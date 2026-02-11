@@ -21,6 +21,7 @@ export default function OTPVerification() {
     const [otp, setOtp] = useState<string[]>(["", "", "", ""]);
     const [time, setTime] = useState<number>(120);
     const [status, setStatus] = useState<Status>("idle");
+    const [showWorkout, setShowWorkout] = useState(false);
     const [toast, setToast] = useState<{
         type: ToastType;
         message: string;
@@ -132,7 +133,12 @@ export default function OTPVerification() {
 
     const handleToastClose = useCallback(() => {
         setToast(null);
-    }, []);
+
+        // Only show WorkoutForm if OTP was successful
+        if (status === "success") {
+            setShowWorkout(true);
+        }
+    }, [status]);
 
     /* ---------------- Helpers ---------------- */
     const borderColor =
@@ -146,27 +152,28 @@ export default function OTPVerification() {
 
     return (
         <>
-            {(status !== 'success' && toast !== null) ? (
-                <div>
-                    {/* 🔄 Center Modal */}
-                    {(status === "verifying" || status === "resending") && (
-                        <CenterModal
-                            text={
-                                status === "verifying"
-                                    ? "Validating credentials"
-                                    : "Resending OTP"
-                            }
-                        />
-                    )}
+            <div>
+                {/* 🔄 Center Modal */}
+                {(status === "verifying" || status === "resending") && (
+                    <CenterModal
+                        text={
+                            status === "verifying"
+                                ? "Validating credentials"
+                                : "Resending OTP"
+                        }
+                    />
+                )}
 
-                    {/* ❌ Bottom Toast */}
-                    {toast && (
-                        <Toast
-                            type={toast.type}
-                            text={toast.message}
-                            onClose={handleToastClose}
-                        />
-                    )}
+                {/* ❌ Bottom Toast */}
+                {toast && (
+                    <Toast
+                        type={toast.type}
+                        text={toast.message}
+                        onClose={handleToastClose}
+                    />
+                )}
+
+                {!showWorkout && (
                     <div className="min-h-screen py-10 bg-white flex justify-center">
                         <div className="w-full max-w-sm px-6 text-center">
                             <img src={lockImage} title="img" className="mx-auto size-[120px]" />
@@ -217,10 +224,10 @@ export default function OTPVerification() {
                             </p>
                         </div>
                     </div>
-                </div>
-            ) : (
-                <WorkoutForm />
-            )}
+                )}
+
+                {showWorkout && <WorkoutForm />}
+            </div>
         </>
     );
 }
