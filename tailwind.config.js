@@ -25,6 +25,12 @@ export default {
         'sr': '340px',
         'sb': '300px',
       },
+      fontFamily: {
+        heading: ['Oswald', 'sans-serif'],
+        anton: ['Anton', 'sans-serif'],
+        manrope: ['Manrope', 'sans-serif'],
+        redhat: ["'Red Hat Text'", "sans-serif"],
+      },
     },
   },
   plugins: [],

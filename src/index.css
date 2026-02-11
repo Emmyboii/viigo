@@ -1,3 +1,30 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+/* Position dots INSIDE blue section */
+.slick-dots {
+  bottom: 20px !important;
+}
+
+/* Remove default button styling */
+.slick-dots li button {
+  padding: 0;
+}
+
+/* Inactive dot */
+.slick-dots li button::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  background-color: #94a3b8; /* gray */
+  border-radius: 9999px;
+  opacity: 1;
+  display: block;
+}
+
+/* Active dot */
+.slick-dots li.slick-active button::before {
+  background-color: #ffffff;
+}
