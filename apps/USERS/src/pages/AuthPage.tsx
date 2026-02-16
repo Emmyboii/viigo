@@ -42,6 +42,24 @@ const AuthPage = () => {
   const navigate = useNavigate();
   const [toast, setToast] = useState<{ type: ToastType; message: string } | null>(null);
 
+  useEffect(() => {
+    const tempIdentifierStr = localStorage.getItem("tempIdentifier");
+    if (!tempIdentifierStr) {
+      navigate("/login");
+      return;
+    }
+
+    const tempIdentifier = JSON.parse(tempIdentifierStr);
+
+    if (tempIdentifier.Email) {
+      setEmailAddress(`${tempIdentifier.Email}`);
+      setUseEmail(true);
+    } else if (tempIdentifier.Phone) {
+      setPhoneNumber(`${tempIdentifier.Phone}`);
+      setUseEmail(false);
+    }
+  }, []);
+
   const [emblaRef, emblaApi] = useEmblaCarousel(
     { loop: true },
     [Autoplay({ delay: 3000, stopOnInteraction: false })]

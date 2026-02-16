@@ -1,7 +1,7 @@
 import email from '../assets/loginEmail.png'
 import login from '../assets/loginIng.png'
 // import { FcGoogle } from "react-icons/fc";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaPhoneAlt } from 'react-icons/fa';
 import { MdError } from 'react-icons/md';
@@ -19,6 +19,24 @@ const AuthPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const [toast, setToast] = useState<{ type: ToastType; message: string } | null>(null);
+
+  useEffect(() => {
+    const tempIdentifierStr = localStorage.getItem("tempIdentifier");
+    if (!tempIdentifierStr) {
+      navigate("/login");
+      return;
+    }
+
+    const tempIdentifier = JSON.parse(tempIdentifierStr);
+
+    if (tempIdentifier.Email) {
+      setEmailAddress(`${tempIdentifier.Email}`);
+      setUseEmail(true);
+    } else if (tempIdentifier.Phone) {
+      setPhoneNumber(`${tempIdentifier.Phone}`);
+      setUseEmail(false);
+    }
+  }, [navigate]);
 
   const isValidEmail = (email: string) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);

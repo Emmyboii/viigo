@@ -5,6 +5,7 @@ import lockChecked from "../assets/otpVerified.png";
 import lockWrong from "../assets/lockWrong.png";
 import { MdError } from "react-icons/md";
 import { FaCircleCheck } from "react-icons/fa6";
+import { FaRegEdit } from "react-icons/fa";
 
 type Status =
     | "idle"
@@ -218,13 +219,19 @@ export default function OTPVerification() {
             {toast && <Toast type={toast.type} text={toast.message} onClose={handleToastClose} />}
 
             <div className="min-h-screen py-10 bg-white flex justify-center">
-                <div className="w-full max-w-sm px-6 text-center">
+                <div className="w-full max-w-sm px-6">
                     <img src={lockImage} title="img" className="mx-auto size-[120px]" />
 
                     <h2 className="text-3xl font-bold mt-4">OTP Verification</h2>
 
                     <p className="text-base font-semibold text-[#4A4A4A] mt-2">
                         Please enter the verification code sent to {identifierText}.
+                        <span
+                            className="ml-1 cursor-pointer text-[#2563EB] inline-flex items-center"
+                            onClick={() => navigate("/login")}
+                        >
+                            <FaRegEdit />
+                        </span>
                     </p>
 
                     <div className="mt-6 font-semibold">
@@ -252,7 +259,7 @@ export default function OTPVerification() {
                         ))}
                     </div>
 
-                    <p className="text-sm mt-6">
+                    <p className="text-sm mt-6 text-center">
                         Didn’t receive the OTP?
                         <button
                             disabled={time > 0}
