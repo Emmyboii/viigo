@@ -3,12 +3,15 @@ import FacilityTag from "./FacilityTag";
 import type { Gym } from "./types/gym";
 import { useState } from "react";
 import ImageCarousel from "./ImageCarousel";
+import { useNavigate } from "react-router";
 
 interface GymCardProps {
     gym: Gym;
 }
 
 export default function GymCard({ gym }: GymCardProps) {
+
+    const navigate = useNavigate();
 
     const [showAll, setShowAll] = useState(false);
 
@@ -42,7 +45,7 @@ export default function GymCard({ gym }: GymCardProps) {
 
                 <div className="flex justify-between items-center mt-4">
                     <span className="font-semibold text-lg">₹{gym.price}/Hr</span>
-                    <button className="text-blue-600 text-sm font-medium">
+                    <button onClick={() => navigate('/gyms/fight-to-fitness')} className="text-blue-600 text-sm font-medium">
                         View Details
                     </button>
                 </div>
