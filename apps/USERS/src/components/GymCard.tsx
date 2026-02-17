@@ -45,7 +45,12 @@ export default function GymCard({ gym }: GymCardProps) {
 
                 <div className="flex justify-between items-center mt-4">
                     <span className="font-semibold text-lg">₹{gym.price}/Hr</span>
-                    <button onClick={() => navigate('/gyms/fight-to-fitness')} className="text-blue-600 text-sm font-medium">
+                    <button onClick={() => {
+                        navigate('/gyms/fight-to-fitness')
+                        window.scrollTo(0, 0);
+                    }}
+                        className="text-blue-600 text-sm font-medium"
+                    >
                         View Details
                     </button>
                 </div>

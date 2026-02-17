@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { gyms } from "../data/gyms";
 import BottomSheet from "../components/BottomSheet";
 import ImageCarousel from "../components/ImageCarousel";
-import { useState, type JSX } from "react";
+import { useEffect, useState, type JSX } from "react";
 
 import {
     IoArrowBack,
@@ -13,10 +13,25 @@ import { FaRegClock } from "react-icons/fa6";
 import { PiUserGearFill } from "react-icons/pi";
 import Footer from "../components/Footer";
 import { MdPhone } from "react-icons/md";
+import PickHoursSheet from "../components/PickHoursSheet";
 
 export default function GymDetails() {
     const { slug } = useParams();
     const navigate = useNavigate();
+    // const location = useLocation();
+    // const bookingState = location.state;
+
+    const storedBooking = localStorage.getItem("bookingData");
+
+    // const initialBookingState = bookingState
+    //     ? bookingState
+    //     : storedBooking
+    //         ? JSON.parse(storedBooking)
+    //         : null;
+
+    const initialBookingState = storedBooking
+        ? JSON.parse(storedBooking)
+        : null;
 
     const gym = gyms.find((g) => g.slug === slug);
 
@@ -24,10 +39,25 @@ export default function GymDetails() {
     const [rulesOpen, setRulesOpen] = useState(false);
     const [priceBreakdownOpen, setPriceBreakdownOpen] = useState(false);
 
+    const [open, setOpen] = useState(initialBookingState?.reopenSheet || false);
+
+
     const tagIcons: Record<string, JSX.Element> = {
         "Hourly Access": <FaRegClock size={12} />,
         "Beginner Friendly": <PiUserGearFill size={12} />,
     };
+
+    useEffect(() => {
+        if (amenitiesOpen || rulesOpen || priceBreakdownOpen || open) {
+            document.body.style.overflow = "hidden"
+        } else {
+            document.body.style.overflow = "auto"
+        }
+
+        return () => {
+            document.body.style.overflow = "auto"
+        }
+    }, [amenitiesOpen, rulesOpen, priceBreakdownOpen, open])
 
     if (!gym) return <div className="p-4">Gym not found</div>;
 
@@ -174,7 +204,7 @@ export default function GymDetails() {
                     </div>
                 </div>
 
-                <button className="bg-blue-600 text-white px-6 py-3 rounded-xl font-medium">
+                <button onClick={() => setOpen(true)} className="bg-blue-600 text-white px-6 py-3 rounded-md w-[163px] font-medium">
                     Select Slot
                 </button>
             </div>
@@ -233,6 +263,13 @@ export default function GymDetails() {
                 </div>
             </BottomSheet>
 
+            <PickHoursSheet
+                total={gym.price + 10}
+                open={open}
+                onClose={() => setOpen(false)}
+                defaultDate={initialBookingState?.selectedDate}
+                defaultHours={initialBookingState?.selectedHours}
+            />
         </div>
     );
 }

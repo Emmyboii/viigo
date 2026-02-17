@@ -9,6 +9,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
 import GymDetails from "./pages/GymDetails";
 import ReviewPay from "./pages/ReviewPay";
+import PaymentSuccess from "./pages/PaymentSuccess";
+import Notifications from "./pages/Notification";
 
 function App() {
 
@@ -92,6 +94,24 @@ function App() {
             element={
               <ProtectedRoute>
                 <ReviewPay />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/payment/success"
+            element={
+              <ProtectedRoute>
+                <PaymentSuccess />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/notifications"
+            element={
+              <ProtectedRoute>
+                <Notifications />
               </ProtectedRoute>
             }
           />

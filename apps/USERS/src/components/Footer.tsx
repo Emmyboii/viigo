@@ -12,14 +12,14 @@ export default function Footer() {
         { name: "Home", icon: AiFillHome, path: "/" },
         { name: "Explore", icon: MdExplore, path: "/explore" },
         { name: "My Bookings", icon: FaRegCalendarAlt, path: "/bookings" },
-        { name: "Profile", icon: FaUser, path: "/profile" },
+        { name: "Profile", icon: FaUser, path: "/profile", path2: "/notifications" },
     ];
 
     return (
         <div className="fixed bottom-0 left-0 w-full bg-white border-t border-[#F1F5F9] shadow-sm">
             <div className="flex justify-between items-center px-4 py-2">
                 {tabs.map((tab) => {
-                    const isActive = location.pathname === tab.path;
+                    const isActive = location.pathname === tab.path || location.pathname === tab.path2;
                     const Icon = tab.icon;
 
                     return (

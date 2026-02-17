@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { gyms } from "../data/gyms";
 
 import {
@@ -10,17 +10,104 @@ import {
     IoInformationCircleOutline,
 } from "react-icons/io5";
 import { HiShare } from "react-icons/hi";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
+import { FaCheckCircle } from "react-icons/fa";
 
 export default function ReviewPay() {
     const navigate = useNavigate();
+    // const location = useLocation();
+    const [showSuccess, setShowSuccess] = useState(false);
 
-    // For now hardcoded selected gym
+    // Hardcoded gym for now
     const gym = gyms[0];
+
+    const storedData = localStorage.getItem("bookingData");
+
+    // const initialState = location.state
+    //     ? location.state
+    //     : storedData
+    //         ? JSON.parse(storedData)
+    //         : null;
+
+    const initialState = storedData
+        ? JSON.parse(storedData)
+        : null;
+
+    // Redirect immediately if no booking data exists
+    if (!initialState || !initialState.selectedDate || !initialState.selectedHours) {
+        return <Navigate to={`/gyms/${gym.slug}`} replace />;
+    }
+
+    const { selectedDate, selectedHours } = initialState;
 
     const basePrice = 410;
     const platformFee = 12;
     const gst = 3;
     const total = basePrice + platformFee + gst;
+
+    const convertTo24Hour = (time12h: string) => {
+        const [time, modifier] = time12h.split(" ");
+
+        let hours = parseInt(time, 10);
+
+        if (modifier === "PM" && hours !== 12) {
+            hours += 12;
+        }
+
+        if (modifier === "AM" && hours === 12) {
+            hours = 0;
+        }
+
+        return `${hours.toString().padStart(2, "0")}:00`;
+    };
+
+    const closingTime = convertTo24Hour(gym.closeTime);
+
+
+    const calculateLastEntry = () => {
+        if (!selectedHours?.value || !closingTime) return "";
+
+        const [hour, minute] = closingTime.split(":").map(Number);
+
+        const closingDate = new Date();
+        closingDate.setHours(hour, minute, 0, 0);
+
+        // subtract selected duration
+        const durationInMinutes = selectedHours.value * 60;
+
+        closingDate.setMinutes(closingDate.getMinutes() - durationInMinutes);
+
+        return closingDate.toLocaleTimeString("en-GB", {
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+        });
+    };
+
+    const lastEntryTime = calculateLastEntry();
+
+    const bookingDate = selectedDate ? new Date(selectedDate) : null;
+
+    const formattedShortDate = bookingDate
+        ? bookingDate.toLocaleDateString("en-GB", { day: "2-digit", month: "short" })
+        : "";
+
+    const formattedLongDate = bookingDate
+        ? bookingDate.toLocaleDateString("en-GB", { day: "numeric", month: "long" })
+        : "";
+
+    const handlePayment = () => {
+
+        // Show success modal
+        setShowSuccess(true);
+
+        // Navigate after 3 seconds
+        setTimeout(() => {
+            navigate("/payment/success");
+            localStorage.removeItem("bookingData");
+        }, 3000);
+    };
 
     return (
         <div className="pb-36 bg-gray-50 min-h-screen">
@@ -90,9 +177,9 @@ export default function ReviewPay() {
 
                             <div className="flex items-center gap-2 text-sm text-gray-600 mt-2">
                                 <IoCalendarOutline size={14} />
-                                <span>05 Dec</span>
+                                <span>{formattedShortDate}</span>
                                 <span>•</span>
-                                <span>1.5 hrs</span>
+                                <span>{selectedHours?.label}</span>
                             </div>
 
                             <div className="flex items-center gap-2 text-sm text-gray-600 mt-2">
@@ -101,7 +188,12 @@ export default function ReviewPay() {
                             </div>
                         </div>
 
-                        <button className="text-sm text-[#2563EB] bg-[#DBEAFE] px-3 py-1 font-medium rounded-md">
+                        <button
+                            onClick={() =>
+                                navigate(`/gyms/${gym.slug}`)
+                            }
+                            className="text-sm text-[#2563EB] bg-[#DBEAFE] px-3 py-1 font-medium rounded-md"
+                        >
                             Change
                         </button>
                     </div>
@@ -170,24 +262,55 @@ export default function ReviewPay() {
 
             {/* ===== Info Strip ===== */}
             <div className="bg-blue-50 text-blue-700 text-sm px-4 py-3 font-medium text-center">
-                Last entry for selected duration: 8:30 PM
+                Last entry for selected duration: {lastEntryTime}
             </div>
 
             {/* ===== Sticky Bottom Pay Bar ===== */}
             <div className="fixed bottom-0 left-0 right-0 bg-white border-t px-4 py-3 flex justify-between items-center">
                 <div>
                     <p className="text-xs text-gray-500">
-                        Valid on 5th December till 11:59 PM
+                        Valid on {formattedLongDate} till 11:59 PM
                     </p>
+
                     <p className="text-xl font-bold">
-                        ₹{total}/1.5Hrs
+                        ₹{total}/{selectedHours?.label}
                     </p>
                 </div>
 
-                <button className="bg-blue-600 text-white px-6 py-3 rounded-xl font-medium">
+                <button
+                    onClick={handlePayment}
+                    className="bg-blue-600 text-white px-6 py-3 rounded-md font-medium"
+                >
                     Pay Now
                 </button>
             </div>
+
+            {/* Success Modal */}
+            <AnimatePresence>
+                {showSuccess && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-blue-500 z-50 flex items-center justify-center"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.5 }}
+                            animate={{ scale: 1 }}
+                            transition={{ duration: 0.5 }}
+                            className="text-white p-8 w-80 text-center"
+                        >
+                            <FaCheckCircle className="text-green-500 text-[85px] mx-auto mb-3" />
+                            <h2 className="text-lg font-semibold mb-2">
+                                Payment Successful
+                            </h2>
+                            <p className="text-sm font-normal text-[#EBEBEB]">
+                                You will be redirected to the booking confirmation page.
+                            </p>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

@@ -224,7 +224,7 @@ export default function OTPVerification() {
             {toast && <Toast type={toast.type} text={toast.message} onClose={handleToastClose} />}
 
             <div className="min-h-screen py-10 bg-white flex justify-center">
-                <div className="w-full max-w-sm px-6">
+                <div className="w-full max-w-s px-6">
                     <img src={lockImage} title="img" className="mx-auto size-[120px]" />
 
                     <h2 className="text-3xl font-bold mt-4">OTP Verification</h2>
