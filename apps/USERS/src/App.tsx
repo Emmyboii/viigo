@@ -7,6 +7,8 @@ import OTPVerification from "./pages/OTPVerification";
 import WorkoutForm from "./pages/WorkoutForm";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
+import GymDetails from "./pages/GymDetails";
+import ReviewPay from "./pages/ReviewPay";
 
 function App() {
 
@@ -72,6 +74,24 @@ function App() {
             element={
               <ProtectedRoute>
                 <UserHome />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/gyms/:slug"
+            element={
+              <ProtectedRoute>
+                <GymDetails />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/reviewpay"
+            element={
+              <ProtectedRoute>
+                <ReviewPay />
               </ProtectedRoute>
             }
           />

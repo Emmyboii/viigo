@@ -18,7 +18,8 @@
   content: "";
   width: 10px;
   height: 10px;
-  background-color: #94a3b8; /* gray */
+  background-color: #94a3b8;
+  /* gray */
   border-radius: 9999px;
   opacity: 1;
   display: block;
@@ -33,6 +34,7 @@
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }
@@ -47,6 +49,7 @@
     opacity: 0;
     transform: scale(0.6);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
@@ -55,4 +58,18 @@
 
 .animate-fadeIn {
   animation: fadeIn 0.6s ease forwards;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+
+  to {
+    transform: translateY(0);
+  }
+}
+
+.animate-slideUp {
+  animation: slideUp 0.3s ease-out;
 }
