@@ -1,4 +1,3 @@
-import { FaUser } from 'react-icons/fa6'
 import profile from '../assets/userProfileImg.png'
 import { useNavigate } from 'react-router-dom'
 import { IoArrowBack } from 'react-icons/io5'
