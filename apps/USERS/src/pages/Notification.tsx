@@ -1,18 +1,38 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     FiArrowLeft,
     FiCalendar,
     FiCreditCard,
 } from "react-icons/fi";
-import { motion, AnimatePresence, type PanInfo } from "framer-motion";
+import { motion, AnimatePresence, type PanInfo, useAnimation } from "framer-motion";
 import { notifications as initialData } from "../data/notifications";
 import Footer from "../components/Footer";
 import { IoStopCircle } from "react-icons/io5";
 import { IoMdPlayCircle } from "react-icons/io";
 import { FaClock } from "react-icons/fa";
+import { useNavigate } from "react-router";
 
-export default function Notifications() {
+export default function Notifications({ Loading }: { Loading: boolean }) {
     const [data, setData] = useState(initialData);
+
+    const controls = useAnimation();
+
+    useEffect(() => {
+        if (!Loading) {
+            controls.start({
+                x: 0,
+                opacity: 1,
+                transition: {
+                    type: "spring",
+                    stiffness: 50,
+                    damping: 11,
+                    mass: 1.2,
+                },
+            });
+        }
+    }, [Loading, controls]);
+
+    const navigate = useNavigate();
 
     const markAllAsRead = () => {
         const updated = data.map((item) => ({ ...item, unread: false }));
@@ -44,7 +64,7 @@ export default function Notifications() {
         <div className="min-h-screen pb-24">
             {/* Header */}
             <div className="flex items-center justify-between p-4 bg-white">
-                <div className="flex items-center gap-3">
+                <div onClick={() => navigate(-1)} className="flex items-center gap-3">
                     <FiArrowLeft size={20} />
                     <h1 className="text-lg font-semibold">Notifications</h1>
                 </div>
@@ -64,7 +84,7 @@ export default function Notifications() {
                         <motion.div
                             key={item.id}
                             initial={{ x: 100, opacity: 0 }}
-                            animate={{ x: 0, opacity: 1 }}
+                            animate={controls}
                             exit={{ x: 100, opacity: 0 }}
                             layout
                             className="relative"

@@ -24,6 +24,13 @@ export default function UserHome() {
         containScroll: "trimSnaps",
     });
 
+    const chipData = [
+        { id: "filters", label: "Filters" },
+        { id: "sort", label: "Sort By" },
+        { id: "near", label: "Near Me ✕" },
+        { id: "women", label: "Women" },
+    ];
+
     const recommendedGyms: Gym[] = [
         {
             name: "Fight To Fitness",
@@ -115,7 +122,7 @@ export default function UserHome() {
         <Container>
             <LocationHeader />
             <SearchBar />
-            <FilterChips />
+            <FilterChips items={chipData} />
 
             <SectionHeader title="Recommended For You" />
             <div className="overflow-hidden py-2" ref={emblaRef}>

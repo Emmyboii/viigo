@@ -148,7 +148,8 @@ export default function PickHoursSheet({ total, open, onClose, defaultDate, defa
                             setSelectedDate(item.fullDate);
                             setError({ type: "", message: "" });
                         }}
-                        className={`min-w-[70px] text-center p-1.5 py-2 font-medium rounded-md space-y-2 border cursor-pointer transition ${selectedDate?.toDateString() === item.fullDate.toDateString()
+                        className={`min-w-[70px] text-center p-1.5 py-2 font-medium rounded-md space-y-2 border cursor-pointer transition ${selectedDate &&
+                            selectedDate.toDateString() === item.fullDate.toDateString()
                             ? "bg-[#DBEAFE] border-[#2563EB] text-[#2563EB]"
                             : "border-[#DBEAFE] text-[#0F172A]"
                             }`}

@@ -1,23 +1,22 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { gyms } from "../data/gyms";
 import BottomSheet from "../components/BottomSheet";
 import ImageCarousel from "../components/ImageCarousel";
 import { useEffect, useState, type JSX } from "react";
 
 import {
-    IoArrowBack,
     IoInformationCircleOutline,
 } from "react-icons/io5";
-import { HiLocationMarker, HiOutlineLocationMarker, HiShare } from "react-icons/hi";
+import { HiLocationMarker, HiOutlineLocationMarker } from "react-icons/hi";
 import { FaRegClock } from "react-icons/fa6";
 import { PiUserGearFill } from "react-icons/pi";
 import Footer from "../components/Footer";
 import { MdPhone } from "react-icons/md";
 import PickHoursSheet from "../components/PickHoursSheet";
+import PageHeader from "../components/PageHeader";
 
 export default function GymDetails() {
     const { slug } = useParams();
-    const navigate = useNavigate();
     // const location = useLocation();
     // const bookingState = location.state;
 
@@ -30,7 +29,16 @@ export default function GymDetails() {
     //         : null;
 
     const initialBookingState = storedBooking
-        ? JSON.parse(storedBooking)
+        ? (() => {
+            const parsed = JSON.parse(storedBooking);
+
+            return {
+                ...parsed,
+                selectedDate: parsed.selectedDate
+                    ? new Date(parsed.selectedDate)
+                    : null,
+            };
+        })()
         : null;
 
     const gym = gyms.find((g) => g.slug === slug);
@@ -68,25 +76,7 @@ export default function GymDetails() {
         <div className="pb-32 bg-white min-h-screen">
 
             {/* ===== Header ===== */}
-            <div className="fixed top-0 left-0 right-0 z-40 bg-white flex items-center justify-between px-4 py-3 shadow-sm">
-
-                <button
-                    onClick={() => navigate(-1)}
-                    aria-label="Go back"
-                    className="p-1"
-                >
-                    <IoArrowBack size={20} />
-                </button>
-
-                <span className="font-medium">Details</span>
-
-                <button
-                    aria-label="Share gym"
-                    className="p-1"
-                >
-                    <HiShare className="text-[#475569]" size={20} />
-                </button>
-            </div>
+            <PageHeader text="Details" />
 
 
             <div className="pt-14" />

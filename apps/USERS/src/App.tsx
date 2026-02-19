@@ -11,6 +11,10 @@ import GymDetails from "./pages/GymDetails";
 import ReviewPay from "./pages/ReviewPay";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import Notifications from "./pages/Notification";
+import Bookings from "./pages/Bookings";
+import CancelBooking from "./pages/CancelBooking";
+import Profile from "./pages/Profile";
+import EditProfile from "./pages/EditProfile";
 
 function App() {
 
@@ -102,7 +106,7 @@ function App() {
             path="/payment/success"
             element={
               <ProtectedRoute>
-                <PaymentSuccess />
+                <PaymentSuccess Loading={loading} />
               </ProtectedRoute>
             }
           />
@@ -111,7 +115,43 @@ function App() {
             path="/notifications"
             element={
               <ProtectedRoute>
-                <Notifications />
+                <Notifications Loading={loading} />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/bookings"
+            element={
+              <ProtectedRoute>
+                <Bookings />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/cancelbookings"
+            element={
+              <ProtectedRoute>
+                <CancelBooking />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/edit-profile"
+            element={
+              <ProtectedRoute>
+                <EditProfile />
               </ProtectedRoute>
             }
           />

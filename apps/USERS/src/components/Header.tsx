@@ -1,7 +1,11 @@
 import { HiLocationMarker, HiOutlineBell } from "react-icons/hi"
 import { IoChevronDown } from "react-icons/io5";
+import { useNavigate } from "react-router";
 
 export default function Header() {
+
+    const navigate = useNavigate();
+
     return (
         <div className="flex justify-between items-center mb-4">
             <div className="flex items-center gap-2">
@@ -13,7 +17,7 @@ export default function Header() {
                 <IoChevronDown className="text-[#475569]" />
             </div>
 
-            <HiOutlineBell className="text-xl text-[#475569]" />
+            <HiOutlineBell onClick={() => navigate('/notifications')} className="text-xl text-[#475569]" />
         </div>
     );
 }
