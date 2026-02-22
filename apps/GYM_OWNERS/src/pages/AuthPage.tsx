@@ -232,7 +232,7 @@ function Toast({ text, type }: { text: string; type: ToastType }) {
   return (
     <div
       role="alert"
-      className={`fixed w-[280px] bottom-6 left-1/2 justify-center -translate-x-1/2 
+      className={`fixed w-[280px] bottom-10 z-50 left-1/2 justify-center -translate-x-1/2 
       bg-white px-4 py-3 rounded-lg flex items-center gap-3
       shadow-[0_10px_40px_rgba(0,0,0,0.18)] animate-[fadeIn_0.2s_ease-out]`}
     >

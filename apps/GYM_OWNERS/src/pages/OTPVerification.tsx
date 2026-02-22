@@ -72,8 +72,11 @@ export default function OTPVerification() {
             inputsRef.current[index + 1]?.focus();
         }
 
-        // auto verify when complete
-        if (updated.every(Boolean)) verifyOtp(updated.join(""));
+        // ✅ when last digit is entered
+        if (updated.every(Boolean)) {
+            inputsRef.current[index]?.blur(); // 👈 dismiss keyboard
+            verifyOtp(updated.join(""));
+        }
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
@@ -94,16 +97,21 @@ export default function OTPVerification() {
     const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
         e.preventDefault();
         const pasted = e.clipboardData.getData("text").replace(/\D/g, "");
+
         if (pasted.length === 6) {
             const newOtp = pasted.split("");
             setOtp(newOtp);
-            inputsRef.current[5]?.focus();
+
+            inputsRef.current[5]?.blur(); // 👈 dismiss keyboard
             verifyOtp(pasted);
         }
     };
 
     /* ---------------- Verify OTP ---------------- */
     const verifyOtp = async (code: string) => {
+
+        inputsRef.current.forEach(input => input?.blur());
+
         setStatus("verifying");
         const tempIdentifier = JSON.parse(localStorage.getItem("tempIdentifier") || "{}");
         const identifier = tempIdentifier.Email || tempIdentifier.Phone;
@@ -301,7 +309,7 @@ function Toast({ text, type, onClose }: { text: string; type: ToastType; onClose
 
     return (
         <div
-            className={`fixed w-[280px] bottom-6 left-1/2 justify-center -translate-x-1/2 
+            className={`fixed w-[280px] bottom-20 z-50 left-1/2 justify-center -translate-x-1/2 
       bg-white px-4 py-3 rounded-lg flex items-center gap-3
       shadow-[0_10px_40px_rgba(0,0,0,0.18)] animate-[fadeIn_0.2s_ease-out]`}
         >

@@ -1,5 +1,4 @@
 import { HiLocationMarker, HiOutlineBell } from "react-icons/hi"
-import { IoChevronDown } from "react-icons/io5";
 import { useNavigate } from "react-router";
 
 export default function Header() {
@@ -11,10 +10,9 @@ export default function Header() {
             <div className="flex items-center gap-2">
                 <HiLocationMarker className="text-[#475569] text-xl" />
                 <div className="leading-tight">
-                    <div className="font-medium text-sm">Pallavaram</div>
-                    <div className="text-sm font-medium">Chennai</div>
+                    <div className="font-medium text-sm">Fit to Fitness</div>
+                    <div className="text-sm font-medium">Pallavaram,Chennai</div>
                 </div>
-                <IoChevronDown className="text-[#475569]" />
             </div>
 
             <HiOutlineBell onClick={() => navigate('/notifications')} className="text-2xl text-[#475569]" />

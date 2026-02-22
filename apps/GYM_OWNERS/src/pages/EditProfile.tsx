@@ -28,7 +28,7 @@ const EditProfile = () => {
                 <div className="flex items-center justify-between">
                     <div className="space-y-3">
                         <p className="text-[#0F172A] font-semibold text-base">Vijay</p>
-                        <p className="text-[#0F172A] font-normal text-sm">Total Fitness Hours : 22</p>
+                        <p className="text-[#0F172A] font-normal text-sm">Gym Owner</p>
                     </div>
 
                     <img src={profile} className="w-[69px]" alt="Profile Image" />
@@ -75,7 +75,7 @@ const EditProfile = () => {
                 </div>
             </div>
 
-            <button className="mt-5 bg-[#2563EB] w-full h-[50px] font-semibold text-sm text-white py-2 px-4 rounded-md">Save Changes</button>
+            <button className="mt-8 bg-[#2563EB] w-full h-[50px] font-semibold text-sm text-white py-2 px-4 rounded-md">Save Changes</button>
 
             <Footer />
         </div>

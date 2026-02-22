@@ -1,8 +1,8 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { AiFillHome } from "react-icons/ai";
-import { MdExplore } from "react-icons/md";
-import { PiCalendarDotsFill } from "react-icons/pi";
 import { FaUser } from "react-icons/fa6";
+import { IoWalletOutline } from "react-icons/io5";
+import muscle from '../assets/muscle.png'
 
 export default function Footer() {
     const location = useLocation();
@@ -10,9 +10,9 @@ export default function Footer() {
 
     const tabs = [
         { name: "Home", icon: AiFillHome, path: "/" },
-        { name: "Explore", icon: MdExplore, path: "/explore" },
-        { name: "My Bookings", icon: PiCalendarDotsFill, path: "/bookings" },
-        { name: "Profile", icon: FaUser, path: "/profile", path2: "/notifications",path3: "/profile/edit", path4: "/faq", path5: "/support" },
+        { name: "Gym", image: muscle, icon: '', path: "/gym", path2: "/gym/edit" },
+        { name: "Wallet", icon: IoWalletOutline, path: "/wallet" },
+        { name: "Profile", icon: FaUser, path: "/profile", path2: "/notifications", path3: "/profile/edit", path4: "/faq", path5: "/support" },
     ];
 
     return (
@@ -28,10 +28,14 @@ export default function Footer() {
                             onClick={() => navigate(tab.path)}
                             className="flex flex-col items-center justify-center flex-1 cursor-pointer"
                         >
-                            <Icon
-                                size={22}
-                                className={isActive ? "text-gray-900" : "text-gray-400"}
-                            />
+                            {tab.image ? (
+                                <img src={tab.image} alt={tab.name} className="w-6 h-6" />
+                            ) : (
+                                <Icon
+                                    size={22}
+                                    className={isActive ? "text-gray-900" : "text-gray-400"}
+                                />
+                            )}
 
                             <span
                                 className={`text-xs mt-1 ${isActive

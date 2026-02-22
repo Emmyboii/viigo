@@ -7,6 +7,12 @@ import WorkoutForm from "./pages/WorkoutForm";
 import GymOwnerHome from "./pages/GymOwnerHome";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
+import Gym from "./pages/Gym";
+import Wallet from "./pages/Wallet";
+import Profile from "./pages/Profile";
+import EditProfile from "./pages/EditProfile";
+import Notifications from "./pages/Notification";
+import Support from "./pages/Support";
 
 function App() {
 
@@ -70,9 +76,49 @@ function App() {
           <Route
             path="/"
             element={
-              <ProtectedRoute>
-                <GymOwnerHome />
-              </ProtectedRoute>
+              <GymOwnerHome />
+            }
+          />
+
+          <Route
+            path="/gym"
+            element={
+              <Gym />
+            }
+          />
+
+          <Route
+            path="/wallet"
+            element={
+              <Wallet />
+            }
+          />
+
+          <Route
+            path="/profile"
+            element={
+              <Profile />
+            }
+          />
+
+          <Route
+            path="/profile/edit"
+            element={
+              <EditProfile />
+            }
+          />
+
+          <Route
+            path="/notifications"
+            element={
+              <Notifications Loading={loading} />
+            }
+          />
+
+          <Route
+            path="/support"
+            element={
+              <Support />
             }
           />
         </Routes>
