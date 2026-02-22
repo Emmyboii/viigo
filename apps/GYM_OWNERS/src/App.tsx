@@ -13,6 +13,7 @@ import Profile from "./pages/Profile";
 import EditProfile from "./pages/EditProfile";
 import Notifications from "./pages/Notification";
 import Support from "./pages/Support";
+import NotFound from "./pages/NotFound";
 
 function App() {
 
@@ -121,6 +122,9 @@ function App() {
               <Support />
             }
           />
+
+
+          <Route path="*" element={<NotFound Loading={loading} />} />
         </Routes>
       </div>
     </div>

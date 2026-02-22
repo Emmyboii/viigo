@@ -15,6 +15,7 @@ import Bookings from "./pages/Bookings";
 import CancelBooking from "./pages/CancelBooking";
 import Profile from "./pages/Profile";
 import EditProfile from "./pages/EditProfile";
+import NotFound from "./pages/NotFound";
 
 function App() {
 
@@ -155,6 +156,9 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+          <Route path="*" element={<NotFound Loading={loading} />} />
+            
         </Routes>
 
       </div>
