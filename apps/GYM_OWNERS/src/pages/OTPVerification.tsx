@@ -133,6 +133,7 @@ export default function OTPVerification() {
 
                 // Show toast for 3 seconds
                 setToast({ type: "error", message });
+                setStatus("idle");
 
                 // Auto-hide toast after 3 seconds
                 setTimeout(() => setToast(null), 2000);
@@ -149,7 +150,7 @@ export default function OTPVerification() {
             // Navigate after toast
             setTimeout(() => {
                 setToast(null);
-                navigate("/workoutform");
+                navigate("/onboarding");
             }, 3000);
         } catch (err: unknown) {
             setStatus("error");
@@ -157,6 +158,7 @@ export default function OTPVerification() {
             // Narrow the unknown type to Error
             const message = err instanceof Error ? err.message : "OTP verification failed. Try again later.";
             setToast({ type: "error", message });
+            setStatus("idle");
             setTimeout(() => setToast(null), 3000);
         }
     };
@@ -191,6 +193,7 @@ export default function OTPVerification() {
             const message = err instanceof Error ? err.message : "Failed to resend OTP";
             setToast({ type: "error", message });
             setTimeout(() => setToast(null), 3000);
+            setStatus("idle");
         }
     };
 
@@ -199,7 +202,7 @@ export default function OTPVerification() {
 
         // Navigate to workout form if OTP success
         if (status === "success") {
-            navigate("/workoutform");
+            navigate("/onboarding");
         }
     }, [status, navigate]);
 

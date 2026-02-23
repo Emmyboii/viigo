@@ -96,7 +96,9 @@ const AuthPage = () => {
     setPhoneNumber(`+91 ${digitsOnly}`);
   };
 
-  const handleContinue = async () => {
+  const handleContinue = async (e: React.SubmitEvent<HTMLFormElement>) => {
+    e.preventDefault()
+
     if (!useEmail && phoneNumber.length !== 14) return;
     if (useEmail && !isValidEmail(emailAddress)) return;
 
@@ -180,7 +182,7 @@ const AuthPage = () => {
 
         setTimeout(() => {
           setToast(null);
-          window.location.href = "/workoutform";
+          window.location.href = "/onboarding";
         }, 2000);
 
       } catch (error: any) {
@@ -238,7 +240,7 @@ const AuthPage = () => {
         <p className="font-semibold text-lg">Login or signup Viigo to Book <br /> Workouts on hourly basis </p>
 
         {!useEmail ? (
-          <>
+          <form onSubmit={handleContinue}>
             <div className="relative">
               <input
                 type="text"
@@ -253,19 +255,18 @@ const AuthPage = () => {
             </div>
 
             <button
-              type="button"
+              type="submit"
               disabled={isLoading || !isFormValid}
-              onClick={handleContinue}
-              className={`rounded-md w-full px-2 h-[48px] text-white font-semibold text-sm ${isLoading || !isFormValid
+              className={`rounded-md w-full mt-4 px-2 h-[48px] text-white font-semibold text-sm ${isLoading || !isFormValid
                 ? "bg-[#94A3B8] cursor-not-allowed"
                 : "bg-[#2563EB] cursor-pointer"
                 }`}
             >
               {isLoading ? "Loading..." : "Continue"}
             </button>
-          </>
+          </form>
         ) : (
-          <>
+          <form onSubmit={handleContinue}>
             <div className="relative">
               <input
                 type="email"
@@ -282,15 +283,14 @@ const AuthPage = () => {
             <button
               type="button"
               disabled={isLoading || !isFormValid}
-              onClick={handleContinue}
-              className={`rounded-md w-full px-2 h-[48px] text-white font-semibold text-sm ${isLoading || !isFormValid
+              className={`rounded-md w-full mt-4 px-2 h-[48px] text-white font-semibold text-sm ${isLoading || !isFormValid
                 ? "bg-[#94A3B8] cursor-not-allowed"
                 : "bg-[#2563EB] cursor-pointer"
                 }`}
             >
               {isLoading ? "Loading..." : "Continue"}
             </button>
-          </>
+          </form>
         )}
 
         <div className="flex items-center justify-center gap-4 text-[#CBD5E1] text-sm font-normal">

@@ -68,7 +68,7 @@ function App() {
             }
           />
           <Route
-            path="/workoutform"
+            path="/onboarding"
             element={
               <ProtectedRoute>
                 <WorkoutForm />
