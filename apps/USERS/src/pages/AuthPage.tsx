@@ -99,6 +99,10 @@ const AuthPage = () => {
   const handleContinue = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault()
 
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+
     if (!useEmail && phoneNumber.length !== 14) return;
     if (useEmail && !isValidEmail(emailAddress)) return;
 
@@ -281,7 +285,7 @@ const AuthPage = () => {
             </div>
 
             <button
-              type="button"
+              type="submit"
               disabled={isLoading || !isFormValid}
               className={`rounded-md w-full mt-4 px-2 h-[48px] text-white font-semibold text-sm ${isLoading || !isFormValid
                 ? "bg-[#94A3B8] cursor-not-allowed"
