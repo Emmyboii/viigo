@@ -9,9 +9,11 @@ export default function Wallet() {
     return (
         <div className="min-h-screen">
             {display === "details" ? (
-                <WalletDetails setDisplay={setDisplay} />
+                <WalletDetails />
+                // <WalletDetails setDisplay={setDisplay} />
             ) : (
-                <CreateWallet setDisplay={setDisplay} />
+                <CreateWallet />
+                // <CreateWallet setDisplay={setDisplay} />
             )}
         </div>
     )
