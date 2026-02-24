@@ -177,8 +177,9 @@ export default function ReviewPay() {
 
                         <button
                             onClick={() =>
-                                navigate(`/gyms/${gym.slug}`)
-                            }
+                                navigate(`/gyms/${gym?.slug}`, {
+                                    state: { reopenSheet: true }
+                                })}
                             className="text-sm text-[#2563EB] bg-[#DBEAFE] px-3 py-1 font-medium rounded-md"
                         >
                             Change
@@ -298,7 +299,7 @@ export default function ReviewPay() {
                     </motion.div>
                 )}
             </AnimatePresence>
-        </div>
+        </div >
     );
 }
 

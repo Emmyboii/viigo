@@ -1,7 +1,9 @@
 import { useState, useMemo } from "react";
-import { FiClock, FiUsers } from "react-icons/fi";
+import { FiUsers } from "react-icons/fi";
 import BottomSheet from "./BottomSheet";
-import { useNavigate } from "react-router";
+import { gyms } from "../data/gyms";
+
+type Gym = (typeof gyms)[number];
 
 interface Props {
     total?: number;
@@ -12,7 +14,9 @@ interface Props {
         index: number;
         value: number;
         label: string;
-    };
+    },
+    gym: Gym
+    setOpen: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 const gymOpenHour = 9;  // 9 AM
@@ -32,16 +36,26 @@ const hoursOptions = [
     { label: "3 Hrs", value: 3 },
 ];
 
-export default function PickHoursSheet({ total, open, onClose, defaultDate, defaultHours }: Props) {
-    const navigate = useNavigate();
+export default function PickHoursSheet({ open, onClose, defaultDate, defaultHours, gym, setOpen }: Props) {
+    // const navigate = useNavigate();
 
     const [selectedDate, setSelectedDate] = useState<Date | null>(
-        defaultDate ?? null
+        defaultDate ?? new Date()
     );
 
     const [selectedHours, setSelectedHours] = useState(
-        defaultHours ?? null
+        defaultHours ?? {
+            index: 0,
+            value: 1,
+            label: "1 Hr",
+        }
     );
+
+    const editSelectedHr = selectedHours.value === 1 ? "Hr" : selectedHours.label
+
+    const totalWithHr = selectedHours
+        ? gym.price * selectedHours.value
+        : gym.price;
 
     const [error, setError] = useState({ type: "", message: "" });
 
@@ -49,7 +63,7 @@ export default function PickHoursSheet({ total, open, onClose, defaultDate, defa
     const dates = useMemo(() => {
         const today = new Date();
 
-        return Array.from({ length: 7 }).map((_, index) => {
+        return Array.from({ length: 90 }).map((_, index) => {
             const date = new Date();
             date.setDate(today.getDate() + index);
 
@@ -81,6 +95,10 @@ export default function PickHoursSheet({ total, open, onClose, defaultDate, defa
         return false;
     };
 
+    const allHoursDisabled = hoursOptions.every((hour) =>
+        isDurationInvalid(hour.value)
+    );
+
     const handleApply = () => {
         if (selectedDate === null && !selectedHours) {
             setError({ type: "general", message: "Please select a workout date and duration to continue." });
@@ -101,13 +119,14 @@ export default function PickHoursSheet({ total, open, onClose, defaultDate, defa
         const bookingData = {
             selectedDate,
             selectedHours,
-            reopenSheet: true
+            // reopenSheet: true
         };
         localStorage.setItem("bookingData", JSON.stringify(bookingData));
 
         setError({ type: "", message: "" });
 
-        navigate("/reviewpay");
+
+        setOpen(false)
 
         window.scrollTo(0, 0);
     };
@@ -124,13 +143,24 @@ export default function PickHoursSheet({ total, open, onClose, defaultDate, defa
                         <p className="text-red-500 text-sm mb-2">{error.message}</p>
                     )}
                     <div className="flex items-center justify-between">
-                        <p className="font-semibold text-2xl">
+                        {/* <p className="font-semibold text-2xl">
                             ₹{total || 425}{selectedHours?.label ? `/${selectedHours.label}` : ""}
-                        </p>
+                        </p> */}
+
+                        <div className="space-y-2">
+                            <p className="text-xs text-[#475569]">
+                                Gym timings : {formatTo12Hour(gymOpenHour)} - {formatTo12Hour(gymCloseHour)}
+                            </p>
+
+                            <p className="text-xl font-bold">
+                                ₹{totalWithHr}{selectedHours?.label ? `/${editSelectedHr}` : ""}
+                            </p>
+                        </div>
 
                         <button
+                            disabled={allHoursDisabled}
                             onClick={handleApply}
-                            className="bg-blue-600 w-[163px] text-white px-6 py-3 rounded-md font-medium"
+                            className={`w-[163px] text-white px-6 py-3 rounded-md font-medium ${allHoursDisabled ? "bg-[#a6a7a8] cursor-not-allowed" : "bg-blue-600 cursor-pointer"}`}
                         >
                             Apply
                         </button>
@@ -209,12 +239,12 @@ export default function PickHoursSheet({ total, open, onClose, defaultDate, defa
 
             {/* Info Card */}
             <div className="mt-6 bg-[#F1F5F9] border border-[#DBEAFE] py-2.5 px-[17px] rounded-lg space-y-3 text-sm">
-                <div className="flex items-center gap-2 text-gray-600">
+                {/* <div className="flex items-center gap-2 text-gray-600">
                     <FiClock size={16} />
                     <span>
                         <strong>Gym Timings :</strong> {formatTo12Hour(gymOpenHour)} - {formatTo12Hour(gymCloseHour)}
                     </span>
-                </div>
+                </div> */}
 
                 <div className="flex items-start gap-2 text-gray-600">
                     <FiUsers size={16} className="mt-1" />

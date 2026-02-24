@@ -1,7 +1,12 @@
 import { useState } from "react";
 import Footer from "../components/Footer";
 
-export default function CreateWallet() {
+interface createWalletProps {
+    setDisplay: React.Dispatch<React.SetStateAction<"details" | "create" | "edit">>;
+}
+
+
+export default function CreateWallet({ setDisplay }: createWalletProps) {
     const [form, setForm] = useState({
         name: "",
         account: "",
@@ -65,9 +70,10 @@ export default function CreateWallet() {
             {/* Button */}
             <button
                 disabled={!isValid}
+                onClick={() => setDisplay('details')}
                 className={`mt-8 w-full py-3 rounded-xl font-medium transition ${isValid
-                        ? "bg-[#2563EB] text-white"
-                        : "bg-[#94A3B8] text-white"
+                    ? "bg-[#2563EB] text-white"
+                    : "bg-[#94A3B8] text-white"
                     }`}
             >
                 Verify Details And Continue

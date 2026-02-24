@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { CiCircleAlert } from "react-icons/ci";
 import {
     FiArrowLeft,
@@ -8,7 +8,7 @@ import {
     FiArrowRight,
 } from "react-icons/fi";
 import { FiSun, FiMoon } from "react-icons/fi";
-import { FaPlus } from "react-icons/fa6";
+import { FaCircleCheck, FaPlus } from "react-icons/fa6";
 import { useNavigate } from "react-router";
 
 interface PeakHour {
@@ -52,32 +52,76 @@ const ALL_RULES = [
     "Maintain hygiene",
 ];
 
-interface EditGymProps {
-    setDisplay: React.Dispatch<React.SetStateAction<"details" | "edit">>;
+interface GymType {
+    id: string;
+    name: string;
+    hourly_rate: string;
+    phone_number: string;
+    location: string;
+    open_time: string;
+    close_time: string;
+    peak_morning_start?: string[];
+    peak_morning_end?: string[];
+    peak_evening_start?: string[];
+    peak_evening_end?: string[];
+    amenities?: string[];
+    rules?: string[];
+    uploaded_images?: string[];
 }
 
-export default function EditGym({ setDisplay }: EditGymProps) {
+type ToastType = "success" | "error" | null;
+
+interface EditGymProps {
+    display: string,
+    setDisplay: React.Dispatch<React.SetStateAction<"details" | "edit" | "create">>;
+    setGymList: React.Dispatch<React.SetStateAction<GymType[]>>;
+    setGym: React.Dispatch<React.SetStateAction<GymType | null>>;
+    gym?: GymType | null;
+}
+
+export default function EditGym({ display, setDisplay, gym, setGymList, setGym }: EditGymProps) {
+
+    const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
     const navigate = useNavigate();
 
-    const [gymName, setGymName] = useState("");
-    const [price, setPrice] = useState("");
-    const [phone, setPhone] = useState('+91 ');
-    const [location, setLocation] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const [toast, setToast] = useState<{ type: ToastType; message: string } | null>(null);
 
-    const [startTime, setStartTime] = useState("00:00");
-    const [endTime, setEndTime] = useState("00:01");
+    const [gymName, setGymName] = useState(gym?.name || "");
+    const [price, setPrice] = useState(gym?.hourly_rate || "");
+    const [phone, setPhone] = useState(gym?.phone_number || "+91 ");
+    const [location, setLocation] = useState(gym?.location || "");
+    const [startTime, setStartTime] = useState(gym?.open_time || "00:00");
+    const [endTime, setEndTime] = useState(gym?.close_time || "00:01");
 
-    const [morningPeak, setMorningPeak] = useState<PeakHour[]>([
-        { id: crypto.randomUUID(), start: "00:00", end: "00:01" },
-    ]);
+    const [morningPeak, setMorningPeak] = useState<PeakHour[]>(
+        gym?.peak_morning_start
+            ? gym.peak_morning_start.map((start: string, i: number) => ({
+                id: crypto.randomUUID(),
+                start,
+                end: gym.peak_morning_end && gym.peak_morning_end[i] || start,
+            }))
+            : [{ id: crypto.randomUUID(), start: "00:00", end: "00:01" }]
+    );
 
-    const [eveningPeak, setEveningPeak] = useState<PeakHour[]>([
-        { id: crypto.randomUUID(), start: "00:00", end: "00:01" },
-    ]);
+    const [eveningPeak, setEveningPeak] = useState<PeakHour[]>(() =>
+        gym?.peak_evening_start
+            ? gym.peak_evening_start.map((start: string, i: number) => ({
+                id: crypto.randomUUID(),
+                start,
+                end:
+                    (gym.peak_evening_end && gym.peak_evening_end[i]) ||
+                    gym.close_time || // fallback to gym close time
+                    "00:01",
+            }))
+            : [{ id: crypto.randomUUID(), start: "16:00", end: gym?.close_time || "00:01" }]
+    );
 
-    const [photos, setPhotos] = useState<string[]>([]);
+    const [photos, setPhotos] = useState<string[]>(gym?.uploaded_images || []);
+    const [selectedAmenities, setSelectedAmenities] = useState<string[]>(gym?.amenities || []);
+    const [selectedRules, setSelectedRules] = useState<string[]>(gym?.rules || []);
+
 
     const [visibleAmenities, setVisibleAmenities] = useState<string[]>([
         "Locker",
@@ -85,14 +129,10 @@ export default function EditGym({ setDisplay }: EditGymProps) {
         "Trainer",
     ]);
 
-    const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
-
     const [visibleRules, setVisibleRules] = useState<string[]>([
         "Slot timing is strictly followed",
         "Hourly passes must be used in one continuous session",
     ]);
-
-    const [selectedRules, setSelectedRules] = useState<string[]>([]);
 
     const [modalType, setModalType] = useState<"amenities" | "rules" | null>(null);
 
@@ -103,6 +143,77 @@ export default function EditGym({ setDisplay }: EditGymProps) {
             document.body.style.overflow = "auto";
         }
     }, [modalType]);
+
+    // If gym closes before evening peak start, automatically limit evening start
+    useEffect(() => {
+        setEveningPeak((prev) =>
+            prev.map((p) => ({
+                ...p,
+                start: p.start < "16:00" ? "16:00" : p.start,
+                end: p.end > endTime ? endTime : p.end,
+            }))
+        );
+    }, [endTime]);
+
+    useEffect(() => {
+        const fetchGyms = async () => {
+            const token = localStorage.getItem("token");
+
+            try {
+                const res = await fetch(`${backendUrl}/gymowner/gyms/`, {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    }
+                });
+                if (!res.ok) throw new Error("Failed to fetch gyms");
+                const data = await res.json();
+                const gymData = data.data
+
+                if (Array.isArray(gymData) && gymData.length > 0) {
+                    // User has multiple gyms
+                    setGymList(gymData);
+                    // Pick the first gym to edit by default
+                    const firstGym = gymData[0];
+                    const gymRes = await fetch(`${backendUrl}/gymowner/gym/${firstGym.id}/`, {
+                        method: "GET",
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        }
+                    });
+                    if (gymRes.ok) {
+                        const gymData: GymType = await gymRes.json();
+                        setGym(gymData);
+                    }
+                    setDisplay("edit");
+                    localStorage.setItem("gymDisplay", display);
+                } else if (data && data.id) {
+                    // Only one gym object
+                    const gymRes = await fetch(`${backendUrl}/gymowner/gym/${data.id}/`, {
+                        method: "GET",
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        }
+                    });
+                    if (gymRes.ok) {
+                        const gymData: GymType = await gymRes.json();
+                        setGym(gymData);
+                    }
+                    setDisplay("edit");
+                    localStorage.setItem("gymDisplay", display);
+                } else {
+                    // No gym yet
+                    setDisplay("create");
+                    localStorage.setItem("gymDisplay", display);
+                }
+            } catch (err) {
+                console.error(err);
+                setDisplay("create");
+            }
+        };
+
+        fetchGyms();
+    }, [backendUrl, setDisplay, setGym, setGymList, display]);
 
     // Photos Logic
     const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -133,6 +244,102 @@ export default function EditGym({ setDisplay }: EditGymProps) {
         setPhone(`+91 ${digitsOnly}`);
     };
 
+    const handleSubmit = async () => {
+        if (!isFormValid || isLoading) return;
+
+        (document.activeElement as HTMLElement)?.blur();
+
+        setIsLoading(true);
+
+        try {
+            const formData = new FormData();
+            formData.append("name", gymName);
+            formData.append("hourly_rate", price);
+            formData.append("phone_number", phone);
+            formData.append("location", location);
+            formData.append("open_time", startTime);
+            formData.append("close_time", endTime);
+
+            // Photos
+            for (const photo of photos) {
+                const blob = await fetch(photo).then(res => res.blob());
+                formData.append("uploaded_images", blob, "photo.jpg");
+            }
+
+            // selectedAmenities.forEach((id) => formData.append("amenities[]", id));
+            // selectedRules.forEach((id) => formData.append("rules[]", id));
+
+            selectedAmenities.forEach((value) =>
+                formData.append("amenities", value)
+            );
+
+            selectedRules.forEach((value) =>
+                formData.append("rules", value)
+            );
+
+            // morningPeak.forEach((p) => {
+            //     formData.append("peak_morning_start[]", p.start);
+            //     formData.append("peak_morning_end[]", p.end);
+            // });
+
+            morningPeak.forEach((p) => {
+                formData.append("peak_morning_start", p.start);
+                formData.append("peak_morning_end", p.end);
+            });
+
+            eveningPeak.forEach((p) => {
+                formData.append("peak_evening_start", p.start);
+                formData.append("peak_evening_end", p.end);
+            });
+
+            const token = localStorage.getItem("token");
+
+            let res;
+            if (display === "edit" && gym?.id) {
+                // EDIT existing gym
+                res = await fetch(`${backendUrl}/gymowner/gyms/${gym.id}/`, {
+                    method: "PUT",
+                    body: formData,
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+            } else {
+                // CREATE new gym
+                res = await fetch(`${backendUrl}/gymowner/gyms/create/`, {
+                    method: "POST",
+                    body: formData,
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+            }
+
+            if (!res.ok) throw new Error("Failed to save gym");
+
+            const message =
+                display === "edit"
+                    ? "Changes saved successfully!"
+                    : "Gym created successfully!";
+            setToast({ type: "success", message });
+
+            setTimeout(() => {
+                setDisplay("details")
+                localStorage.setItem("gymDisplay", display);
+
+            }, 100);
+            window.scrollTo(0, 0)
+        } catch (err) {
+            console.error(err);
+            setToast({ type: "error", message: "Something went wrong, please try again!" });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleToastClose = useCallback(() => {
+        setToast(null);
+    }, []);
 
 
     const isFormValid =
@@ -156,17 +363,30 @@ export default function EditGym({ setDisplay }: EditGymProps) {
     return (
         <div className="min-h-screen pb-32">
             {/* Header */}
-            <div onClick={() => navigate(-1)} className="flex items-center gap-3 p-4 bg-white">
-                <FiArrowLeft size={20} />
+            <div className="flex items-center gap-3 p-4 bg-white cursor-pointer">
+                <FiArrowLeft
+                    onClick={() => {
+                        if (display === "edit") {
+                            setDisplay("details");
+                            localStorage.setItem("gymDisplay", display);
+                        } else if (display === "create") {
+                            navigate(-1)
+                        } else {
+                            navigate(-1)
+                        }
+                    }}
+                    size={20} />
                 <h1 className="font-semibold text-lg">Edit Gym Details</h1>
             </div>
+
+            {toast && <Toast type={toast.type} text={toast.message} onClose={handleToastClose} />}
 
             <div className="p-4 space-y-6">
                 {/* Gym Name */}
                 <Input label="Gym Name" value={gymName} onChange={setGymName} />
 
                 <div>
-                    <Input
+                    <Input2
                         label="How much do you charge per hour?"
                         placeholder="Example ₹210/Hour"
                         value={price}
@@ -213,6 +433,7 @@ export default function EditGym({ setDisplay }: EditGymProps) {
                     evening={eveningPeak}
                     setMorning={setMorningPeak}
                     setEvening={setEveningPeak}
+                    gymEndTime={endTime}
                 />
 
                 {/* Photos */}
@@ -334,20 +555,10 @@ export default function EditGym({ setDisplay }: EditGymProps) {
             <div className="fixed bottom-0 left-0 right-0 bg-white p-4 border-t">
                 <button
                     disabled={!isFormValid || isLoading}
-                    onClick={() => {
-                        if (!isFormValid || isLoading) return;
-
-                        setIsLoading(true);
-
-                        setTimeout(() => {
-                            setIsLoading(false);
-                            setDisplay("details");
-                            window.scrollTo({ top: 0, behavior: "smooth" });
-                        }, 1500);
-                    }}
+                    onClick={handleSubmit}
                     className={`w-full py-3 rounded-xl font-medium flex items-center justify-center gap-2 transition ${isFormValid && !isLoading
-                            ? "bg-blue-600 text-white"
-                            : "bg-gray-300 text-gray-500"
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-300 text-gray-500"
                         }`}
                 >
                     {isLoading ? (
@@ -399,8 +610,34 @@ const Input = ({ label, value, onChange, placeholder, icon }: InputProps) => (
     </div>
 );
 
+const Input2 = ({ label, value, onChange, placeholder, icon }: InputProps) => {
+    // Handle numeric input only
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        // Allow only digits
+        const numericValue = e.target.value.replace(/\D/g, "");
+        onChange(numericValue);
+    };
+
+    return (
+        <div className="relative">
+            <p className="text-base mb-1 text-[#0F172A] font-semibold">{label}</p>
+            <div className="flex items-center border border-[#475569] h-[50px] rounded-lg px-3 py-2 bg-white">
+                {icon && <div className="mr-2 absolute right-2 text-[#475569] text-[20px]">{icon}</div>}
+                <input
+                    type="text" // keep text so we can control pasted input
+                    className="w-full outline-none text-sm"
+                    value={value}
+                    placeholder={placeholder}
+                    onChange={handleChange}
+                />
+            </div>
+        </div>
+    );
+};
+
 import { useRef } from "react";
 import SelectionModal from "../components/SelectionModal";
+import { MdError } from "react-icons/md";
 
 const TimeInput = ({ value, onChange }: TimeInputProps) => {
     const inputRef = useRef<HTMLInputElement>(null);
@@ -476,11 +713,13 @@ const GymPeakHours = ({
     evening,
     setMorning,
     setEvening,
+    gymEndTime
 }: {
     morning: PeakHour[];
     evening: PeakHour[];
     setMorning: React.Dispatch<React.SetStateAction<PeakHour[]>>;
     setEvening: React.Dispatch<React.SetStateAction<PeakHour[]>>;
+    gymEndTime: string
 }) => {
     return (
         <div className="space-y-4">
@@ -498,6 +737,7 @@ const GymPeakHours = ({
                 data={evening}
                 setData={setEvening}
                 icon={<FiMoon size={16} />}
+                gymEndTime={gymEndTime}
             />
         </div>
     );
@@ -520,11 +760,13 @@ const PeakSection = ({
     icon,
     data,
     setData,
+    gymEndTime,
 }: {
     title: string;
     icon: React.ReactNode;
     data: PeakHour[];
     setData: React.Dispatch<React.SetStateAction<PeakHour[]>>;
+    gymEndTime?: string;
 }) => {
     const addMore = () => {
         setData((prev) => [
@@ -533,23 +775,26 @@ const PeakSection = ({
         ]);
     };
 
-    const updateTime = (
-        id: string,
-        field: "start" | "end",
-        value: string
-    ) => {
+    const updateTime = (id: string, field: "start" | "end", value: string) => {
         setData((prev) =>
-            prev.map((item) =>
-                item.id === id ? { ...item, [field]: value } : item
-            )
+            prev.map((item) => {
+                if (item.id !== id) return item;
+
+                // Evening peak restriction
+                if (title === "Evening" && gymEndTime) {
+                    if (field === "start" && value < "16:00") value = "16:00";
+                    if (field === "end" && value > gymEndTime) value = gymEndTime;
+                }
+
+                return { ...item, [field]: value };
+            })
         );
     };
 
     return (
         <div className="bg-blue-100 rounded-lg p-3 py-5 space-y-5">
             <div className="flex items-center gap-2 text-gray-700 font-medium">
-                {icon}
-                {title}
+                {icon} {title}
             </div>
 
             {data.map((item, index) => (
@@ -557,29 +802,20 @@ const PeakSection = ({
                     <div className="flex items-center justify-between gap-1">
                         <div className="flex-">
                             <p className="text-sm mb-2 text-gray-700">Start Time</p>
-                            <TimeInput
-                                value={item.start}
-                                onChange={(v) => updateTime(item.id, "start", v)}
-                            />
+                            <TimeInput value={item.start} onChange={(v) => updateTime(item.id, "start", v)} />
                         </div>
 
                         <FiArrowRight className="mt-6 text-gray-600" size={18} />
 
                         <div className="flex-">
                             <p className="text-sm mb-2 text-gray-700">End Time</p>
-                            <TimeInput
-                                value={item.end}
-                                onChange={(v) => updateTime(item.id, "end", v)}
-                            />
+                            <TimeInput value={item.end} onChange={(v) => updateTime(item.id, "end", v)} />
                         </div>
                     </div>
 
-                    {/* DELETE BUTTON */}
                     {data.length > 1 && (
                         <button
-                            onClick={() =>
-                                setData((prev) => prev.filter((p) => p.id !== item.id))
-                            }
+                            onClick={() => setData((prev) => prev.filter((p) => p.id !== item.id))}
                             className="mt-6 text-red-500 hover:text-red-600 text-sm font-medium"
                         >
                             Delete
@@ -587,9 +823,7 @@ const PeakSection = ({
                     )}
 
                     {!isEndTimeValid(item.start, item.end) && (
-                        <p className="text-red-500 text-xs mt-1">
-                            End time must be later than start time
-                        </p>
+                        <p className="text-red-500 text-xs mt-1">End time must be later than start time</p>
                     )}
 
                     {(index === data.length - 1 && title === "Morning") && (
@@ -612,3 +846,28 @@ const Section = ({ title, children }: SectionProps) => (
         {children}
     </div>
 );
+
+
+function Toast({ text, type, onClose }: { text: string; type: ToastType; onClose: () => void }) {
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            onClose();
+        }, 3000);
+        return () => clearTimeout(timer);
+    }, [onClose]);
+
+    const isSuccess = type === "success";
+
+    return (
+        <div
+            className={`fixed w-[280px] bottom-20 z-50 left-1/2 justify-center -translate-x-1/2 
+      bg-white px-4 py-3 rounded-lg flex items-center gap-3
+      shadow-[0_10px_40px_rgba(0,0,0,0.18)] animate-[fadeIn_0.2s_ease-out]`}
+        >
+            <span className={`text-xl ${isSuccess ? "text-green-500" : "text-red-500"}`}>
+                {isSuccess ? <FaCircleCheck /> : <MdError />}
+            </span>
+            <p className="text-sm font-medium">{text}</p>
+        </div>
+    );
+}

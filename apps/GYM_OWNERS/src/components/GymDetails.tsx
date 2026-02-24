@@ -15,10 +15,11 @@ type Day = {
 };
 
 interface GymDetailsProps {
-    setDisplay: React.Dispatch<React.SetStateAction<"details" | "edit">>;
+    display: string,
+    setDisplay: React.Dispatch<React.SetStateAction<"details" | "edit" | "create">>;
 }
 
-export default function GymDetails({ setDisplay }: GymDetailsProps) {
+export default function GymDetails({ setDisplay, display }: GymDetailsProps) {
 
     const navigate = useNavigate();
 
@@ -225,6 +226,8 @@ export default function GymDetails({ setDisplay }: GymDetailsProps) {
 
                 <button onClick={() => {
                     setDisplay("edit")
+                    localStorage.setItem("gymDisplay", display);
+                    // navigate('/gym/edit')
                     window.scrollTo({ top: 0, behavior: "smooth" });
                 }} className="bg-blue-600 text-white px-5 py-2 rounded-md h-[50px]">
                     Edit Gym Details

@@ -14,6 +14,9 @@ import EditProfile from "./pages/EditProfile";
 import Notifications from "./pages/Notification";
 import Support from "./pages/Support";
 import NotFound from "./pages/NotFound";
+import Transactions from "./pages/Transactions";
+import TransactionDetails from "./pages/TransactionDetails";
+import FAQ from "./pages/FAQ";
 
 function App() {
 
@@ -77,52 +80,93 @@ function App() {
           <Route
             path="/"
             element={
-              <GymOwnerHome />
+              <ProtectedRoute>
+                <GymOwnerHome />
+              </ProtectedRoute>
             }
           />
 
           <Route
             path="/gym"
             element={
-              <Gym />
+              <ProtectedRoute>
+                <Gym />
+              </ProtectedRoute>
             }
           />
 
           <Route
             path="/wallet"
             element={
-              <Wallet />
+              <ProtectedRoute>
+                <Wallet />
+              </ProtectedRoute>
             }
           />
 
           <Route
+            path="/wallet/transactions"
+            element={
+              <ProtectedRoute>
+                <Transactions />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/wallet/transactions/:id"
+            element={
+              <ProtectedRoute>
+                <TransactionDetails />
+              </ProtectedRoute>
+            }
+          />
+
+
+          <Route
             path="/profile"
             element={
-              <Profile />
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
             }
           />
 
           <Route
             path="/profile/edit"
             element={
-              <EditProfile />
+              <ProtectedRoute>
+                <EditProfile />
+              </ProtectedRoute>
             }
           />
 
           <Route
             path="/notifications"
             element={
-              <Notifications Loading={loading} />
+              <ProtectedRoute>
+                <Notifications Loading={loading} />
+              </ProtectedRoute>
             }
           />
 
           <Route
             path="/support"
             element={
-              <Support />
+              <ProtectedRoute>
+                <Support />
+              </ProtectedRoute>
             }
           />
 
+          <Route
+            path="/faq"
+            element={
+              <ProtectedRoute>
+                <FAQ />
+              </ProtectedRoute>
+            }
+          />
 
           <Route path="*" element={<NotFound Loading={loading} />} />
         </Routes>

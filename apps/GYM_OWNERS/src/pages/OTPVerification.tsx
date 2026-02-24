@@ -107,6 +107,31 @@ export default function OTPVerification() {
         }
     };
 
+    const checkOnboardingAndRedirect = async () => {
+        try {
+            const token = localStorage.getItem("token");
+
+            const res = await fetch(`${backendUrl}/api/onboarding/`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            const data = await res.json();
+
+            if (data?.data?.is_completed) {
+                navigate("/");
+            } else {
+                navigate("/onboarding");
+            }
+        } catch (err) {
+            console.error("Failed to check onboarding:", err);
+            navigate("/onboarding"); // fallback
+        }
+    };
+
     /* ---------------- Verify OTP ---------------- */
     const verifyOtp = async (code: string) => {
 
@@ -150,7 +175,7 @@ export default function OTPVerification() {
             // Navigate after toast
             setTimeout(() => {
                 setToast(null);
-                navigate("/onboarding");
+                checkOnboardingAndRedirect();
             }, 3000);
         } catch (err: unknown) {
             setStatus("error");
@@ -200,11 +225,7 @@ export default function OTPVerification() {
     const handleToastClose = useCallback(() => {
         setToast(null);
 
-        // Navigate to workout form if OTP success
-        if (status === "success") {
-            navigate("/onboarding");
-        }
-    }, [status, navigate]);
+    }, []);
 
     /* ---------------- Helpers ---------------- */
     const borderColor =
