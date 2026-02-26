@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FaCircleCheck } from 'react-icons/fa6';
 import { MdError } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
@@ -12,38 +12,38 @@ export default function WorkoutForm() {
 
     const [name, setName] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    // const [checkingOnboarding, setCheckingOnboarding] = useState(true);
+    const [checkingOnboarding, setCheckingOnboarding] = useState(true);
     const [toast, setToast] = useState<{ type: ToastType; message: string } | null>(null);
 
     const isFormComplete = name.trim() !== '';
 
     /* ---------------- Check onboarding ---------------- */
-    // useEffect(() => {
-    //     const checkOnboarding = async () => {
-    //         try {
-    //             const token = localStorage.getItem('token');
-    //             const res = await fetch(`${backendUrl}/api/onboarding/`, {
-    //                 method: 'GET',
-    //                 headers: {
-    //                     'Content-Type': 'application/json',
-    //                     Authorization: `Bearer ${token}`,
-    //                 },
-    //             });
-    //             const data = await res.json();
+    useEffect(() => {
+        const checkOnboarding = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(`${backendUrl}/api/onboarding/`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                const data = await res.json();
 
-    //             if (data.data.is_completed) {
-    //                 navigate('/'); // user already completed onboarding
-    //             } else {
-    //                 setCheckingOnboarding(false); // show form
-    //             }
-    //         } catch (err) {
-    //             console.error('Failed to check onboarding:', err);
-    //             setCheckingOnboarding(false); // fallback: show form
-    //         }
-    //     };
+                if (data.data.is_completed) {
+                    navigate('/'); // user already completed onboarding
+                } else {
+                    setCheckingOnboarding(false); // show form
+                }
+            } catch (err) {
+                console.error('Failed to check onboarding:', err);
+                setCheckingOnboarding(false); // fallback: show form
+            }
+        };
 
-    //     checkOnboarding();
-    // }, [backendUrl, navigate]);
+        checkOnboarding();
+    }, [backendUrl, navigate]);
 
     /* ---------------- Handle Submit ---------------- */
     const handleSubmit = async () => {
@@ -101,19 +101,19 @@ export default function WorkoutForm() {
     };
 
     /* ---------------- Render ---------------- */
-    // if (checkingOnboarding) {
-    //     return (
-    //         <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
-    //             {/* Spinner */}
-    //             <div className="w-12 h-12 border-4 border-gray-300 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+    if (checkingOnboarding) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
+                {/* Spinner */}
+                <div className="w-12 h-12 border-4 border-gray-300 border-t-blue-600 rounded-full animate-spin mb-4"></div>
 
-    //             {/* Text */}
-    //             <p className="text-gray-700 text-lg font-medium">
-    //                 Checking onboarding status...
-    //             </p>
-    //         </div>
-    //     );
-    // }
+                {/* Text */}
+                <p className="text-gray-700 text-lg font-medium">
+                    Checking onboarding status...
+                </p>
+            </div>
+        );
+    }
 
     return (
         <div className="p-5 space-y-6 flex flex-col h-screen">
@@ -132,7 +132,7 @@ export default function WorkoutForm() {
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         className="border border-[#475569] text-[#0F172A] text-sm w-full rounded-lg py-2 px-4 outline-none h-[48px]"
-                        placeholder="Please type our name here ..."
+                        placeholder="Please type your name here ..."
                     />
                 </div>
             </div>

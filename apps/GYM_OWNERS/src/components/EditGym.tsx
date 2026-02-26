@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { CiCircleAlert } from "react-icons/ci";
 import {
     FiArrowLeft,
@@ -35,23 +35,6 @@ interface SectionProps {
     children: React.ReactNode;
 }
 
-const ALL_AMENITIES = [
-    "Locker",
-    "Restroom",
-    "Trainer",
-    "Shower",
-    "Parking",
-    "WiFi",
-];
-
-const ALL_RULES = [
-    "Slot timing is strictly followed",
-    "Hourly passes must be used in one continuous session",
-    "Wear proper workout attire and shoes",
-    "No outside food allowed",
-    "Maintain hygiene",
-];
-
 interface GymType {
     id: string;
     name: string;
@@ -59,14 +42,18 @@ interface GymType {
     phone_number: string;
     location: string;
     open_time: string;
+    longitude: string;
+    latitude: string;
     close_time: string;
-    peak_morning_start?: string[];
-    peak_morning_end?: string[];
-    peak_evening_start?: string[];
-    peak_evening_end?: string[];
-    amenities?: string[];
-    rules?: string[];
-    uploaded_images?: string[];
+    amenities: Amenity[];
+    rules: Rule[];
+    images: { id: number; image: string }[];
+
+    peak_morning?: [string, string][];
+    peak_evening?: [string, string][];
+    calendar_availability?: []
+
+    owner_email: string
 }
 
 type ToastType = "success" | "error" | null;
@@ -74,16 +61,33 @@ type ToastType = "success" | "error" | null;
 interface EditGymProps {
     display: string,
     setDisplay: React.Dispatch<React.SetStateAction<"details" | "edit" | "create">>;
-    setGymList: React.Dispatch<React.SetStateAction<GymType[]>>;
+    // setGymList: React.Dispatch<React.SetStateAction<GymType[]>>;
     setGym: React.Dispatch<React.SetStateAction<GymType | null>>;
     gym?: GymType | null;
 }
 
-export default function EditGym({ display, setDisplay, gym, setGymList, setGym }: EditGymProps) {
+interface Amenity {
+    id: number;
+    name: string;
+    icon: string;
+}
+
+interface Rule {
+    id: number;
+    description: string;
+}
+
+type PhotoType = {
+    url: string;
+    isNew: boolean;
+};
+
+export default function EditGym({ display, setDisplay, gym, setGym }: EditGymProps) {
 
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
     const navigate = useNavigate();
+    const [initialData, setInitialData] = useState<string>("");
 
     const [isLoading, setIsLoading] = useState(false);
     const [toast, setToast] = useState<{ type: ToastType; message: string } | null>(null);
@@ -94,45 +98,60 @@ export default function EditGym({ display, setDisplay, gym, setGymList, setGym }
     const [location, setLocation] = useState(gym?.location || "");
     const [startTime, setStartTime] = useState(gym?.open_time || "00:00");
     const [endTime, setEndTime] = useState(gym?.close_time || "00:01");
+    const [latitude, setLatitude] = useState<string>(gym?.latitude || "");
+    const [longitude, setLongitude] = useState<string>(gym?.longitude || "");
 
-    const [morningPeak, setMorningPeak] = useState<PeakHour[]>(
-        gym?.peak_morning_start
-            ? gym.peak_morning_start.map((start: string, i: number) => ({
+    const [morningPeak, setMorningPeak] = useState<PeakHour[]>(() => {
+        if (gym?.peak_morning && gym.peak_morning.length > 0) {
+            return gym.peak_morning.map(([start, end]) => ({
                 id: crypto.randomUUID(),
                 start,
-                end: gym.peak_morning_end && gym.peak_morning_end[i] || start,
-            }))
-            : [{ id: crypto.randomUUID(), start: "00:00", end: "00:01" }]
-    );
+                end,
+            }));
+        }
 
-    const [eveningPeak, setEveningPeak] = useState<PeakHour[]>(() =>
-        gym?.peak_evening_start
-            ? gym.peak_evening_start.map((start: string, i: number) => ({
+        return [{ id: crypto.randomUUID(), start: "00:00", end: "00:01" }];
+    });
+
+    const [eveningPeak, setEveningPeak] = useState<PeakHour[]>(() => {
+        if (gym?.peak_evening && gym.peak_evening.length > 0) {
+            return gym.peak_evening.map(([start, end]) => ({
                 id: crypto.randomUUID(),
                 start,
-                end:
-                    (gym.peak_evening_end && gym.peak_evening_end[i]) ||
-                    gym.close_time || // fallback to gym close time
-                    "00:01",
-            }))
-            : [{ id: crypto.randomUUID(), start: "16:00", end: gym?.close_time || "00:01" }]
+                end,
+            }));
+        }
+
+        return [{
+            id: crypto.randomUUID(),
+            start: "16:00",
+            end: gym?.close_time || "00:01",
+        }];
+    });
+
+    const [photos, setPhotos] = useState<PhotoType[]>(
+        gym?.images?.map(img => ({
+            url: img.image,
+            isNew: false,
+        })) || []
     );
 
-    const [photos, setPhotos] = useState<string[]>(gym?.uploaded_images || []);
-    const [selectedAmenities, setSelectedAmenities] = useState<string[]>(gym?.amenities || []);
-    const [selectedRules, setSelectedRules] = useState<string[]>(gym?.rules || []);
+    const [selectedAmenities, setSelectedAmenities] = useState<number[]>(
+        gym?.amenities?.map(a => a.id) || []
+    );
+    const [selectedRules, setSelectedRules] = useState<number[]>(
+        gym?.rules?.map(r => r.id) || []
+    );
+    const [amenities, setAmenities] = useState<Amenity[]>([]);
+    const [amenitiesCount, setAmenitiesCount] = useState('');
+    const [rules, setRules] = useState<Rule[]>([]);
+    const [rulesCount, setRulesCount] = useState('');
 
+    // const visibleAmenities = amenities.slice(0, 6);
+    // const visibleRules = rules.slice(0, 6);
 
-    const [visibleAmenities, setVisibleAmenities] = useState<string[]>([
-        "Locker",
-        "Restroom",
-        "Trainer",
-    ]);
-
-    const [visibleRules, setVisibleRules] = useState<string[]>([
-        "Slot timing is strictly followed",
-        "Hourly passes must be used in one continuous session",
-    ]);
+    const [visibleAmenities, setVisibleAmenities] = useState<Amenity[]>([])
+    const [visibleRules, setVisibleRules] = useState<Rule[]>([])
 
     const [modalType, setModalType] = useState<"amenities" | "rules" | null>(null);
 
@@ -146,89 +165,157 @@ export default function EditGym({ display, setDisplay, gym, setGymList, setGym }
 
     // If gym closes before evening peak start, automatically limit evening start
     useEffect(() => {
+        const minStart = timeToMinutes("16:00");
+        const endLimit = timeToMinutes(endTime);
+
         setEveningPeak((prev) =>
-            prev.map((p) => ({
-                ...p,
-                start: p.start < "16:00" ? "16:00" : p.start,
-                end: p.end > endTime ? endTime : p.end,
-            }))
+            prev.map((p) => {
+                let start = p.start;
+                let end = p.end;
+
+                if (timeToMinutes(start) < minStart) {
+                    start = "16:00";
+                }
+
+                if (timeToMinutes(end) > endLimit) {
+                    end = endTime;
+                }
+
+                return { ...p, start, end };
+            })
         );
     }, [endTime]);
 
+    const fetchCurrentLocation = () => {
+        if (!navigator.geolocation) {
+            setToast({ type: "error", message: "Your browser does not support location access." });
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude } = position.coords;
+                setLatitude(latitude.toString());
+                setLongitude(longitude.toString());
+            },
+            (error) => {
+                if (error.code === error.PERMISSION_DENIED) {
+                    setToast({
+                        type: "error",
+                        message: "Please allow location access so we can auto-fill your coordinates.",
+                    });
+                } else {
+                    setToast({ type: "error", message: "Unable to get your location." });
+                }
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
+    };
+
     useEffect(() => {
-        const fetchGyms = async () => {
+        // if (display === "create") {
+        fetchCurrentLocation();
+        // }
+    }, [display]);
+
+    useEffect(() => {
+        if (!gym) return;
+
+        const formatted = JSON.stringify({
+            name: gym?.name,
+            price: gym?.hourly_rate,
+            phone: gym?.phone_number,
+            location: gym?.location,
+            start: gym?.open_time,
+            end: gym?.close_time,
+            amenities: gym?.amenities.map(a => a.id).sort(),
+            rules: gym?.rules.map(r => r.id).sort(),
+            photos: gym?.images?.map(img => img.image).sort(),
+            morning: gym?.peak_morning,
+            evening: gym?.peak_evening,
+        });
+
+        setInitialData(formatted);
+    }, [gym]);
+
+    const currentData = useMemo(() => {
+        return JSON.stringify({
+            name: gymName,
+            price,
+            phone,
+            location,
+            start: startTime,
+            end: endTime,
+            amenities: selectedAmenities.slice().sort(),
+            rules: selectedRules.slice().sort(),
+            photos: photos.map(p => p.url).sort(),
+            morning: morningPeak.map(p => [p.start, p.end]),
+            evening: eveningPeak.map(p => [p.start, p.end]),
+        });
+    }, [
+        gymName,
+        price,
+        phone,
+        location,
+        startTime,
+        endTime,
+        selectedAmenities,
+        selectedRules,
+        photos,
+        morningPeak,
+        eveningPeak
+    ]);
+
+    const isChanged = initialData !== currentData;
+
+    useEffect(() => {
+        const fetchAmenitiesAndRules = async () => {
             const token = localStorage.getItem("token");
 
             try {
-                const res = await fetch(`${backendUrl}/gymowner/gyms/`, {
-                    method: "GET",
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    }
+                const res = await fetch(`${backendUrl}/gymowner/amenities/`, {
+                    headers: { Authorization: `Bearer ${token}` },
                 });
-                if (!res.ok) throw new Error("Failed to fetch gyms");
-                const data = await res.json();
-                const gymData = data.data
 
-                if (Array.isArray(gymData) && gymData.length > 0) {
-                    // User has multiple gyms
-                    setGymList(gymData);
-                    // Pick the first gym to edit by default
-                    const firstGym = gymData[0];
-                    const gymRes = await fetch(`${backendUrl}/gymowner/gym/${firstGym.id}/`, {
-                        method: "GET",
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        }
-                    });
-                    if (gymRes.ok) {
-                        const gymData: GymType = await gymRes.json();
-                        setGym(gymData);
-                    }
-                    setDisplay("edit");
-                    localStorage.setItem("gymDisplay", display);
-                } else if (data && data.id) {
-                    // Only one gym object
-                    const gymRes = await fetch(`${backendUrl}/gymowner/gym/${data.id}/`, {
-                        method: "GET",
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        }
-                    });
-                    if (gymRes.ok) {
-                        const gymData: GymType = await gymRes.json();
-                        setGym(gymData);
-                    }
-                    setDisplay("edit");
-                    localStorage.setItem("gymDisplay", display);
-                } else {
-                    // No gym yet
-                    setDisplay("create");
-                    localStorage.setItem("gymDisplay", display);
-                }
+                const data = await res.json();
+                if (!res.ok) throw new Error("Failed to fetch amenities");
+                setAmenities(data.data);
+                setAmenitiesCount(data.data.length);
+                setVisibleAmenities(data.data.slice(0, 6));
+
+                const res2 = await fetch(`${backendUrl}/gymowner/rules/`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+
+                const data2 = await res2.json();
+                if (!res2.ok) throw new Error("Failed to fetch rules");
+                setRules(data2.data);
+                setRulesCount(data2.data.length);
+                setVisibleRules(data2.data.slice(0, 6));
+
             } catch (err) {
                 console.error(err);
-                setDisplay("create");
             }
         };
 
-        fetchGyms();
-    }, [backendUrl, setDisplay, setGym, setGymList, display]);
+        fetchAmenitiesAndRules();
+    }, [backendUrl]);
 
     // Photos Logic
     const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
         if (!files) return;
 
-        const newPhotos = Array.from(files).map((file) =>
-            URL.createObjectURL(file)
-        );
+        const newPhotos = Array.from(files).map((file) => ({
+            url: URL.createObjectURL(file),
+            isNew: true,
+        }));
 
         setPhotos((prev) => [...prev, ...newPhotos]);
     };
 
     const removePhoto = (url: string) => {
-        setPhotos((prev) => prev.filter((p) => p !== url));
+        setPhotos((prev) => prev.filter((p) => p.url !== url));
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -259,45 +346,38 @@ export default function EditGym({ display, setDisplay, gym, setGymList, setGym }
             formData.append("location", location);
             formData.append("open_time", startTime);
             formData.append("close_time", endTime);
+            formData.append("latitude", latitude);
+            formData.append("longitude", longitude);
 
             // Photos
+            // only upload NEW images
             for (const photo of photos) {
-                const blob = await fetch(photo).then(res => res.blob());
-                formData.append("uploaded_images", blob, "photo.jpg");
+                if (photo.isNew) {
+                    const blob = await fetch(photo.url).then(res => res.blob());
+                    formData.append("uploaded_images", blob, "photo.jpg");
+                }
             }
 
-            // selectedAmenities.forEach((id) => formData.append("amenities[]", id));
-            // selectedRules.forEach((id) => formData.append("rules[]", id));
-
-            selectedAmenities.forEach((value) =>
-                formData.append("amenities", value)
+            selectedAmenities.forEach((id) =>
+                formData.append("amenities", String(id))
             );
 
-            selectedRules.forEach((value) =>
-                formData.append("rules", value)
+            selectedRules.forEach((id) =>
+                formData.append("rules", String(id))
             );
 
-            // morningPeak.forEach((p) => {
-            //     formData.append("peak_morning_start[]", p.start);
-            //     formData.append("peak_morning_end[]", p.end);
-            // });
+            const peakMorningFormatted = morningPeak.map(p => [p.start, p.end]);
+            const peakEveningFormatted = eveningPeak.map(p => [p.start, p.end]);
 
-            morningPeak.forEach((p) => {
-                formData.append("peak_morning_start", p.start);
-                formData.append("peak_morning_end", p.end);
-            });
-
-            eveningPeak.forEach((p) => {
-                formData.append("peak_evening_start", p.start);
-                formData.append("peak_evening_end", p.end);
-            });
+            formData.append("peak_morning", JSON.stringify(peakMorningFormatted));
+            formData.append("peak_evening", JSON.stringify(peakEveningFormatted));
 
             const token = localStorage.getItem("token");
 
             let res;
-            if (display === "edit" && gym?.id) {
+            if (display === "edit") {
                 // EDIT existing gym
-                res = await fetch(`${backendUrl}/gymowner/gyms/${gym.id}/`, {
+                res = await fetch(`${backendUrl}/gymowner/gyms/${gym?.id}/`, {
                     method: "PUT",
                     body: formData,
                     headers: {
@@ -317,6 +397,17 @@ export default function EditGym({ display, setDisplay, gym, setGymList, setGym }
 
             if (!res.ok) throw new Error("Failed to save gym");
 
+            const data = await res.json();
+
+            const newGym: GymType = data.data;
+            setGym(newGym);
+
+
+            setTimeout(() => {
+                setDisplay("details");
+                localStorage.setItem("gymDisplay", "details");
+            }, 1500);
+
             const message =
                 display === "edit"
                     ? "Changes saved successfully!"
@@ -324,10 +415,9 @@ export default function EditGym({ display, setDisplay, gym, setGymList, setGym }
             setToast({ type: "success", message });
 
             setTimeout(() => {
-                setDisplay("details")
-                localStorage.setItem("gymDisplay", display);
+                window.location.reload()
+            }, 1000);
 
-            }, 100);
             window.scrollTo(0, 0)
         } catch (err) {
             console.error(err);
@@ -368,7 +458,7 @@ export default function EditGym({ display, setDisplay, gym, setGymList, setGym }
                     onClick={() => {
                         if (display === "edit") {
                             setDisplay("details");
-                            localStorage.setItem("gymDisplay", display);
+                            localStorage.setItem("gymDisplay", "details");
                         } else if (display === "create") {
                             navigate(-1)
                         } else {
@@ -439,16 +529,16 @@ export default function EditGym({ display, setDisplay, gym, setGymList, setGym }
                 {/* Photos */}
                 <Section title="Gym Photos">
                     <div className="flex gap-3 flex-wrap">
-                        {photos.map((url) => (
-                            <div key={url} className="relative">
+                        {photos.map((photo) => (
+                            <div key={photo.url} className="relative">
                                 <img
-                                    src={url}
+                                    src={photo.url}
                                     title="gymphotos"
                                     className="w-24 h-24 object-cover rounded-lg"
                                 />
                                 <button
+                                    onClick={() => removePhoto(photo.url)}
                                     title="remove"
-                                    onClick={() => removePhoto(url)}
                                     className="absolute -top-2 -right-2 bg-white p-1 rounded-full shadow"
                                 >
                                     <FiX size={14} />
@@ -471,27 +561,29 @@ export default function EditGym({ display, setDisplay, gym, setGymList, setGym }
 
                 {/* Amenities */}
                 <Section title="Amenities">
-                    <div className="flex flex-wrap gap-2 mt-2">
+                    <div className="flex flex-wrap gap-3 mt-2">
                         {visibleAmenities.map((item) => {
-                            const active = selectedAmenities.includes(item);
+                            const active = selectedAmenities.includes(item.id);
 
                             return (
                                 <button
-                                    key={item}
+                                    key={item.id}
                                     onClick={() =>
                                         setSelectedAmenities((prev) =>
-                                            prev.includes(item)
-                                                ? prev.filter((i) => i !== item)
-                                                : [...prev, item]
+                                            prev.includes(item.id)
+                                                ? prev.filter((i) => i !== item.id)
+                                                : [...prev, item.id]
                                         )
                                     }
-                                    className={`px-3 py-1.5 rounded-full text-sm
-                                     ${active
-                                            ? "bg-blue-100 text-blue-600"
-                                            : "bg-gray-100 text-gray-600"}
+                                    className={`flex items-center gap-2 px-3 py-2 rounded-full text-sm border transition
+                                        ${active
+                                            ? "bg-blue-100 border-blue-500 text-blue-600"
+                                            : "bg-gray-100 border-gray-200 text-gray-600"
+                                        }
                                     `}
                                 >
-                                    {item}
+                                    <img src={item.icon} alt={item.name} className="w-4 h-4" />
+                                    {item.name}
                                 </button>
                             );
                         })}
@@ -509,34 +601,33 @@ export default function EditGym({ display, setDisplay, gym, setGymList, setGym }
                 <Section title="Rules">
                     <div className="space-y-3 mt-2">
                         {visibleRules.map((item) => {
-                            const active = selectedRules.includes(item);
+                            const active = selectedRules.includes(item.id);
 
                             return (
                                 <div
-                                    key={item}
+                                    key={item.id}
                                     onClick={() =>
                                         setSelectedRules((prev) =>
-                                            prev.includes(item)
-                                                ? prev.filter((i) => i !== item)
-                                                : [...prev, item]
+                                            prev.includes(item.id)
+                                                ? prev.filter((i) => i !== item.id)
+                                                : [...prev, item.id]
                                         )
                                     }
-                                    className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer
+                                    className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition
                                         ${active ? "border-blue-500 bg-blue-50" : "border-gray-200"}
                                     `}
                                 >
-                                    {/* Radio */}
                                     <div
                                         className={`w-5 h-5 rounded-full border flex items-center justify-center
                                         ${active ? "border-blue-500" : "border-gray-400"}
-                                        `}
+                                    `}
                                     >
                                         {active && (
                                             <div className="w-2.5 h-2.5 bg-blue-500 rounded-full" />
                                         )}
                                     </div>
 
-                                    <p className="text-sm text-gray-700">{item}</p>
+                                    <p className="text-sm text-gray-700">{item.description}</p>
                                 </div>
                             );
                         })}
@@ -554,9 +645,9 @@ export default function EditGym({ display, setDisplay, gym, setGymList, setGym }
             {/* Save Button */}
             <div className="fixed bottom-0 left-0 right-0 bg-white p-4 border-t">
                 <button
-                    disabled={!isFormValid || isLoading}
+                    disabled={!isFormValid || isLoading || !isChanged}
                     onClick={handleSubmit}
-                    className={`w-full py-3 rounded-xl font-medium flex items-center justify-center gap-2 transition ${isFormValid && !isLoading
+                    className={`w-full py-3 rounded-xl font-medium flex items-center justify-center gap-2 transition ${isFormValid && !isLoading && isChanged
                         ? "bg-blue-600 text-white"
                         : "bg-gray-300 text-gray-500"
                         }`}
@@ -576,15 +667,41 @@ export default function EditGym({ display, setDisplay, gym, setGymList, setGym }
             {modalType && (
                 <SelectionModal
                     open={true}
-                    title={modalType === "amenities" ? "Amenities" : "Select Rules"}
-                    options={modalType === "amenities" ? ALL_AMENITIES : ALL_RULES}
-                    existing={modalType === "amenities" ? visibleAmenities : visibleRules}
+                    title={modalType === "amenities" ? `Amenities (${amenitiesCount})` : `Select Rules (${rulesCount})`}
+                    options={
+                        modalType === "amenities"
+                            ? amenities.map((a) => ({
+                                id: a.id,
+                                label: a.name,
+                                icon: a.icon,
+                            }))
+                            : rules.map((r) => ({
+                                id: r.id,
+                                label: r.description,
+                            }))
+                    }
+                    existing={
+                        modalType === "amenities"
+                            ? visibleAmenities.map((a) => a.id)
+                            : visibleRules.map((r) => r.id)
+                    }
                     onClose={() => setModalType(null)}
-                    onSave={(items) => {
+                    onSave={(items: number[]) => {
                         if (modalType === "amenities") {
-                            setVisibleAmenities((prev) => [...prev, ...items]);
+                            const selected = amenities.filter(a => items.includes(a.id));
+                            setVisibleAmenities((prev) => {
+                                const existingIds = new Set(prev.map(a => a.id));
+                                const filtered = selected.filter(a => !existingIds.has(a.id));
+                                return [...prev, ...filtered];
+                            });
                         } else {
-                            setVisibleRules((prev) => [...prev, ...items]);
+                            const selected = rules.filter(r => items.includes(r.id));
+                            setVisibleRules((prev) => {
+                                const existingIds = new Set(prev.map(r => r.id));
+                                const filtered = selected.filter(r => !existingIds.has(r.id));
+                                return [...prev, ...filtered];
+                            });
+
                         }
 
                         setModalType(null);
@@ -755,6 +872,11 @@ const isEndTimeValid = (start: string, end: string) => {
     return endMinutes > startMinutes;
 };
 
+const timeToMinutes = (time: string) => {
+    const [h, m] = time.split(":").map(Number);
+    return h * 60 + m;
+};
+
 const PeakSection = ({
     title,
     icon,
@@ -782,8 +904,17 @@ const PeakSection = ({
 
                 // Evening peak restriction
                 if (title === "Evening" && gymEndTime) {
-                    if (field === "start" && value < "16:00") value = "16:00";
-                    if (field === "end" && value > gymEndTime) value = gymEndTime;
+                    const minStart = timeToMinutes("16:00");
+                    const endLimit = timeToMinutes(gymEndTime);
+                    const newValue = timeToMinutes(value);
+
+                    if (field === "start" && newValue < minStart) {
+                        value = "16:00";
+                    }
+
+                    if (field === "end" && newValue > endLimit) {
+                        value = gymEndTime;
+                    }
                 }
 
                 return { ...item, [field]: value };

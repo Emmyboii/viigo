@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom"
+import { Route, Routes, useNavigate } from "react-router-dom"
 import AuthPage from "./pages/AuthPage"
 import { useEffect, useState } from "react";
 import Loader from './components/Loader';
@@ -20,6 +20,7 @@ import NotFound from "./pages/NotFound";
 function App() {
 
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate()
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -28,6 +29,33 @@ function App() {
 
     return () => clearTimeout(timer);
   }, []);
+
+
+  useEffect(() => {
+    const timestamp = localStorage.getItem("tokenTimestamp");
+
+    if (!timestamp) return;
+
+    const savedTime = Number(timestamp);
+    const TWO_HOURS = 2 * 60 * 60 * 1000;
+
+    const remainingTime = TWO_HOURS - (Date.now() - savedTime);
+
+    if (remainingTime <= 0) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("tokenTimestamp");
+      navigate("/login");
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      localStorage.removeItem("token");
+      localStorage.removeItem("tokenTimestamp");
+      navigate("/login");
+    }, remainingTime);
+
+    return () => clearTimeout(timer);
+  }, [navigate]);
 
   return (
     <div className="font-manrope relative">
@@ -158,7 +186,7 @@ function App() {
           />
 
           <Route path="*" element={<NotFound Loading={loading} />} />
-            
+
         </Routes>
 
       </div>

@@ -4,9 +4,16 @@ import { useNavigate } from "react-router-dom";
 import Container from "../components/layout/Container";
 import { MdEmail, MdKeyboardArrowRight } from "react-icons/md";
 
+const companyEmail = "Support@viigo.in";
+
 const Support = () => {
 
     const navigate = useNavigate();
+
+    const handleEmailClick = () => {
+        window.location.href = `mailto:${companyEmail}`;
+    };
+
 
     return (
         <Container>
@@ -20,7 +27,7 @@ const Support = () => {
 
             <p className="py-5">Have a question or run into an issue? write to us and our team will get back to you.</p>
 
-            <div className="border border-[#E2E8F0] py-3 px-4 rounded-lg flex items-center gap-4 justify-between">
+            <div onClick={handleEmailClick} className="border cursor-pointer border-[#E2E8F0] py-3 px-4 rounded-lg flex items-center gap-4 justify-between">
                 <div className="flex items-center gap-3">
                     <div className="p-2 bg-[#BFDBFE] rounded-full">
                         <MdEmail className="text-[#2563EB]" size={20} />

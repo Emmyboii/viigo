@@ -173,7 +173,7 @@ const AuthPage = () => {
                 title="email"
                 className="border border-[#475569] text-[#0F172A] text-sm w-full rounded-lg py-2 px-4 outline-none pt-7"
               />
-              <p className="text-[#475569] absolute top-2 left-4 text-xs font-normal">Enter Email Address</p>
+              <p className="text-[#475569] absolute top-2 left-4 text-xs font-normal">Enter Email ID</p>
             </div>
 
             <button

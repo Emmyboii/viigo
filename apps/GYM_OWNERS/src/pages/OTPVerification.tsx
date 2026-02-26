@@ -166,6 +166,7 @@ export default function OTPVerification() {
             }
 
             localStorage.setItem("token", data?.data?.access);
+            localStorage.setItem("tokenTimestamp", Date.now().toString());
 
             localStorage.removeItem("tempIdentifier");
 

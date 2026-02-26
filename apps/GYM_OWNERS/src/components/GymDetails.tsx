@@ -1,56 +1,169 @@
 import { FiArrowLeft } from "react-icons/fi";
-import { FaRegClock } from "react-icons/fa";
-import { gyms } from "../data/gyms";
-import { useEffect, useState, type JSX } from "react";
-import { PiUserGearFill } from "react-icons/pi";
+// import { FaRegClock } from "react-icons/fa";
+import { useCallback, useEffect, useMemo, useState } from "react";
+// import { PiUserGearFill } from "react-icons/pi";
 import { HiLocationMarker, HiOutlineLocationMarker, HiShare } from "react-icons/hi";
 import ImageCarousel from "./ImageCarousel";
 import Footer from "./Footer";
 import BottomSheet from "./BottomSheet";
 import { useNavigate } from "react-router";
+import { FaCircleCheck } from "react-icons/fa6";
+import { MdError } from "react-icons/md";
 
-type Day = {
-    day: string;
-    open: boolean;
-};
+type ToastType = "success" | "error" | null;
+
+interface Amenity {
+    id: number;
+    name: string;
+    icon: string;
+}
+
+interface Rule {
+    id: number;
+    description: string;
+}
+
+interface CalendarAvailability {
+    date: string;
+    is_open: boolean;
+}
+
+interface GymType {
+    id: string;
+    name: string;
+    hourly_rate: string;
+    phone_number: string;
+    location: string;
+    open_time: string;
+    close_time: string;
+    longitude: string;
+    latitude: string;
+    amenities: Amenity[];
+    rules: Rule[];
+    images: { id: number; image: string }[];
+
+    peak_morning?: [string, string][];
+    peak_evening?: [string, string][];
+    calendar_availability?: CalendarAvailability[]
+
+    owner_email: string
+}
 
 interface GymDetailsProps {
     display: string,
+    gym?: GymType | null;
     setDisplay: React.Dispatch<React.SetStateAction<"details" | "edit" | "create">>;
 }
 
-export default function GymDetails({ setDisplay, display }: GymDetailsProps) {
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
+export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
     const navigate = useNavigate();
 
-    const [days, setDays] = useState<Day[]>([
-        { day: "Mon, 12th Oct", open: true },
-        { day: "Tue, 13th Oct", open: true },
-        { day: "Wed, 14th Oct", open: false },
-        { day: "Thu, 15th Oct", open: true },
-        { day: "Fri, 16th Oct", open: true },
-    ]);
+    const [toast, setToast] = useState<{ type: ToastType; message: string } | null>(null);
 
-    const toggleDay = (index: number) => {
-        setDays((prev) =>
-            prev.map((item, i) =>
-                i === index ? { ...item, open: !item.open } : item
-            )
+    const initialAvailability = useMemo(() => {
+        if (!gym) return [];
+
+        const today = new Date();
+        const endDate = new Date();
+        endDate.setMonth(today.getMonth() + 3);
+
+        const backendMap = new Map(
+            gym?.calendar_availability?.map((item) => [
+                item.date,
+                item.is_open,
+            ]) || []
         );
+
+        const dates: { date: string; is_open: boolean }[] = [];
+        const current = new Date(today);
+
+        while (current <= endDate) {
+            const formatted = current.toISOString().split("T")[0];
+
+            dates.push({
+                date: formatted,
+                is_open: backendMap.has(formatted)
+                    ? backendMap.get(formatted)!
+                    : true,
+            });
+
+            current.setDate(current.getDate() + 1);
+        }
+
+        return dates;
+    }, [gym]);
+
+    const [availability, setAvailability] = useState<
+        { date: string; is_open: boolean }[]
+    >([]);
+
+
+    useEffect(() => {
+        setAvailability(initialAvailability);
+    }, [initialAvailability]);
+
+    const toggleDate = async (index: number) => {
+        if (!gym) return;
+
+        const originalItem = availability[index];
+        const updatedItem = { ...originalItem, is_open: !originalItem.is_open };
+
+        // Optimistic UI update
+        const updated = availability.map((item, i) =>
+            i === index ? updatedItem : item
+        );
+        setAvailability(updated);
+
+        try {
+            const res = await fetch(`${backendUrl}/gymowner/gyms/${gym.id}/`, {
+                method: "PUT",
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    ...gym,
+                    amenities: gym.amenities.map(a => a.id),
+                    rules: gym.rules.map(r => r.id),
+                    availability_data: [updatedItem],
+                }),
+            });
+
+            if (!res.ok) throw new Error("Failed to update availability");
+
+            setToast({
+                type: "success",
+                message: `Gym is now ${updatedItem.is_open ? "Open" : "Closed"
+                    } on ${new Date(updatedItem.date).toDateString()}`
+            });
+        } catch (err) {
+            console.error("Failed to update availability", err);
+
+            // Revert back
+            setAvailability((prev) =>
+                prev.map((item, i) =>
+                    i === index ? originalItem : item
+                )
+            );
+
+            setToast({
+                type: "error",
+                message: "Failed to update availability, please try again",
+            });
+        }
     };
-
-    const gym = gyms[0];
-
 
     const [amenitiesOpen, setAmenitiesOpen] = useState(false);
     const [rulesOpen, setRulesOpen] = useState(false);
 
 
 
-    const tagIcons: Record<string, JSX.Element> = {
-        "Hourly Access": <FaRegClock size={12} />,
-        "Beginner Friend": <PiUserGearFill size={12} />,
-    };
+    // const tagIcons: Record<string, JSX.Element> = {
+    //     "Hourly Access": <FaRegClock size={12} />,
+    //     "Beginner Friend": <PiUserGearFill size={12} />,
+    // };
 
     useEffect(() => {
         if (amenitiesOpen || rulesOpen) {
@@ -64,10 +177,17 @@ export default function GymDetails({ setDisplay, display }: GymDetailsProps) {
         }
     }, [amenitiesOpen, rulesOpen])
 
-    if (!gym) return <div className="p-4">Gym not found</div>;
+    const handleToastClose = useCallback(() => {
+        setToast(null);
+    }, []);
 
-    const visibleAmenities = gym.amenities.slice(0, 4);
-    const visibleRules = gym.rules.slice(0, 3);
+    if (!gym) {
+        return <div className="p-4">Gym not found</div>;
+    }
+
+    const visibleAmenities = gym?.amenities?.slice(0, 4);
+    const visibleRules = gym?.rules?.slice(0, 3);
+
     return (
         <div className="min-h-screen pb-28">
 
@@ -81,22 +201,27 @@ export default function GymDetails({ setDisplay, display }: GymDetailsProps) {
             </div>
 
             {/* IMAGE */}
-            <ImageCarousel images={gym.images} height="h-60" />
+            <ImageCarousel
+                images={gym?.images?.map(img => img.image)}
+                height="h-60"
+            />
+
+            {toast && <Toast type={toast.type} text={toast.message} onClose={handleToastClose} />}
 
             {/* CONTENT */}
             <div className="bg-white p-4 px-5 space-y-6 mb-10">
 
                 {/* Gym Name */}
                 <div>
-                    <h1 className="text-xl font-bold">{gym.name}</h1>
+                    <h1 className="text-xl font-bold">{gym?.name}</h1>
 
                     <div className="flex items-center justify-between gap-2">
 
                         <div className="flex items-center text-sm text-gray-500 mt-1 gap-1">
                             <HiLocationMarker size={14} />
-                            <span>{gym.distance}</span>
+                            <span>{gym?.location}</span>
                             <span>•</span>
-                            <span>Open Till {gym.closeTime}</span>
+                            <span>Open Till {gym?.close_time}</span>
                         </div>
 
                         {/* Call & Map Buttons */}
@@ -112,7 +237,7 @@ export default function GymDetails({ setDisplay, display }: GymDetailsProps) {
                     </div>
 
                     {/* Tags */}
-                    <div className="flex gap-2 mt-3 flex-wrap">
+                    {/* <div className="flex gap-2 mt-3 flex-wrap">
                         {gym.tags.map((tag, i) => (
                             <span
                                 key={i}
@@ -122,7 +247,7 @@ export default function GymDetails({ setDisplay, display }: GymDetailsProps) {
                                 {tag}
                             </span>
                         ))}
-                    </div>
+                    </div> */}
                 </div>
 
                 <div className="border border-dashed border-[#CBD5E1]"></div>
@@ -134,10 +259,13 @@ export default function GymDetails({ setDisplay, display }: GymDetailsProps) {
                     </h2>
 
                     <div className="space-y-3">
-                        {visibleAmenities.map((item, i) => (
-                            <p key={i} className="text-sm text-gray-700">
-                                {item}
-                            </p>
+                        {visibleAmenities.map((item) => (
+                            <div key={item.id} className="flex items-center gap-2">
+                                <img src={item.icon} alt={item.name} className="w-4 h-4" />
+                                <p className="text-sm text-gray-700">
+                                    {item.name}
+                                </p>
+                            </div>
                         ))}
                     </div>
 
@@ -146,7 +274,7 @@ export default function GymDetails({ setDisplay, display }: GymDetailsProps) {
                             onClick={() => setAmenitiesOpen(true)}
                             className="mt-4 w-full bg-gray-100 py-3 rounded-xl text-[#94A3B8] font-medium"
                         >
-                            Show all {gym.amenities.length} amenities
+                            Show all {gym?.amenities.length} amenities
                         </button>
                     )}
                 </div>
@@ -161,8 +289,8 @@ export default function GymDetails({ setDisplay, display }: GymDetailsProps) {
 
                     <div className="space-y-2 text-sm text-gray-600">
                         {visibleRules.map((rule, i) => (
-                            <p key={i}>
-                                {i + 1}. {rule}
+                            <p key={`${rule.id}-${i}`}>
+                                {i + 1}. {rule.description}
                             </p>
                         ))}
                     </div>
@@ -180,34 +308,36 @@ export default function GymDetails({ setDisplay, display }: GymDetailsProps) {
                 <hr />
 
                 {/* TIMINGS */}
-                <Section title="Manage Gym Timings">
-                    <div className="bg-white rounded-xl border p-3 space-y-3">
-                        {days.map((item, index) => (
+                <Section title="Manage Gym Availability">
+                    <div className="bg-white rounded-xl border p-3 h-[400px] overflow-y-auto space-y-3">
+
+                        {availability.map((item, index) => (
                             <div
-                                key={index}
+                                key={item.date}
                                 className="flex items-center justify-between py-2"
                             >
-                                <p className="text-sm font-semibold text-[#0F172A]">{item.day}</p>
+                                <p className="text-sm font-semibold text-[#0F172A]">
+                                    {new Date(item.date).toDateString()}
+                                </p>
 
-                                {/* Toggle */}
                                 <button
-                                    onClick={() => toggleDay(index)}
-                                    className={`relative w-16 h-7 rounded-full transition duration-300 ${item.open
+                                    onClick={() => toggleDate(index)}
+                                    className={`relative w-16 h-7 rounded-full transition duration-300 ${item.is_open
                                         ? "bg-[#22C55E] border border-[#22C55E]"
                                         : "bg-[#94A3B8]"
                                         }`}
                                 >
-                                    {/* Text inside colored track */}
                                     <span
-                                        className={`absolute inset-0 flex items-center text-[10px] font-semibold px-2 ${item.open ? "justify-start text-white" : "justify-end text-white"
+                                        className={`absolute inset-0 flex items-center text-[10px] font-semibold px-2 ${item.is_open
+                                            ? "justify-start text-white"
+                                            : "justify-end text-white"
                                             }`}
                                     >
-                                        {item.open ? "Open" : "Closed"}
+                                        {item.is_open ? "Open" : "Closed"}
                                     </span>
 
-                                    {/* White knob */}
                                     <div
-                                        className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-md transition-all duration-300 ${item.open ? "right-1" : "left-1"
+                                        className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-md transition-all duration-300 ${item.is_open ? "right-1" : "left-1"
                                             }`}
                                     />
                                 </button>
@@ -221,12 +351,14 @@ export default function GymDetails({ setDisplay, display }: GymDetailsProps) {
             <div className="fixed bottom-14 left-0 right-0 bg-white border-t border-[#F1F5F9] px-4 py-3 flex items-center justify-between">
                 <div>
                     <p className="text-xs text-gray-500">Your Gym Price Per hour</p>
-                    <p className="font-semibold text-lg">₹410/1.5Hrs</p>
+                    <p className="font-semibold text-lg">
+                        ₹{gym?.hourly_rate}/Hr
+                    </p>
                 </div>
 
                 <button onClick={() => {
                     setDisplay("edit")
-                    localStorage.setItem("gymDisplay", display);
+                    localStorage.setItem("gymDisplay", "edit");
                     // navigate('/gym/edit')
                     window.scrollTo({ top: 0, behavior: "smooth" });
                 }} className="bg-blue-600 text-white px-5 py-2 rounded-md h-[50px]">
@@ -242,10 +374,13 @@ export default function GymDetails({ setDisplay, display }: GymDetailsProps) {
                 onClose={() => setAmenitiesOpen(false)}
                 title="What This Place Offers"
             >
-                {gym.amenities.map((item, i) => (
-                    <p key={i} className="mb-3 text-sm">
-                        {item}
-                    </p>
+                {gym?.amenities.map((item) => (
+                    <div key={item.id} className="flex items-center gap-2">
+                        <img src={item.icon} alt={item.name} className="w-4 h-4" />
+                        <p key={item.id} className="mb-3 text-sm">
+                            {item.name}
+                        </p>
+                    </div>
                 ))}
             </BottomSheet>
 
@@ -255,9 +390,9 @@ export default function GymDetails({ setDisplay, display }: GymDetailsProps) {
                 onClose={() => setRulesOpen(false)}
                 title="Things to Know"
             >
-                {gym.rules.map((rule, i) => (
-                    <p key={i} className="mb-3 text-sm">
-                        {i + 1}. {rule}
+                {gym?.rules.map((rule, i) => (
+                    <p key={rule.id} className="mb-3 text-sm">
+                        {i + 1}. {rule.description}
                     </p>
                 ))}
             </BottomSheet>
@@ -275,7 +410,32 @@ function Section({
     return (
         <div>
             <h3 className="font-semibold text-base text-[#0F172A] mb-2">{title}</h3>
+            <p className="text-xs text-[#0F172A] mb-2">Turn your gym ON or OFF for the upcoming dates. Control bookings in advance and avoid last-minute confusion.</p>
             {children}
+        </div>
+    );
+}
+
+function Toast({ text, type, onClose }: { text: string; type: ToastType; onClose: () => void }) {
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            onClose();
+        }, 3000);
+        return () => clearTimeout(timer);
+    }, [onClose]);
+
+    const isSuccess = type === "success";
+
+    return (
+        <div
+            className={`fixed w-[280px] bottom-20 z-50 left-1/2 justify-center -translate-x-1/2 
+      bg-white px-4 py-3 rounded-lg flex items-center gap-3
+      shadow-[0_10px_40px_rgba(0,0,0,0.18)] animate-[fadeIn_0.2s_ease-out]`}
+        >
+            <span className={`text-xl ${isSuccess ? "text-green-500" : "text-red-500"}`}>
+                {isSuccess ? <FaCircleCheck /> : <MdError />}
+            </span>
+            <p className="text-sm font-medium">{text}</p>
         </div>
     );
 }

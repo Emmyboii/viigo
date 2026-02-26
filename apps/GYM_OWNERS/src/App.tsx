@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom"
+import { Route, Routes, useNavigate } from "react-router-dom"
 import AuthPage from "./pages/AuthPage"
 import { useEffect, useState } from "react";
 import Loader from './components/Loader';
@@ -18,9 +18,139 @@ import Transactions from "./pages/Transactions";
 import TransactionDetails from "./pages/TransactionDetails";
 import FAQ from "./pages/FAQ";
 
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
+type UserType = {
+  full_name: string;
+  profile_image: string | null;
+  email: string;
+  phone_number: string | null;
+  user_type: string;
+  total_fitness_hours: number;
+};
+
+interface Amenity {
+  id: number;
+  name: string;
+  icon: string;
+}
+
+interface Rule {
+  id: number;
+  description: string;
+}
+
+interface GymType {
+  id: string;
+  name: string;
+  hourly_rate: string;
+  phone_number: string;
+  location: string;
+  open_time: string;
+  close_time: string;
+  longitude: string;
+  latitude: string;
+  amenities: Amenity[];
+  rules: Rule[];
+  images: { id: number; image: string }[];
+
+  peak_morning?: [string, string][];
+  peak_evening?: [string, string][];
+  calendar_availability?: []
+
+  owner_email: string
+}
+
 function App() {
 
   const [loading, setLoading] = useState(true);
+
+  const [userData, setUserData] = useState<UserType | null>(null);
+
+  const [display, setDisplay] = useState<"details" | "edit" | "create">(() => {
+    const stored = localStorage.getItem("gymDisplay");
+    if (stored === "edit" || stored === "create" || stored === "details") {
+      return stored;
+    }
+    return "details";
+  });
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedGym, setSelectedGym] = useState<GymType | null>(null);
+
+  // Persist display state
+  useEffect(() => {
+    localStorage.setItem("gymDisplay", display);
+  }, [display]);
+
+  useEffect(() => {
+    async function fetchGyms() {
+      setIsLoading(true);
+
+      try {
+        const token = localStorage.getItem("token");
+
+        const res = await fetch(`${backendUrl}/gymowner/gyms`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) throw new Error("Failed to fetch gyms");
+
+        const data = await res.json();
+        const gyms: GymType[] = data.data || [];
+
+        if (gyms.length === 0) {
+          setDisplay("create");
+          return;
+        }
+
+        // 🔥 Find gym belonging to logged-in user
+        const matchedGym = gyms.find(
+          (gym) => gym?.owner_email === userData?.email
+        );
+
+        if (matchedGym) {
+          setSelectedGym(matchedGym);
+          setDisplay("details");
+        } else {
+          setDisplay("create");
+        }
+      } catch (err) {
+        console.error(err);
+        setDisplay("create");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchGyms();
+  }, [userData]);
+
+  useEffect(() => {
+    async function fetchUsers() {
+      try {
+        const token = localStorage.getItem("token");
+
+        const res = await fetch(`${backendUrl}/api/user/profile/`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!res.ok) throw new Error("Failed to fetch gyms");
+        const data = await res.json();
+
+        setUserData(data?.data)
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    fetchUsers();
+  }, []);
+
+  const navigate = useNavigate()
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -29,6 +159,33 @@ function App() {
 
     return () => clearTimeout(timer);
   }, []);
+
+
+  useEffect(() => {
+    const timestamp = localStorage.getItem("tokenTimestamp");
+
+    if (!timestamp) return;
+
+    const savedTime = Number(timestamp);
+    const TWO_HOURS = 2 * 60 * 60 * 1000;
+
+    const remainingTime = TWO_HOURS - (Date.now() - savedTime);
+
+    if (remainingTime <= 0) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("tokenTimestamp");
+      navigate("/login");
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      localStorage.removeItem("token");
+      localStorage.removeItem("tokenTimestamp");
+      navigate("/login");
+    }, remainingTime);
+
+    return () => clearTimeout(timer);
+  }, [navigate]);
 
   return (
     <div className="font-manrope relative">
@@ -81,7 +238,7 @@ function App() {
             path="/"
             element={
               <ProtectedRoute>
-                <GymOwnerHome />
+                <GymOwnerHome gym={selectedGym} />
               </ProtectedRoute>
             }
           />
@@ -90,7 +247,7 @@ function App() {
             path="/gym"
             element={
               <ProtectedRoute>
-                <Gym />
+                {userData && <Gym setGym={setSelectedGym} display={display} setDisplay={setDisplay} gym={selectedGym} loading={isLoading} />}
               </ProtectedRoute>
             }
           />
@@ -127,7 +284,7 @@ function App() {
             path="/profile"
             element={
               <ProtectedRoute>
-                <Profile />
+                <Profile user={userData} />
               </ProtectedRoute>
             }
           />

@@ -37,7 +37,43 @@ const chipData = [
   { id: "cancelled", label: "Cancelled" },
 ];
 
-const GymOwnerHome = () => {
+interface Amenity {
+  id: number;
+  name: string;
+  icon: string;
+}
+
+interface Rule {
+  id: number;
+  description: string;
+}
+
+interface GymType {
+  id: string;
+  name: string;
+  hourly_rate: string;
+  phone_number: string;
+  location: string;
+  open_time: string;
+  close_time: string;
+  longitude: string;
+  latitude: string;
+  amenities: Amenity[];
+  rules: Rule[];
+  images: { id: number; image: string }[];
+
+  peak_morning?: [string, string][];
+  peak_evening?: [string, string][];
+  calendar_availability?: []
+
+  owner_email: string
+}
+
+interface GymProps {
+  gym?: GymType | null;
+}
+
+const GymOwnerHome = ({ gym }: GymProps) => {
 
   const users: User[] = [
     {
@@ -197,7 +233,7 @@ const GymOwnerHome = () => {
     <>
       {!selectedUser && (
         <Container>
-          <Header />
+          <Header gym={gym} />
 
           {toast && <Toast type={toast.type} text={toast.message} onClose={handleToastClose} />}
 

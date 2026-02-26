@@ -1,99 +1,83 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { IoChevronDown, IoChevronUp } from "react-icons/io5";
 import { IoArrowBack, IoShareOutline } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 
-type Category = "Bookings" | "Payments" | "Account" | "About Us";
+type Category = "BOOKINGS" | "PAYMENTS" | "ACCOUNT" | "ABOUT_US";
+
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 interface FAQ {
     question: string;
     answer: string;
 }
 
-const faqData: Record<Category, FAQ[]> = {
-    Bookings: [
-        {
-            question: "How do I cancel my booking?",
-            answer:
-                "To cancel, go to your Bookings tab, select the upcoming session, and tap 'Cancel Booking'. Cancellations made 2 hours prior are fully refundable.",
-        },
-        {
-            question: "Can I reschedule a session?",
-            answer:
-                "Yes. Go to your booking details and select 'Reschedule'. You can change the time based on gym availability.",
-        },
-        {
-            question: "What happens if I miss a session?",
-            answer:
-                "Missed sessions are non-refundable. We recommend cancelling at least 2 hours before the session.",
-        },
-        {
-            question: "How do I book hourly sessions?",
-            answer:
-                "Select a gym, choose your preferred time slots, confirm availability, and proceed to payment.",
-        },
-    ],
-    Payments: [
-        {
-            question: "What payment methods are supported?",
-            answer:
-                "We support debit cards, credit cards, UPI, and wallet payments.",
-        },
-        {
-            question: "When will I receive my refund?",
-            answer:
-                "Refunds are processed within 3–5 business days depending on your bank.",
-        },
-        {
-            question: "Is my payment information secure?",
-            answer:
-                "Yes. We use encrypted and PCI-compliant payment gateways to protect your data.",
-        },
-    ],
-    Account: [
-        {
-            question: "How do I update my profile?",
-            answer:
-                "Go to Account Settings and tap 'Edit Profile' to update your details.",
-        },
-        {
-            question: "How do I change my phone number?",
-            answer:
-                "You can update your phone number under Account Settings. OTP verification will be required.",
-        },
-        {
-            question: "How do I delete my account?",
-            answer:
-                "Please contact support from the Account section to request account deletion.",
-        },
-    ],
-    "About Us": [
-        {
-            question: "What is Viigo?",
-            answer:
-                "Viigo allows users to book gym sessions on an hourly basis — pay only for what you use.",
-        },
-        {
-            question: "How does Viigo work?",
-            answer:
-                "Browse gyms, select hours, make payment, and start training. It’s flexible and convenient.",
-        },
-        {
-            question: "How can gyms partner with Viigo?",
-            answer:
-                "Gym owners can register via our onboarding page and list their available time slots.",
-        },
-    ],
+interface FAQType {
+    id: number;
+    question: string;
+    answer: string;
+    category: "BOOKINGS" | "PAYMENTS" | "ACCOUNT" | "ABOUT_US";
+}
+
+const categoryLabels: Record<Category, string> = {
+    BOOKINGS: "Bookings",
+    PAYMENTS: "Payments",
+    ACCOUNT: "Account",
+    ABOUT_US: "About Us",
 };
 
 export default function FAQ() {
     const navigate = useNavigate();
-    const [activeCategory, setActiveCategory] = useState<Category>("Bookings");
+    const [activeCategory, setActiveCategory] = useState<Category>("BOOKINGS");
     const [openIndex, setOpenIndex] = useState<number | null>(0);
+
+    const [faqs, setFaqs] = useState<FAQType[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        setLoading(true)
+
+        const fetchFaqs = async () => {
+            try {
+                const token = localStorage.getItem("token");
+
+                const res = await fetch(`${backendUrl}/api/support/faqs/`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                const data = await res.json();
+                setFaqs(Array.isArray(data) ? data : data?.data || []);
+            } catch (err) {
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchFaqs();
+    }, []);
+
+    const filteredFaqs = faqs?.filter(
+        (faq) => faq.category === activeCategory.toUpperCase()
+    );
+
+    const isEmpty = !filteredFaqs || filteredFaqs.length === 0;
 
     const toggleAccordion = (index: number) => {
         setOpenIndex((prev) => (prev === index ? null : index));
     };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="flex flex-col items-center gap-3">
+                    <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                    <p className="text-sm text-gray-500">Loading FAQs...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gray-50 px-4 py-6">
@@ -116,7 +100,7 @@ export default function FAQ() {
 
             {/* Category Tabs */}
             <div className="flex gap-3 overflow-x-auto no-scrollbar mb-6">
-                {(Object.keys(faqData) as Category[]).map((category) => (
+                {(Object.keys(categoryLabels) as Category[]).map((category) => (
                     <button
                         key={category}
                         onClick={() => {
@@ -124,7 +108,7 @@ export default function FAQ() {
                             setOpenIndex(0);
                         }}
                         className={`px-4 py-2 rounded-lg border text-sm whitespace-nowrap transition 
-              ${activeCategory === category
+                                ${activeCategory === category
                                 ? "bg-[#DBEAFE] text-[#2563EB] border-[#2563EB]"
                                 : "bg-white text-[#0F172A] border-[#CBD5E1]"
                             }`}
@@ -136,36 +120,52 @@ export default function FAQ() {
 
             {/* Accordion */}
             <div className="space-y-3">
-                {faqData[activeCategory].map((faq, index) => {
-                    const isOpen = openIndex === index;
-
-                    return (
-                        <div
-                            key={index}
-                            className="bg-white rounded-xl border border-gray-200 overflow-hidden"
-                        >
-                            <button
-                                onClick={() => toggleAccordion(index)}
-                                className="w-full flex justify-between items-center px-4 py-4 text-left"
-                            >
-                                <span className="text-sm font-semibold text-[#0F172A]">
-                                    {faq.question}
-                                </span>
-                                {isOpen ? (
-                                    <IoChevronUp size={18} />
-                                ) : (
-                                    <IoChevronDown size={18} />
-                                )}
-                            </button>
-
-                            {isOpen && (
-                                <div className="px-4 pb-4 text-sm font-medium text-[#475569] leading-relaxed">
-                                    {faq.answer}
-                                </div>
-                            )}
+                {isEmpty ? (
+                    <div className="flex flex-col items-center justify-center text-center bg-white rounded-xl py-10 px-6">
+                        <div className="w-12 h-12 rounded-full bg-[#DBEAFE] flex items-center justify-center mb-4">
+                            <span className="text-[#2563EB] text-xl">?</span>
                         </div>
-                    );
-                })}
+
+                        <p className="text-sm font-semibold text-[#0F172A] mb-1">
+                            No FAQs available
+                        </p>
+
+                        <p className="text-xs text-gray-500 max-w-[250px]">
+                            There are no FAQs under this category yet. Please check back later.
+                        </p>
+                    </div>
+                ) : (
+                    filteredFaqs.map((faq, index) => {
+                        const isOpen = openIndex === index;
+
+                        return (
+                            <div
+                                key={index}
+                                className="bg-white rounded-xl border border-gray-200 overflow-hidden"
+                            >
+                                <button
+                                    onClick={() => toggleAccordion(index)}
+                                    className="w-full flex justify-between items-center px-4 py-4 text-left"
+                                >
+                                    <span className="text-sm font-semibold text-[#0F172A]">
+                                        {faq.question}
+                                    </span>
+                                    {isOpen ? (
+                                        <IoChevronUp size={18} />
+                                    ) : (
+                                        <IoChevronDown size={18} />
+                                    )}
+                                </button>
+
+                                {isOpen && (
+                                    <div className="px-4 pb-4 text-sm font-medium text-[#475569] leading-relaxed">
+                                        {faq.answer}
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })
+                )}
             </div>
         </div>
     );

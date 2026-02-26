@@ -55,7 +55,7 @@ export default function ImageCarousel({
         >
             {/* Dots */}
             <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10 flex gap-1">
-                {images.map((_, index) => (
+                {images?.map((_, index) => (
                     <div
                         key={index}
                         className={`h-2 w-2 rounded-full ${selectedIndex === index
@@ -68,7 +68,7 @@ export default function ImageCarousel({
 
             <div className="overflow-hidden" ref={emblaRef}>
                 <div className="flex">
-                    {images.map((img, index) => (
+                    {images?.map((img, index) => (
                         <div key={index} className="min-w-full">
                             <img
                                 src={img}
