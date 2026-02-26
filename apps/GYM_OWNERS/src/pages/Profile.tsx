@@ -4,6 +4,7 @@ import profile from '../assets/userProfileImg.png'
 import Footer from '../components/Footer'
 import { useNavigate } from 'react-router'
 import { HiOutlineCurrencyRupee } from 'react-icons/hi'
+import { useState } from 'react'
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -23,8 +24,11 @@ type UserProps = {
 const Profile = ({ user }: UserProps) => {
 
     const navigate = useNavigate()
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
 
     const handleLogout = async () => {
+        setIsLoggingOut(true);
         try {
             const token = localStorage.getItem("token");
 
@@ -39,6 +43,8 @@ const Profile = ({ user }: UserProps) => {
         } finally {
             localStorage.removeItem("token");
             localStorage.removeItem("tokenTimestamp");
+            setIsLoggingOut(false);
+            setShowLogoutModal(false);
             navigate("/login");
         }
     };
@@ -88,9 +94,42 @@ const Profile = ({ user }: UserProps) => {
                 </div>
             </div>
 
-            <button onClick={handleLogout} className="mt-20 bg-[#2563EB] w-full h-[50px] font-semibold text-sm text-white py-2 px-4 rounded-md">Log Out</button>
+            <button onClick={() => setShowLogoutModal(true)} className="mt-20 bg-[#2563EB] w-full h-[50px] font-semibold text-sm text-white py-2 px-4 rounded-md">Log Out</button>
 
             <Footer />
+
+            {/* Logout Confirmation Modal */}
+            {showLogoutModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 animate-slideUp">
+                    <div className="bg-white rounded-lg p-6 w-[300px] space-y-4">
+                        <p className="text-[#0F172A] text-center font-semibold">
+                            Are you sure you want to log out?
+                        </p>
+
+                        <div className="flex justify-between gap-4">
+                            <button
+                                onClick={() => setShowLogoutModal(false)}
+                                className="flex-1 py-2 bg-gray-200 rounded-md text-gray-700"
+                                disabled={isLoggingOut}
+                            >
+                                Cancel
+                            </button>
+
+                            <button
+                                onClick={handleLogout}
+                                className={`flex-1 py-2 rounded-md text-white ${isLoggingOut ? "bg-gray-400" : "bg-[#2563EB]"} flex justify-center items-center gap-2`}
+                                disabled={isLoggingOut}
+                            >
+                                {isLoggingOut ? (
+                                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                ) : (
+                                    "Log Out"
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
