@@ -121,6 +121,7 @@ export default function OTPVerification() {
             const data = await res.json();
 
             if (data?.data?.is_completed) {
+                window.location.reload()
                 navigate("/");
             } else {
                 navigate("/onboarding");
@@ -174,8 +175,8 @@ export default function OTPVerification() {
 
             // Navigate after toast
             setTimeout(() => {
-                setToast(null);
                 checkOnboardingAndRedirect();
+                setToast(null);
             }, 3000);
         } catch (err: any) {
             setStatus("error");

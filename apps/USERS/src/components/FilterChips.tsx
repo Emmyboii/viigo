@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 interface ChipItem {
     id: string;
     label: string;
@@ -28,19 +26,20 @@ export function Chip({ label, active, onClick }: ChipProps) {
 
 interface FilterChipsProps {
     items: ChipItem[];
+    activeId: string;
+    onChange: (id: string) => void;
 }
 
-export default function FilterChips({ items }: FilterChipsProps) {
-    const [activeId, setActiveId] = useState<string | null>(null);
+export default function FilterChips({ items, activeId, onChange }: FilterChipsProps) {
 
     return (
-        <div className="flex gap-2 mt-4 overflow-x-auto">
+        <div className="flex gap-2 mt-4 overflow-x-auto no-scrollbar">
             {items.map((item) => (
                 <Chip
                     key={item.id}
                     label={item.label}
                     active={activeId === item.id}
-                    onClick={() => setActiveId(item.id)}
+                    onClick={() => onChange(item.id)}
                 />
             ))}
         </div>

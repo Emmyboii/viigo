@@ -3,11 +3,12 @@ import {
     FiArrowLeft,
     FiCalendar,
     FiClock,
-    FiLock,
 } from "react-icons/fi";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import CancelSuccessModal from "../components/CancelSuccessModal";
-import gym1 from '../assets/gymImg.png'
+import type { Gym } from "../components/types/gym";
+import { useAppContext } from "../context/AppContext";
+import type { Booking } from "./Bookings";
 
 const reasons = [
     "Changed the plans",
@@ -15,14 +16,119 @@ const reasons = [
     "Booked by mistake",
 ];
 
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
+
 export default function CancelBooking() {
     const [selectedReason, setSelectedReason] = useState<string | null>(null);
     const [error, setError] = useState<string>("");
-
+    const { gyms } = useAppContext()
     const [showSuccess, setShowSuccess] = useState(false);
-
     const navigate = useNavigate();
-    const location = useLocation();
+    const [gym, setGym] = useState<Gym | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+    const [isCancelling, setIsCancelling] = useState(false);
+
+    const priceTag = selectedBooking?.price_tag || "";
+
+    const [pricePart = "", hoursPart = ""] = priceTag.split("/");
+    const price = parseFloat(pricePart.replace(/[^\d.]/g, ""));
+
+    const hours = hoursPart.trim().toLowerCase();
+
+    const totalRefund = price - 10
+
+
+    const token = localStorage.getItem("token");
+    const selectedBookingId = localStorage.getItem("selectedBookingId");
+
+    useEffect(() => {
+        const fetchBooking = async () => {
+            try {
+                const res = await fetch(`${backendUrl}/client/bookings/my-bookings/`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+
+                const data = await res.json();
+
+                const foundBooking = data?.data?.find((g: Booking) => g.id === Number(selectedBookingId));
+
+                setSelectedBooking(foundBooking);
+            } catch (err) {
+                console.error("Error fetching bookings", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchBooking();
+    }, []);
+
+    useEffect(() => {
+        const fetchGymById = async () => {
+            if (!selectedBooking) return;
+
+            setLoading(true);
+
+            try {
+                // Try to find the gym locally first
+                const localGym = gyms.find((g) => g.name === selectedBooking.gym_name);
+
+                let gymId: number | undefined;
+                if (localGym) {
+                    gymId = localGym.id;
+                } else {
+                    // If not found locally, fetch all gyms to find the ID
+                    const res = await fetch(`${backendUrl}/gymowner/gyms/all/`, {
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: localStorage.getItem("token")
+                                ? `Bearer ${localStorage.getItem("token")}`
+                                : "",
+                        },
+                    });
+
+                    if (!res.ok) throw new Error("Failed to fetch gyms list");
+
+                    const data = await res.json();
+                    const foundGym = data?.data?.find((g: Gym) => g.slug === selectedBooking.gym_name);
+
+                    if (!foundGym) {
+                        setGym(null);
+                        // setLoading(false);
+                        return;
+                    }
+
+                    gymId = foundGym.id;
+                }
+
+                // Now fetch gym details by ID
+                const detailRes = await fetch(`${backendUrl}/gymowner/gym/${gymId}/`, {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: localStorage.getItem("token")
+                            ? `Bearer ${localStorage.getItem("token")}`
+                            : "",
+                    },
+                });
+
+                if (!detailRes.ok) throw new Error("Failed to fetch gym details");
+
+                const detailData = await detailRes.json();
+                setGym(detailData?.data || null);
+            } catch (err) {
+                console.error(err);
+                setGym(null);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchGymById();
+    }, [gyms]);
 
     // ✅ Restore modal on refresh
     useEffect(() => {
@@ -30,46 +136,98 @@ export default function CancelBooking() {
 
         if (stored === "true") {
             setShowSuccess(true);
+        } else {
+            setShowSuccess(false)
         }
     }, []);
 
-    // ✅ Close modal when URL changes
     useEffect(() => {
-        return () => {
-            localStorage.removeItem("cancelSuccess");
+        const handleRouteChange = () => {
+            const success = localStorage.getItem("cancelSuccess");
+
+            if (success === "true") {
+                localStorage.removeItem("cancelSuccess");
+                localStorage.removeItem("selectedBookingId");
+            }
         };
-    }, [location.pathname]);
 
-    const handleCancel = () => {
+        window.addEventListener("beforeunload", handleRouteChange);
 
+        return () => {
+            window.removeEventListener("beforeunload", handleRouteChange);
+        };
+    }, []);
+
+    const handleCancel = async () => {
         if (!selectedReason) {
             setError("Please select a reason for cancellation.");
             return;
         }
 
-        // Clear error if reason is selected
         setError("");
+        setIsCancelling(true);
 
-        // 👉 call API here
+        if (!selectedBooking) {
+            setError("No booking selected.");
+            return;
+        }
 
-        // persist modal
-        localStorage.setItem("cancelSuccess", "true");
+        try {
+            const token = localStorage.getItem("token");
 
-        setShowSuccess(true);
+            const res = await fetch(`${backendUrl}/client/bookings/${selectedBooking.id}/cancel/`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    reason: selectedReason,
+                }),
+            });
+
+            if (!res.ok) {
+                const errData = await res.json();
+                throw new Error(errData?.message || "Failed to cancel booking");
+            }
+
+            // persist modal for refresh
+            localStorage.setItem("cancelSuccess", "true");
+            setShowSuccess(true);
+        } catch (err: any) {
+            console.error(err);
+            setError(err.message || "Something went wrong");
+        } finally {
+            setIsCancelling(false);
+        }
     };
 
     const handleClose = () => {
         localStorage.removeItem("cancelSuccess");
+        localStorage.removeItem("selectedBookingId");
         setShowSuccess(false);
         navigate("/");
         window.scrollTo(0, 0);
     };
 
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="flex flex-col items-center gap-4 p-8 bg-white animate-fadeIn">
+                    <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                    <p className="text-gray-700 text-lg font-medium">
+                        Loading...
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen p-4 max-w-md mx-auto relative">
             {/* Header */}
             <div className="flex items-center gap-3 mb-4">
-                <FiArrowLeft className="text-xl cursor-pointer" />
+                <FiArrowLeft onClick={() => navigate(-1)} className="text-xl cursor-pointer" />
                 <h1 className="text-lg font-semibold">Cancel Booking</h1>
             </div>
 
@@ -77,7 +235,7 @@ export default function CancelBooking() {
             <div className="bg-white rounded shadow-sm border">
                 <div className="flex">
                     <img
-                        src={gym1}
+                        src={gym?.images[0].image}
                         alt="gym"
                         className="w-20 h-auto rounded-tl rounded-bl object-cover"
                     />
@@ -85,21 +243,22 @@ export default function CancelBooking() {
                     <div className="flex-1  p-3">
                         <div className="flex justify-between items-start">
                             <h2 className="font-semibold text-sm">
-                                Fight To Fitness
+                                {gym?.name}
                             </h2>
 
-                            <span className="flex items-center gap-1 text-xs bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE] px-2 py-1 rounded-full">
+                            {/* <span className="flex items-center gap-1 text-xs bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE] px-2 py-1 rounded-full">
                                 <FiLock size={12} />
                                 Premium
-                            </span>
+                            </span> */}
                         </div>
 
                         <div className="text-xs text-gray-500 mt-1 flex items-center gap-2">
-                            <FiCalendar /> 5th December
+                            <FiCalendar /> {selectedBooking?.display_date}
                         </div>
 
                         <div className="text-xs text-gray-500 flex items-center gap-2 pt-1">
-                            <FiClock /> Duration : 1.5 Hrs • Flexible Entry
+                            <FiClock /> Duration : {hours}
+                            {/* • Flexible Entry */}
                         </div>
                     </div>
                 </div>
@@ -114,7 +273,7 @@ export default function CancelBooking() {
                 <div className="flex justify-between text-sm text-[#6A6A6A] mb-2">
                     <span>Total Paid</span>
                     <span className="text-black font-medium">
-                        Rs. 400
+                        Rs. {price}
                     </span>
                 </div>
 
@@ -129,7 +288,7 @@ export default function CancelBooking() {
 
                 <div className="flex justify-between text-sm font-normal mt-3">
                     <span>Total Refund Amount</span>
-                    <span>Rs.400</span>
+                    <span>Rs. {totalRefund}</span>
                 </div>
             </div>
 
@@ -191,21 +350,26 @@ export default function CancelBooking() {
             {/* Bottom */}
             <div className="fixed bottom-0 left-0 w-full bg-white p-4 border-t border-[#F1F5F9]">
                 <div className="max-w-md mx-auto flex items-center justify-center gap-4">
-                    <button onClick={() => navigate('/payment/success')} className="text-blue-600 text-sm font-medium">
+                    <button onClick={() => navigate(-1)} className="text-blue-600 text-sm font-medium">
                         Don’t Cancel
                     </button>
 
                     <button
-                        className="w-[209px] bg-red-500 text-white py-3 rounded-md font-semibold"
+                        className="w-[209px] bg-red-500 text-white py-3 rounded-md font-semibold flex justify-center items-center gap-2"
                         onClick={handleCancel}
+                        disabled={isCancelling}
                     >
-                        Cancel Booking
+                        {isCancelling ? (
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                            "Cancel Booking"
+                        )}
                     </button>
                 </div>
             </div>
 
             {/* ✅ Success Modal */}
-            {showSuccess && <CancelSuccessModal onClose={handleClose} />}
+            {showSuccess && <CancelSuccessModal onClose={handleClose} price={price} total={totalRefund} />}
         </div>
     );
 }

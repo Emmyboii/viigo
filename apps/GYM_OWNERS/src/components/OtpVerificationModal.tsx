@@ -7,19 +7,10 @@ import { HiOutlineCalendar } from 'react-icons/hi';
 import BottomSheet from './BottomSheet';
 import { useEffect, useState } from 'react';
 import upcoming from '../assets/otpChecking.png'
-
-interface User {
-    id: string;
-    name: string;
-    status: "active" | "upcoming" | "completed" | "cancelled" | "inactive";
-    date: string;
-    duration: string;
-    remainingTime: string;
-    image?: string;
-}
+import type { Booking } from '../context/AppContext';
 
 type OtpVerificationModalProps = {
-    user?: User;
+    user?: Booking;
     onClose: () => void;
 };
 
@@ -40,30 +31,71 @@ export default function OtpVerificationModal({ user, onClose }: OtpVerificationM
         }
     }, [priceBreakdownOpen])
 
+    const durationText = user?.duration_text || "";
+
+    // get "2.5 Hrs"
+    const durationMatch = durationText.match(/\d+(\.\d+)?\s*Hrs?/i);
+    const duration = durationMatch ? durationMatch[0] : "";
+
+    const text = user?.contextual_text || "";
+
+
+    // match time like 08:31 PM
+    const match = text.match(/\d{1,2}:\d{2}\s?(AM|PM)/i);
+
+    const time = match ? match[0] : "";
+
+    const formattedTime = time.replace(/\s/, "");
+
+
+    const isActive = user?.status === "CONFIRMED";
+    const isUpcoming = user?.status === "PENDING";
+    const isCancelled = user?.status === "CANCELLED";
+
     // Determine dynamic status text
     const getStatusText = () => {
-        switch (user?.status) {
-            case "active": return "OTP Verified";
-            case "upcoming": return "OTP Verified Required";
-            case "completed": return "OTP Verified";
-            case "cancelled": return "OTP Not Verified";
-            default: return "";
-        }
+        if (isActive) return "OTP Verified";
+        if (isUpcoming) return "OTP Verification Required";
+        if (isCancelled) return "OTP Not Verified";
+        return "";
     };
 
+    // const getStatusText = () => {
+    //     switch (user?.status) {
+    //         case "active": return "OTP Verified";
+    //         case "upcoming": return "OTP Verified Required";
+    //         case "completed": return "OTP Verified";
+    //         case "cancelled": return "OTP Not Verified";
+    //         default: return "";
+    //     }
+    // };
+
+    // const bookingIdText = () => {
+    //     switch (user?.status) {
+    //         case "active": return `Booking ID #${user?.id} has been verified and the session has started`;
+    //         case "upcoming": return `Booking ID #${user?.id} has to be verified and then the session will start`;
+    //         case "completed": return `Booking ID #${user?.id} has been verified and the session has been completed`;
+    //         case "cancelled": return `Booking ID #${user?.id} has been cancelled before the session has started`;
+    //         default: return "";
+    //     }
+    // };
+
     const bookingIdText = () => {
-        switch (user?.status) {
-            case "active": return `Booking ID #${user?.id} has been verified and the session has started`;
-            case "upcoming": return `Booking ID #${user?.id} has to be verified and then the session will start`;
-            case "completed": return `Booking ID #${user?.id} has been verified and the session has been completed`;
-            case "cancelled": return `Booking ID #${user?.id} has been cancelled before the session has started`;
-            default: return "";
-        }
+        if (isActive)
+            return `Booking ID #${user?.id} has been verified and the session has started`;
+
+        if (isUpcoming)
+            return `Booking ID #${user?.id} has to be verified before the session starts`;
+
+        if (isCancelled)
+            return `Booking ID #${user?.id} has been cancelled`;
+
+        return "";
     };
 
     const getRemainingTime = () => {
-        if (user?.status === "active") return user?.remainingTime + " left";
-        if (user?.status === "upcoming") return user?.remainingTime;
+        if (isActive) return `${user?.contextual_text} left`;
+        if (isUpcoming) return formattedTime;
         return null;
     };
 
@@ -72,9 +104,10 @@ export default function OtpVerificationModal({ user, onClose }: OtpVerificationM
 
             {/* Top Success Section */}
             <div className="flex flex-col items-center pt-10 pb-6">
-                {(user?.status === "active" || user?.status === "completed") ? (
+                {/* {(user?.status === "CONFIRMED" || user?.status === "completed") ? ( */}
+                {(user?.status === "CONFIRMED") ? (
                     <FaCheckCircle className="text-green-500 text-[65px]" />
-                ) : user?.status === "upcoming" ? (
+                ) : user?.status === "PENDING" ? (
                     <img src={upcoming} className="w-16 h-16" alt="Upcoming Status" />
                 ) : (
                     <FaTimesCircle className="text-red-500 text-[65px]" />
@@ -93,27 +126,27 @@ export default function OtpVerificationModal({ user, onClose }: OtpVerificationM
                         <p className="text-[#0F172A] font-semibold">Guest</p>
                         <div className="flex items-center gap-2">
                             <FaUser size={16} />
-                            <p className="text-[#0F172A] font-normal text-sm">{user?.name}</p>
+                            <p className="text-[#0F172A] font-normal text-sm">{user?.client_name}</p>
                         </div>
                         <div className="flex items-center gap-2">
                             <FaRegClock size={16} />
-                            <p className="text-[#0F172A] font-normal text-sm">{user?.duration}</p>
-                            {user?.status === "active" && (
+                            <p className="text-[#0F172A] font-normal text-sm">{duration}</p>
+                            {user?.status === "CONFIRMED" && (
                                 <p className='bg-[#22C55E] rounded-full text-white font-medium p-1 px-2 text-xs'>
                                     Active
                                 </p>
                             )}
-                            {user?.status === "upcoming" && (
+                            {user?.status === "PENDING" && (
                                 <p className='bg-[#FACC15] rounded-full text-white font-medium p-1 px-2 text-xs'>
                                     Upcoming
                                 </p>
                             )}
-                            {user?.status === "completed" && (
+                            {/* {user?.status === "CONFIRMED" && (
                                 <p className='bg-[#CBD5E1] rounded-full text-white font-medium p-1 px-2 text-xs'>
                                     Completed
                                 </p>
-                            )}
-                            {user?.status === "cancelled" && (
+                            )} */}
+                            {user?.status === "CANCELLED" && (
                                 <p className='bg-[#FDECEA] text-[#F43F5E] rounded-full font-medium p-1 px-2 text-xs'>
                                     Cancelled
                                 </p>
@@ -125,41 +158,42 @@ export default function OtpVerificationModal({ user, onClose }: OtpVerificationM
                         </div>
                     </div>
 
-                    <img src={user?.image || profile} className="w-[69px] rounded-full" alt="Profile Image" />
+                    <img src={user?.client_image || profile} className="w-[69px] rounded-full" alt="Profile Image" />
                 </div>
 
                 <div className="border border-[#F2F2F2] border-dotted"></div>
 
                 {/* ===== Status-specific Details ===== */}
                 <div className="space-y-3 mt-2">
-                    {user?.status === "cancelled" && (
+                    {user?.status === "CANCELLED" && (
                         <div className="space-y-1">
                             <p className="text-[#0F172A] font-semibold">Session Cancelled</p>
-                            <p className="text-[#0F172A] text-sm"><HiOutlineCalendar className='inline mr-1' /> {user.date}</p>
+                            <p className="text-[#0F172A] text-sm"><HiOutlineCalendar className='inline mr-1' /> {user.display_date}</p>
                         </div>
                     )}
 
-                    {(user?.status === "completed" || user?.status === "active") && (
+                    {/* {(user?.status === "completed" || user?.status === "CONFIRMED") && ( */}
+                    {(user?.status === "CONFIRMED") && (
                         <>
                             <div className="space-y-1">
                                 <p className="text-[#0F172A] font-semibold">Session Completed</p>
-                                <p className="text-[#0F172A] text-sm"><HiOutlineCalendar className="inline mr-1" /> {user.date}</p>
+                                <p className="text-[#0F172A] text-sm"><HiOutlineCalendar className="inline mr-1" /> {user.display_date}</p>
                                 <p className="text-[#0F172A] text-sm"><FaRegClock className='inline mr-1' /> Start Time: <span className='font-semibold'> 10 AM</span></p>
                                 <p className="text-[#0F172A] text-sm"><FaRegClock className='inline mr-1' /> End Time: <span className='font-semibold'> 12 PM</span></p>
                             </div>
 
                             <div className="border border-[#F2F2F2] border-dotted"></div>
 
-                            {user?.status === "completed" && (
+                            {/* {user?.status === "completed" && (
                                 <p className='text-[#2563EB] font-medium text-xs'>Session Ended</p>
-                            )}
+                            )} */}
                         </>
                     )}
 
-                    {user?.status === "upcoming" && (
+                    {user?.status === "PENDING" && (
                         <div className="space-y-1">
                             <p className="text-[#0F172A] font-semibold">Session Upcoming</p>
-                            <p className="text-[#0F172A] text-sm"><HiOutlineCalendar className="inline mr-1" /> {user.date}</p>
+                            <p className="text-[#0F172A] text-sm"><HiOutlineCalendar className="inline mr-1" /> {user.display_date}</p>
                             <p className="text-[#0F172A] text-sm"> <FaRegClock className='inline mr-1' /> Check-in anytime during working hours</p>
                         </div>
                     )}
@@ -168,7 +202,7 @@ export default function OtpVerificationModal({ user, onClose }: OtpVerificationM
                 {getRemainingTime() && (
                     <div className='space-y-1'>
                         <p className='text-[#475569] font-medium text-xs'>
-                            {user?.status === "active" ? "Remaining Time" : user?.status === "upcoming" ? "Last Entry is at" : ""}
+                            {user?.status === "CONFIRMED" ? "Remaining Time" : user?.status === "PENDING" ? "Last Entry is at" : ""}
                         </p>
                         <p className='text-[#1D4ED8] font-semibold text-base'>{getRemainingTime()}</p>
                     </div>
@@ -211,7 +245,7 @@ export default function OtpVerificationModal({ user, onClose }: OtpVerificationM
                         <p className="text-sm font-medium text-[#0F172A]">Rs. 10</p>
                     </div>
 
-                    {user?.status === "cancelled" && (
+                    {user?.status === "CANCELLED" && (
                         <div className="flex items-center justify-between">
                             <p className="text-sm font-medium text-[#6A6A6A]">Amount Paid</p>
                             <p className="text-sm font-medium text-[#0F172A]">Rs. 420</p>
@@ -221,7 +255,7 @@ export default function OtpVerificationModal({ user, onClose }: OtpVerificationM
 
                     <div className="border border-dashed border-[#CBD5E1]"></div>
 
-                    {user?.status === "cancelled" ? (
+                    {user?.status === "CANCELLED" ? (
                         <div className="flex items-center justify-between">
                             <p className="text-sm font-medium text-[#6A6A6A]">Total</p>
                             <p className="text-sm font-medium text-[#0F172A]">Rs. 400</p>

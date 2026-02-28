@@ -88,7 +88,9 @@ export default function WorkoutForm() {
             // Navigate after 2 seconds
             setTimeout(() => {
                 setToast(null);
-                navigate('/'); // go to home
+                window.location.reload()
+                navigate('/');
+                 // go to home
             }, 2000);
         } catch (err: unknown) {
             console.error(err);
@@ -105,7 +107,7 @@ export default function WorkoutForm() {
         return (
             <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
                 {/* Spinner */}
-                <div className="w-12 h-12 border-4 border-gray-300 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+                <div className="w-6 h-6 border-4 border-gray-300 border-t-blue-600 rounded-full animate-spin mb-4"></div>
 
                 {/* Text */}
                 <p className="text-gray-700 text-lg font-medium">

@@ -1,9 +1,10 @@
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
 import { useEffect, useRef, useState } from "react";
+import type { Image } from "./types/gym";
 
 interface Props {
-    images: string[];
+    images: Image[];
     height?: string;
     delay?: number;
 }
@@ -71,7 +72,7 @@ export default function ImageCarousel({
                     {images.map((img, index) => (
                         <div key={index} className="min-w-full">
                             <img
-                                src={img}
+                                src={img.image}
                                 title="imagess"
                                 className={`w-full ${height} object-cover`}
                                 draggable={false}

@@ -1,6 +1,5 @@
-import { Route, Routes, useNavigate } from "react-router-dom"
+import { Route, Routes } from "react-router-dom"
 import AuthPage from "./pages/AuthPage"
-import { useEffect, useState } from "react";
 import Loader from './components/Loader';
 import UserHome from "./pages/UserHome";
 import OTPVerification from "./pages/OTPVerification";
@@ -9,53 +8,23 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
 import GymDetails from "./pages/GymDetails";
 import ReviewPay from "./pages/ReviewPay";
-import PaymentSuccess from "./pages/PaymentSuccess";
+// import PaymentSuccess from "./pages/PaymentSuccess";
 import Notifications from "./pages/Notification";
 import Bookings from "./pages/Bookings";
 import CancelBooking from "./pages/CancelBooking";
 import Profile from "./pages/Profile";
 import EditProfile from "./pages/EditProfile";
 import NotFound from "./pages/NotFound";
+import FAQ from "./pages/FAQ";
+import Support from "./pages/Support";
+import { useAppContext } from "./context/AppContext";
+import Explore from "./pages/Explore";
+import Recommended from "./pages/Recommended";
+import NearBy from "./pages/NearBy";
 
-function App() {
+function App() {  
 
-  const [loading, setLoading] = useState(true);
-  const navigate = useNavigate()
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 3200);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-
-  useEffect(() => {
-    const timestamp = localStorage.getItem("tokenTimestamp");
-
-    if (!timestamp) return;
-
-    const savedTime = Number(timestamp);
-    const TWO_HOURS = 2 * 60 * 60 * 1000;
-
-    const remainingTime = TWO_HOURS - (Date.now() - savedTime);
-
-    if (remainingTime <= 0) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("tokenTimestamp");
-      navigate("/login");
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      localStorage.removeItem("token");
-      localStorage.removeItem("tokenTimestamp");
-      navigate("/login");
-    }, remainingTime);
-
-    return () => clearTimeout(timer);
-  }, [navigate]);
+   const { loading, userData } = useAppContext();
 
   return (
     <div className="font-manrope relative">
@@ -114,6 +83,33 @@ function App() {
           />
 
           <Route
+            path="/recommended"
+            element={
+              <ProtectedRoute>
+                <Recommended />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/nearby"
+            element={
+              <ProtectedRoute>
+                <NearBy />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/explore"
+            element={
+              <ProtectedRoute>
+                <Explore />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
             path="/gyms/:slug"
             element={
               <ProtectedRoute>
@@ -131,14 +127,14 @@ function App() {
             }
           />
 
-          <Route
+          {/* <Route
             path="/payment/success"
             element={
               <ProtectedRoute>
                 <PaymentSuccess Loading={loading} />
               </ProtectedRoute>
             }
-          />
+          /> */}
 
           <Route
             path="/notifications"
@@ -159,7 +155,7 @@ function App() {
           />
 
           <Route
-            path="/cancelbookings"
+            path="/cancelbooking/:slug"
             element={
               <ProtectedRoute>
                 <CancelBooking />
@@ -171,7 +167,7 @@ function App() {
             path="/profile"
             element={
               <ProtectedRoute>
-                <Profile />
+                <Profile user={userData} />
               </ProtectedRoute>
             }
           />
@@ -181,6 +177,24 @@ function App() {
             element={
               <ProtectedRoute>
                 <EditProfile />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/support"
+            element={
+              <ProtectedRoute>
+                <Support />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/faq"
+            element={
+              <ProtectedRoute>
+                <FAQ />
               </ProtectedRoute>
             }
           />

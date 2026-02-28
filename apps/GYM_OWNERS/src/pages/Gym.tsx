@@ -47,9 +47,9 @@ export default function Gym({ gym, loading, display, setDisplay, setGym }: GymPr
         return (
             <div className="flex items-center justify-center min-h-screen">
                 <div className="flex flex-col items-center gap-4 p-8 bg-white animate-fadeIn">
-                    <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                    <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
                     <p className="text-gray-700 text-lg font-medium">
-                        Fetching your gyms...
+                        Fetching your gym details...
                     </p>
                     <p className="text-gray-400 text-sm text-center">
                         This might take a few seconds. Sit tight!

@@ -4,13 +4,14 @@ import {
     FiCalendar,
     FiCreditCard,
 } from "react-icons/fi";
-import { motion, AnimatePresence, type PanInfo, useAnimation } from "framer-motion";
+import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import Footer from "../components/Footer";
 // import { IoStopCircle } from "react-icons/io5";
 import { IoMdPlayCircle } from "react-icons/io";
 import { FaClock } from "react-icons/fa";
 import { useNavigate } from "react-router";
 import { FiBellOff } from "react-icons/fi";
+import { useAppContext } from "../context/AppContext";
 interface NotificationType {
     id: number;
     title: string;
@@ -22,7 +23,29 @@ interface NotificationType {
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
+const timeAgo = (dateString: string) => {
+    const now = new Date();
+    const createdAt = new Date(dateString);
+    const diff = now.getTime() - createdAt.getTime();
+
+    const seconds = Math.floor(diff / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+
+    if (seconds < 60) return "Just now";
+    if (minutes < 60) return `${minutes} min${minutes > 1 ? "s" : ""} ago`;
+    if (hours < 24) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
+    if (days < 7) return `${days} day${days > 1 ? "s" : ""} ago`;
+
+    return createdAt.toLocaleDateString(); // fallback
+};
+
+
 export default function Notifications({ Loading }: { Loading: boolean }) {
+
+    const { hasUnread } = useAppContext()
+
     const [data, setData] = useState<NotificationType[]>([]);
     const navigate = useNavigate();
 
@@ -72,6 +95,32 @@ export default function Notifications({ Loading }: { Loading: boolean }) {
         }
     };
 
+    const markAllAsRead = async () => {
+        try {
+            const token = localStorage.getItem("token");
+
+            await fetch(
+                `${backendUrl}/notification/notifications/mark-all-read/`,
+                {
+                    method: "POST",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            // Optimistic update
+            setData((prev) =>
+                prev.map(n => ({
+                    ...n,
+                    is_read: true,
+                }))
+            );
+        } catch (err) {
+            console.error("Failed to mark as read", err);
+        }
+    };
+
     const getIcon = (type: string) => {
         switch (type) {
             case "SESSION":
@@ -104,9 +153,9 @@ export default function Notifications({ Loading }: { Loading: boolean }) {
         }
     }, [Loading, controls]);
 
-    const deleteNotification = (id: number) => {
-        setData((prev) => prev.filter((item) => item.id !== id));
-    };
+    // const deleteNotification = (id: number) => {
+    //     setData((prev) => prev.filter((item) => item.id !== id));
+    // };
 
     // const markAllAsRead = () => {
     //     const updated = data.map((item) => ({ ...item, is_read: true }));
@@ -125,7 +174,8 @@ export default function Notifications({ Loading }: { Loading: boolean }) {
 
                 {data.length > 0 && (
                     <button
-                        // onClick={markAllAsRead}
+                        onClick={markAllAsRead}
+                        disabled={hasUnread}
                         className="text-blue-600 text-sm font-medium"
                     >
                         Mark All as Read
@@ -135,13 +185,7 @@ export default function Notifications({ Loading }: { Loading: boolean }) {
 
             {/* List */}
             <div className="p-4 space-y-4">
-                {Loading ? (
-                    <div className="p-4 space-y-3">
-                        {[1, 2, 3].map((i) => (
-                            <div key={i} className="h-16 bg-gray-100 animate-pulse rounded-lg" />
-                        ))}
-                    </div>
-                ) : data.length === 0 ? (
+                {data.length === 0 ? (
                     <EmptyNotifications />
                 ) : (
                     <AnimatePresence>
@@ -155,9 +199,9 @@ export default function Notifications({ Loading }: { Loading: boolean }) {
                                 className="relative"
                             >
                                 {/* Swipe-to-delete background */}
-                                <div className="absolute inset-0 rounded-lg flex items-center justify-end pr-4">
+                                {/* <div className="absolute inset-0 rounded-lg flex items-center justify-end pr-4">
                                     <span className="text-white font-semibold">Delete</span>
-                                </div>
+                                </div> */}
 
                                 {/* Notification card */}
                                 <motion.div
@@ -167,34 +211,35 @@ export default function Notifications({ Loading }: { Loading: boolean }) {
                                         }
                                     }}
                                     drag="x"
-                                    dragConstraints={{ left: 0, right: 0 }}
-                                    dragElastic={0.2}
-                                    onDragEnd={(_, info: PanInfo) => {
-                                        if (info.offset.x > 100 || info.offset.x < -100) {
-                                            deleteNotification(item.id);
-                                        }
-                                    }}
-                                    whileTap={{ cursor: "grabbing" }}
-                                    className={`flex gap-3 p-2 rounded-lg items-center border border-[#E2E8F0] relative z-10 cursor-grab transition ${item.is_read
+                                    // dragConstraints={{ left: 0, right: 0 }}
+                                    // dragElastic={0.2}
+                                    // onDragEnd={(_, info: PanInfo) => {
+                                    //     if (info.offset.x > 100 || info.offset.x < -100) {
+                                    //         deleteNotification(item.id);
+                                    //     }
+                                    // }}
+                                    // whileTap={{ cursor: "grabbing" }}
+                                    className={`flex gap-3 p-2 rounded-lg items-center border border-[#E2E8F0] relative z-10 cursor-grab transition ${!item.is_read
                                         ? "border-l-blue-500 border-l-4"
                                         : "border-[#E2E8F0] bg-white border"
                                         }`}
                                 >
                                     {/* Icon */}
-                                    <div className="w-10 h-10 rounded-full bg-[#CBD5E1] fle x items-center justify-center text-[#0F172A]">
+                                    <div className="w-10 h-10 rounded-full bg-[#CBD5E1] flex items-center justify-center text-[#0F172A]">
                                         {getIcon(item.notification_type)}
                                     </div>
 
                                     {/* Content */}
                                     <div className="flex-1">
-                                        <div className="flex justify-between items-start">
-                                            <h3 className="font-semibold text-base">{item.title}</h3>
-                                            <span className="text-xs text-[#475569]">{new Date(item.created_at).toLocaleString()}</span>
+                                        <div className="flex justify-between items-start gap-2">
+                                            <div>
+                                                <h3 className="font-semibold text-base">{item?.title}</h3>
+                                                <p className="text-xs text-[#0F172A] mt-1 leading-relaxed">
+                                                    {item.message}
+                                                </p>
+                                            </div>
+                                            <span className="text-xs text-[#475569] text-nowrap">{timeAgo(item.created_at)}</span>
                                         </div>
-
-                                        <p className="text-xs text-[#0F172A] mt-1 leading-relaxed">
-                                            {item.message}
-                                        </p>
                                     </div>
                                 </motion.div>
                             </motion.div>
@@ -204,7 +249,7 @@ export default function Notifications({ Loading }: { Loading: boolean }) {
             </div>
 
             <Footer />
-        </div>
+        </div >
     );
 }
 

@@ -96,6 +96,32 @@ const AuthPage = () => {
     setPhoneNumber(`+91 ${digitsOnly}`);
   };
 
+  const checkOnboardingAndRedirect = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(`${backendUrl}/api/onboarding/`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+
+      if (data?.data?.is_completed) {
+        window.location.reload()
+        navigate("/");
+      } else {
+        navigate("/onboarding");
+      }
+    } catch (err) {
+      console.error("Failed to check onboarding:", err);
+      navigate("/onboarding"); // fallback
+    }
+  };
+
   const handleContinue = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault()
 
@@ -186,9 +212,9 @@ const AuthPage = () => {
         setToast({ type: "success", message: "Login successful" });
 
         setTimeout(() => {
+          checkOnboardingAndRedirect();
           setToast(null);
-          window.location.href = "/onboarding";
-        }, 2000);
+        }, 3000);
 
       } catch (error: any) {
         setToast({ type: "error", message: error.message });

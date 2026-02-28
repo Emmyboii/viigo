@@ -122,6 +122,7 @@ export default function OTPVerification() {
             const data = await res.json();
 
             if (data?.data?.is_completed) {
+                window.location.reload()
                 navigate("/");
             } else {
                 navigate("/onboarding");

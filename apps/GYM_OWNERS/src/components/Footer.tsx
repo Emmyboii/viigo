@@ -25,7 +25,10 @@ export default function Footer() {
                     return (
                         <div
                             key={tab.name}
-                            onClick={() => navigate(tab.path)}
+                            onClick={() => {
+                                window.scrollTo(0, 0)
+                                navigate(tab.path)
+                            }}
                             className="flex flex-col items-center justify-center flex-1 cursor-pointer"
                         >
                             {tab.image ? (

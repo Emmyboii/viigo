@@ -194,9 +194,11 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
 
         navigator.geolocation.getCurrentPosition(
             (position) => {
-                const { latitude, longitude } = position.coords;
-                setLatitude(latitude.toString());
-                setLongitude(longitude.toString());
+                const lat = position.coords.latitude.toFixed(6);
+                const lng = position.coords.longitude.toFixed(6);
+
+                setLatitude(lat);
+                setLongitude(lng);
             },
             (error) => {
                 if (error.code === error.PERMISSION_DENIED) {
@@ -216,7 +218,7 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
         // if (display === "create") {
         fetchCurrentLocation();
         // }
-    }, [display]);
+    }, []);
 
     useEffect(() => {
         if (!gym) return;
@@ -346,8 +348,8 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
             formData.append("location", location);
             formData.append("open_time", startTime);
             formData.append("close_time", endTime);
-            formData.append("latitude", latitude);
-            formData.append("longitude", longitude);
+            formData.append("latitude", latitude.slice(0, 7));
+            formData.append("longitude", longitude.slice(0, 7));
 
             // Photos
             // only upload NEW images
@@ -897,28 +899,60 @@ const PeakSection = ({
         ]);
     };
 
-    const updateTime = (id: string, field: "start" | "end", value: string) => {
+    useEffect(() => {
+        if (!gymEndTime) return;
+
+        const endLimit = timeToMinutes(gymEndTime);
+        const minStart = timeToMinutes("16:00");
+
         setData((prev) =>
-            prev.map((item) => {
-                if (item.id !== id) return item;
+            prev.map((p) => {
+                let start = p.start;
+                let end = p.end;
 
-                // Evening peak restriction
-                if (title === "Evening" && gymEndTime) {
-                    const minStart = timeToMinutes("16:00");
-                    const endLimit = timeToMinutes(gymEndTime);
-                    const newValue = timeToMinutes(value);
-
-                    if (field === "start" && newValue < minStart) {
-                        value = "16:00";
-                    }
-
-                    if (field === "end" && newValue > endLimit) {
-                        value = gymEndTime;
-                    }
+                if (timeToMinutes(start) < minStart) {
+                    start = "16:00";
                 }
 
-                return { ...item, [field]: value };
+                if (timeToMinutes(end) > endLimit) {
+                    end = gymEndTime;
+                }
+
+                return { ...p, start, end };
             })
+        );
+    }, [gymEndTime, setData]);
+
+    // const updateTime = (id: string, field: "start" | "end", value: string) => {
+    //     setData((prev) =>
+    //         prev.map((item) => {
+    //             if (item.id !== id) return item;
+
+    //             // Evening peak restriction
+    //             if (title === "Evening" && gymEndTime) {
+    //                 const minStart = timeToMinutes("16:00");
+    //                 const endLimit = timeToMinutes(gymEndTime);
+    //                 const newValue = timeToMinutes(value);
+
+    //                 if (field === "start" && newValue < minStart) {
+    //                     value = "16:00";
+    //                 }
+
+    //                 if (field === "end" && newValue > endLimit) {
+    //                     value = gymEndTime;
+    //                 }
+    //             }
+
+    //             return { ...item, [field]: value };
+    //         })
+    //     );
+    // };
+
+    const updateTime = (id: string, field: "start" | "end", value: string) => {
+        setData((prev) =>
+            prev.map((item) =>
+                item.id === id ? { ...item, [field]: value } : item
+            )
         );
     };
 
@@ -955,6 +989,12 @@ const PeakSection = ({
 
                     {!isEndTimeValid(item.start, item.end) && (
                         <p className="text-red-500 text-xs mt-1">End time must be later than start time</p>
+                    )}
+
+                    {timeToMinutes(item.end) > timeToMinutes(gymEndTime || "23:59") && (
+                        <p className="text-red-500 text-xs mt-1">
+                            End time cannot exceed gym closing time
+                        </p>
                     )}
 
                     {(index === data.length - 1 && title === "Morning") && (

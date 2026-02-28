@@ -13,15 +13,17 @@ const PageHeader = ({ text }: PageHeaderProps) => {
     return (
         <div className="fixed top-0 left-0 right-0 z-40 bg-white flex items-center justify-between px-4 py-3" >
 
-            <button
-                onClick={() => navigate(-1)}
-                aria-label="Go back"
-                className="p-1"
-            >
-                <IoArrowBack size={20} />
-            </button>
+            <div className='flex items-center gap-2'>
+                <button
+                    onClick={() => navigate(-1)}
+                    aria-label="Go back"
+                    className="p-1"
+                >
+                    <IoArrowBack size={20} />
+                </button>
 
-            <span className="font-medium">{text}</span>
+                <span className="font-medium">{text}</span>
+            </div>
 
             <button
                 aria-label="Share gym"

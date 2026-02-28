@@ -2,11 +2,142 @@ import profile from '../assets/userProfileImg.png'
 import { useNavigate } from 'react-router-dom'
 import { IoArrowBack } from 'react-icons/io5'
 import Footer from '../components/Footer'
+import { useCallback, useEffect, useState } from 'react';
+import { FaCircleCheck } from 'react-icons/fa6';
+import { MdError } from 'react-icons/md';
+
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
+type ToastType = "success" | "error" | null;
 
 const EditProfile = () => {
 
     const navigate = useNavigate()
 
+    const [formData, setFormData] = useState({
+        full_name: '',
+        email: '',
+        phone_number: '',
+        total_fitness_hours: ''
+    });
+
+    const [initialData, setInitialData] = useState(formData);
+    const [isLoading, setIsLoading] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const [toast, setToast] = useState<{ type: ToastType; message: string } | null>(null);
+
+    useEffect(() => {
+        setIsLoading(true)
+
+        const fetchProfile = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(`${backendUrl}/api/user/profile/`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                const data = await res.json();
+
+                if (data?.data) {
+                    setFormData({
+                        full_name: data.data.full_name || '',
+                        email: data.data.email || '',
+                        phone_number: data.data.phone_number || '',
+                        total_fitness_hours: data.data.total_fitness_hours || '',
+                    });
+                    setInitialData({
+                        full_name: data.data.full_name || '',
+                        email: data.data.email || '',
+                        phone_number: data.data.phone_number || '',
+                        total_fitness_hours: data.data.total_fitness_hours || '',
+                    });
+                }
+            } catch (err) {
+                console.error('Failed to fetch profile', err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchProfile();
+    }, []);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+
+        setFormData((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+    };
+
+    const isDirty =
+        formData.full_name !== initialData.full_name ||
+        formData.email !== initialData.email ||
+        formData.phone_number !== initialData.phone_number ||
+        formData.total_fitness_hours !== initialData.total_fitness_hours;
+
+    const isValid =
+        formData.email.trim() !== '' &&
+        formData.phone_number.trim() !== '';
+
+    const handleSave = async (e: React.SubmitEvent<HTMLFormElement>) => {
+        e.preventDefault()
+
+        if (!isValid) return;
+
+        setSaving(true);
+
+        try {
+            const token = localStorage.getItem("token");
+
+            const res = await fetch(`${backendUrl}/api/user/profile/`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify(formData),
+            });
+
+            if (!res.ok) throw new Error("Failed to update");
+
+            await res.json();
+
+            setInitialData(formData);
+
+
+            const message = "Changes saved successfully!"
+
+            setToast({ type: "success", message });
+
+            navigate("/profile");
+
+
+            window.location.reload()
+        } catch (err) {
+            console.error(err);
+            setToast({ type: "error", message: "Something went wrong, please try again!" });
+        } finally {
+            setSaving(false);
+        }
+    };
+
+
+    const handleToastClose = useCallback(() => {
+        setToast(null);
+    }, []);
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="flex flex-col items-center gap-3">
+                    <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                    <p className="text-sm text-gray-500">Loading profile...</p>
+                </div>
+            </div>
+        );
+    }
     return (
         <div className='p-5'>
             <div className="fixed top-0 left-0 right-0 z-40 bg-white flex items-center px-4 py-3" >
@@ -24,62 +155,101 @@ const EditProfile = () => {
 
             <div className='pt-14'></div>
 
-            <div className='border border-[#DBEAFE] py-6 px-4 rounded-md space-y-4'>
-                <div className="flex items-center justify-between">
-                    <div className="space-y-3">
-                        <p className="text-[#0F172A] font-semibold text-base">Vijay</p>
-                        <p className="text-[#0F172A] font-normal text-sm">Total Fitness Hours : 22</p>
+            {toast && <Toast type={toast.type} text={toast.message} onClose={handleToastClose} />}
+
+            <form onSubmit={handleSave}>
+
+                <div className='border border-[#DBEAFE] py-6 px-4 rounded-md space-y-4'>
+                    <div className="flex items-center justify-between">
+                        <div className="space-y-3">
+                            <p className="text-[#0F172A] font-semibold text-base">{formData?.full_name || "User"}</p>
+                            <p className="text-[#0F172A] font-normal text-sm">Total Fitness Hours : {formData.total_fitness_hours || 0}</p>
+                        </div>
+
+                        <img src={profile} className="w-[69px]" alt="Profile Image" />
                     </div>
 
-                    <img src={profile} className="w-[69px]" alt="Profile Image" />
+                    <div className="border border-[#F2F2F2] border-dotted"></div>
+
+                    <div className='space-y-2'>
+                        <p className="text-[#0F172A] font-semibold">Account Details</p>
+
+                        <div className='space-y-2 pt-2'>
+                            <p className='text-[#0F172A] text-sm'>Full Name</p>
+                            <input
+                                type="text"
+                                name="full_name"
+                                value={formData.full_name}
+                                onChange={handleChange}
+                                title='fullname'
+                                className="w-full border border-[#E2E8F0] h-[50px] rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+
+                        <div className='space-y-2 pt-2'>
+                            <p className='text-[#0F172A] text-sm'>Email ID</p>
+                            <input
+                                type="email"
+                                name="email"
+                                value={formData.email}
+                                onChange={handleChange}
+                                title='email'
+                                required
+                                className="w-full border border-[#E2E8F0] h-[50px] rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+
+                        <div className='space-y-2 pt-2'>
+                            <p className='text-[#0F172A] text-sm'>Phone Number</p>
+                            <input
+                                type="tel"
+                                name="phone_number"
+                                value={formData.phone_number}
+                                onChange={handleChange}
+                                title='phone'
+                                required
+                                className="w-full border border-[#E2E8F0] h-[50px] rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+                    </div>
                 </div>
 
-                <div className="border border-[#F2F2F2] border-dotted"></div>
-
-                <div className='space-y-2'>
-                    <p className="text-[#0F172A] font-semibold">Account Details</p>
-
-                    <div className='space-y-2 pt-2'>
-                        <p className='text-[#0F172A] text-sm'>Full Name</p>
-                        <input
-                            type="text"
-                            name="fullname"
-                            id="fullname"
-                            title='fullname'
-                            className="w-full border border-[#E2E8F0] h-[50px] rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                    </div>
-
-                    <div className='space-y-2 pt-2'>
-                        <p className='text-[#0F172A] text-sm'>Email ID</p>
-                        <input
-                            type="email"
-                            name="email"
-                            id="email"
-                            title='email'
-                            className="w-full border border-[#E2E8F0] h-[50px] rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                    </div>
-
-                    <div className='space-y-2 pt-2'>
-                        <p className='text-[#0F172A] text-sm'>Phone Number</p>
-                        <input
-                            type="tel"
-                            name="phone"
-                            id="phone"
-                            title='phone'
-
-                            className="w-full border border-[#E2E8F0] h-[50px] rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                    </div>
-                </div>
-            </div>
-
-            <button className="mt-5 bg-[#2563EB] w-full h-[50px] font-semibold text-sm text-white py-2 px-4 rounded-md">Save Changes</button>
-
+                <button
+                    type="submit"
+                    disabled={!isDirty || !isValid || saving}
+                    className={`mt-8 w-full h-[50px] rounded-md text-sm font-semibold text-white
+                        ${(!isDirty || !isValid || saving) ? 'bg-gray-400' : 'bg-[#2563EB]'}`}
+                >
+                    {saving ? 'Saving...' : 'Save Changes'}
+                </button>
+            </form>
             <Footer />
-        </div>
+        </div >
     )
 }
 
 export default EditProfile
+
+function Toast({ text, type, onClose }: { text: string; type: ToastType; onClose: () => void }) {
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            onClose();
+        }, 3000);
+        return () => clearTimeout(timer);
+    }, [onClose]);
+
+    const isSuccess = type === "success";
+
+    return (
+        <div
+            className={`fixed w-[280px] bottom-20 z-50 left-1/2 justify-center -translate-x-1/2 
+      bg-white px-4 py-3 rounded-lg flex items-center gap-3
+      shadow-[0_10px_40px_rgba(0,0,0,0.18)] animate-[fadeIn_0.2s_ease-out]`}
+        >
+            <span className={`text-xl ${isSuccess ? "text-green-500" : "text-red-500"}`}>
+                {isSuccess ? <FaCircleCheck /> : <MdError />}
+            </span>
+            <p className="text-sm font-medium">{text}</p>
+        </div>
+    );
+}

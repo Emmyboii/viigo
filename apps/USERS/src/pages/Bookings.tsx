@@ -2,125 +2,168 @@ import FilterChips from "../components/FilterChips"
 import Container from "../components/layout/Container"
 import PageHeader from "../components/PageHeader"
 import SearchBar from "../components/SearchBar"
-import gym1 from '../assets/gymImg.png'
-import gym2 from '../assets/gymImg2.png'
-import gym3 from '../assets/gymImg3.png'
-import gym4 from '../assets/gymImg4.png'
-import gym5 from '../assets/gymImg5.png'
-import gym6 from '../assets/gymImg6.png'
-import type { Gym } from "../components/types/gym"
-import ImageCarousel from "../components/ImageCarousel"
 import { HiLocationMarker } from "react-icons/hi"
 import { CiCalendar } from "react-icons/ci"
 import { FiClock } from "react-icons/fi"
 import Footer from "../components/Footer"
+import { useEffect, useState } from "react"
+import BookingModal from "../components/BookingModal"
+
+export type Booking = {
+    id: number;
+    booking_reference: string;
+    gym_name: string;
+    gym_location: string;
+    gym_image: string;
+    display_date: string;
+    display_time: string;
+    price_tag: string;
+    status: "PENDING" | "CONFIRMED" | "CANCELLED";
+};
 
 const Bookings = () => {
 
     const chipData = [
-        { id: "upcoming", label: "Upcoming X" },
+        { id: "upcoming", label: "Upcoming" },
         { id: "past", label: "Past" },
         { id: "cancelled", label: "Cancelled" },
         { id: "all", label: "All" },
     ];
 
-    const bookings: Gym[] = [
-        {
-            name: "Cure Fitness",
-            images: [gym4, gym5],
-            distance: "0.7Km",
-            location: "Chromepet",
-            open: "Open Till 11 PM",
-            price: 120,
-            facilities: ["Restroom", "Locker"],
-        },
-        {
-            name: "Flex Zone Gym",
-            images: [gym2, gym3, gym6],
-            distance: "1.5Km",
-            location: "Pallavaram",
-            open: "Open Till 10 PM",
-            price: 150,
-            facilities: ["Locker", "Parking"],
-        },
-        {
-            name: "Urban Strength",
-            images: [gym3, gym6],
-            distance: "0.9Km",
-            location: "Tambaram",
-            open: "Open Till 9:30 PM",
-            price: 180,
-            facilities: ["Trainer", "Restroom"],
-        },
-        {
-            name: "Lift & Burn Studio",
-            images: [gym4, gym5, gym6],
-            distance: "2.4Km",
-            location: "Velachery",
-            open: "Open Till 10 PM",
-            price: 200,
-            facilities: ["Trainer", "Shower", "Locker"],
-        },
-        {
-            name: "Rapid Fitness Club",
-            images: [gym1, gym2],
-            distance: "3.1Km",
-            location: "Guindy",
-            open: "Open Till 11 PM",
-            price: 140,
-            facilities: ["Restroom", "Parking"],
-        },
-    ];
+    const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
+    const [bookings, setBookings] = useState<Booking[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [activeFilter, setActiveFilter] = useState("all");
+    const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+    const [showModal, setShowModal] = useState(false);
+
+    const token = localStorage.getItem("token");
+
+    useEffect(() => {
+        const fetchBookings = async () => {
+            try {
+                const res = await fetch(`${backendUrl}/client/bookings/my-bookings/`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+
+                const data = await res.json();
+                setBookings(data.data);
+            } catch (err) {
+                console.error("Error fetching bookings", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchBookings();
+    }, []);
+
+    const filteredBookings = bookings.filter((b) => {
+        switch (activeFilter) {
+            case "upcoming":
+                return b.status === "PENDING";
+            case "past":
+                return b.status === "CONFIRMED";
+            case "cancelled":
+                return b.status === "CANCELLED";
+            case "all":
+            default:
+                return true;
+        }
+    });
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="flex flex-col items-center gap-4 p-8 bg-white animate-fadeIn">
+                    <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                    <p className="text-gray-700 text-lg font-medium">
+                        Loading Bookings...
+                    </p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <Container>
 
-            <PageHeader text="Bookings" />
+            {!showModal && (
+                <div>
+                    <PageHeader text="Bookings" />
 
-            <div className="pt-14" />
+                    <div className="pt-14" />
 
-            <SearchBar />
-            <FilterChips items={chipData} />
-
-            <div className="space-y-4 mb-20 mt-8">
-                {bookings.map((gym, index) => (
-                    <div key={index} className="bg-white rounded border border-[#E2E8F0] min-h-[140px] h-full flex gap-3">
-                        <div className="w-28 rounded-tl rounded-bl h-full overflow-hidden">
-                            <ImageCarousel images={gym.images} height="h-40" />
-                        </div>
-
-                        <div className="flex flex-col justify-between w-full p-3">
-
-                            <div className="space-y-1.5">
-                                <h3 className="font-normal">{gym.name}</h3>
-                                <p className="text-xs text-gray-500 flex items-center gap-1">
-                                    <HiLocationMarker className="text-[#475569] text-xl" />
-                                    G.S.T Road, {gym.location}
-                                </p>
-
-                                <p className="text-xs text-gray-500 flex items-center gap-1">
-                                    <CiCalendar className="text-[#475569] text-xl" />
-                                    Date and Time : 5th December
-                                </p>
-
-                                <p className="text-xs text-gray-500 flex items-center gap-1">
-                                    <FiClock className="text-[#475569] text-xl" />
-                                    Time : 11AM  - 12:30 PM
-                                </p>
+                    <SearchBar />
+                    <FilterChips
+                        items={chipData}
+                        activeId={activeFilter}
+                        onChange={(id) => setActiveFilter(id)}
+                    />
+                    <div className="space-y-4 mb-20 mt-8">
+                        {filteredBookings.length === 0 ? (
+                            <div className="text-center text-gray-500 mt-10">
+                                No bookings found for "{chipData.find(c => c.id === activeFilter)?.label}"
                             </div>
+                        ) : (
+                            filteredBookings.map((gym, index) => (
+                                <div
+                                    key={index}
+                                    onClick={() => {
+                                        setSelectedBooking(gym);
+                                        setShowModal(true);
+                                        localStorage.setItem("selectedBookingId", String(gym.id));
+                                    }}
+                                    className="bg-white rounded border border-[#E2E8F0] min-h-[140px] h-full flex gap-3"
+                                >
+                                    <img src={`http://api.viigo.in/${gym.gym_image}`} title="gym" className="w-24 min-h-full rounded-tl rounded-bl object-cover" />
 
-                            <div className="flex justify-between items-center mt-2 gap-2">
-                                <span className="font-normal text-sm text-nowrap">₹{gym.price}/1.5 Hr</span>
-                                <button className="bg-white rounded-full border text-nowrap border-[#CBD5E1] text-[#475569] text-[11px] px-2.5 py-2">
-                                    Booking ID : #23242Q
-                                </button>
-                            </div>
-                        </div>
+                                    <div className="flex flex-col justify-between w-full p-3 pl-0">
+
+                                        <div className="space-y-1.5">
+                                            <h3 className="font-normal">{gym.gym_name}</h3>
+                                            <p className="text-xs text-gray-500 flex items-center gap-1">
+                                                <HiLocationMarker className="text-[#475569] text-xl" />
+                                                {gym.gym_location}
+                                            </p>
+
+                                            <p className="text-xs text-gray-500 flex items-center gap-1">
+                                                <CiCalendar className="text-[#475569] text-xl" />
+                                                Date and Time : {gym.display_date}
+                                            </p>
+
+                                            <p className="text-xs text-gray-500 flex items-center gap-1">
+                                                <FiClock className="text-[#475569] text-xl" />
+                                                Time : {gym.display_time}
+                                            </p>
+                                        </div>
+
+                                        <div className="flex flex-col justify-between items-start mt-4 gap-2">
+                                            <span className="font-normal text-sm text-nowrap">{gym.price_tag}</span>
+                                            <button className="bg-white rounded-full border border-[#CBD5E1] text-center text-[#475569] text-[11px] px-2.5 py-2">
+                                                Booking ID : #{gym.booking_reference}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))
+                        )}
                     </div>
-                ))}
-            </div>
 
-            <Footer />
+                    <Footer />
+
+                </div>
+            )}
+
+            {showModal && selectedBooking && (
+                <BookingModal
+                    booking={selectedBooking}
+                    onClose={() => setShowModal(false)}
+                />
+            )}
         </Container>
     )
 }

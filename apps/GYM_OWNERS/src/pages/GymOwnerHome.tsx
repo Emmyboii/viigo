@@ -10,6 +10,7 @@ import OtpVerificationModal from "../components/OtpVerificationModal";
 import Footer from "../components/Footer";
 import FilterChips from "../components/FilterChips";
 import UserCard from "../components/UserCard";
+import { useAppContext, type Booking } from "../context/AppContext";
 
 type Status =
   | "idle"
@@ -18,16 +19,6 @@ type Status =
   | "error";
 
 type ToastType = "success" | "error" | null;
-
-interface User {
-  id: string;
-  name: string;
-  status: "active" | "upcoming" | "completed" | "cancelled" | "inactive";
-  date: string;
-  duration: string;
-  remainingTime: string;
-  image?: string;
-}
 
 const chipData = [
   { id: "all", label: "All" },
@@ -75,74 +66,32 @@ interface GymProps {
 
 const GymOwnerHome = ({ gym }: GymProps) => {
 
-  const users: User[] = [
-    {
-      id: "1",
-      name: "Prakash M",
-      status: "active",
-      date: "5th December",
-      duration: "1.5 Hrs",
-      remainingTime: "00:42 min",
-      image: "https://randomuser.me/api/portraits/men/32.jpg",
-    },
-    {
-      id: "2",
-      name: "Sarah K",
-      status: "upcoming",
-      date: "6th December",
-      duration: "2 Hrs",
-      remainingTime: "09:30 PM",
-    },
-    {
-      id: "3",
-      name: "John Doe",
-      status: "completed",
-      date: "7th December",
-      duration: "1 Hr",
-      remainingTime: "00:00 min",
-    },
-    {
-      id: "4",
-      name: "Mary Ann",
-      status: "active",
-      date: "8th December",
-      duration: "3 Hrs",
-      remainingTime: "02:10 min",
-    },
-    {
-      id: "5",
-      name: "David P",
-      status: "cancelled",
-      date: "9th December",
-      duration: "1.5 Hrs",
-      remainingTime: "00:00 min",
-    },
-    {
-      id: "6",
-      name: "James L",
-      status: "active",
-      date: "10th December",
-      duration: "2 Hrs",
-      remainingTime: "01:05 min",
-    },
-    {
-      id: "7",
-      name: "Emma W",
-      status: "active",
-      date: "11th December",
-      duration: "45 mins",
-      remainingTime: "00:20 min",
-    },
-  ];
-
   const navigate = useNavigate();
 
-  const [filter, setFilter] = useState<string>("all");
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const { bookings } = useAppContext()
 
-  const filteredUsers = users.filter((user) =>
-    filter === "all" ? true : user.status === filter
-  )
+  const [filter, setFilter] = useState<string>("all");
+  const [selectedUser, setSelectedUser] = useState<Booking | null>(null);
+
+  // const filteredUsers = bookings.filter((user) =>
+  //   filter === "all" ? true : user.status === filter
+  // )
+
+  const filteredBookings = bookings.filter((b) => {
+    switch (filter) {
+      case "upcoming":
+        return b.status === "PENDING";
+      case "active":
+        return b.status === "CONFIRMED";
+      case "cancelled":
+        return b.status === "CANCELLED";
+      case "completed":
+        return false;
+      case "all":
+      default:
+        return true;
+    }
+  });
 
   const [otp, setOtp] = useState("");
   const [status, setStatus] = useState<Status>("idle");
@@ -186,13 +135,14 @@ const GymOwnerHome = ({ gym }: GymProps) => {
           // setShowPaymentModal(true);
 
           setSelectedUser({
-            id: "999",
-            name: "Dummy Verified User",
-            status: "active",
-            date: "12th Feb",
-            duration: "1.5 Hrs",
-            remainingTime: "00:45 min",
-            image: "https://randomuser.me/api/portraits/men/99.jpg"
+            id: 999,
+            client_name: "Dummy Verified User",
+            status: "PENDING",
+            display_date: "12th Feb",
+            duration_text: "1.5 Hrs",
+            display_status: '',
+            contextual_text: "00:45 min",
+            client_image: "https://randomuser.me/api/portraits/men/99.jpg"
           });
           window.scrollTo(0, 0);
         }, 3000);
@@ -276,20 +226,22 @@ const GymOwnerHome = ({ gym }: GymProps) => {
               onChange={(id) => setFilter(id)}
             />
 
-            <div className="py-5 space-y-4">
-              {filteredUsers.map((user) => (
-                <UserCard
-                  key={user.id}
-                  name={user.name}
-                  status={user.status}
-                  date={user.date}
-                  duration={user.duration}
-                  remainingTime={user.remainingTime}
-                  image={user.image}
-                  onClick={() => setSelectedUser(user)}
-                />
-              ))}
-            </div>
+            {filteredBookings.length === 0 ? (
+              <div className="text-center text-gray-500 mt-10">
+                No "{chipData.find(c => c.id === filter)?.label}" Booking yet.
+              </div>
+            ) : (
+              <div className="py-5 space-y-4">
+                {filteredBookings.map((book) => (
+                  <UserCard
+                    key={book.id}
+                    booking={book}
+                    onClick={() => setSelectedUser(book)}
+                  />
+                ))}
+              </div>
+            )}
+
           </div>
 
           <Footer />

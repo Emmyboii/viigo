@@ -1,9 +1,7 @@
 import { useState, useMemo } from "react";
 import { FiUsers } from "react-icons/fi";
 import BottomSheet from "./BottomSheet";
-import { gyms } from "../data/gyms";
-
-type Gym = (typeof gyms)[number];
+import type { GymCard } from "../context/AppContext";
 
 interface Props {
     total?: number;
@@ -15,18 +13,9 @@ interface Props {
         value: number;
         label: string;
     },
-    gym: Gym
+    gym: GymCard
     setOpen: React.Dispatch<React.SetStateAction<boolean>>
 }
-
-const gymOpenHour = 9;  // 9 AM
-const gymCloseHour = 22; // 10 PM (24hr format)
-
-const formatTo12Hour = (hour: number) => {
-    const suffix = hour >= 12 ? "PM" : "AM";
-    const formattedHour = hour % 12 === 0 ? 12 : hour % 12;
-    return `${formattedHour} ${suffix}`;
-};
 
 const hoursOptions = [
     { label: "1 Hr", value: 1 },
@@ -51,11 +40,13 @@ export default function PickHoursSheet({ open, onClose, defaultDate, defaultHour
         }
     );
 
+    const id = gym.id
+
     const editSelectedHr = selectedHours.value === 1 ? "Hr" : selectedHours.label
 
     const totalWithHr = selectedHours
-        ? gym.price * selectedHours.value
-        : gym.price;
+        ? gym.hourly_rate * selectedHours.value
+        : gym.hourly_rate;
 
     const [error, setError] = useState({ type: "", message: "" });
 
@@ -89,7 +80,8 @@ export default function PickHoursSheet({ open, onClose, defaultDate, defaultHour
             const currentHour = now.getHours();
             const endHour = currentHour + duration;
 
-            return endHour > gymCloseHour;
+            const closeTimeHour = gym?.close_time ? parseInt(gym.close_time.split(":")[0], 10) : 24;
+            return endHour > closeTimeHour;
         }
 
         return false;
@@ -119,6 +111,7 @@ export default function PickHoursSheet({ open, onClose, defaultDate, defaultHour
         const bookingData = {
             selectedDate,
             selectedHours,
+            id
             // reopenSheet: true
         };
         localStorage.setItem("bookingData", JSON.stringify(bookingData));
@@ -130,6 +123,23 @@ export default function PickHoursSheet({ open, onClose, defaultDate, defaultHour
 
         window.scrollTo(0, 0);
     };
+
+    function formatTime12Hour(time24: string | undefined) {
+        const [hourStr, minuteStr] = time24?.split(":") || [];
+        let hour = Number(hourStr);
+        const minute = minuteStr;
+        const ampm = hour >= 12 ? "PM" : "AM";
+
+        hour = hour % 12;
+        if (hour === 0) hour = 12;
+
+        return `${hour}:${minute} ${ampm}`;
+    }
+
+    const allPeaks = [
+        ...(gym?.peak_morning ?? []),
+        ...(gym?.peak_evening ?? []),
+    ];
 
     return (
         <BottomSheet
@@ -149,7 +159,7 @@ export default function PickHoursSheet({ open, onClose, defaultDate, defaultHour
 
                         <div className="space-y-2">
                             <p className="text-xs text-[#475569]">
-                                Gym timings : {formatTo12Hour(gymOpenHour)} - {formatTo12Hour(gymCloseHour)}
+                                Gym timings : {formatTime12Hour(gym.open_time)} - {formatTime12Hour(gym.close_time)}
                             </p>
 
                             <p className="text-xl font-bold">
@@ -249,9 +259,18 @@ export default function PickHoursSheet({ open, onClose, defaultDate, defaultHour
                 <div className="flex items-start gap-2 text-gray-600">
                     <FiUsers size={16} className="mt-1" />
                     <div>
-                        <p>
-                            <strong>Peak Hours :</strong> 6AM-9AM , 10AM-11AM
-                        </p>
+                        <div>
+                            <strong>Peak Hours :</strong>
+
+                            <div className="flex gap-2 flex-wrap">
+                                {allPeaks.map(([start, end], i) => (
+                                    <span key={i}>
+                                        {formatTime12Hour(start)} - {formatTime12Hour(end)}
+                                        {i !== allPeaks.length - 1 && ","}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
                         <p className="text-xs text-gray-500 mt-1">
                             (Workouts during peak hours may use more minutes)
                         </p>

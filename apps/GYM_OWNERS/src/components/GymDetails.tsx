@@ -95,6 +95,18 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
         return dates;
     }, [gym]);
 
+    function formatTime12Hour(time24: string) {
+        const [hourStr, minuteStr] = time24.split(":");
+        let hour = Number(hourStr);
+        const minute = minuteStr;
+        const ampm = hour >= 12 ? "PM" : "AM";
+
+        hour = hour % 12;
+        if (hour === 0) hour = 12;
+
+        return `${hour}:${minute} ${ampm}`;
+    }
+
     const [availability, setAvailability] = useState<
         { date: string; is_open: boolean }[]
     >([]);
@@ -213,27 +225,22 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
 
                 {/* Gym Name */}
                 <div>
-                    <h1 className="text-xl font-bold">{gym?.name}</h1>
+                    <div className="flex items-center justify-between gap-3">
+                        <div className="flex flex-col items-start gap-2">
+                            <h1 className="text-xl font-bold">{gym?.name}</h1>
 
-                    <div className="flex items-center justify-between gap-2">
-
-                        <div className="flex items-center text-sm text-gray-500 mt-1 gap-1">
-                            <HiLocationMarker size={14} />
-                            <span>{gym?.location}</span>
-                            <span>•</span>
-                            <span>Open Till {gym?.close_time}</span>
-                        </div>
-
-                        {/* Call & Map Buttons */}
-                        <div className="flex gap-3 mt-3">
-                            {/* <div className="bg-[#F1F5F9] text-[#94A3B8] p-2 rounded-lg">
-                            <MdPhone size={16} />
-                        </div> */}
-                            <div className="bg-[#F1F5F9] text-[#94A3B8] p-2 rounded-lg">
-                                <HiOutlineLocationMarker size={16} />
+                            <div className="flex flex-wrap items-center text-sm text-gray-500 mt-1 gap-1">
+                                <HiLocationMarker size={14} />
+                                <span>{gym?.location}</span>
+                                <span>•</span>
+                                <span>Open Till</span>
+                                <span>{formatTime12Hour(gym?.close_time)}</span>
                             </div>
                         </div>
 
+                        <div className="bg-[#F1F5F9] text-[#94A3B8] p-2 rounded-lg">
+                            <HiOutlineLocationMarker size={16} />
+                        </div>
                     </div>
 
                     {/* Tags */}

@@ -1,41 +1,43 @@
-import {
-    FaDumbbell,
-    FaShower,
-    FaLock,
-    FaRestroom,
-    FaParking,
-} from "react-icons/fa";
-import type { Facility } from "./types/gym";
 
 interface FacilityTagProps {
-    label: Facility | string;
+    amenity: {
+        name?: string;
+        icon?: string;
+    };
     onClick?: () => void;
 }
 
-const facilityIcons: Record<Facility, React.ReactNode> = {
-    Trainer: <FaDumbbell size={12} />,
-    Shower: <FaShower size={12} />,
-    Locker: <FaLock size={12} />,
-    Restroom: <FaRestroom size={12} />,
-    Parking: <FaParking size={12} />,
-};
-
 export default function FacilityTag({
-    label,
+    amenity,
     onClick,
 }: FacilityTagProps) {
-    const icon =
-        label in facilityIcons
-            ? facilityIcons[label as Facility]
-            : null;
+
+
+    const getIconUrl = (icon?: string) => {
+        if (!icon) return "";
+
+        // If it's already a full URL
+        if (icon.startsWith("http://") || icon.startsWith("https://")) {
+            return icon;
+        }
+
+        // Otherwise prepend base URL
+        return `https://api.viigo.in/${icon}`;
+    };
 
     return (
         <div
             onClick={onClick}
             className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-md text-xs cursor-pointer"
         >
-            {icon}
-            <span>{label}</span>
+            {amenity?.icon && (
+                <img
+                    src={getIconUrl(amenity.icon)}
+                    alt={amenity?.name}
+                    className="w-3 h-3 object-contain"
+                />
+            )}
+            <span>{amenity?.name}</span>
         </div>
     );
 }

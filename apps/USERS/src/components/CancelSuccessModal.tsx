@@ -3,8 +3,12 @@ import { FiInfo } from "react-icons/fi";
 
 export default function CancelSuccessModal({
     onClose,
+    price,
+    total
 }: {
     onClose: () => void;
+    price: number,
+    total: number
 }) {
     return (
         <div className="fixed inset-0 bg-black/40 flex justify-center z-50">
@@ -35,7 +39,7 @@ export default function CancelSuccessModal({
 
                         <div className="flex justify-between text-sm text-[#6A6A6A]">
                             <span>Total Paid</span>
-                            <span className="text-black">Rs. 400</span>
+                            <span className="text-black">Rs. {price}</span>
                         </div>
 
                         <div className="flex justify-between text-sm text-[#6A6A6A] mt-1">
@@ -45,7 +49,7 @@ export default function CancelSuccessModal({
 
                         <div className="flex justify-between text-sm font-normal mt-5">
                             <span>Total Refund Amount</span>
-                            <span>Rs.400</span>
+                            <span>Rs.{total}</span>
                         </div>
                     </div>
 
