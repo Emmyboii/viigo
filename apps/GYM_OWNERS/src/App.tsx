@@ -73,7 +73,7 @@ function App() {
             path="/"
             element={
               <ProtectedRoute>
-                <GymOwnerHome gym={selectedGym} />
+                <GymOwnerHome />
               </ProtectedRoute>
             }
           />
