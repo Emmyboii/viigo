@@ -28,43 +28,43 @@ const chipData = [
   { id: "cancelled", label: "Cancelled" },
 ];
 
-interface Amenity {
-  id: number;
-  name: string;
-  icon: string;
-}
+// interface Amenity {
+//   id: number;
+//   name: string;
+//   icon: string;
+// }
 
-interface Rule {
-  id: number;
-  description: string;
-}
+// interface Rule {
+//   id: number;
+//   description: string;
+// }
 
-interface GymType {
-  id: string;
-  name: string;
-  hourly_rate: string;
-  phone_number: string;
-  location: string;
-  open_time: string;
-  close_time: string;
-  longitude: string;
-  latitude: string;
-  amenities: Amenity[];
-  rules: Rule[];
-  images: { id: number; image: string }[];
+// interface GymType {
+//   id: string;
+//   name: string;
+//   hourly_rate: string;
+//   phone_number: string;
+//   location: string;
+//   open_time: string;
+//   close_time: string;
+//   longitude: string;
+//   latitude: string;
+//   amenities: Amenity[];
+//   rules: Rule[];
+//   images: { id: number; image: string }[];
 
-  peak_morning?: [string, string][];
-  peak_evening?: [string, string][];
-  calendar_availability?: []
+//   peak_morning?: [string, string][];
+//   peak_evening?: [string, string][];
+//   calendar_availability?: []
 
-  owner_email: string
-}
+//   owner_email: string
+// }
 
-interface GymProps {
-  gym?: GymType | null;
-}
+// interface GymProps {
+//   gym?: GymType | null;
+// }
 
-const GymOwnerHome = ({ gym }: GymProps) => {
+const GymOwnerHome = () => {
 
   const navigate = useNavigate();
 
@@ -183,7 +183,7 @@ const GymOwnerHome = ({ gym }: GymProps) => {
     <>
       {!selectedUser && (
         <Container>
-          <Header gym={gym} />
+          <Header />
 
           {toast && <Toast type={toast.type} text={toast.message} onClose={handleToastClose} />}
 

@@ -5,7 +5,7 @@ import { useAppContext } from "../context/AppContext";
 
 export default function Header() {
 
-    const { hasUnread,selectedGym } = useAppContext();
+    const { hasUnread, selectedGym } = useAppContext();
 
 
     const navigate = useNavigate();

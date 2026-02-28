@@ -201,12 +201,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             setSearchLoading(true);
 
             const res = await fetch(
-                `${backendUrl}/client/gyms/search/?name=${query}`
+                `${backendUrl}/client/gyms/search/?search=${query}`
             );
 
             const data = await res.json();
 
-            setSearchResults(data);
+            setSearchResults(data.data);
         } catch (error) {
             console.error(error);
         } finally {
