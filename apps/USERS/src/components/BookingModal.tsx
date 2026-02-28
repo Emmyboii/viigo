@@ -140,8 +140,8 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
 
 
     const allPeaks = [
-        ...(gym?.peak_morning ?? []),
-        ...(gym?.peak_evening ?? []),
+        ...(Array.isArray(gym?.peak_morning) ? gym.peak_morning : []),
+        ...(Array.isArray(gym?.peak_evening) ? gym.peak_evening : []),
     ];
 
     const totalWithHr = (hours && gym)
@@ -231,7 +231,7 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
                 {/* Gym Header */}
                 <div className="flex gap-3">
                     <img
-                        src={gym?.images[0].image}
+                        src={gym?.images[0]?.image}
                         alt=""
                         className="w-[110px] h-[110px] rounded object-cover"
                     />

@@ -137,8 +137,8 @@ export default function PickHoursSheet({ open, onClose, defaultDate, defaultHour
     }
 
     const allPeaks = [
-        ...(gym?.peak_morning ?? []),
-        ...(gym?.peak_evening ?? []),
+        ...(Array.isArray(gym?.peak_morning) ? gym.peak_morning : []),
+        ...(Array.isArray(gym?.peak_evening) ? gym.peak_evening : []),
     ];
 
     return (

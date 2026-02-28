@@ -5,19 +5,11 @@ import {
     type GymType,
     type UserType,
     type DisplayType,
-    type Booking
+    type Booking,
+    type NotificationType
 } from "./AppContext";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
-
-interface NotificationType {
-    id: number;
-    title: string;
-    message: string;
-    notification_type: "SESSION" | "PAYMENT" | "SYSTEM" | "PROMO";
-    is_read: boolean;
-    created_at: string;
-}
 
 // provider
 export const AppProvider = ({ children }: { children: ReactNode }) => {
@@ -26,9 +18,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [loading, setLoading] = useState(true);
 
     const [userData, setUserData] = useState<UserType | null>(null);
-    const [hasUnread, setHasUnread] = useState(false);
-
+    const [notifications, setNotifications] = useState<NotificationType[]>([]);
     const [display, setDisplay] = useState<DisplayType>("details");
+
+    const hasUnread = notifications.some(n => !n.is_read);
 
     useEffect(() => {
         const stored = localStorage.getItem("gymDisplay");
@@ -40,6 +33,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [selectedGym, setSelectedGym] = useState<GymType | null>(null);
     const [bookings, setBookings] = useState<Booking[]>([]);
+    const [notificationsLoading, setNotificationsLoading] = useState(true);
 
     useEffect(() => {
         localStorage.setItem("gymDisplay", display);
@@ -103,6 +97,33 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [request]);
 
+    const fetchNotifications = useCallback(async () => {
+        setNotificationsLoading(true);
+        try {
+
+            const token = localStorage.getItem("token");
+
+            if (!token) return
+
+            const res = await fetch(`${backendUrl}/notification/notifications/`, {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                },
+            });
+
+            const data = await res.json()
+            const notificationsData: NotificationType[] = data.data || [];
+
+            setNotifications(notificationsData);
+
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setNotificationsLoading(false);
+        }
+    }, []);
+
     const fetchBookings = useCallback(async () => {
         setIsLoading(true);
         try {
@@ -111,24 +132,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
 
             setBookings(bookings);
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setIsLoading(false);
-        }
-    }, [request]);
-
-    const fetchNotifications = useCallback(async () => {
-        setIsLoading(true);
-        try {
-            const data = await request("/notification/notifications/");
-            const notifications: NotificationType[] = data.data || [];
-
-            const unreadExists = notifications.some(
-                (item) => !item.is_read
-            );
-
-            setHasUnread(unreadExists);
         } catch (err) {
             console.error(err);
         } finally {
@@ -153,6 +156,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     useEffect(() => {
         fetchBookings()
     }, [fetchBookings]);
+
+    useEffect(() => {
+        fetchNotifications()
+    }, [fetchNotifications]);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -198,10 +205,13 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                 setIsLoading,
                 display,
                 setDisplay,
-                setHasUnread,
                 hasUnread,
+                notifications,
+                setNotifications,
                 setBookings,
                 bookings,
+                setNotificationsLoading,
+                notificationsLoading,
 
                 fetchBookings,
                 fetchUser,

@@ -23,14 +23,14 @@ export default function GymCard({ gym }: GymCardProps) {
 
     return (
         <div className="bg-white rounded-md shadow-md overflow-hidden">
-            <ImageCarousel images={gym.images} />
+            <ImageCarousel images={gym?.images} />
 
             <div className="p-4">
-                <h3 className="font-semibold">{gym.name}</h3>
+                <h3 className="font-semibold">{gym?.name}</h3>
 
                 <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
                     <HiLocationMarker className="text-[#475569] text-sm" />
-                    {gym.distance}, {gym.location} <GoDotFill /> {gym.open_status}
+                    {gym?.distance}, {gym?.location} <GoDotFill /> {gym?.open_status}
                 </p>
 
                 <div className="flex gap-2 mt-3 flex-wrap">
@@ -38,7 +38,7 @@ export default function GymCard({ gym }: GymCardProps) {
                         <FacilityTag key={index} amenity={amenity} />
                     ))}
 
-                    {!showAll && gym.amenities.length > 2 && (
+                    {!showAll && gym?.amenities.length > 2 && (
                         <div
                             onClick={() => setShowAll(true)}
                             className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-md text-xs cursor-pointer"
@@ -49,9 +49,9 @@ export default function GymCard({ gym }: GymCardProps) {
                 </div>
 
                 <div className="flex justify-between items-center mt-4">
-                    <span className="font-semibold text-lg">₹{gym.hourly_rate}/Hr</span>
+                    <span className="font-semibold text-lg">₹{gym?.hourly_rate}/Hr</span>
                     <button onClick={() => {
-                        navigate(`/gyms/${gym.slug}`)
+                        navigate(`/gyms/${gym?.slug}`)
                         window.scrollTo(0, 0);
                     }}
                         className="text-blue-600 text-sm font-medium"

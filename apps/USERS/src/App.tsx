@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom"
+import { Route, Routes, useLocation } from "react-router-dom"
 import AuthPage from "./pages/AuthPage"
 import Loader from './components/Loader';
 import UserHome from "./pages/UserHome";
@@ -21,10 +21,21 @@ import { useAppContext } from "./context/AppContext";
 import Explore from "./pages/Explore";
 import Recommended from "./pages/Recommended";
 import NearBy from "./pages/NearBy";
+import { useEffect } from "react";
 
-function App() {  
+function App() {
 
-   const { loading, userData } = useAppContext();
+  const { loading, userData } = useAppContext();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (
+      !location.pathname.startsWith("/reviewpay") &&
+      !location.pathname.startsWith("/gyms/")
+    ) {
+      localStorage.removeItem("bookingData");
+    }
+  }, [location.pathname]);
 
   return (
     <div className="font-manrope relative">

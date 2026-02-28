@@ -79,9 +79,9 @@ export default function UserHome() {
                 </p>
             ) : (
                 <div className="overflow-hidden py-2" ref={emblaRef}>
-                    <div className="flex gap-4">
+                    <div className="flex gap-4 embla__container">
                         {recommendedGyms.map((gym, index) => (
-                            <div key={index} className={`${recommendedGyms.length === 1 ? "" : "flex-[0_0_85%] "}`}>
+                            <div key={index} className={`embla__slide ${recommendedGyms.length === 1 ? "" : "flex-[0_0_85%] "}`}>
                                 <GymCard gym={gym} />
                             </div>
                         ))}

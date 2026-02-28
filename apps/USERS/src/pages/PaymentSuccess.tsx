@@ -251,7 +251,14 @@ export default function PaymentSuccess({ onClose, gym }: PaymentSuccessProps) {
         const fetchBookings = async () => {
             setBookingLoading(true);
             try {
-                const res = await fetch(`${backendUrl}/client/bookings/my-bookings/`);
+                const res = await fetch(`${backendUrl}/client/bookings/my-bookings/`, {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: localStorage.getItem("token")
+                            ? `Bearer ${localStorage.getItem("token")}`
+                            : "",
+                    },
+                });
                 const data = await res.json();
 
                 const lastBookingId = localStorage.getItem("lastBookingId");
@@ -310,8 +317,8 @@ export default function PaymentSuccess({ onClose, gym }: PaymentSuccessProps) {
 
 
     const allPeaks = [
-        ...(gym?.peak_morning ?? []),
-        ...(gym?.peak_evening ?? []),
+        ...(Array.isArray(gym?.peak_morning) ? gym.peak_morning : []),
+        ...(Array.isArray(gym?.peak_evening) ? gym.peak_evening : []),
     ];
 
     const totalWithHr = (hours && gym)
@@ -360,7 +367,7 @@ export default function PaymentSuccess({ onClose, gym }: PaymentSuccessProps) {
                 {/* Gym Header */}
                 <div className="flex gap-3">
                     <img
-                        src={gym?.images[0].image}
+                        src={gym?.images[0]?.image}
                         alt=""
                         className="w-[110px] h-[110px] rounded object-cover"
                     />

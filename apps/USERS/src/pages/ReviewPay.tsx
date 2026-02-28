@@ -611,10 +611,9 @@ export default function ReviewPay() {
     };
 
     const allPeaks = [
-        ...(gym?.peak_morning ?? []),
-        ...(gym?.peak_evening ?? []),
+        ...(Array.isArray(gym?.peak_morning) ? gym.peak_morning : []),
+        ...(Array.isArray(gym?.peak_evening) ? gym.peak_evening : []),
     ];
-
     const closingTime = gym?.close_time
 
 
@@ -671,15 +670,16 @@ export default function ReviewPay() {
                 body: JSON.stringify(payload),
             });
 
+            const data = await res.json();
+
             if (!res.ok) {
-                throw new Error("Booking failed");
+                throw data;
             }
 
-            const data = await res.json();
             console.log("Booking success:", data);
 
             localStorage.setItem("paymentSuccess", "true");
-            localStorage.setItem("lastBookingId", data.data.id);
+            localStorage.setItem("lastBookingId", data.data.gym);
 
             // ✅ Show success modal AFTER API success
             setShowSuccess(true);
@@ -690,10 +690,33 @@ export default function ReviewPay() {
                 window.scrollTo(0, 0);
             }, 3000);
 
-        } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : "Something went wrong";
+        } catch (error: unknown) {
+            let errorMessage = "Something went wrong";
+
+            if (error instanceof Error) {
+                // Generic JS/network error
+                errorMessage = error.message;
+            } else if (typeof error === "object" && error !== null) {
+                const err = error as {
+                    data?: Record<string, string[]>;
+                    message?: string;
+                    non_field_errors?: string[];
+                };
+
+                // Prefer non_field_errors
+                if (err.data) {
+                    // Flatten first error from any field
+                    const fieldErrors = Object.values(err.data).flat();
+                    if (fieldErrors.length) errorMessage = fieldErrors[0];
+                } else if (err.non_field_errors?.length) {
+                    errorMessage = err.non_field_errors[0];
+                } else if (err.message) {
+                    errorMessage = err.message;
+                }
+            }
+
             setToast({ type: "error", message: errorMessage });
-            setTimeout(() => setToast(null), 2000);
+            setTimeout(() => setToast(null), 3400);
         }
     };
 
@@ -728,203 +751,207 @@ export default function ReviewPay() {
 
     return (
         <div className="pb-36 min-h-screen">
+            {!showSecondSuccess && (
 
-            {/* ===== Header ===== */}
-            <PageHeader text="Review and Pay" />
+                <div>
+                    {/* ===== Header ===== */}
+                    <PageHeader text="Review and Pay" />
 
-            <div className="pt-14" />
+                    <div className="pt-14" />
 
-            <div className="p-4 space-y-4 relative">
+                    <div className="p-4 space-y-4 relative">
 
-                {toast && <Toast type={toast.type} text={toast.message} onClose={handleToastClose} />}
+                        {toast && <Toast type={toast.type} text={toast.message} onClose={handleToastClose} />}
 
 
-                {/* ===== Gym Summary Card ===== */}
-                <div className="bg-white rounded-xl border flex gap-1 min-h-[130px]">
-                    <img
-                        src={gym?.images[0].image}
-                        alt={gym?.name}
-                        className="w-[85px] min-h-full rounded-tl-lg rounded-bl-lg object-cover"
-                    />
+                        {/* ===== Gym Summary Card ===== */}
+                        <div className="bg-white rounded-xl border flex gap-1 min-h-[130px]">
+                            <img
+                                src={gym?.images[0]?.image}
+                                alt={gym?.name}
+                                className="w-[85px] min-h-full rounded-tl-lg rounded-bl-lg object-cover"
+                            />
 
-                    <div className="flex-1 p-3">
-                        <h2 className="font-semibold">{gym?.name}</h2>
+                            <div className="flex-1 p-3">
+                                <h2 className="font-semibold">{gym?.name}</h2>
 
-                        <div className="flex items-center text-xs text-gray-500 gap-1 mt-2 flex-wrap">
-                            <HiLocationMarker size={12} />
-                            <span>{gym?.distance} {gym?.location}</span>
-                            <span>•</span>
-                            <span>{gym?.open_status || `Open Till ${formatTime12Hour(gym?.close_time)}`}</span>
-                        </div>
+                                <div className="flex items-center text-xs text-gray-500 gap-1 mt-2 flex-wrap">
+                                    <HiLocationMarker size={12} />
+                                    <span>{gym?.distance} {gym?.location}</span>
+                                    <span>•</span>
+                                    <span>{gym?.open_status || `Open Till ${formatTime12Hour(gym?.close_time)}`}</span>
+                                </div>
 
-                        <div className="flex gap-2 mt-2 flex-wrap">
-                            {visibleAmenities?.map((amenity, index) => (
-                                <FacilityTag key={index} amenity={amenity} />
-                            ))}
-                        </div>
+                                <div className="flex gap-2 mt-2 flex-wrap">
+                                    {visibleAmenities?.map((amenity, index) => (
+                                        <FacilityTag key={index} amenity={amenity} />
+                                    ))}
+                                </div>
 
-                        <div className="flex items-center gap-2 mt-4">
-                            <p className="font-semibold">₹{Number(gym?.hourly_rate)}/Hr</p>
-                            <span className="text-xs bg-[#22C55E] text-white px-2 py-1 rounded-full">
-                                Confirmed
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* ===== Selected Pass ===== */}
-                <div className="bg-white rounded-xl border p-4 space-y-4">
-
-                    <div className="flex justify-between items-start">
-                        <div>
-                            <h3 className="font-semibold">Selected Pass</h3>
-
-                            <div className="flex items-center gap-1 text-sm text-gray-600 mt-2">
-                                <HiOutlineCalendar size={14} />
-                                <span>{formattedShortDate}</span>
-                                <span>•</span>
-                                <span>{selectedHours?.label}</span>
-                            </div>
-
-                            <div className="flex items-center gap-2 text-sm text-gray-600 mt-2">
-                                <PiIdentificationCardBold size={14} />
-                                <span>Enter anytime during the day</span>
-                            </div>
-                        </div>
-
-                        <button
-                            onClick={() =>
-                                navigate(`/gyms/${gym?.slug}`, {
-                                    state: { reopenSheet: true }
-                                })}
-                            className="text-sm text-[#2563EB] bg-[#DBEAFE] px-3 py-1 font-medium rounded-md"
-                        >
-                            Change
-                        </button>
-                    </div>
-
-                    <hr />
-
-                    {/* Gym timings */}
-                    <div>
-                        <h4 className="font-medium">Gym timings</h4>
-
-                        <div className="flex items-center gap-2 text-sm text-gray-600 mt-2">
-                            <IoTimeOutline size={14} />
-                            <span>{formatTime12Hour(gym?.open_time)} – {formatTime12Hour(gym?.close_time)} </span>
-                        </div>
-                    </div>
-
-                    <hr />
-
-                    {/* Peak hours */}
-                    <div>
-                        <h4 className="font-medium">Peak hours</h4>
-
-                        <div className="flex items-center gap-2 text-sm text-gray-600 mt-2">
-                            <IoPeopleOutline size={14} />
-
-                            <div className="flex gap-2 flex-wrap">
-                                {allPeaks.map(([start, end], i) => (
-                                    <span key={i}>
-                                        {formatTime12Hour(start)} - {formatTime12Hour(end)}
-                                        {i !== allPeaks.length - 1 && ","}
+                                <div className="flex items-center gap-2 mt-4">
+                                    <p className="font-semibold">₹{Number(gym?.hourly_rate)}/Hr</p>
+                                    <span className="text-xs bg-[#22C55E] text-white px-2 py-1 rounded-full">
+                                        Confirmed
                                     </span>
-                                ))}
+                                </div>
                             </div>
                         </div>
 
-                        <div className="flex items-start gap-2 text-xs text-gray-500 mt-2">
-                            <IoInformationCircleOutline size={14} />
-                            <span>
-                                Workouts during peak hours may use more minutes
-                            </span>
+                        {/* ===== Selected Pass ===== */}
+                        <div className="bg-white rounded-xl border p-4 space-y-4">
+
+                            <div className="flex justify-between items-start">
+                                <div>
+                                    <h3 className="font-semibold">Selected Pass</h3>
+
+                                    <div className="flex items-center gap-1 text-sm text-gray-600 mt-2">
+                                        <HiOutlineCalendar size={14} />
+                                        <span>{formattedShortDate}</span>
+                                        <span>•</span>
+                                        <span>{selectedHours?.label}</span>
+                                    </div>
+
+                                    <div className="flex items-center gap-2 text-sm text-gray-600 mt-2">
+                                        <PiIdentificationCardBold size={14} />
+                                        <span>Enter anytime during the day</span>
+                                    </div>
+                                </div>
+
+                                <button
+                                    onClick={() =>
+                                        navigate(`/gyms/${gym?.slug}`, {
+                                            state: { reopenSheet: true }
+                                        })}
+                                    className="text-sm text-[#2563EB] bg-[#DBEAFE] px-3 py-1 font-medium rounded-md"
+                                >
+                                    Change
+                                </button>
+                            </div>
+
+                            <hr />
+
+                            {/* Gym timings */}
+                            <div>
+                                <h4 className="font-medium">Gym timings</h4>
+
+                                <div className="flex items-center gap-2 text-sm text-gray-600 mt-2">
+                                    <IoTimeOutline size={14} />
+                                    <span>{formatTime12Hour(gym?.open_time)} – {formatTime12Hour(gym?.close_time)} </span>
+                                </div>
+                            </div>
+
+                            <hr />
+
+                            {/* Peak hours */}
+                            <div>
+                                <h4 className="font-medium">Peak hours</h4>
+
+                                <div className="flex items-center gap-2 text-sm text-gray-600 mt-2">
+                                    <IoPeopleOutline size={14} />
+
+                                    <div className="flex gap-2 flex-wrap">
+                                        {allPeaks.map(([start, end], i) => (
+                                            <span key={i}>
+                                                {formatTime12Hour(start)} - {formatTime12Hour(end)}
+                                                {i !== allPeaks.length - 1 && ","}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="flex items-start gap-2 text-xs text-gray-500 mt-2">
+                                    <IoInformationCircleOutline size={14} />
+                                    <span>
+                                        Workouts during peak hours may use more minutes
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* ===== Price Breakdown ===== */}
+                        <div className="space-y-2 text-sm text-gray-700 mt-2">
+                            <h3 className="font-semibold text-gray-800 mb-2">
+                                Price Breakdown
+                            </h3>
+
+                            <div className="flex justify-between">
+                                <span>{selectedHours.label}</span>
+                                <span>Rs. {totalWithHr}</span>
+                            </div>
+
+                            <div className="flex justify-between">
+                                <span>Platform Fee</span>
+                                <span>Rs. {platformFee}</span>
+                            </div>
+
+                            <div className="flex justify-between">
+                                <span>GST on Platform Fee</span>
+                                <span>Rs. {gst}</span>
+                            </div>
+
+                            <hr className="border-dashed my-2" />
+
+                            <div className="flex justify-between font-semibold text-base">
+                                <span>Total</span>
+                                <span>Rs. {total}</span>
+                            </div>
                         </div>
                     </div>
+
+                    {/* ===== Sticky Bottom Pay Bar ===== */}
+                    <div className="fixed bottom-0 left-0 right-0 bg-white">
+                        <div className="bg-blue-50 text-blue-700 text-sm px-4 py-3 font-medium text-center">
+                            Last entry for selected duration: {lastEntryTime}
+                        </div>
+
+                        <div className="flex justify-between items-center px-4 py-5">
+                            <div>
+                                <p className="text-xs text-[#475569] font-medium mb-2">
+                                    Valid on {formattedLongDate}
+                                </p>
+
+                                <p className="text-xl font-bold">
+                                    ₹{total}/{selectedHours?.label}
+                                </p>
+                            </div>
+
+                            <button
+                                onClick={handlePayment}
+                                className="bg-blue-600 text-white px-6 py-3 w-[163px] text-xs rounded-md font-medium"
+                            >
+                                Pay Using Razorpay
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Success Modal */}
+                    <AnimatePresence>
+                        {showSuccess && (
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="fixed inset-0 bg-blue-500 z-50 flex items-center justify-center"
+                            >
+                                <motion.div
+                                    initial={{ scale: 0.5 }}
+                                    animate={{ scale: 1 }}
+                                    transition={{ duration: 0.5 }}
+                                    className="text-white p-8 w-80 text-center"
+                                >
+                                    <FaCheckCircle className="text-green-500 text-[85px] mx-auto mb-3" />
+                                    <h2 className="text-lg font-semibold mb-2">
+                                        Payment Successful
+                                    </h2>
+                                    <p className="text-sm font-normal text-[#EBEBEB]">
+                                        You will be redirected to the booking confirmation page.
+                                    </p>
+                                </motion.div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
-
-                {/* ===== Price Breakdown ===== */}
-                <div className="space-y-2 text-sm text-gray-700 mt-2">
-                    <h3 className="font-semibold text-gray-800 mb-2">
-                        Price Breakdown
-                    </h3>
-
-                    <div className="flex justify-between">
-                        <span>{selectedHours.label}</span>
-                        <span>Rs. {totalWithHr}</span>
-                    </div>
-
-                    <div className="flex justify-between">
-                        <span>Platform Fee</span>
-                        <span>Rs. {platformFee}</span>
-                    </div>
-
-                    <div className="flex justify-between">
-                        <span>GST on Platform Fee</span>
-                        <span>Rs. {gst}</span>
-                    </div>
-
-                    <hr className="border-dashed my-2" />
-
-                    <div className="flex justify-between font-semibold text-base">
-                        <span>Total</span>
-                        <span>Rs. {total}</span>
-                    </div>
-                </div>
-            </div>
-
-            {/* ===== Sticky Bottom Pay Bar ===== */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white">
-                <div className="bg-blue-50 text-blue-700 text-sm px-4 py-3 font-medium text-center">
-                    Last entry for selected duration: {lastEntryTime}
-                </div>
-
-                <div className="flex justify-between items-center px-4 py-5">
-                    <div>
-                        <p className="text-xs text-[#475569] font-medium mb-2">
-                            Valid on {formattedLongDate}
-                        </p>
-
-                        <p className="text-xl font-bold">
-                            ₹{total}/{selectedHours?.label}
-                        </p>
-                    </div>
-
-                    <button
-                        onClick={handlePayment}
-                        className="bg-blue-600 text-white px-6 py-3 w-[163px] text-xs rounded-md font-medium"
-                    >
-                        Pay Using Razorpay
-                    </button>
-                </div>
-            </div>
-
-            {/* Success Modal */}
-            <AnimatePresence>
-                {showSuccess && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 bg-blue-500 z-50 flex items-center justify-center"
-                    >
-                        <motion.div
-                            initial={{ scale: 0.5 }}
-                            animate={{ scale: 1 }}
-                            transition={{ duration: 0.5 }}
-                            className="text-white p-8 w-80 text-center"
-                        >
-                            <FaCheckCircle className="text-green-500 text-[85px] mx-auto mb-3" />
-                            <h2 className="text-lg font-semibold mb-2">
-                                Payment Successful
-                            </h2>
-                            <p className="text-sm font-normal text-[#EBEBEB]">
-                                You will be redirected to the booking confirmation page.
-                            </p>
-                        </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+            )}
 
             {/* Second Success Modal */}
             {showSecondSuccess && (

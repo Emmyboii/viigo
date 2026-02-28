@@ -43,7 +43,6 @@ export default function Notifications({ Loading = false }: { Loading?: boolean }
         message: string;
     } | null>(null);
 
-
     useEffect(() => {
         if (!toast) return;
 

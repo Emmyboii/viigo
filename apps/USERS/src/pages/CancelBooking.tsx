@@ -235,7 +235,7 @@ export default function CancelBooking() {
             <div className="bg-white rounded shadow-sm border">
                 <div className="flex">
                     <img
-                        src={gym?.images[0].image}
+                        src={gym?.images[0]?.image}
                         alt="gym"
                         className="w-20 h-auto rounded-tl rounded-bl object-cover"
                     />

@@ -52,6 +52,24 @@ export type Booking = {
     status: "PENDING" | "CONFIRMED" | "CANCELLED";
 };
 
+type NotificationTypeEnum =
+    | "SESSION"
+    | "PAYMENT"
+    | "SYSTEM"
+    | "PROMO"
+    | "NEW_BOOKING_RECEIVED"
+    | "BOOKING_CREATED";
+
+
+export interface NotificationType {
+    id: number;
+    title: string;
+    message: string;
+    notification_type: NotificationTypeEnum;
+    is_read: boolean;
+    created_at: string;
+}
+
 export type DisplayType = "details" | "edit" | "create";
 
 export type AppContextType = {
@@ -68,8 +86,13 @@ export type AppContextType = {
     setLoading: React.Dispatch<React.SetStateAction<boolean>>;
     isLoading: boolean;
     setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+
+    notificationsLoading: boolean;
+    setNotificationsLoading: React.Dispatch<React.SetStateAction<boolean>>;
     hasUnread: boolean;
-    setHasUnread: React.Dispatch<React.SetStateAction<boolean>>;
+
+    notifications: NotificationType[];
+    setNotifications: React.Dispatch<React.SetStateAction<NotificationType[]>>;
 
     bookings: Booking[];
     setBookings: (bookings: Booking[]) => void;
