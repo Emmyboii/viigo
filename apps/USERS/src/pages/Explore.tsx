@@ -7,6 +7,7 @@ import Footer from "../components/Footer";
 import MapView from "../components/MapView";
 import { IoArrowBack, IoSearchSharp } from "react-icons/io5";
 import FilterModal from "../components/FilterModal";
+import { HiFilter } from "react-icons/hi";
 
 export default function Explore() {
     const {
@@ -65,21 +66,30 @@ export default function Explore() {
         <div className="relative h-screen bg-white">
             {/* MAP VIEW */}
             {view === "map" && (
-                <div className="relative h-full">
+                <div className="relative h-full bg-white">
+
                     <MapView />
 
-                    {/* Floating Search */}
+                    {/* Search Bar */}
                     <div
-                        onClick={() =>
-                            setShowSearch(true)
-                        }
-                        className="absolute top-6 left-4 right-4 bg-white rounded-xl px-4 py-4 flex items-center shadow-md cursor-pointer"
+                        onClick={() => setShowSearch(true)}
+                        className="absolute top-6 left-4 right-16 mr-2 border-[#94A3B8] border bg-white rounded-2xl px-4 py-4 flex items-center shadow-md cursor-pointer"
                     >
-                        <IoSearchSharp className="mr-2 text-xl text-gray-500" />
-                        <p className="text-sm text-gray-700">
+                        <IoSearchSharp className="mr-3 text-xl text-gray-500" />
+                        <p className="text-sm text-gray-500">
                             Search for Hourly Gyms
                         </p>
                     </div>
+
+                    {/* Filter Button */}
+                    <button
+                        title="filter"
+                        onClick={() => setShowFilter(true)}
+                        className="absolute top-6 right-4 bg-white w-12 h-12 rounded-full text-[#94A3B8] border border-[#94A3B8] shadow-md flex items-center justify-center"
+                    >
+                        <HiFilter />
+                    </button>
+
                 </div>
             )}
 

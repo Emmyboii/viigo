@@ -41,8 +41,11 @@ const Profile = ({ user }: UserProps) => {
         } catch (err) {
             console.error("Logout failed", err);
         } finally {
-            localStorage.removeItem("token");
-            localStorage.removeItem("tokenTimestamp");
+            const recentSearches = localStorage.getItem("recentSearches");
+            localStorage.clear();
+            if (recentSearches) {
+                localStorage.setItem("recentSearches", recentSearches);
+            }
             setIsLoggingOut(false);
             setShowLogoutModal(false);
             navigate("/login");

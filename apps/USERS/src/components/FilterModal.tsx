@@ -43,7 +43,7 @@ export default function FilterModal({ onClose, onApply }: Props) {
     };
 
     return (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-end">
+        <div className="fixed z-50 inset-0 bg-black/40 flex items-end">
             <div className="bg-white w-full rounded-t-2xl p-4 max-h-[90%] overflow-y-auto">
 
                 {/* Header */}

@@ -458,7 +458,11 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         }
 
         const timer = setTimeout(() => {
+            const recentSearches = localStorage.getItem("recentSearches");
             localStorage.clear();
+            if (recentSearches) {
+                localStorage.setItem("recentSearches", recentSearches);
+            }
             navigate("/login");
         }, remainingTime);
 
