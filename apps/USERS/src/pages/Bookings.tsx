@@ -24,10 +24,10 @@ export type Booking = {
 const Bookings = () => {
 
     const chipData = [
-        { id: "upcoming", label: "Upcoming" },
-        { id: "past", label: "Past" },
-        { id: "cancelled", label: "Cancelled" },
-        { id: "all", label: "All" },
+        { id: "upcoming", label: "Upcoming", icon: '' },
+        { id: "past", label: "Past", icon: '' },
+        { id: "cancelled", label: "Cancelled", icon: '' },
+        { id: "all", label: "All", icon: '' },
     ];
 
     const backendUrl = import.meta.env.VITE_BACKEND_URL;

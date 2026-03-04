@@ -1,3 +1,5 @@
+import { useLocation } from "react-router-dom";
+
 interface ChipItem {
     id: string;
     label: string;
@@ -15,11 +17,17 @@ interface ChipProps {
 //         ? "bg-[#DBEAFE] border-[#2563EB] text-[#2563EB]"
 //         : "bg-[#F1F5F9] border-[#CBD5E1] text-[#0F172A]"}
 
-export function Chip({ label, onClick, icon }: ChipProps) {
+export function Chip({ label, onClick, icon, active }: ChipProps) {
+
+    const location = useLocation()
     return (
         <button
             onClick={onClick}
-            className={`px-3 py-1.5 rounded-lg bg-[#F1F5F9] border-[#CBD5E1] text-[13px] flex items-center gap-2 justify-center border w-full text-nowrap transition`}
+            className={`px-3 py-1.5 rounded-lg text-[13px] flex items-center gap-2 justify-center border w-full text-nowrap transition
+                  ${active && location.pathname === '/bookings'
+                    ? "bg-[#DBEAFE] border-[#2563EB] text-[#2563EB]"
+                    : "bg-[#F1F5F9] border-[#CBD5E1] text-[#0F172A]"}
+                `}
         >
             {icon}
             {label}
