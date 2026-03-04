@@ -1,26 +1,28 @@
-import { useState } from "react";
-import { IoClose } from "react-icons/io5";
+import { useEffect, useState } from "react";
+import { IoArrowBack } from "react-icons/io5";
+import { useAppContext } from "../context/AppContext";
+
 
 type Props = {
+    filters: any;
     onClose: () => void;
     onApply: (filters: any) => void;
 };
 
-export default function FilterModal({ onClose, onApply }: Props) {
-    const [sort, setSort] = useState("price_high");
-    const [radius, setRadius] = useState(5);
-    const [price, setPrice] = useState("250+");
-    const [amenities, setAmenities] = useState<string[]>([]);
+export default function FilterModal({ filters, onClose, onApply }: Props) {
 
-    const toggleAmenity = (item: string) => {
-        setAmenities((prev) =>
-            prev.includes(item)
-                ? prev.filter((a) => a !== item)
-                : [...prev, item]
-        );
-    };
+    const {
+        searchLoading,
+        searchResults,
+        fetchFilteredGyms,
+        amenities
+    } = useAppContext();
 
-    const handleApply = () => {
+    const [sort, setSort] = useState(filters.sort);
+    const [radius, setRadius] = useState(filters.radius);
+    const [amenitiesSelected, setAmenitiesSelected] = useState<string[]>(filters.amenities);
+
+    const buildFilters = () => {
         let min_price = "";
         let max_price = "";
 
@@ -33,120 +35,207 @@ export default function FilterModal({ onClose, onApply }: Props) {
             min_price = "250";
         }
 
-        onApply({
+        return {
             sort,
             radius,
             min_price,
             max_price,
-            amenities,
+            amenities: amenitiesSelected,
+        };
+    };
+
+    const toggleAmenity = (name: string) => {
+        setAmenitiesSelected((prev) =>
+            prev.includes(name)
+                ? prev.filter((a) => a !== name)
+                : [...prev, name]
+        );
+    };
+
+    const derivePrice = () => {
+        if (filters.min_price === "150" && filters.max_price === "250") {
+            return "150-250";
+        }
+        if (filters.min_price === "250") {
+            return "250+";
+        }
+        if (filters.max_price === "150") {
+            return "under150";
+        }
+        return "250+";
+    };
+
+    const [price, setPrice] = useState(derivePrice());
+
+    useEffect(() => {
+        fetchFilteredGyms(buildFilters());
+    }, [sort, radius, price, amenitiesSelected]);
+
+    const handleReset = () => {
+        setSort("price_high");
+        setRadius(5);
+        setPrice("250+");
+        setAmenitiesSelected([]);
+
+        fetchFilteredGyms({
+            sort: "price_high",
+            radius: 5,
+            min_price: "",
+            max_price: "",
+            amenities: [],
         });
     };
 
+    const filtersApplied =
+        (sort ? 1 : 0) +
+        (price ? 1 : 0) +
+        (radius !== 5 ? 1 : 0) +
+        amenitiesSelected.length;
+
     return (
-        <div className="fixed z-50 inset-0 bg-black/40 flex items-end">
-            <div className="bg-white w-full rounded-t-2xl p-4 max-h-[90%] overflow-y-auto">
+        <div className="fixed inset-0 z-50 bg-gray-50"
+            onClick={onClose}
+        >
+            <div
+                className="bg-white h-full flex flex-col"
+                onClick={(e) => e.stopPropagation()}
+            >
 
                 {/* Header */}
-                <div className="flex justify-between items-center mb-4">
-                    <h2 className="font-semibold text-lg">Filter</h2>
-                    <button title="close" onClick={onClose}>
-                        <IoClose size={22} />
+                <div className="flex items-center justify-between px-4 py-4 bg-white border-b">
+                    <div className="flex items-center gap-3">
+                        <IoArrowBack
+                            size={20}
+                            className="cursor-pointer"
+                            onClick={onClose}
+                        />
+                        <h2 className="text-lg font-semibold">Filter</h2>
+                    </div>
+
+                    <button
+                        onClick={handleReset}
+                        className="text-blue-600 text-sm font-medium"
+                    >
+                        Reset All
                     </button>
                 </div>
 
-                {/* SORT */}
-                <h3 className="font-medium mb-2">Sort By</h3>
-                <div className="flex gap-2 flex-wrap">
-                    {[
-                        { label: "Recommended", value: "" },
-                        { label: "Nearest", value: "nearest" },
-                        { label: "Open 24/7", value: "open_24_7" },
-                        { label: "Price : High to Low", value: "price_high" },
-                        { label: "Lowest Price", value: "price_low" },
-                    ].map((item) => (
-                        <button
-                            key={item.value}
-                            onClick={() => setSort(item.value)}
-                            className={`px-3 py-2 rounded-lg border text-sm ${sort === item.value
-                                    ? "bg-blue-100 text-blue-600 border-blue-500"
-                                    : "bg-gray-100"
-                                }`}
-                        >
-                            {item.label}
-                        </button>
-                    ))}
+                {/* Content */}
+                <div className="px-4 pb-40 pt-4 space-y-6 overflow-y-auto h-full">
+
+                    {/* SORT */}
+                    <div>
+                        <h3 className="font-semibold mb-3">Sort By</h3>
+                        <div className="flex flex-wrap gap-3">
+                            {[
+                                { label: "Recommended", value: "" },
+                                { label: "Nearest", value: "nearest" },
+                                { label: "Open 24/7", value: "open_24_7" },
+                                { label: "Price : High to Low", value: "price_high" },
+                                { label: "Lowest Price", value: "price_low" },
+                            ].map((item) => (
+                                <button
+                                    key={item.value}
+                                    onClick={() => setSort(item.value)}
+                                    className={`px-4 py-2 rounded-full text-sm border transition ${sort === item.value
+                                        ? "bg-blue-100 border-blue-500 text-blue-600"
+                                        : "bg-gray-100 border-gray-200 text-gray-700"
+                                        }`}
+                                >
+                                    {item.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* RADIUS */}
+                    <div>
+                        <h3 className="font-semibold mb-3">Distance radius</h3>
+
+                        <div className="flex justify-between text-xs text-gray-400 mb-">
+                            <span>0.5Km</span>
+                            <span className="text-gray-700 font-medium">
+                                Within {radius} Km
+                            </span>
+                            <span>10Km</span>
+                        </div>
+
+                        <input
+                            type="range"
+                            title="range"
+                            min={0.5}
+                            max={10}
+                            step={0.5}
+                            value={radius}
+                            onChange={(e) => setRadius(Number(e.target.value))}
+                            className="w-full h-1 accent-blue-600"
+                        />
+                    </div>
+
+                    {/* PRICE */}
+                    <div>
+                        <h3 className="font-semibold mb-3">Price per Hour</h3>
+                        <div className="flex gap-3">
+                            {[
+                                { label: "Under ₹150", value: "under150" },
+                                { label: "₹150–₹250", value: "150-250" },
+                                { label: "₹250+", value: "250+" },
+                            ].map((p) => (
+                                <button
+                                    key={p.value}
+                                    onClick={() => setPrice(p.value)}
+                                    className={`px-4 py-2 rounded-full text-sm border transition ${price === p.value
+                                        ? "bg-blue-100 border-blue-500 text-blue-600"
+                                        : "bg-gray-100 border-gray-200 text-gray-700"
+                                        }`}
+                                >
+                                    {p.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* AMENITIES */}
+                    <div className="pb-20">
+                        <h3 className="font-semibold mb-3">Amenities</h3>
+                        <div className="flex flex-wrap gap-3">
+                            {amenities.map((item) => (
+                                <button
+                                    key={item.id}
+                                    onClick={() => toggleAmenity(item.name)}
+                                    className={`px-4 py-2 rounded-full text-sm border flex items-center gap-1 transition ${amenitiesSelected.includes(item.name)
+                                        ? "bg-blue-100 border-blue-500 text-blue-600"
+                                        : "bg-gray-100 border-gray-200 text-gray-700"
+                                        }`}
+                                >
+                                    {/* Optional icon */}
+                                    {item.icon && <img src={item.icon} alt={item.name} className="w-4 h-4" />}
+                                    {item.name}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
                 </div>
 
-                {/* RADIUS */}
-                <h3 className="font-medium mt-6 mb-2">Distance radius</h3>
-                <input
-                    type="range"
-                    title="ramge"
-                    min={0.5}
-                    max={10}
-                    step={0.5}
-                    value={radius}
-                    onChange={(e) => setRadius(Number(e.target.value))}
-                    className="w-full"
-                />
-                <p className="text-sm text-gray-500 mt-1">
-                    Within {radius} Km
-                </p>
+                {/* Bottom Section */}
+                <div className="fixed bottom-0 left-0 right-0 bg-white px-4 pt-3 pb-6 border-t">
+                    <p className="text-center text-sm text-gray-500 mb-3">
+                        {filtersApplied} Filters applied
+                    </p>
 
-                {/* PRICE */}
-                <h3 className="font-medium mt-6 mb-2">Price per Hour</h3>
-                <div className="flex gap-2">
-                    {[
-                        { label: "Under ₹150", value: "under150" },
-                        { label: "₹150–₹250", value: "150-250" },
-                        { label: "₹250+", value: "250+" },
-                    ].map((p) => (
-                        <button
-                            key={p.value}
-                            onClick={() => setPrice(p.value)}
-                            className={`px-3 py-2 rounded-lg border text-sm ${price === p.value
-                                    ? "bg-blue-100 text-blue-600 border-blue-500"
-                                    : "bg-gray-100"
-                                }`}
-                        >
-                            {p.label}
-                        </button>
-                    ))}
-                </div>
-
-                {/* AMENITIES */}
-                <h3 className="font-medium mt-6 mb-2">Amenities</h3>
-                <div className="flex flex-wrap gap-2">
-                    {[
-                        "Restroom",
-                        "Locker",
-                        "Shower",
-                        "Personal Trainer",
-                        "Air conditioned",
-                        "Women Only",
-                        "Heavy Weights",
-                        "Parking",
-                    ].map((item) => (
-                        <button
-                            key={item}
-                            onClick={() => toggleAmenity(item)}
-                            className={`px-3 py-2 rounded-lg border text-sm ${amenities.includes(item)
-                                    ? "bg-blue-100 text-blue-600 border-blue-500"
-                                    : "bg-gray-100"
-                                }`}
-                        >
-                            {item}
-                        </button>
-                    ))}
-                </div>
-
-                {/* FOOTER */}
-                <div className="sticky bottom-0 bg-white mt-6 pt-4">
                     <button
-                        onClick={handleApply}
-                        className="w-full bg-blue-600 text-white py-3 rounded-xl font-medium"
+                        onClick={() => {
+                            onApply(buildFilters());
+                        }}
+                        disabled={searchLoading || searchResults.length === 0}
+                        className="w-full bg-blue-600 text-white py-4 rounded-xl font-semibold text-base disabled:opacity-50"
                     >
-                        Apply Filters
+                        {searchLoading
+                            ? "Finding gyms..."
+                            : searchResults.length === 0
+                                ? "No gyms found"
+                                : `Show ${searchResults.length} Gym${searchResults.length !== 1 ? "s" : ""}`
+                        }
                     </button>
                 </div>
             </div>

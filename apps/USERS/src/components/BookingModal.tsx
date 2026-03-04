@@ -272,8 +272,11 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
                 <div className="text-center mt-6">
                     <p className="text-[48px] font-semibold">OTP : 1384</p>
                     <p className="text-xs mt-2 max-w-[261px] mx-auto">
-                        Use OTP during check-in to start your session. <br />
-                        This pass will be valid till 11:59 PM on 5th December
+                        Use OTP during check in. Once OTP is validated, your session timings will start.
+                    </p>
+
+                    <p className="text-xs mt-2 max-w-[261px] mx-auto">
+                        This pass remains valid until 11:59 PM on the selected booking date.
                     </p>
                 </div>
 
@@ -283,7 +286,7 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
                 {/* Timings */}
                 <div className="space-y-3 text-sm">
                     <div className="flex items-center text-[#DBEAFE] justify-center gap-2">
-                        <FiClock size={24} />
+                        <FiClock size={17} />
                         Gym timings : <span>{formatTime12Hour(gym?.open_time)} – {formatTime12Hour(gym?.close_time)} </span>
                     </div>
 
@@ -324,8 +327,8 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
                     </div>
 
                     <p className="text-xs text-[#0F172A] mt-3">
-                        Cancel anytime before 12am during the day to get a refund.
-                        After 12am bookings will be cancelled automatically without refund.
+                        Cancel anytime before 12 am during the day.
+                        After 12 am, bookings will be canceled automatically with no refund.
                     </p>
                 </div>
             )}

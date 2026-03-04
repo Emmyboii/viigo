@@ -1,47 +1,44 @@
 import { useAppContext } from '../context/AppContext';
 import PageHeader from '../components/PageHeader';
 import Container from '../components/layout/Container';
-import FilterChips from '../components/FilterChips';
 import GymHorizontalCard from '../components/GymHorizontalCard';
 import SearchBar2 from '../components/SearchBar2';
-import { useEffect, useState } from 'react';
-import FilterModal from '../components/FilterModal';
-import SortModal from '../components/SortModal';
+import { useState } from 'react';
 
 const Recommended = () => {
 
 
-    const { recommendedGyms, loading2, fetchFilteredGyms, fetchSortedGyms } = useAppContext()
-    const [activeId, setActiveId] = useState("");
-    const [showSortModal, setShowSortModal] = useState(false);
-    const [showFilterModal, setShowFilterModal] = useState(false);
+    const { recommendedGyms, loading2 } = useAppContext()
+    // const [activeId, setActiveId] = useState("");
+    // const [showSortModal, setShowSortModal] = useState(false);
+    // const [showFilterModal, setShowFilterModal] = useState(false);
 
     const [query, setQuery] = useState("");
-    const [sort, setSort] = useState("");
-    const [filters, setFilters] = useState<any>({});
+    // const [sort, setSort] = useState("");
+    // const [filters, setFilters] = useState<any>({});
 
-    const chipData = [
-        { id: "filters", label: "Filters" },
-        { id: "sort", label: "Sort By" },
-        { id: "near", label: "Near Me" },
-        { id: "women", label: "Women" },
-        { id: "top_rated", label: "Top Rated" },
-    ];
+    // const chipData = [
+    //     { id: "filters", label: "Filters" },
+    //     { id: "sort", label: "Sort By" },
+    //     // { id: "near", label: "Near Me" },
+    //     // { id: "women", label: "Women" },
+    //     // { id: "top_rated", label: "Top Rated" },
+    // ];
 
-    const fetchData = () => {
-        if (sort) {
-            fetchSortedGyms(sort, "");
-        } else {
-            fetchFilteredGyms({
-                ...filters,
-                query,
-            });
-        }
-    };
+    // const fetchData = () => {
+    //     if (sort) {
+    //         fetchSortedGyms(sort, "");
+    //     } else {
+    //         fetchFilteredGyms({
+    //             ...filters,
+    //             query,
+    //         });
+    //     }
+    // };
 
-    useEffect(() => {
-        fetchData();
-    }, [sort, filters, query]);
+    // useEffect(() => {
+    //     fetchData();
+    // }, [sort, filters, query]);
 
     if (loading2) {
         return (
@@ -68,7 +65,7 @@ const Recommended = () => {
                     onChange={(val: string) => setQuery(val)}
                 />
             </div>
-            <FilterChips
+            {/* <FilterChips
                 items={chipData}
                 activeId={activeId}
                 onChange={(id) => {
@@ -87,7 +84,7 @@ const Recommended = () => {
                         }));
                     }
                 }}
-            />
+            /> */}
             {recommendedGyms.length === 0 ? (
                 <p className="text-center text-gray-400 py-6">
                     No recommended gyms available
@@ -100,7 +97,7 @@ const Recommended = () => {
                 </div>
             )}
 
-            {showSortModal && (
+            {/* {showSortModal && (
                 <SortModal
                     onClose={() => setShowSortModal(false)}
                     onSelect={(value) => {
@@ -108,10 +105,10 @@ const Recommended = () => {
                         setSort(value);
                     }}
                 />
-            )}
+            )} */}
 
             {/* 🎛 FILTER MODAL */}
-            {showFilterModal && (
+            {/* {showFilterModal && (
                 <FilterModal
                     onClose={() => setShowFilterModal(false)}
                     onApply={(selectedFilters: any) => {
@@ -119,7 +116,7 @@ const Recommended = () => {
                         setFilters(selectedFilters);
                     }}
                 />
-            )}
+            )} */}
         </Container>
     )
 }

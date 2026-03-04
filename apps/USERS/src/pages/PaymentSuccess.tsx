@@ -154,8 +154,8 @@
 //                 </div>
 
 //                 <p className="text-xs text-[#0F172A] mt-3">
-//                     Cancel anytime before 12am during the day to get a refund.
-//                     After 12am bookings will be cancelled automatically without refund.
+//                     Cancel anytime before 12 am during the day. 
+//                     After 12 am, bookings will be canceled automatically with no refund.
 //                 </p>
 //             </div>
 
@@ -203,7 +203,7 @@
 //     );
 // }
 
-import { motion, useAnimation } from "framer-motion";
+import { motion } from "framer-motion";
 import {
     FiMapPin,
     FiClock,
@@ -227,10 +227,10 @@ const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 export default function PaymentSuccess({ onClose, gym }: PaymentSuccessProps) {
 
-    const { loading, userData } = useAppContext()
+    const { userData } = useAppContext()
 
     const navigate = useNavigate();
-    const controls = useAnimation();
+    // const controls = useAnimation();
 
     const [booking, setBooking] = useState<any>(null);
     const [bookingLoading, setBookingLoading] = useState(true);
@@ -261,20 +261,12 @@ export default function PaymentSuccess({ onClose, gym }: PaymentSuccessProps) {
                 });
                 const data = await res.json();
 
-                const lastBookingId = localStorage.getItem("lastBookingId");
+                const lastBooking = data.data[data.data.length - 1];
 
-                let selectedBooking;
+                localStorage.setItem("selectedBookingId", String(lastBooking.id));
 
-                if (lastBookingId) {
-                    selectedBooking = data.data.find(
-                        (b: any) => b.id === Number(lastBookingId)
-                    );
-                } else {
-                    // fallback: latest booking
-                    selectedBooking = data.data[data.data.length - 1];
-                }
+                setBooking(lastBooking);
 
-                setBooking(selectedBooking);
             } catch (err) {
                 console.log(err);
             } finally {
@@ -285,23 +277,23 @@ export default function PaymentSuccess({ onClose, gym }: PaymentSuccessProps) {
         fetchBookings();
     }, []);
 
-    const isReady = !loading && !bookingLoading;
+    // const isReady = !bookingLoading;
 
-    useEffect(() => {
-        if (isReady) {
-            controls.start({
-                scale: 1,
-                rotate: 0,
-                opacity: 1,
-                transition: {
-                    type: "spring",
-                    stiffness: 20,
-                    damping: 11,
-                    mass: 1.2,
-                },
-            });
-        }
-    }, [isReady, controls]);
+    // useEffect(() => {
+    //     if (!bookingLoading) {
+    //         controls.start({
+    //             scale: 1,
+    //             rotate: 0,
+    //             opacity: 1,
+    //             transition: {
+    //                 type: "spring",
+    //                 stiffness: 20,
+    //                 damping: 11,
+    //                 mass: 1.2,
+    //             },
+    //         });
+    //     }
+    // }, [bookingLoading, controls]);
 
     function formatTime12Hour(time24: string | undefined) {
         const [hourStr, minuteStr] = time24?.split(":") || [];
@@ -329,7 +321,7 @@ export default function PaymentSuccess({ onClose, gym }: PaymentSuccessProps) {
     const gst = 3;
     // const total = totalWithHr && totalWithHr + platformFee + gst;
 
-    if (!isReady || !gym || !booking) {
+    if (bookingLoading || !gym || !booking) {
         return (
             <div className="flex items-center justify-center min-h-screen">
                 <div className="flex flex-col items-center gap-4 p-8 bg-white animate-fadeIn">
@@ -357,8 +349,14 @@ export default function PaymentSuccess({ onClose, gym }: PaymentSuccessProps) {
             {/* 🎯 Animated Blue Card */}
             <motion.div
                 initial={{ scale: 0.2, rotate: -180, opacity: 0 }}
-                animate={controls}
-                className="relative bg-gradient-to-b from-blue-600 to-blue-500 text-white rounded-2xl p-4 shadow-xl"
+                animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                transition={{
+                    type: "spring",
+                    stiffness: 20,
+                    damping: 11,
+                    mass: 1.2,
+                }}
+                className="relative bg-gradient-to-b from-blue-600 to-blue-500 text-white rounded-2xl mx-2 p-4 shadow-xl"
             >
 
                 <img src={halfCircle} alt="Half Circle" className="absolute bottom-28 left-[-13px] w-[48px] h-[55px]" />
@@ -383,7 +381,7 @@ export default function PaymentSuccess({ onClose, gym }: PaymentSuccessProps) {
 
                         <div className="flex items-center gap-1 text-sm opacity-90">
                             <FiMapPin size={14} />
-                            {gym?.distance} <span className="pl-2">{`Open Till ${formatTime12Hour(gym.close_time)}`}</span>
+                            {gym?.distance} <span className="pl-2">{`Open Till ${formatTime12Hour(gym?.close_time)}`}</span>
                         </div>
 
                         {/* <div className="flex gap-2 mt-2 flex-wrap">
@@ -423,8 +421,11 @@ export default function PaymentSuccess({ onClose, gym }: PaymentSuccessProps) {
                 <div className="text-center mt-6">
                     <p className="text-[48px] font-semibold">OTP : 1384</p>
                     <p className="text-xs mt-2 max-w-[261px] mx-auto">
-                        Use OTP during check-in to start your session. <br />
-                        This pass will be valid till 11:59 PM on 5th December
+                        Use OTP during check in. Once OTP is validated, your session timings will start.
+                    </p>
+
+                    <p className="text-xs mt-2 max-w-[261px] mx-auto">
+                        This pass remains valid until 11:59 PM on the selected booking date.
                     </p>
                 </div>
 
@@ -468,14 +469,17 @@ export default function PaymentSuccess({ onClose, gym }: PaymentSuccessProps) {
             <div className="bg-[#F1F5F9] rounded-lg p-4">
                 <div className="flex gap-3 items-center">
                     <h3 className="font-semibold text-sm">Change of Plans</h3>
-                    <button onClick={() => navigate(`/cancelbooking/${booking?.booking_reference}`)} className="text-[#F43F5E] font-medium text-sm border border-[#F43F5E] px-3 py-1 rounded-md">
+                    <button onClick={() => {
+                        localStorage.removeItem("paymentSuccess");
+                        navigate(`/cancelbooking/${booking?.booking_reference}`)
+                    }} className="text-[#F43F5E] font-medium text-sm border border-[#F43F5E] px-3 py-1 rounded-md">
                         Cancel Booking
                     </button>
                 </div>
 
                 <p className="text-xs text-[#0F172A] mt-3">
-                    Cancel anytime before 12am during the day to get a refund.
-                    After 12am bookings will be cancelled automatically without refund.
+                    Cancel anytime before 12 am during the day.
+                    After 12 am, bookings will be canceled automatically with no refund.
                 </p>
             </div>
 

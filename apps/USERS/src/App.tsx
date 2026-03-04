@@ -37,6 +37,14 @@ function App() {
     }
   }, [location.pathname]);
 
+   useEffect(() => {
+    if (
+      !location.pathname.startsWith("/reviewpay")
+    ) {
+      localStorage.removeItem("paid");
+    }
+  }, [location.pathname]);
+
   return (
     <div className="font-manrope relative">
       {/* Loader */}
@@ -94,7 +102,7 @@ function App() {
           />
 
           <Route
-            path="/recommended"
+            path="/gyms/recommended"
             element={
               <ProtectedRoute>
                 <Recommended />
@@ -103,7 +111,7 @@ function App() {
           />
 
           <Route
-            path="/nearby"
+            path="/gyms/nearby"
             element={
               <ProtectedRoute>
                 <NearBy />

@@ -14,6 +14,7 @@ export default function MapView() {
     const { nearbyGyms, latitude, longitude } = useAppContext();
     const [selectedGym, setSelectedGym] = useState<any>(null);
     const navigate = useNavigate()
+    // const [map, setMap] = useState<google.maps.Map | null>(null);
 
     const center = {
         lat: Number(latitude),
@@ -30,11 +31,14 @@ export default function MapView() {
         googleMapsApiKey: import.meta.env.VITE_GOOGLE_API_KEY,
     });
 
-    useEffect(() => {
-        if (selectedGym) {
-            // Optional: center map to selected marker
-        }
-    }, [selectedGym]);
+    // useEffect(() => {
+    //     if (selectedGym && map) {
+    //         map.panTo({
+    //             lat: Number(selectedGym.lat),
+    //             lng: Number(selectedGym.lng),
+    //         });
+    //     }
+    // }, [selectedGym, map]);
 
     if (!isLoaded) return <div className="h-full w-full" />;
 
@@ -44,6 +48,7 @@ export default function MapView() {
                 mapContainerStyle={containerStyle}
                 center={center}
                 zoom={14}
+                // onLoad={(mapInstance) => setMap(mapInstance)}
                 options={{
                     disableDefaultUI: true,
                     clickableIcons: false,

@@ -22,13 +22,13 @@ export default function GymCard({ gym }: GymCardProps) {
         : gym.amenities.slice(0, 2);
 
     return (
-        <div className="bg-white rounded-md shadow-md overflow-hidden">
+        <div className="bg-white rounded-md shadow-md overflow-hidden h-[350px] flex flex-col">
             <ImageCarousel images={gym?.images} />
 
-            <div className="p-4">
+            <div className="p-4 flex flex-col flex-1">
                 <h3 className="font-semibold">{gym?.name}</h3>
 
-                <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                <p className="text-xs text-gray-500 mt-1 flex items-center flex-wrap gap-1">
                     <HiLocationMarker className="text-[#475569] text-sm" />
                     {gym?.distance}, {gym?.location} <GoDotFill /> {gym?.open_status}
                 </p>
@@ -48,7 +48,7 @@ export default function GymCard({ gym }: GymCardProps) {
                     )}
                 </div>
 
-                <div className="flex justify-between items-center mt-4">
+                <div className="flex justify-between items-center mt-auto pt-4">
                     <span className="font-semibold text-lg">₹{gym?.hourly_rate}/Hr</span>
                     <button onClick={() => {
                         navigate(`/gyms/${gym?.slug}`)

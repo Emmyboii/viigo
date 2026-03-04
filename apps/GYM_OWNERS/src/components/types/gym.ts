@@ -14,3 +14,4 @@ export interface Gym {
     price: number;
     facilities: Facility[];
 }
+

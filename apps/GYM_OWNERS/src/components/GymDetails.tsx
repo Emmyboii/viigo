@@ -238,7 +238,7 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
                             </div>
                         </div>
 
-                        <div className="bg-[#F1F5F9] text-[#94A3B8] p-2 rounded-lg">
+                        <div className="bg-blue-600 text-[#ffffff] p-2 rounded-lg">
                             <HiOutlineLocationMarker size={16} />
                         </div>
                     </div>
@@ -279,7 +279,7 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
                     {gym.amenities.length > 4 && (
                         <button
                             onClick={() => setAmenitiesOpen(true)}
-                            className="mt-4 w-full bg-gray-100 py-3 rounded-xl text-[#94A3B8] font-medium"
+                            className="mt-4 w-full bg-blue-600 py-3 rounded-xl text-[#ffffff] font-medium"
                         >
                             Show all {gym?.amenities.length} amenities
                         </button>
@@ -291,7 +291,7 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
                 {/* ===== Rules ===== */}
                 <div>
                     <h2 className="text-lg font-semibold mb-3">
-                        Things to Keep in Mind
+                        Rules
                     </h2>
 
                     <div className="space-y-2 text-sm text-gray-600">
@@ -305,7 +305,7 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
                     {gym.rules.length > 3 && (
                         <button
                             onClick={() => setRulesOpen(true)}
-                            className="mt-4 w-full bg-gray-100 py-3 rounded-xl mb-10 text-[#94A3B8] font-medium"
+                            className="mt-4 w-full bg-blue-600 py-3 rounded-xl mb-10 text-[#ffffff] font-medium"
                         >
                             View all rules
                         </button>

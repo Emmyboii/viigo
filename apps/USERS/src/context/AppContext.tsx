@@ -129,6 +129,8 @@ type AppContextType = {
     nearbyGyms: GymCard[];
     setNearbyGyms: React.Dispatch<React.SetStateAction<GymCard[]>>;
 
+    amenities: Amenity[];
+
     // API FUNCTIONS 🔥
     fetchUser: () => Promise<void>;
     fetchNotifications: () => Promise<void>;
@@ -163,6 +165,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [recommendedGyms, setRecommendedGyms] = useState<GymCard[]>([]);
     const [nearbyGyms, setNearbyGyms] = useState<GymCard[]>([]);
     const [sortLabel, setSortLabel] = useState("");
+    const [amenities, setAmenities] = useState<Amenity[]>([]);
 
     const hasUnread = notifications.some(n => !n.is_read);
 
@@ -213,6 +216,24 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             setSearchLoading(false);
         }
     };
+
+    useEffect(() => {
+        const fetchAmenities = async () => {
+            const token = localStorage.getItem("token");
+            try {
+                const res = await fetch(`${backendUrl}/gymowner/amenities/`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error("Failed to fetch amenities");
+                setAmenities(data.data);
+            } catch (err) {
+                console.error(err);
+            }
+        };
+        fetchAmenities();
+    }, []);
+
 
     const fetchUser = async () => {
         try {
@@ -499,6 +520,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                 setNotifications,
                 sortLabel,
                 setSortLabel,
+                amenities,
 
                 fetchRecommendedGyms,
                 fetchNotifications,

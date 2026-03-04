@@ -1,5 +1,5 @@
 import { IoSearchSharp } from "react-icons/io5";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppContext } from "../context/AppContext";
 import muscle from '../assets/muscle.png'
@@ -8,13 +8,14 @@ import { FiClock } from "react-icons/fi";
 type Props = {
     onClose: () => void;
     from?: string;
+    query?: string
+    setQuery: React.Dispatch<React.SetStateAction<string>>
 };
 
-export default function SearchModal({ onClose, from }: Props) {
+export default function SearchModal({ onClose, from, query, setQuery }: Props) {
     const navigate = useNavigate();
     const { searchGyms, searchResults, nearbyGyms } = useAppContext();
 
-    const [query, setQuery] = useState("");
     const [recent, setRecent] = useState<string[]>([]);
 
     // Load recent searches
@@ -39,7 +40,7 @@ export default function SearchModal({ onClose, from }: Props) {
     // Live search as user types
     useEffect(() => {
         const delay = setTimeout(() => {
-            if (query.trim()) {
+            if (query?.trim()) {
                 searchGyms(query);
             }
         }, 400);
@@ -62,6 +63,11 @@ export default function SearchModal({ onClose, from }: Props) {
         }
     };
 
+    const handleGymClick = (gym: any) => {
+        onClose();
+        navigate(`/gyms/${gym.slug}`);
+    };
+
     return (
         <div className="fixed inset-0 bg-white z-50 p-4 flex flex-col">
             {/* HEADER */}
@@ -72,6 +78,17 @@ export default function SearchModal({ onClose, from }: Props) {
                         autoFocus
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
+                        onKeyDown={async (e) => {
+                            if (e.key === "Enter" && query?.trim()) {
+                                await searchGyms(query);
+                                saveRecent(query);
+                                onClose();
+
+                                navigate("/explore", {
+                                    state: { query },
+                                });
+                            }
+                        }}
                         placeholder="Search Here"
                         className="outline-none w-full text-sm placeholder:text-[#0F172A] bg-transparent"
                     />
@@ -91,7 +108,7 @@ export default function SearchModal({ onClose, from }: Props) {
                     {searchResults.slice(0, 5).map((gym) => (
                         <div
                             key={gym.id}
-                            onClick={() => handleSelect(gym.name)}
+                            onClick={() => handleGymClick(gym)}
                             className="py-3 border-b cursor-pointer flex items-center justify-between"
                         >
                             <div className="flex items-center gap-2">
@@ -149,7 +166,7 @@ export default function SearchModal({ onClose, from }: Props) {
                     {nearbyGyms.slice(0, 5).map((gym) => (
                         <div
                             key={gym.id}
-                            onClick={() => handleSelect(gym.name)}
+                            onClick={() => handleGymClick(gym)}
                             className="py-3 border-b cursor-pointer flex items-center justify-between"
                         >
                             <div className="flex items-center gap-2">

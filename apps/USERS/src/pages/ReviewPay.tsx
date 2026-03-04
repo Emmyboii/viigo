@@ -461,7 +461,7 @@
 //     );
 // }
 
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import {
     IoTimeOutline,
@@ -488,7 +488,7 @@ export default function ReviewPay() {
     const [showSuccess, setShowSuccess] = useState(false);
     const [showSecondSuccess, setShowSecondSuccess] = useState(false);
     const [gym, setGym] = useState<GymCard | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [toast, setToast] = useState<{ type: ToastType; message: string } | null>(null);
 
 
@@ -504,12 +504,19 @@ export default function ReviewPay() {
         ? JSON.parse(storedData)
         : null;
 
-    // Redirect immediately if no booking data exists
-    if (!initialState || !initialState.selectedDate || !initialState.selectedHours) {
-        return <Navigate to={`/`} replace />;
-    }
+    useEffect(() => {
+        const paid = localStorage.getItem("paid");
 
-    const { selectedDate, selectedHours, id } = initialState;
+        if (paid === "true" || !storedData) {
+            navigate("/", { replace: true });
+        }
+    }, [navigate]);
+
+    // const { selectedDate, selectedHours, id } = initialState;
+
+    const selectedDate = initialState?.selectedDate
+    const selectedHours = initialState?.selectedHours
+    const id = initialState?.id
 
     useEffect(() => {
         const stored = localStorage.getItem("paymentSuccess");
@@ -525,7 +532,6 @@ export default function ReviewPay() {
 
             if (success === "true") {
                 localStorage.removeItem("paymentSuccess");
-                localStorage.removeItem("lastBookingId");
             }
         };
 
@@ -679,14 +685,14 @@ export default function ReviewPay() {
             console.log("Booking success:", data);
 
             localStorage.setItem("paymentSuccess", "true");
-            localStorage.setItem("lastBookingId", data.data.gym);
+            localStorage.setItem("paid", "true");
 
             // ✅ Show success modal AFTER API success
             setShowSuccess(true);
 
             setTimeout(() => {
                 setShowSecondSuccess(true);
-                localStorage.removeItem("bookingData");
+                // localStorage.removeItem("bookingData");
                 window.scrollTo(0, 0);
             }, 3000);
 
@@ -722,7 +728,7 @@ export default function ReviewPay() {
 
     const handleClose = () => {
         localStorage.removeItem("paymentSuccess");
-        localStorage.removeItem("lastBookingId");
+        localStorage.removeItem("bookingData");
         setShowSecondSuccess(false);
         // navigate("/");
     };
@@ -875,7 +881,7 @@ export default function ReviewPay() {
                             </h3>
 
                             <div className="flex justify-between">
-                                <span>{selectedHours.label}</span>
+                                <span>{selectedHours?.label}</span>
                                 <span>Rs. {totalWithHr}</span>
                             </div>
 

@@ -45,6 +45,7 @@ export default function CancelBooking() {
 
     useEffect(() => {
         const fetchBooking = async () => {
+            setLoading(true)
             try {
                 const res = await fetch(`${backendUrl}/client/bookings/my-bookings/`, {
                     headers: {
@@ -128,7 +129,7 @@ export default function CancelBooking() {
         };
 
         fetchGymById();
-    }, [gyms]);
+    }, [gyms, selectedBooking]);
 
     // ✅ Restore modal on refresh
     useEffect(() => {

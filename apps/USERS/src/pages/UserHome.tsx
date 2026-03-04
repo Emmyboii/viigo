@@ -11,6 +11,8 @@ import { useAppContext } from "../context/AppContext";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import SortModal from "../components/SortModal";
+import { FaFilter } from "react-icons/fa";
+import { BiSortAlt2 } from "react-icons/bi";
 
 
 export default function UserHome() {
@@ -28,11 +30,11 @@ export default function UserHome() {
     });
 
     const chipData = [
-        { id: "filters", label: "Filters" },
-        { id: "sort", label: "Sort By" },
-        { id: "near", label: "Near Me" },
-        { id: "women", label: "Women" },
-        { id: "top_rated", label: "Top Rated" },
+        { id: "filters", label: "Filters", icon: <FaFilter /> },
+        { id: "sort", label: "Sort By", icon: <BiSortAlt2 className="text-xl" /> },
+        // { id: "near", label: "Near Me" },
+        // { id: "women", label: "Women" },
+        // { id: "top_rated", label: "Top Rated" },
     ];
 
     if (loading2) {
@@ -70,8 +72,8 @@ export default function UserHome() {
                     }
                 }}
             />
-            
-            <SectionHeader title="Recommended For You" url="/recommended" />
+
+            <SectionHeader title="Recommended For You" url="/gyms/recommended" />
 
             {recommendedGyms.length === 0 ? (
                 <p className="text-center text-gray-400 py-6">
@@ -90,7 +92,7 @@ export default function UserHome() {
             )}
 
 
-            <SectionHeader title="Hourly Gyms Near You" url="/nearby" />
+            <SectionHeader title="Hourly Gyms Near You" url="/gyms/nearby" />
 
             {nearbyGyms.length === 0 ? (
                 <p className="text-center text-gray-400 py-6">

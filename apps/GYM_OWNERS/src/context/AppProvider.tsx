@@ -128,7 +128,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setIsLoading(true);
         try {
             const data = await request("/gymowner/owner/bookings/");
-            const bookings = data.data || [];
+            const bookings = data?.data || [];
 
 
             setBookings(bookings);

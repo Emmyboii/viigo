@@ -288,7 +288,7 @@ export default function GymDetails() {
                         {/* Phone */}
                         <div
                             onClick={handlePhoneClick}
-                            className="bg-[#F1F5F9] text-[#94A3B8] p-2 rounded-lg cursor-pointer hover:bg-gray-200 transition"
+                            className="bg-blue-600 text-[#ffffff] p-2 rounded-lg cursor-pointer hover:bg-gray-200 transition"
                         >
                             <MdPhone size={16} />
                         </div>
@@ -296,7 +296,7 @@ export default function GymDetails() {
                         {/* Location */}
                         <div
                             onClick={handleLocationClick}
-                            className="bg-[#F1F5F9] text-[#94A3B8] p-2 rounded-lg cursor-pointer hover:bg-gray-200 transition"
+                            className="bg-blue-600 text-[#ffffff] p-2 rounded-lg cursor-pointer hover:bg-gray-200 transition"
                         >
                             <HiOutlineLocationMarker size={16} />
                         </div>
@@ -340,7 +340,7 @@ export default function GymDetails() {
                     {gym.amenities.length > 4 && (
                         <button
                             onClick={() => setAmenitiesOpen(true)}
-                            className="mt-4 w-full bg-gray-100 py-3 rounded-xl text-[#94A3B8] font-medium"
+                            className="mt-4 w-full bg-blue-600 py-3 rounded-xl text-[#ffffff] font-medium"
                         >
                             Show all {gym.amenities.length} amenities
                         </button>
@@ -350,9 +350,9 @@ export default function GymDetails() {
                 <div className="border border-dashed border-[#CBD5E1]"></div>
 
                 {/* ===== Rules ===== */}
-                <div>
+                <div className="pb-20">
                     <h2 className="text-lg font-semibold mb-3">
-                        Things to Keep in Mind
+                        Rules
                     </h2>
 
                     <div className="space-y-2 text-sm text-gray-600">
@@ -366,7 +366,7 @@ export default function GymDetails() {
                     {gym.rules.length > 3 && (
                         <button
                             onClick={() => setRulesOpen(true)}
-                            className="mt-4 w-full bg-gray-100 py-3 rounded-xl mb-20 text-[#94A3B8] font-medium"
+                            className="mt-4 w-full bg-blue-600 py-3 rounded-xl text-[#ffffff] font-medium"
                         >
                             View all rules
                         </button>
