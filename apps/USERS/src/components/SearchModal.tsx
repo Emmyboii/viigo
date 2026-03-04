@@ -119,7 +119,7 @@ export default function SearchModal({ onClose, from, query, setQuery }: Props) {
                                         {gym.name}
                                     </p>
                                     <p className="text-xs text-gray-500">
-                                        {gym.distance}km • ₹{Number(gym.hourly_rate)}/Hr
+                                        {gym.distance} • ₹{Number(gym.hourly_rate)}/Hr
                                     </p>
                                 </div>
                             </div>
@@ -177,7 +177,7 @@ export default function SearchModal({ onClose, from, query, setQuery }: Props) {
                                         {gym.name}
                                     </p>
                                     <p className="text-xs text-gray-500">
-                                        {gym.distance}km • ₹{Number(gym.hourly_rate)}/Hr
+                                        {gym.distance} • ₹{Number(gym.hourly_rate)}/Hr
                                     </p>
                                 </div>
                             </div>

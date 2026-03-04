@@ -220,6 +220,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     useEffect(() => {
         const fetchAmenities = async () => {
             const token = localStorage.getItem("token");
+
+            if (!token) return
+
             try {
                 const res = await fetch(`${backendUrl}/gymowner/amenities/`, {
                     headers: { Authorization: `Bearer ${token}` },

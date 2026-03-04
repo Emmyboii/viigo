@@ -14,7 +14,7 @@ export default function MapView() {
     const { nearbyGyms, latitude, longitude } = useAppContext();
     const [selectedGym, setSelectedGym] = useState<any>(null);
     const navigate = useNavigate()
-    // const [map, setMap] = useState<google.maps.Map | null>(null);
+    const [map, setMap] = useState<google.maps.Map | null>(null);
 
     const center = {
         lat: Number(latitude),
@@ -31,14 +31,14 @@ export default function MapView() {
         googleMapsApiKey: import.meta.env.VITE_GOOGLE_API_KEY,
     });
 
-    // useEffect(() => {
-    //     if (selectedGym && map) {
-    //         map.panTo({
-    //             lat: Number(selectedGym.lat),
-    //             lng: Number(selectedGym.lng),
-    //         });
-    //     }
-    // }, [selectedGym, map]);
+    useEffect(() => {
+        if (selectedGym && map) {
+            map.panTo({
+                lat: Number(selectedGym.latitude),
+                lng: Number(selectedGym.longitude),
+            });
+        }
+    }, [selectedGym, map]);
 
     if (!isLoaded) return <div className="h-full w-full" />;
 
@@ -48,7 +48,7 @@ export default function MapView() {
                 mapContainerStyle={containerStyle}
                 center={center}
                 zoom={14}
-                // onLoad={(mapInstance) => setMap(mapInstance)}
+                onLoad={(mapInstance) => setMap(mapInstance)}
                 options={{
                     disableDefaultUI: true,
                     clickableIcons: false,
@@ -140,7 +140,7 @@ export default function MapView() {
 
                                     <p className="text-sm text-gray-500 flex items-center gap-1 mt-1">
                                         <HiLocationMarker size={16} className="mt-" />
-                                        {gym.distance}Km • {gym.open_status}
+                                        {gym.distance} • {gym.open_status}
                                     </p>
 
                                     <div className="flex items-center justify-between gap-2 mt-2">
