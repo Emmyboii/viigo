@@ -31,7 +31,7 @@ export default function GymHorizontalCard({ gym }: GymHorizontalCardProps) {
                     <h3 className="font-medium">{gym.name}</h3>
                     <p className="text-xs text-gray-500 mt-1 flex items-center gap-1 flex-wrap">
                         <HiLocationMarker className="text-[#475569] text-sm" />
-                        {gym.distance}, {gym.location} <GoDotFill /> {gym.open_status}
+                        {gym.distance}, {gym?.city},{gym?.state} <GoDotFill /> {gym.open_status}
                     </p>
 
                     <div className="flex gap-2 mt-2 flex-wrap">

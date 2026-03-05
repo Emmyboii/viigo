@@ -208,7 +208,7 @@ import {
     FiMapPin,
     FiClock,
 } from "react-icons/fi";
-import { HiShare } from "react-icons/hi";
+import { HiOutlineLocationMarker, HiShare } from "react-icons/hi";
 
 import three from "../assets/three.png";
 import halfCircle from "../assets/paymentWhiteImg.png";
@@ -217,6 +217,7 @@ import { BiSolidCalendarAlt } from "react-icons/bi";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { useAppContext, type GymCard } from "../context/AppContext";
+import { MdPhone } from "react-icons/md";
 
 type PaymentSuccessProps = {
     gym: GymCard | null
@@ -307,6 +308,26 @@ export default function PaymentSuccess({ onClose, gym }: PaymentSuccessProps) {
         return `${hour}:${minute} ${ampm}`;
     }
 
+    const handlePhoneClick = () => {
+        if (gym?.phone_number) {
+            // Open the phone dialer
+            window.location.href = `tel:${gym.phone_number}`;
+        }
+    };
+
+    const handleLocationClick = () => {
+        if (!gym) return;
+
+        // Navigate to /explore with coordinates and gym info
+        navigate("/explore", {
+            state: {
+                gym,
+                latitude: gym.latitude,
+                longitude: gym.longitude,
+            }
+        });
+    };
+
 
     const allPeaks = [
         ...(Array.isArray(gym?.peak_morning) ? gym.peak_morning : []),
@@ -371,33 +392,38 @@ export default function PaymentSuccess({ onClose, gym }: PaymentSuccessProps) {
                     />
 
                     <div className="flex-1">
-                        <h2 className="font-semibold text-lg">
-                            {gym?.name}
-                        </h2>
+                        <div className="flex justify-between items-center gap-2">
+                            <h2 className="font-semibold text-lg">
+                                {gym?.name}
+                            </h2>
+
+                            <div className="flex gap-3 mt-3">
+                                {/* Phone */}
+                                <div
+                                    onClick={handlePhoneClick}
+                                    className="bg-[#BFDBFE] text-[#2563EB] p-2 rounded-lg cursor-pointer hover:bg-gray-200 transition"
+                                >
+                                    <MdPhone size={16} />
+                                </div>
+
+                                {/* Location */}
+                                <div
+                                    onClick={handleLocationClick}
+                                    className="bg-[#BFDBFE] text-[#2563EB] p-2 rounded-lg cursor-pointer hover:bg-gray-200 transition"
+                                >
+                                    <HiOutlineLocationMarker size={16} />
+                                </div>
+                            </div>
+                        </div>
 
                         <div className="flex items-center gap-2 text-sm text-[#CBD5E1]">
-                            {gym?.location}
+                            {gym?.city},{gym?.state}
                         </div>
 
                         <div className="flex items-center gap-1 text-sm opacity-90">
                             <FiMapPin size={14} />
                             {gym?.distance} <span className="pl-2">{`Open Till ${formatTime12Hour(gym?.close_time)}`}</span>
                         </div>
-
-                        {/* <div className="flex gap-2 mt-2 flex-wrap">
-                            {visibleAmenities?.map((amenity, index) => (
-                                <FacilityTag key={index} amenity={amenity} />
-                            ))}
-
-                            {!showAll && gym?.amenities && gym.amenities.length > 2 && (
-                                <div
-                                    onClick={() => setShowAll(true)}
-                                    className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-md text-xs cursor-pointer"
-                                >
-                                    <span>+ More</span>
-                                </div>
-                            )}
-                        </div> */}
                     </div>
                 </div>
 

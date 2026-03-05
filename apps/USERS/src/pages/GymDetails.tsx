@@ -209,7 +209,7 @@ export default function GymDetails() {
         if (!gym) return;
 
         // Navigate to /explore with coordinates and gym info
-        navigate("/exploree", {
+        navigate("/explore", {
             state: {
                 gym,
                 latitude: gym.latitude,

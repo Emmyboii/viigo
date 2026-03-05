@@ -5,8 +5,9 @@ import { useAppContext } from "../context/AppContext";
 
 export default function Header() {
 
-    const { userData, hasUnread } = useAppContext();
+    const { hasUnread, location } = useAppContext();
 
+    const [city = "", country = ""] = location.split(",");
 
     const navigate = useNavigate();
 
@@ -15,8 +16,8 @@ export default function Header() {
             <div className="flex items-center gap-2">
                 <HiLocationMarker className="text-[#475569] text-xl" />
                 <div className="leading-tight">
-                    <div className="font-medium text-sm">{userData?.full_name?.split(" ")[0]}</div>
-                    <div className="text-sm font-medium">Chennai</div>
+                    <div className="font-medium text-sm">{city.trim()}</div>
+                    <div className="text-sm font-medium">{country.trim()}</div>
                 </div>
                 <IoChevronDown className="text-[#475569]" />
             </div>

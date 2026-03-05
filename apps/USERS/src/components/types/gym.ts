@@ -21,13 +21,18 @@ export interface Gym {
     owner_email: string;
     phone_number: string;
     location: string;
+    address_line_1: string,
+    address_line_2: string,
+    city: string,
+    state: string,
+    postal_code: string,
     latitude: string;
     longitude: string;
     open_time: string;
     close_time: string;
-    open_status: string; 
+    open_status: string;
     hourly_rate: number;
-    distance: string;    
+    distance: string;
     images: Image[];
     amenities: Amenity[];
     rules: Rule[];

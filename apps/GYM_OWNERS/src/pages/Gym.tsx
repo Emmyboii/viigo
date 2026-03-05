@@ -18,6 +18,11 @@ interface GymType {
     hourly_rate: string;
     phone_number: string;
     location: string;
+    address_line_1: string,
+    address_line_2: string,
+    city: string,
+    state: string,
+    postal_code: string,
     open_time: string;
     close_time: string;
     longitude: string;

@@ -2,7 +2,7 @@ import {
     FiMapPin,
     FiClock,
 } from "react-icons/fi";
-import { HiShare } from "react-icons/hi";
+import { HiOutlineLocationMarker, HiShare } from "react-icons/hi";
 
 import three from "../assets/three.png";
 import halfCircle from "../assets/paymentWhiteImg.png";
@@ -13,7 +13,7 @@ import { useNavigate } from "react-router";
 import { useAppContext } from "../context/AppContext";
 import type { Booking } from "../pages/Bookings";
 import type { Gym } from "./types/gym";
-import { MdPending } from "react-icons/md";
+import { MdPending, MdPhone } from "react-icons/md";
 
 type PaymentSuccessProps = {
     onClose: () => void;
@@ -181,6 +181,26 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
         }
     };
 
+    const handlePhoneClick = () => {
+        if (gym?.phone_number) {
+            // Open the phone dialer
+            window.location.href = `tel:${gym.phone_number}`;
+        }
+    };
+
+    const handleLocationClick = () => {
+        if (!gym) return;
+
+        // Navigate to /explore with coordinates and gym info
+        navigate("/explore", {
+            state: {
+                gym,
+                latitude: gym.latitude,
+                longitude: gym.longitude,
+            }
+        });
+    };
+
     const statusConfig = getStatusConfig(booking?.status || "PENDING");
 
     const getStatusIcon = (status: Booking["status"]) => {
@@ -237,12 +257,32 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
                     />
 
                     <div className="flex-1">
-                        <h2 className="font-semibold text-lg">
-                            {gym?.name}
-                        </h2>
+                        <div className="flex justify-between items-center gap-2">
+                            <h2 className="font-semibold text-lg">
+                                {gym?.name}
+                            </h2>
+
+                            <div className="flex gap-3 mt-3">
+                                {/* Phone */}
+                                <div
+                                    onClick={handlePhoneClick}
+                                    className="bg-[#BFDBFE] text-[#2563EB] p-2 rounded-lg cursor-pointer hover:bg-gray-200 transition"
+                                >
+                                    <MdPhone size={16} />
+                                </div>
+
+                                {/* Location */}
+                                <div
+                                    onClick={handleLocationClick}
+                                    className="bg-[#BFDBFE] text-[#2563EB] p-2 rounded-lg cursor-pointer hover:bg-gray-200 transition"
+                                >
+                                    <HiOutlineLocationMarker size={16} />
+                                </div>
+                            </div>
+                        </div>
 
                         <div className="flex items-center gap-2 text-sm text-[#CBD5E1]">
-                            {gym?.location}
+                            {gym?.city},{gym?.state}
                         </div>
 
                         <div className="flex items-center gap-1 text-sm opacity-90">

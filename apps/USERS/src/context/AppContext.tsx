@@ -32,6 +32,11 @@ export interface GymType {
     owner_email: string;
     phone_number: string;
     location: string;
+    address_line_1: string,
+    address_line_2: string,
+    city: string,
+    state: string,
+    postal_code: string,
     latitude: string;
     longitude: string;
     open_time: string;
@@ -59,6 +64,11 @@ export interface GymCard {
     owner_email: string;
     phone_number: string;
     location: string;
+    address_line_1: string,
+    address_line_2: string,
+    city: string,
+    state: string,
+    postal_code: string,
     latitude: string;
     longitude: string;
     open_time: string;
@@ -110,8 +120,8 @@ type AppContextType = {
     hasUnread: boolean;
     isLoading: boolean;
     setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
-    location: any;
-    setLocation: React.Dispatch<React.SetStateAction<null>>;
+    location: string;
+    setLocation: React.Dispatch<React.SetStateAction<string>>;
 
     recommendedGyms: GymCard[];
     setRecommendedGyms: React.Dispatch<React.SetStateAction<GymCard[]>>;
@@ -154,7 +164,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [loading2, setLoading2] = useState(true);
 
     const [userData, setUserData] = useState<UserType | null>(null);
-    const [location, setLocation] = useState(null);
+    const [location, setLocation] = useState<string>("");
     const [latitude, setLatitude] = useState<string>("");
     const [longitude, setLongitude] = useState<string>("");
     const [searchResults, setSearchResults] = useState<GymCard[]>([]);
@@ -168,6 +178,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [amenities, setAmenities] = useState<Amenity[]>([]);
 
     const hasUnread = notifications.some(n => !n.is_read);
+
+    const token = localStorage.getItem("token");
 
     const request = async (url: string, options?: RequestInit) => {
         const token = localStorage.getItem("token");
@@ -289,7 +301,14 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const fetchLocation = async () => {
         try {
             const data = await request("/api/user/location/");
-            setLocation(data?.data);
+
+            const address = data?.data.current_address
+
+            const parts = address.split(",");
+            const state = parts[parts.length - 2]?.trim();
+            const country = parts[parts.length - 1]?.trim();
+
+            setLocation(`${state}, ${country}`);
         } catch (err) {
             console.error(err);
         }
@@ -326,6 +345,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const getAddressFromCoords = async (lat: string, lng: string) => {
+
+        if (!token) return
+
         try {
             const res = await fetch(
                 `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${API_KEY}`
