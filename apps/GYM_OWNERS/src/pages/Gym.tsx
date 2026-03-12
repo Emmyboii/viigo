@@ -19,7 +19,7 @@ interface GymType {
     phone_number: string;
     location: string;
     address_line_1: string,
-    address_line_2: string,
+    area: string,
     city: string,
     state: string,
     postal_code: string,

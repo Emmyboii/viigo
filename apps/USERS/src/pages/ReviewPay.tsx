@@ -483,6 +483,14 @@ import PaymentSuccess from "./PaymentSuccess";
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 type ToastType = "success" | "error" | null;
 
+export interface PreviewData {
+    base_price: string
+    platform_fee: string
+    gst_fee: string
+    total_payable: string
+    duration: string
+}
+
 export default function ReviewPay() {
     const navigate = useNavigate();
     const [showSuccess, setShowSuccess] = useState(false);
@@ -490,7 +498,9 @@ export default function ReviewPay() {
     const [gym, setGym] = useState<GymCard | null>(null);
     const [loading, setLoading] = useState(false);
     const [toast, setToast] = useState<{ type: ToastType; message: string } | null>(null);
-
+    const [previewLoading, setPreviewLoading] = useState(true);
+    const [previewData, setPreviewData] = useState<PreviewData | null>(null);
+    const [payLoading, setPayLoading] = useState(false);
 
     const storedData = localStorage.getItem("bookingData");
 
@@ -574,13 +584,61 @@ export default function ReviewPay() {
         fetchGymById();
     }, []);
 
-    const totalWithHr = (initialState?.selectedHours && gym)
-        ? gym?.hourly_rate * initialState?.selectedHours.value
-        : gym?.hourly_rate;
+    useEffect(() => {
+        const runPreview = async () => {
+            if (!id || !selectedDate || !selectedHours?.value) return;
 
-    const platformFee = 10;
-    const gst = 3;
-    const total = totalWithHr && totalWithHr + platformFee + gst;
+            setPreviewLoading(true);
+
+            try {
+                const payload = {
+                    gym_id: id,
+                    date: formatDateForAPI(selectedDate),
+                    duration: String(selectedHours.value),
+                };
+
+                const headers = {
+                    "Content-Type": "application/json",
+                    Authorization: localStorage.getItem("token")
+                        ? `Bearer ${localStorage.getItem("token")}`
+                        : "",
+                };
+
+                const res = await fetch(`${backendUrl}/client/booking/preview/`, {
+                    method: "POST",
+                    headers,
+                    body: JSON.stringify(payload),
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) throw data;
+
+                setPreviewData(data.data);
+
+            } catch (error) {
+                console.error("Preview failed:", error);
+
+                setToast({
+                    type: "error",
+                    message: "Unable to preview booking",
+                });
+
+            } finally {
+                setPreviewLoading(false);
+            }
+        };
+
+        runPreview();
+    }, []);
+
+    // const totalWithHr = (initialState?.selectedHours && gym)
+    //     ? gym?.hourly_rate * initialState?.selectedHours.value
+    //     : gym?.hourly_rate;
+
+    // const platformFee = 12;
+    // const gst = 2.16;
+    // const total = totalWithHr && totalWithHr + platformFee + gst;
 
     // const convertTo24Hour = (time12h: string) => {
     //     const [time, modifier] = time12h.split(" ");
@@ -655,52 +713,106 @@ export default function ReviewPay() {
         ? bookingDate.toLocaleDateString("en-GB", { day: "numeric", month: "long" })
         : "";
 
+    const loadRazorpayScript = () => {
+        return new Promise((resolve) => {
+            const script = document.createElement("script");
+            script.src = "https://checkout.razorpay.com/v1/checkout.js";
+            script.onload = () => resolve(true);
+            script.onerror = () => resolve(false);
+            document.body.appendChild(script);
+        });
+    };
+
     const handlePayment = async () => {
         if (!id || !selectedDate || !selectedHours?.value) return;
 
+        setPayLoading(true);
+
         try {
+
+            const scriptLoaded = await loadRazorpayScript();
+
+            if (!scriptLoaded) {
+                throw new Error("Failed to load Razorpay SDK");
+            }
+
             const payload = {
                 gym: id,
                 booking_date: formatDateForAPI(selectedDate),
                 duration_in_hours: String(selectedHours.value),
             };
 
-            const res = await fetch(`${backendUrl}/client/booking/confirm/`, {
+            const headers = {
+                "Content-Type": "application/json",
+                Authorization: localStorage.getItem("token")
+                    ? `Bearer ${localStorage.getItem("token")}`
+                    : "",
+            };
+
+
+            // 2️⃣ CONFIRM BOOKING
+            const confirmRes = await fetch(`${backendUrl}/client/booking/confirm/`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: localStorage.getItem("token")
-                        ? `Bearer ${localStorage.getItem("token")}`
-                        : "",
-                },
+                headers,
                 body: JSON.stringify(payload),
             });
 
-            const data = await res.json();
+            const confirmData = await confirmRes.json();
 
-            if (!res.ok) {
-                throw data;
+            if (!confirmRes.ok) {
+                throw confirmData;
             }
 
-            console.log("Booking success:", data);
+            const payment = confirmData.data.payment_details;
 
-            localStorage.setItem("paymentSuccess", "true");
-            localStorage.setItem("paid", "true");
+            // 2️⃣ OPEN RAZORPAY
+            const options = {
+                key: payment.razorpay_key_id,
+                amount: payment.amount,
+                currency: payment.currency,
+                name: payment.name,
+                description: payment.description,
+                order_id: payment.razorpay_order_id,
 
-            // ✅ Show success modal AFTER API success
-            setShowSuccess(true);
+                handler: function (response: any) {
 
-            setTimeout(() => {
-                setShowSecondSuccess(true);
-                // localStorage.removeItem("bookingData");
-                window.scrollTo(0, 0);
-            }, 3000);
+                    console.log("Payment success:", response);
+
+                    // response contains:
+                    // razorpay_payment_id
+                    // razorpay_order_id
+                    // razorpay_signature
+
+                    localStorage.setItem("paymentSuccess", "true");
+                    localStorage.setItem("paid", "true");
+
+                    setShowSuccess(true);
+
+                    setTimeout(() => {
+                        setShowSecondSuccess(true);
+                        window.scrollTo(0, 0);
+                    }, 3000);
+                },
+
+                modal: {
+                    ondismiss: function () {
+                        setPayLoading(false);
+                    }
+                },
+
+                theme: {
+                    color: "#2563EB"
+                }
+            };
+
+            const razorpay = new (window as any).Razorpay(options);
+
+            razorpay.open();
 
         } catch (error: unknown) {
             let errorMessage = "Something went wrong";
 
             if (error instanceof Error) {
-                // Generic JS/network error
                 errorMessage = error.message;
             } else if (typeof error === "object" && error !== null) {
                 const err = error as {
@@ -709,9 +821,7 @@ export default function ReviewPay() {
                     non_field_errors?: string[];
                 };
 
-                // Prefer non_field_errors
                 if (err.data) {
-                    // Flatten first error from any field
                     const fieldErrors = Object.values(err.data).flat();
                     if (fieldErrors.length) errorMessage = fieldErrors[0];
                 } else if (err.non_field_errors?.length) {
@@ -723,6 +833,8 @@ export default function ReviewPay() {
 
             setToast({ type: "error", message: errorMessage });
             setTimeout(() => setToast(null), 3400);
+        } finally {
+            setPayLoading(false);
         }
     };
 
@@ -739,7 +851,7 @@ export default function ReviewPay() {
 
     const visibleAmenities = gym?.amenities.slice(0, 2);
 
-    if (loading) {
+    if (loading || previewLoading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
                 <div className="flex flex-col items-center gap-4 p-8 bg-white animate-fadeIn">
@@ -783,7 +895,7 @@ export default function ReviewPay() {
 
                                 <div className="flex items-center text-xs text-gray-500 gap-1 mt-2 flex-wrap">
                                     <HiLocationMarker size={12} />
-                                    <span>{gym?.distance} {gym?.location}</span>
+                                    <span>{gym?.distance} {gym?.area}</span>
                                     <span>•</span>
                                     <span>{gym?.open_status || `Open Till ${formatTime12Hour(gym?.close_time)}`}</span>
                                 </div>
@@ -881,25 +993,26 @@ export default function ReviewPay() {
                             </h3>
 
                             <div className="flex justify-between">
+                                {/* <span>{previewData?.duration ?? "N/A"} Hours</span> */}
                                 <span>{selectedHours?.label}</span>
-                                <span>Rs. {totalWithHr}</span>
+                                <span>Rs. {previewData?.base_price ?? "N/A"}</span>
                             </div>
 
                             <div className="flex justify-between">
                                 <span>Platform Fee</span>
-                                <span>Rs. {platformFee}</span>
+                                <span>Rs. {previewData?.platform_fee ?? "N/A"}</span>
                             </div>
 
                             <div className="flex justify-between">
                                 <span>GST on Platform Fee</span>
-                                <span>Rs. {gst}</span>
+                                <span>Rs. {previewData?.gst_fee ?? "N/A"}</span>
                             </div>
 
                             <hr className="border-dashed my-2" />
 
                             <div className="flex justify-between font-semibold text-base">
                                 <span>Total</span>
-                                <span>Rs. {total}</span>
+                                <span>Rs. {previewData?.total_payable ?? "N/A"}</span>
                             </div>
                         </div>
                     </div>
@@ -917,15 +1030,23 @@ export default function ReviewPay() {
                                 </p>
 
                                 <p className="text-xl font-bold">
-                                    ₹{total}/{selectedHours?.label}
+                                    ₹{previewData?.total_payable ?? "N/A"}/{selectedHours?.label}
                                 </p>
                             </div>
 
                             <button
                                 onClick={handlePayment}
-                                className="bg-blue-600 text-white px-6 py-3 w-[163px] text-xs rounded-md font-medium"
+                                disabled={payLoading}
+                                className="bg-blue-600 text-white px-6 py-3 w-[163px] text-xs rounded-md font-medium flex items-center justify-center gap-2 disabled:opacity-60"
                             >
-                                Pay Using Razorpay
+                                {payLoading ? (
+                                    <>
+                                        <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                                        Processing...
+                                    </>
+                                ) : (
+                                    "Pay Using Razorpay"
+                                )}
                             </button>
                         </div>
                     </div>
@@ -961,7 +1082,7 @@ export default function ReviewPay() {
 
             {/* Second Success Modal */}
             {showSecondSuccess && (
-                <PaymentSuccess onClose={handleClose} gym={gym} />
+                <PaymentSuccess onClose={handleClose} gym={gym} preview={previewData} />
             )}
         </div >
     );

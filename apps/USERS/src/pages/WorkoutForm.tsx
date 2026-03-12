@@ -71,7 +71,7 @@ export default function WorkoutForm() {
         try {
             const token = localStorage.getItem('token');
             const payload = {
-                name,
+                full_name: name,
                 workout_duration: dailyWorkout,
                 workout_frequency: weeklyWorkout,
             };
@@ -108,7 +108,7 @@ export default function WorkoutForm() {
             setTimeout(() => {
                 setToast(null);
                 window.location.reload()
-                navigate('/'); 
+                navigate('/');
                 // go to home
             }, 2000);
         } catch (err: any) {

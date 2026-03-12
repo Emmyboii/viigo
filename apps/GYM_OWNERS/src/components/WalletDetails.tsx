@@ -4,15 +4,17 @@ import Footer from './Footer'
 // import { useState } from 'react';
 import VerifiedWallet from './VerifiedWallet';
 import UnverifiedWallet from './UnverifiedWallet';
+import { useAppContext } from '../context/AppContext';
 
-interface walletDetailsProps {
-    setDisplay: React.Dispatch<React.SetStateAction<"details" | "create" | "edit">>;
-}
 
-const WalletDetails = ({ setDisplay }: walletDetailsProps) => {
+const WalletDetails = () => {
 
-    const verified = true
-    // const [verified, setVerified] = useState(false)
+    const { wallet } = useAppContext()
+
+    // const verified = true
+
+    const verified = wallet?.is_active === true
+    const balance = wallet?.balance ?? "0.00"
 
     return (
         <Container>
@@ -21,7 +23,7 @@ const WalletDetails = ({ setDisplay }: walletDetailsProps) => {
             {verified ? (
                 <VerifiedWallet />
             ) : (
-                <UnverifiedWallet setDisplay={setDisplay} />
+                <UnverifiedWallet balance={balance} isActive={wallet?.is_active ?? false} />
             )}
 
             <Footer />

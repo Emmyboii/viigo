@@ -148,8 +148,8 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
         ? gym?.hourly_rate * hoursNumber
         : gym?.hourly_rate;
 
-    const platformFee = 10;
-    const gst = 4;
+    const platformFee = 12;
+    const gst = 2.16;
     // const total = price + platformFee + gst;
 
     const getStatusConfig = (status: Booking["status"]) => {
@@ -257,12 +257,12 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
                     />
 
                     <div className="flex-1">
-                        <div className="flex justify-between items-center gap-2">
+                        <div className="flex flex-col justify-between items-start gap-">
                             <h2 className="font-semibold text-lg">
                                 {gym?.name}
                             </h2>
 
-                            <div className="flex gap-3 mt-3">
+                            <div className="flex gap-3 my-3">
                                 {/* Phone */}
                                 <div
                                     onClick={handlePhoneClick}

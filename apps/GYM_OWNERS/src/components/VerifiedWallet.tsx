@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
     LineChart,
     Line,
@@ -9,84 +9,8 @@ import {
     ResponsiveContainer,
     CartesianGrid,
 } from "recharts";
-
-
-type Transaction = {
-    id: string;
-    name: string;
-    date: Date;
-    formattedDate: string;
-    time: string;
-    amount: number;
-    status: "Settled" | "Refunded";
-    type: "booking" | "refund";
-    hours: number;
-    amountPaid: number;
-    bookingId: number;
-    start: string;
-    end: string;
-};
-
-const getChartData = (
-    transactions: Transaction[],
-    range: "week" | "month"
-) => {
-    const days = range === "week" ? 7 : 30;
-
-    const result: { date: string; amount: number }[] = [];
-
-    for (let i = days - 1; i >= 0; i--) {
-        const d = new Date();
-        d.setDate(d.getDate() - i);
-
-        const label =
-            range === "week"
-                ? d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase()
-                : `${d.getDate()}`;
-
-        const total = transactions
-            .filter((tx) => {
-                const txDate = new Date(tx.date);
-
-                return (
-                    txDate.getDate() === d.getDate() &&
-                    txDate.getMonth() === d.getMonth() &&
-                    txDate.getFullYear() === d.getFullYear() &&
-                    tx.amount > 0 // only earnings
-                );
-            })
-            .reduce((sum, tx) => sum + tx.amount, 0);
-
-        result.push({ date: label, amount: total });
-    }
-
-    return result;
-};
-
-const transactions: Transaction[] = Array.from({ length: 18 }).map((_, i) => {
-    const positive = i % 3 !== 0;
-
-    // generate dates within last 40 days
-    const daysAgo = Math.floor(Math.random() * 40);
-    const dateObj = new Date();
-    dateObj.setDate(dateObj.getDate() - daysAgo);
-
-    return {
-        id: (1000 + i).toString(),
-        name: "Geetanjali",
-        date: dateObj,
-        formattedDate: dateObj.toDateString(),
-        time: "10:30 AM",
-        amount: positive ? 390 : -390,
-        status: positive ? "Settled" : "Refunded",
-        type: positive ? "booking" : "refund", // 👈 IMPORTANT
-        hours: 2,
-        amountPaid: 410,
-        bookingId: 39328 + i,
-        start: "10 AM",
-        end: "12 PM",
-    };
-});
+import { useAppContext } from "../context/AppContext";
+import WithdrawalModal from "../components/WithdrawalModal";
 
 type CustomTooltipProps = {
     active?: boolean;
@@ -106,16 +30,38 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
 };
 
 export default function VerifiedWallet() {
+
+    const { walletDashboard, bookings, request } = useAppContext();
+    const [showWithdrawalModal, setShowWithdrawalModal] = useState(false);
+
+    const pendingBookings =
+        bookings?.filter((b) => b.status === "PENDING").length ?? 0;
+
+    const balance = Number(walletDashboard?.account_balance ?? 0);
+    const isWithdrawDisabled = balance <= 0;
+
     const navigate = useNavigate();
     const [range, setRange] = useState<"week" | "month">("week");
-    const chartData = getChartData(transactions, range);
+    const chartData = walletDashboard?.chart_data ?? [];
 
-    const hasTransactions = transactions.length > 0;
+    const hasTransactions = (walletDashboard?.recent_activity?.length ?? 0) > 0;
 
-    // ---------------- Helpers ----------------
-    const formatAmount = (n: number) => `${n > 0 ? "+" : "-"}₹${Math.abs(n)}`;
+    const handleWithdrawal = async (amount: string) => {
+        try {
+            await request("/request-withdrawal", {
+                method: "POST",
+                body: JSON.stringify({
+                    amount: amount
+                }),
+            });
 
-    const total = useMemo(() => transactions.reduce((a, b) => a + b.amount, 0), []);
+            alert("Withdrawal request submitted successfully");
+
+        } catch (err) {
+            console.error(err);
+            alert("Failed to submit withdrawal request");
+        }
+    };
 
     return (
         <div className="space-y-4 mb-14">
@@ -124,22 +70,30 @@ export default function VerifiedWallet() {
                 <div className="flex justify-between gap-6">
                     <div className="text-center bg-[#FFFFFF1A] p-3 rounded-lg space-y-1 w-full">
                         <p className="text-xs opacity-80">Today's Earnings</p>
-                        <h3 className="text-lg font-semibold">₹ 4,500</h3>
+                        <h3 className="text-lg font-semibold">₹ {walletDashboard?.todays_earnings ?? "0"}</h3>
                         <p className="text-sm text-[#00FF5E]">+12%</p>
                     </div>
                     <div className="text-center bg-[#FFFFFF1A] p-3 rounded-lg space-y-1 w-full">
                         <p className="text-xs opacity-80">Today's Bookings</p>
-                        <h3 className="text-lg font-semibold">18</h3>
-                        <p className="text-sm text-[#00FF5E]">Pending 5</p>
+                        <h3 className="text-lg font-semibold">{walletDashboard?.todays_bookings ?? 0}</h3>
+                        <p className="text-sm text-[#00FF5E]">Pending {pendingBookings}</p>
                     </div>
                 </div>
 
                 <div className="mt-4 text-center">
                     <p className="text-lg font-semibold text-[#F1F5F9]">Account Balance</p>
-                    <h2 className="text-3xl font-bold">Rs. {Math.abs(total)}</h2>
+                    <h2 className="text-3xl font-bold">Rs. {balance}</h2>
                 </div>
 
-                <button className="mt-3 w-full max-w-[184px] mx-auto flex items-center justify-center bg-white text-blue-600 px-4 py-2 rounded text-sm">
+                <button
+                    disabled={!isWithdrawDisabled}
+                    onClick={() => setShowWithdrawalModal(true)}
+                    className={`mt-3 w-full max-w-[184px] mx-auto flex items-center justify-center px-4 py-2 rounded text-sm
+                        ${!isWithdrawDisabled
+                            ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                            : "bg-white text-blue-600 hover:bg-blue-50"
+                        }`}
+                >
                     Withdraw Now
                 </button>
             </div>
@@ -232,15 +186,19 @@ export default function VerifiedWallet() {
             <div>
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="font-semibold text-[#0F172A]">Recent Activity</h3>
-                    <button
-                        onClick={() => {
-                            navigate("/wallet/transactions")
-                            window.scrollTo(0, 0)
-                        }}
-                        className="text-[#0F172A] font-medium text-sm"
-                    >
-                        See All
-                    </button>
+
+                    {hasTransactions && (
+
+                        <button
+                            onClick={() => {
+                                navigate("/wallet/transactions")
+                                window.scrollTo(0, 0)
+                            }}
+                            className="text-[#0F172A] font-medium text-sm"
+                        >
+                            See All
+                        </button>
+                    )}
                 </div>
 
                 <div className="space-y-3">
@@ -275,7 +233,7 @@ export default function VerifiedWallet() {
                         </div>
                     ) : (
                         <div className="space-y-3">
-                            {transactions.slice(0, 6).map((t) => (
+                            {walletDashboard?.recent_activity.slice(0, 6).map((t) => (
                                 <div
                                     key={t.id}
                                     onClick={() => {
@@ -285,17 +243,19 @@ export default function VerifiedWallet() {
                                     className="flex justify-between bg-white py-2 rounded-xl cursor-pointer"
                                 >
                                     <div>
-                                        <p className="font-medium text-sm">{t.name}</p>
+                                        <p className="font-medium text-sm">{t.guest_name}</p>
                                         <p className="text-xs text-gray-500">
-                                            {t.formattedDate} • {t.time}
+                                            {t.date_formatted}
                                         </p>
                                     </div>
 
                                     <p
-                                        className={`text-base font-semibold ${t.amount > 0 ? "text-green-600" : "text-gray-600"
+                                        className={`text-base font-semibold ${t.transaction_type === "EARNING"
+                                            ? "text-green-600"
+                                            : "text-gray-600"
                                             }`}
                                     >
-                                        {formatAmount(t.amount)}
+                                        {t.transaction_type === "EARNING" ? "+" : "-"}₹{t.amount}
                                     </p>
                                 </div>
                             ))}
@@ -303,6 +263,13 @@ export default function VerifiedWallet() {
                     )}
                 </div>
             </div>
+
+            <WithdrawalModal
+                open={showWithdrawalModal}
+                balance={balance}
+                onClose={() => setShowWithdrawalModal(false)}
+                onSubmit={handleWithdrawal}
+            />
         </div>
     );
 }

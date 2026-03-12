@@ -267,7 +267,9 @@ export default function GymDetails() {
             <div className="pt-14" />
 
             {/* ===== Image Carousel ===== */}
-            <ImageCarousel images={gym.images} height="h-60" />
+            <div className="h-60">
+                <ImageCarousel images={gym.images} />
+            </div>
 
             {/* ===== Content ===== */}
             <div className="bg-white p-4 px-5 space-y-6">
@@ -278,7 +280,7 @@ export default function GymDetails() {
 
                     <div className="flex items-center text-sm text-gray-500 mt-1 gap-1 flex-wrap">
                         <HiLocationMarker size={14} />
-                        <span>{gym.distance} {gym.location}</span>
+                        <span>{gym.distance} {gym.area}</span>
                         <span>•</span>
                         <span>{gym.open_status || `Open Till ${formatTime12Hour(gym.close_time)}`}</span>
                     </div>
@@ -288,7 +290,7 @@ export default function GymDetails() {
                         {/* Phone */}
                         <div
                             onClick={handlePhoneClick}
-                            className="bg-blue-600 text-[#ffffff] p-2 rounded-lg cursor-pointer hover:bg-gray-200 transition"
+                            className="bg-[#DBEAFE] text-[#2563EB] p-2 rounded cursor-pointer transition"
                         >
                             <MdPhone size={16} />
                         </div>
@@ -296,7 +298,7 @@ export default function GymDetails() {
                         {/* Location */}
                         <div
                             onClick={handleLocationClick}
-                            className="bg-blue-600 text-[#ffffff] p-2 rounded-lg cursor-pointer hover:bg-gray-200 transition"
+                            className="bg-[#DBEAFE] text-[#2563EB] p-2 rounded cursor-pointer transition"
                         >
                             <HiOutlineLocationMarker size={16} />
                         </div>
@@ -340,7 +342,7 @@ export default function GymDetails() {
                     {gym.amenities.length > 4 && (
                         <button
                             onClick={() => setAmenitiesOpen(true)}
-                            className="mt-4 w-full bg-blue-600 py-3 rounded-xl text-[#ffffff] font-medium"
+                            className="mt-4 w-full bg-[#DBEAFE] text-[#2563EB] py-3 rounded-xl font-medium"
                         >
                             Show all {gym.amenities.length} amenities
                         </button>
@@ -366,7 +368,7 @@ export default function GymDetails() {
                     {gym.rules.length > 3 && (
                         <button
                             onClick={() => setRulesOpen(true)}
-                            className="mt-4 w-full bg-blue-600 py-3 rounded-xl text-[#ffffff] font-medium"
+                            className="mt-4 w-full bg-[#DBEAFE] text-[#2563EB] py-3 rounded-xl font-medium"
                         >
                             View all rules
                         </button>
@@ -398,7 +400,7 @@ export default function GymDetails() {
 
                             <div className="flex items-center gap-1">
                                 <p className="text-xl font-bold">
-                                    ₹{totalWithHr && totalWithHr + 10}{initialBookingState?.selectedHours?.label ? `/${editSelectedHr}` : "Hr"}
+                                    ₹{totalWithHr && totalWithHr + 12 + 2.16}{initialBookingState?.selectedHours?.label ? `/${editSelectedHr}` : "Hr"}
                                 </p>
                             </div>
                         </div>
@@ -417,7 +419,7 @@ export default function GymDetails() {
 
                         <div className="flex items-center gap-1">
                             <p className="text-xl font-bold">
-                                ₹{Number(gym.hourly_rate) + 10}/Hr
+                                ₹{Number(gym.hourly_rate) + 12 + 2.16}/Hr
                             </p>
                             <IoInformationCircleOutline
                                 size={22}
@@ -480,14 +482,19 @@ export default function GymDetails() {
 
                     <div className="flex items-center justify-between">
                         <p className="text-sm font-medium text-[#6A6A6A]">Platform Fee</p>
-                        <p className="text-sm font-medium text-[#0F172A]">Rs. 10</p>
+                        <p className="text-sm font-medium text-[#0F172A]">Rs. 12</p>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                        <p className="text-sm font-medium text-[#6A6A6A]">Gst Fee</p>
+                        <p className="text-sm font-medium text-[#0F172A]">Rs. 2.16</p>
                     </div>
 
                     <div className="border border-dashed border-[#CBD5E1]"></div>
 
                     <div className="flex items-center justify-between">
                         <p className="text-sm font-medium text-[#6A6A6A]">Total</p>
-                        <p className="text-sm font-medium text-[#0F172A]">Rs. {Number(gym.hourly_rate) + 10}</p>
+                        <p className="text-sm font-medium text-[#0F172A]">Rs. {Number(gym.hourly_rate) + 12 + 2.16}</p>
                     </div>
                 </div>
             </BottomSheet>

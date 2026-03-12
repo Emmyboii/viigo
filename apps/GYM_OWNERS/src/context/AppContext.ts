@@ -27,7 +27,7 @@ export interface GymType {
     phone_number: string;
     location: string;
     address_line_1: string,
-    address_line_2: string,
+    area: string,
     city: string,
     state: string,
     postal_code: string,
@@ -44,6 +44,15 @@ export interface GymType {
     calendar_availability?: []
 
     owner_email: string
+}
+
+export interface WalletType {
+    account_holder_name: string;
+    account_number: string;
+    ifsc_code: string;
+    gst_number: string;
+    is_active: boolean;
+    balance: string;
 }
 
 export type Booking = {
@@ -75,6 +84,39 @@ export interface NotificationType {
     created_at: string;
 }
 
+export interface WalletTransaction {
+    id: number;
+    guest_name: string;
+    amount: string;
+    transaction_type: "EARNING" | "REFUND" | "WITHDRAWAL";
+    is_credit: string;
+    date_formatted: string;
+    created_at: string;
+}
+
+export interface WalletChartPoint {
+    date: string;
+    amount: number;
+}
+
+export interface WalletDashboard {
+    account_balance: string;
+    todays_earnings: string;
+    todays_bookings: number;
+    chart_data: WalletChartPoint[];
+    recent_activity: WalletTransaction[];
+}
+
+export interface WalletTransaction {
+    id: number;
+    guest_name: string;
+    amount: string;
+    transaction_type: "EARNING" | "REFUND" | "WITHDRAWAL";
+    is_credit: string;
+    date_formatted: string;
+    created_at: string;
+}
+
 export type DisplayType = "details" | "edit" | "create";
 
 export type AppContextType = {
@@ -84,8 +126,16 @@ export type AppContextType = {
     selectedGym: GymType | null;
     setSelectedGym: React.Dispatch<React.SetStateAction<GymType | null>>;
 
+    walletDashboard: WalletDashboard | null;
+
+    wallet: WalletType | null;
+    setWallet: React.Dispatch<React.SetStateAction<WalletType | null>>;
+
     display: DisplayType;
     setDisplay: React.Dispatch<React.SetStateAction<DisplayType>>;
+
+    displayWallet: DisplayType;
+    setDisplayWallet: React.Dispatch<React.SetStateAction<DisplayType>>;
 
     loading: boolean;
     setLoading: React.Dispatch<React.SetStateAction<boolean>>;
@@ -102,10 +152,16 @@ export type AppContextType = {
     bookings: Booking[];
     setBookings: (bookings: Booking[]) => void;
 
+    walletTransactions: WalletTransaction[];
+
     // API FUNCTIONS 🔥
+request: <T = unknown>(url: string, options?: RequestInit) => Promise<T>;
     fetchUser: () => Promise<void>;
     fetchBookings: () => Promise<void>;
     fetchGyms: () => Promise<void>;
+    fetchWallet: () => Promise<void>;
+    fetchWalletDashboard: () => Promise<void>;
+    fetchWalletTransactions: () => Promise<void>;
 };
 
 // create context

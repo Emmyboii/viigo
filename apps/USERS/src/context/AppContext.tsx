@@ -33,7 +33,7 @@ export interface GymType {
     phone_number: string;
     location: string;
     address_line_1: string,
-    address_line_2: string,
+    area: string,
     city: string,
     state: string,
     postal_code: string,
@@ -65,7 +65,7 @@ export interface GymCard {
     phone_number: string;
     location: string;
     address_line_1: string,
-    address_line_2: string,
+    area: string,
     city: string,
     state: string,
     postal_code: string,
@@ -299,22 +299,29 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const fetchLocation = async () => {
+
+        if (!token) return
+
         try {
             const data = await request("/api/user/location/");
 
             const address = data?.data.current_address
 
-            const parts = address.split(",");
-            const state = parts[parts.length - 2]?.trim();
-            const country = parts[parts.length - 1]?.trim();
+            const parts = address?.split(",");
+            const city = parts[1]?.trim();
+            const state = parts[3]?.trim();
 
-            setLocation(`${state}, ${country}`);
+            setLocation(`${city}, ${state}`);
+
         } catch (err) {
             console.error(err);
         }
     };
 
     const saveLocation = async (lat: string, lng: string, address: string) => {
+
+        if (!token) return
+
         try {
             await request("/api/user/location/", {
                 method: "PUT",
@@ -330,6 +337,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const fetchNotifications = async () => {
+
+        if (!token) return
+
         setIsLoading(true);
         try {
             const data = await request("/notification/notifications/");
@@ -356,7 +366,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             const data = await res.json();
 
             if (data.status === "OK" && data.results.length > 0) {
-                return data.results[0].formatted_address;
+                return data.results[1].formatted_address;
             }
 
             return "";

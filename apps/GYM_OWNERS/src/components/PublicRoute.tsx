@@ -10,7 +10,7 @@ const PublicRoute = ({ children }: PublicRouteProps) => {
 
     // If logged in, redirect to home
     if (token) {
-        return <Navigate to="/" replace />;
+        return <Navigate to="/onboarding" replace />;
     }
 
     return children;

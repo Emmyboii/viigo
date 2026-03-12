@@ -65,7 +65,7 @@ export default function SelectionModal({
                                     : ""
                                 }`}
                         >
-                            <div className="flex items-center gap-3">
+                            <div className="flex flex-1 items-center gap-3">
                                 {item.icon && (
                                     <img
                                         src={item.icon}

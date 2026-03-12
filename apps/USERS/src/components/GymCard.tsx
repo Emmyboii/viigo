@@ -23,14 +23,16 @@ export default function GymCard({ gym }: GymCardProps) {
 
     return (
         <div className="bg-white rounded-md shadow-md overflow-hidden h-[355px] flex flex-col">
-            <ImageCarousel images={gym?.images} />
+            <div className="h-40">
+                <ImageCarousel images={gym?.images} />
+            </div>
 
             <div className="p-4 flex flex-col flex-1">
                 <h3 className="font-semibold">{gym?.name}</h3>
 
                 <p className="text-xs text-gray-500 mt-1 flex items-center flex-wrap gap-1">
                     <HiLocationMarker className="text-[#475569] text-sm" />
-                    {gym?.distance}, {gym?.city},{gym?.state} <GoDotFill /> {gym?.open_status}
+                    {gym?.distance}, {gym?.area} <GoDotFill /> {gym?.open_status}
                 </p>
 
                 <div className="flex gap-2 mt-3 flex-wrap">

@@ -11,11 +11,24 @@ export default function WorkoutForm() {
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
     const [name, setName] = useState('');
+    const [addressLine1, setAddressLine1] = useState("");
+    const [area, setArea] = useState("");
+    const [gst, setGst] = useState("");
+    const [city, setCity] = useState("");
+    const [state, setState] = useState("");
+    const [postalCode, setPostalCode] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [checkingOnboarding, setCheckingOnboarding] = useState(true);
     const [toast, setToast] = useState<{ type: ToastType; message: string } | null>(null);
 
-    const isFormComplete = name.trim() !== '';
+    const isFormComplete =
+        name.trim() !== '' &&
+        addressLine1.trim() !== '' &&
+        gst.trim() !== '' &&
+        area.trim() !== '' &&
+        city.trim() !== '' &&
+        state.trim() !== '' &&
+        postalCode.trim() !== '';
 
     /* ---------------- Check onboarding ---------------- */
     useEffect(() => {
@@ -45,6 +58,30 @@ export default function WorkoutForm() {
         checkOnboarding();
     }, [backendUrl, navigate]);
 
+    const geocodeAddress = async (address: string) => {
+        const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
+
+        const res = await fetch(
+            `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
+                address
+            )}&components=country:NG&key=${apiKey}`
+        );
+
+        const data = await res.json();
+
+        if (data.status !== "OK") {
+            console.error(data);
+            throw new Error("Failed to geocode address");
+        }
+
+        const { lat, lng } = data.results[0].geometry.location;
+
+        return {
+            lat: lat.toFixed(6),
+            lng: lng.toFixed(6),
+        };
+    };
+
     /* ---------------- Handle Submit ---------------- */
     const handleSubmit = async () => {
         if (!isFormComplete || isLoading) return;
@@ -53,8 +90,21 @@ export default function WorkoutForm() {
 
         try {
             const token = localStorage.getItem('token');
+
+            const fullAddress = `${addressLine1}, ${area}, ${city}, ${state}, ${postalCode}`;
+
+            const { lat, lng } = await geocodeAddress(fullAddress);
+
             const payload = {
-                name,
+                full_name: name,
+                gst_number: gst,
+                address_line_1: addressLine1,
+                area,
+                city,
+                state,
+                postal_code: postalCode,
+                latitude: lat,
+                longitude: lng
             };
 
             const res = await fetch(`${backendUrl}/api/onboarding/`, {
@@ -68,7 +118,7 @@ export default function WorkoutForm() {
 
             const data = await res.json();
 
-            if (!res.ok || !data.success) {
+            if (!res.ok || data.status !== "success") {
                 // throw new Error(data.message || 'Failed to save onboarding');
 
                 const message =
@@ -90,8 +140,8 @@ export default function WorkoutForm() {
                 setToast(null);
                 window.location.reload()
                 navigate('/');
-                 // go to home
-            }, 2000);
+                // go to home
+            }, 1700);
         } catch (err: unknown) {
             console.error(err);
             const message = err instanceof Error ? err.message : "Something went wrong. Please try again.";
@@ -127,15 +177,43 @@ export default function WorkoutForm() {
                 {/* Question 1 */}
                 <div>
                     <label className="block mb-2 font-semibold text-black text-[22px]">
-                        What's your Name?
+                        Tell us about you and your gym
                     </label>
-                    <input
-                        type="text"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        className="border border-[#475569] text-[#0F172A] text-sm w-full rounded-lg py-2 px-4 outline-none h-[48px]"
-                        placeholder="Please type your name here ..."
-                    />
+                    <p className='text-sm font-normal mb-10'>We’ll use these details to set up your gym owner account.</p>
+                    <div className='mt-4'>
+                        <p className="text-sm text-[#0F172A] mb-1">Your Name</p>
+                        <input
+                            value={name}
+                            title="name"
+                            onChange={(e) => setName(e.target.value)}
+                            className="border border-[#475569] w-full rounded-lg px-3 py-3 outline-none"
+                        />
+                    </div>
+                    <div className='mt-4'>
+                        <p className="text-sm text-[#0F172A] mb-1">GST Number</p>
+                        <input
+                            value={gst}
+                            title="gst"
+                            onChange={(e) => setGst(e.target.value)}
+                            className="border border-[#475569] w-full rounded-lg px-3 py-3 outline-none placeholder:text-sm"
+                            placeholder="Enter your GST number here"
+                        />
+                    </div>
+
+                    <p className='text-lg font-semibold mt-4'>Update your Gym Location</p>
+                    <LocationInput label="Address" value={addressLine1} onChange={setAddressLine1} />
+                    <LocationInput label="Area" value={area} onChange={setArea} />
+                    <LocationInput label="City" value={city} onChange={setCity} />
+                    <LocationInput label="State" value={state} onChange={setState} />
+                    <div className='mt-4'>
+                        <p className="text-sm text-[#0F172A] mb-1">ZIP / Postal Code</p>
+                        <input
+                            value={postalCode}
+                            title="zip"
+                            onChange={(e) => setPostalCode(e.target.value)}
+                            className="border border-[#475569] w-1/2 rounded-lg px-3 py-3 outline-none placeholder:text-sm"
+                        />
+                    </div>
                 </div>
             </div>
 
@@ -168,6 +246,28 @@ function Toast({ text, type }: { text: string; type: ToastType; }) {
                 {isSuccess ? <FaCircleCheck /> : <MdError />}
             </span>
             <p className="text-sm font-medium">{text}</p>
+        </div>
+    );
+}
+
+function LocationInput({
+    label,
+    value,
+    onChange,
+}: {
+    label: string;
+    value: string;
+    onChange: (v: string) => void;
+}) {
+    return (
+        <div className='mt-4'>
+            <p className="text-sm text-[#0F172A] mb-1">{label}</p>
+            <input
+                value={value}
+                title="location"
+                onChange={(e) => onChange(e.target.value)}
+                className="border border-[#475569] w-full rounded-lg px-3 py-3 outline-none"
+            />
         </div>
     );
 }

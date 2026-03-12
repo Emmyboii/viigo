@@ -3,16 +3,16 @@ import Footer from "../components/Footer";
 import { useAppContext, type WalletType } from "../context/AppContext";
 import { FaCircleCheck } from "react-icons/fa6";
 import { MdError } from "react-icons/md";
-
-interface createWalletProps {
-    setDisplayWallet: React.Dispatch<React.SetStateAction<"details" | "create" | "edit">>;
-}
+import { useNavigate } from "react-router-dom";
+import { FiArrowLeft } from "react-icons/fi";
 
 type ToastType = "success" | "error" | null;
 
-export default function CreateWallet({ setDisplayWallet }: createWalletProps) {
+export default function EditWallet() {
 
-    const { wallet, displayWallet, setWallet } = useAppContext()
+    const { wallet, setWallet } = useAppContext()
+
+    const navigate = useNavigate()
 
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -76,28 +76,15 @@ export default function CreateWallet({ setDisplayWallet }: createWalletProps) {
 
             const token = localStorage.getItem("token");
 
-            let res;
-            if (displayWallet === "edit") {
-                // EDIT existing gym
-                res = await fetch(`${backendUrl}/wallet/`, {
-                    method: "PUT",
-                    body: JSON.stringify(form),
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-            } else {
-                // CREATE new gym
-                res = await fetch(`${backendUrl}/wallet/`, {
-                    method: "POST",
-                    body: JSON.stringify(form),
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-            }
+            // EDIT existing gym
+            const res = await fetch(`${backendUrl}/wallet/`, {
+                method: "PUT",
+                body: JSON.stringify(form),
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            });
 
             const data = await res.json();
 
@@ -110,14 +97,10 @@ export default function CreateWallet({ setDisplayWallet }: createWalletProps) {
             setWallet(newWallet);
 
             setTimeout(() => {
-                setDisplayWallet("details");
-                localStorage.setItem("walletDisplay", "details");
-            }, 1000);
+                navigate(-1)
+            }, 1550);
 
-            const message =
-                displayWallet === "edit"
-                    ? "Changes saved successfully!"
-                    : "Wallet created successfully!";
+            const message = "Changes saved successfully!"
             setToast({ type: "success", message });
 
             setTimeout(() => {
@@ -140,10 +123,18 @@ export default function CreateWallet({ setDisplayWallet }: createWalletProps) {
     return (
         <div className="min-h-screen bg-white px-5 py-6">
             {/* Header */}
-            <h1 className="text-[20px] font-semibold text-[#0F172A]">
-                {!wallet ? 'Setup Your Wallet' : !wallet.account_holder_name ? 'Setup Your Wallet' : wallet.account_holder_name && displayWallet === 'edit' ? 'Bank Details & G.S.T Details' : 'Setup Your Wallet'}
 
-            </h1>
+            <div className="flex items-center gap-3 bg-white cursor-pointer">
+                <FiArrowLeft
+                    onClick={() => {
+                        navigate(-1)
+                    }}
+                    size={20} />
+                <h1 className="text-[20px] font-semibold text-[#0F172A]">
+                    Bank Details & G.S.T Details
+                </h1>
+            </div>
+
             <p className="text-sm text-[#64748B] mt-1">
                 Add payout details so we can send your earnings .
             </p>

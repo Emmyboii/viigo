@@ -7,7 +7,7 @@ export default function Header() {
 
     const { hasUnread, location } = useAppContext();
 
-    const [city = "", country = ""] = location.split(",");
+    const [city = "", state = ""] = location.split(",");
 
     const navigate = useNavigate();
 
@@ -17,7 +17,7 @@ export default function Header() {
                 <HiLocationMarker className="text-[#475569] text-xl" />
                 <div className="leading-tight">
                     <div className="font-medium text-sm">{city.trim()}</div>
-                    <div className="text-sm font-medium">{country.trim()}</div>
+                    <div className="text-sm font-medium">{state.trim()}</div>
                 </div>
                 <IoChevronDown className="text-[#475569]" />
             </div>

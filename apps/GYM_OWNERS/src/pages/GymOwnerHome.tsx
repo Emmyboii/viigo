@@ -28,47 +28,11 @@ const chipData = [
   { id: "cancelled", label: "Cancelled" },
 ];
 
-// interface Amenity {
-//   id: number;
-//   name: string;
-//   icon: string;
-// }
-
-// interface Rule {
-//   id: number;
-//   description: string;
-// }
-
-// interface GymType {
-//   id: string;
-//   name: string;
-//   hourly_rate: string;
-//   phone_number: string;
-//   location: string;
-//   open_time: string;
-//   close_time: string;
-//   longitude: string;
-//   latitude: string;
-//   amenities: Amenity[];
-//   rules: Rule[];
-//   images: { id: number; image: string }[];
-
-//   peak_morning?: [string, string][];
-//   peak_evening?: [string, string][];
-//   calendar_availability?: []
-
-//   owner_email: string
-// }
-
-// interface GymProps {
-//   gym?: GymType | null;
-// }
-
 const GymOwnerHome = () => {
 
   const navigate = useNavigate();
 
-  const { bookings } = useAppContext()
+  const { bookings, isLoading } = useAppContext()
 
   const [filter, setFilter] = useState<string>("all");
   const [selectedUser, setSelectedUser] = useState<Booking | null>(null);
@@ -178,6 +142,22 @@ const GymOwnerHome = () => {
       : status === "error"
         ? "text-red-500"
         : "text-[#CBD5E1]";
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="flex flex-col items-center gap-4 p-8 bg-white animate-fadeIn">
+          <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-gray-700 text-lg font-medium">
+            Fetching your booking details...
+          </p>
+          <p className="text-gray-400 text-sm text-center">
+            This might take a few seconds. Sit tight!
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

@@ -213,20 +213,22 @@ import { HiOutlineLocationMarker, HiShare } from "react-icons/hi";
 import three from "../assets/three.png";
 import halfCircle from "../assets/paymentWhiteImg.png";
 import { FaCheckCircle } from "react-icons/fa";
-import { BiSolidCalendarAlt } from "react-icons/bi";
+// import { BiSolidCalendarAlt } from "react-icons/bi";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { useAppContext, type GymCard } from "../context/AppContext";
 import { MdPhone } from "react-icons/md";
+import type { PreviewData } from "./ReviewPay";
 
 type PaymentSuccessProps = {
     gym: GymCard | null
     onClose: () => void;
+    preview: PreviewData | null
 };
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-export default function PaymentSuccess({ onClose, gym }: PaymentSuccessProps) {
+export default function PaymentSuccess({ onClose, gym, preview }: PaymentSuccessProps) {
 
     const { userData } = useAppContext()
 
@@ -237,16 +239,15 @@ export default function PaymentSuccess({ onClose, gym }: PaymentSuccessProps) {
     const [bookingLoading, setBookingLoading] = useState(true);
 
     const priceTag = booking?.price_tag || "";
+    const hoursPart = priceTag.split("/")[1] || "";
 
-    const [pricePart = "", hoursPart = ""] = priceTag.split("/");
-
-    const price = pricePart.replace(/[^\d.]/g, "");
+    // const price = pricePart.replace(/[^\d.]/g, "");
 
     // Keep hours WITH "hrs"
     const hours = hoursPart.trim().toLowerCase();
 
     // Extract only number for calculation
-    const hoursNumber = Number(hours.replace(/[^\d.]/g, ""));
+    // const hoursNumber = Number(hours.replace(/[^\d.]/g, ""));
 
     useEffect(() => {
         const fetchBookings = async () => {
@@ -334,12 +335,12 @@ export default function PaymentSuccess({ onClose, gym }: PaymentSuccessProps) {
         ...(Array.isArray(gym?.peak_evening) ? gym.peak_evening : []),
     ];
 
-    const totalWithHr = (hours && gym)
-        ? gym?.hourly_rate * hoursNumber
-        : gym?.hourly_rate;
+    // const totalWithHr = (hours && gym)
+    //     ? gym?.hourly_rate * hoursNumber
+    //     : gym?.hourly_rate;
 
-    const platformFee = 10;
-    const gst = 3;
+    // const platformFee = 12;
+    // const gst = 2.16;
     // const total = totalWithHr && totalWithHr + platformFee + gst;
 
     if (bookingLoading || !gym || !booking) {
@@ -392,12 +393,12 @@ export default function PaymentSuccess({ onClose, gym }: PaymentSuccessProps) {
                     />
 
                     <div className="flex-1">
-                        <div className="flex justify-between items-center gap-2">
+                        <div className="flex flex-col justify-between items-start gap-">
                             <h2 className="font-semibold text-lg">
                                 {gym?.name}
                             </h2>
 
-                            <div className="flex gap-3 mt-3">
+                            <div className="flex gap-3 my-3">
                                 {/* Phone */}
                                 <div
                                     onClick={handlePhoneClick}
@@ -514,28 +515,28 @@ export default function PaymentSuccess({ onClose, gym }: PaymentSuccessProps) {
                 <p className="text-sm">Price Details</p>
                 <div className="flex justify-between">
                     <span className="text-[#6A6A6A]">{hours}</span>
-                    <span>Rs. {totalWithHr}</span>
+                    <span>Rs. {preview?.base_price ?? "N/A"}</span>
                 </div>
                 <div className="flex justify-between">
                     <span className="text-[#6A6A6A]">Platform Fee</span>
-                    <span>Rs. {platformFee}</span>
+                    <span>Rs.  {preview?.platform_fee ?? "N/A"}</span>
                 </div>
                 <div className="flex justify-between">
                     <span className="text-[#6A6A6A]">GST on Platform Fee</span>
-                    <span>Rs. {gst}</span>
+                    <span>Rs.  {preview?.gst_fee ?? "N/A"}</span>
                 </div>
                 <div className="flex justify-between pt-3">
                     <span>Total Paid Amount</span>
-                    <span>Rs. {price}</span>
+                    <span>Rs.  {preview?.total_payable ?? "N/A"}</span>
                 </div>
             </div>
 
             {/* Action Buttons */}
             <div className="mx-4 mt-6 flex gap-2">
-                <button className="flex-1 bg-blue-100 text-[#2563EB] py-2 px-2 rounded-full text-xs flex items-center justify-center gap-2">
+                {/* <button className="flex-1 bg-blue-100 text-[#2563EB] py-2 px-2 rounded-full text-xs flex items-center justify-center gap-2">
                     <BiSolidCalendarAlt size={16} />
                     Add To Calendar
-                </button>
+                </button> */}
 
                 <button className="flex-1 bg-blue-100 text-[#2563EB] py-2 px-2 rounded-full text-xs flex items-center justify-center gap-2">
                     <HiShare size={16} />

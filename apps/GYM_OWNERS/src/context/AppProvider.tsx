@@ -3,10 +3,13 @@ import { useNavigate } from "react-router-dom";
 import {
     AppContext,
     type GymType,
+    type WalletType,
     type UserType,
     type DisplayType,
     type Booking,
-    type NotificationType
+    type NotificationType,
+    type WalletDashboard,
+    type WalletTransaction
 } from "./AppContext";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -20,8 +23,25 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [userData, setUserData] = useState<UserType | null>(null);
     const [notifications, setNotifications] = useState<NotificationType[]>([]);
     const [display, setDisplay] = useState<DisplayType>("details");
+    const [displayWallet, setDisplayWallet] = useState<DisplayType>("details");
+    const [walletDashboard, setWalletDashboard] = useState<WalletDashboard | null>(null);
+    const [walletTransactions, setWalletTransactions] = useState<WalletTransaction[]>([]);
 
     const hasUnread = notifications.some(n => !n.is_read);
+
+    const [isLoading, setIsLoading] = useState(true);
+    const [selectedGym, setSelectedGym] = useState<GymType | null>(null);
+    const [wallet, setWallet] = useState<WalletType | null>(null);
+    const [bookings, setBookings] = useState<Booking[]>([]);
+    const [notificationsLoading, setNotificationsLoading] = useState(true);
+
+    useEffect(() => {
+        localStorage.setItem("gymDisplay", display);
+    }, [display]);
+
+    useEffect(() => {
+        localStorage.setItem("walletDisplay", displayWallet);
+    }, [displayWallet]);
 
     useEffect(() => {
         const stored = localStorage.getItem("gymDisplay");
@@ -30,14 +50,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         }
     }, []);
 
-    const [isLoading, setIsLoading] = useState(true);
-    const [selectedGym, setSelectedGym] = useState<GymType | null>(null);
-    const [bookings, setBookings] = useState<Booking[]>([]);
-    const [notificationsLoading, setNotificationsLoading] = useState(true);
-
     useEffect(() => {
-        localStorage.setItem("gymDisplay", display);
-    }, [display]);
+        const stored = localStorage.getItem("walletDisplay");
+        if (stored === "details" || stored === "edit" || stored === "create") {
+            setDisplayWallet(stored);
+        }
+    }, []);
 
     const request = useCallback(async (url: string, options?: RequestInit) => {
         const token = localStorage.getItem("token");
@@ -82,13 +100,24 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             const data = await request("/gymowner/gyms/");
             const gyms: GymType[] = data.data || [];
 
-            if (gyms.length === 0) {
+            // No gyms created
+            if (!gyms.length) {
                 setDisplay("create");
                 return;
             }
 
-            setSelectedGym(gyms[0]);
-            setDisplay("details");
+            const gym = gyms[0];
+
+            // Store gym FIRST
+            setSelectedGym(gym);
+
+            // Gym exists but no images
+            if (!gym.images || gym.images.length === 0) {
+                setDisplay("edit");
+            } else {
+                setDisplay("details");
+            }
+
         } catch (err) {
             console.error(err);
             setDisplay("create");
@@ -96,6 +125,64 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             setIsLoading(false);
         }
     }, [request]);
+
+    const fetchWallet = useCallback(async () => {
+        setIsLoading(true);
+        try {
+            const data = await request("/wallet/");
+            const wallet: WalletType | null = data.data || null;
+
+            if (!wallet) {
+                setDisplayWallet("create");
+                return;
+            }
+
+            setWallet(wallet);
+
+            if (!wallet.account_holder_name) {
+                setDisplayWallet("edit");
+            } else if (wallet.account_holder_name && displayWallet === 'details') {
+                setDisplayWallet("details");
+            }
+
+        } catch (err) {
+            console.error(err);
+            setDisplayWallet("create");
+        } finally {
+            setIsLoading(false);
+        }
+    }, [request, displayWallet]);
+
+    const fetchWalletDashboard = useCallback(async () => {
+        setIsLoading(true);
+        try {
+            const data = await request("/wallet/dashboard/");
+            const dashboard: WalletDashboard = data[0];
+
+            setWalletDashboard(dashboard);
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [request]);
+
+    const fetchWalletTransactions = useCallback(async () => {
+        try {
+            const token = localStorage.getItem("token");
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/wallet/transactions/`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            if (!res.ok) throw new Error("Failed to fetch wallet transactions");
+
+            const data = await res.json();
+            setWalletTransactions(data || []);
+        } catch (err) {
+            console.error("Error fetching wallet transactions:", err);
+            setWalletTransactions([]);
+        }
+    }, []);
 
     const fetchNotifications = useCallback(async () => {
         setNotificationsLoading(true);
@@ -150,6 +237,20 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }, [userData, fetchGyms]);
 
     useEffect(() => {
+        if (userData) {
+            fetchWallet();
+        }
+    }, [userData, fetchWallet]);
+
+    useEffect(() => {
+        fetchWalletDashboard();
+    }, [fetchWalletDashboard]);
+
+    useEffect(() => {
+        fetchWalletTransactions();
+    }, [fetchWalletTransactions]);
+
+    useEffect(() => {
         fetchNotifications()
     }, [fetchNotifications]);
 
@@ -199,16 +300,21 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     return (
         <AppContext.Provider
             value={{
+                request,
                 userData,
                 setUserData,
                 selectedGym,
                 setSelectedGym,
+                wallet,
+                setWallet,
                 loading,
                 setLoading,
                 isLoading,
                 setIsLoading,
                 display,
                 setDisplay,
+                displayWallet,
+                setDisplayWallet,
                 hasUnread,
                 notifications,
                 setNotifications,
@@ -216,10 +322,15 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                 bookings,
                 setNotificationsLoading,
                 notificationsLoading,
+                walletDashboard,
+                walletTransactions,
 
+                fetchWalletDashboard,
+                fetchWalletTransactions,
                 fetchBookings,
                 fetchUser,
                 fetchGyms,
+                fetchWallet
             }}
         >
             {children}

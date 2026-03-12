@@ -1,10 +1,10 @@
-import profile from '../assets/userProfileImg.png'
 import { useNavigate } from 'react-router-dom'
 import { IoArrowBack } from 'react-icons/io5'
 import Footer from '../components/Footer'
 import { useCallback, useEffect, useState } from 'react';
 import { FaCircleCheck } from 'react-icons/fa6';
 import { MdError } from 'react-icons/md';
+import { FaUserCircle } from 'react-icons/fa';
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 type ToastType = "success" | "error" | null;
@@ -17,8 +17,12 @@ const EditProfile = () => {
         full_name: '',
         email: '',
         phone_number: '',
+        profile_image: null as File | null,
+        profile_image_url: '' as string,
         total_fitness_hours: ''
     });
+
+    const [previewImage, setPreviewImage] = useState<string | null>(null);
 
     const [initialData, setInitialData] = useState(formData);
     const [isLoading, setIsLoading] = useState(false);
@@ -43,12 +47,16 @@ const EditProfile = () => {
                         full_name: data.data.full_name || '',
                         email: data.data.email || '',
                         phone_number: data.data.phone_number || '',
+                        profile_image: null,
+                        profile_image_url: data.data.profile_image || '',
                         total_fitness_hours: data.data.total_fitness_hours || '',
                     });
                     setInitialData({
                         full_name: data.data.full_name || '',
                         email: data.data.email || '',
                         phone_number: data.data.phone_number || '',
+                        profile_image: null,
+                        profile_image_url: data.data.profile_image || '',
                         total_fitness_hours: data.data.total_fitness_hours || '',
                     });
                 }
@@ -75,46 +83,49 @@ const EditProfile = () => {
         formData.full_name !== initialData.full_name ||
         formData.email !== initialData.email ||
         formData.phone_number !== initialData.phone_number ||
+        formData.profile_image !== null ||
         formData.total_fitness_hours !== initialData.total_fitness_hours;
 
-    const isValid =
-        formData.email.trim() !== '' &&
-        formData.phone_number.trim() !== '';
+    // const isValid =
+    //     formData.email.trim() !== '' &&
+    //     formData.phone_number.trim() !== '';
 
-    const handleSave = async (e: React.SubmitEvent<HTMLFormElement>) => {
-        e.preventDefault()
+    const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
 
-        if (!isValid) return;
+        // if (!isValid) return;
 
         setSaving(true);
 
         try {
             const token = localStorage.getItem("token");
 
+            const fd = new FormData();
+            fd.append("full_name", formData.full_name);
+            fd.append("email", formData.email);
+            fd.append("phone_number", formData.phone_number);
+
+            if (formData.profile_image) {
+                fd.append("profile_image", formData.profile_image);
+            }
+
             const res = await fetch(`${backendUrl}/api/user/profile/`, {
                 method: "PUT",
                 headers: {
-                    "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify(formData),
+                body: fd,
             });
 
             if (!res.ok) throw new Error("Failed to update");
 
-            await res.json();
+            setToast({ type: "success", message: "Changes saved successfully!" });
 
-            setInitialData(formData);
+            setTimeout(() => {
+                navigate("/profile");
+                window.location.reload();
+            }, 1500);
 
-
-            const message = "Changes saved successfully!"
-
-            setToast({ type: "success", message });
-
-            navigate("/profile");
-
-
-            window.location.reload()
         } catch (err) {
             console.error(err);
             setToast({ type: "error", message: "Something went wrong, please try again!" });
@@ -166,7 +177,42 @@ const EditProfile = () => {
                             <p className="text-[#0F172A] font-normal text-sm">Total Fitness Hours : {formData.total_fitness_hours || 0}</p>
                         </div>
 
-                        <img src={profile} className="w-[69px]" alt="Profile Image" />
+                        <label className="cursor-pointer">
+                            <div className="w-[69px] h-[69px] rounded-full overflow-hidden flex items-center justify-center bg-gray-100">
+                                {previewImage ? (
+                                    <img
+                                        src={previewImage}
+                                        className="w-full h-full object-cover"
+                                        alt="Profile"
+                                    />
+                                ) : formData.profile_image_url ? (
+                                    <img
+                                        src={formData.profile_image_url}
+                                        className="w-full h-full object-cover"
+                                        alt="Profile"
+                                    />
+                                ) : (
+                                    <FaUserCircle size={60} className="text-gray-400" />
+                                )}
+                            </div>
+
+                            <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (!file) return;
+
+                                    setFormData((prev) => ({
+                                        ...prev,
+                                        profile_image: file,
+                                    }));
+
+                                    setPreviewImage(URL.createObjectURL(file));
+                                }}
+                            />
+                        </label>
                     </div>
 
                     <div className="border border-[#F2F2F2] border-dotted"></div>
@@ -216,9 +262,9 @@ const EditProfile = () => {
 
                 <button
                     type="submit"
-                    disabled={!isDirty || !isValid || saving}
+                    disabled={!isDirty || saving}
                     className={`mt-8 w-full h-[50px] rounded-md text-sm font-semibold text-white
-                        ${(!isDirty || !isValid || saving) ? 'bg-gray-400' : 'bg-[#2563EB]'}`}
+                        ${(!isDirty || saving) ? 'bg-gray-400' : 'bg-[#2563EB]'}`}
                 >
                     {saving ? 'Saving...' : 'Save Changes'}
                 </button>

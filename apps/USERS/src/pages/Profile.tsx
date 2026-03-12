@@ -1,9 +1,9 @@
 import { FaClock, FaUser } from 'react-icons/fa6'
 import icon from '../assets/profileIcon.png'
-import profile from '../assets/userProfileImg.png'
 import Footer from '../components/Footer'
 import { useNavigate } from 'react-router'
 import { useState } from 'react'
+import { FaUserCircle } from 'react-icons/fa'
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 type UserType = {
@@ -65,7 +65,13 @@ const Profile = ({ user }: UserProps) => {
                         </div>
                     </div>
 
-                    <img src={profile} className="w-[69px]" alt="Profile Image" />
+                    <div className="w-[69px] h-[69px] rounded-full overflow-hidden flex items-center justify-center bg-gray-100">
+                        {user?.profile_image ? (
+                            <img src={user?.profile_image} className="w-full h-full object-cover" alt="Profile Image" />
+                        ) : (
+                            <FaUserCircle size={60} className="text-gray-400" />
+                        )}
+                    </div>
                 </div>
 
                 <div className="border border-[#F2F2F2] border-dotted"></div>

@@ -5,13 +5,11 @@ import type { Image } from "./types/gym";
 
 interface Props {
     images: Image[];
-    height?: string;
     delay?: number;
 }
 
 export default function ImageCarousel({
     images,
-    height = "h-40",
     delay,
 }: Props) {
     // 🎲 Random delay between 2500–4500ms if not provided
@@ -49,7 +47,7 @@ export default function ImageCarousel({
 
     return (
         <div
-            className="relative"
+            className="relative h-full"
             onPointerDown={handlePointerDown}
             onPointerUp={handlePointerUp}
             onPointerLeave={handlePointerUp}
@@ -67,14 +65,14 @@ export default function ImageCarousel({
                 ))}
             </div>
 
-            <div className="overflow-hidden" ref={emblaRef}>
-                <div className="flex">
+            <div className="overflow-hidden h-full" ref={emblaRef}>
+                <div className="flex h-full">
                     {images.map((img, index) => (
-                        <div key={index} className="min-w-full">
+                        <div key={index} className="min-w-full h-full">
                             <img
                                 src={img.image}
                                 title="imagess"
-                                className={`w-full ${height} object-cover`}
+                                className={`w-full h-full object-cover`}
                                 draggable={false}
                             />
                         </div>
