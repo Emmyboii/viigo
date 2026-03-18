@@ -28,6 +28,7 @@ interface InputProps {
     onChange: (value: string) => void;
     placeholder?: string;
     icon?: React.ReactNode;
+    error?: string;
 }
 
 interface SectionProps {
@@ -41,6 +42,7 @@ interface GymType {
     hourly_rate: string;
     phone_number: string;
     location: string;
+    distance: string;
     address_line_1: string,
     area: string,
     city: string,
@@ -111,6 +113,16 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
     const [endTime, setEndTime] = useState(gym?.close_time || "00:01");
     // const [latitude, setLatitude] = useState<string>(gym?.latitude || "");
     // const [longitude, setLongitude] = useState<string>(gym?.longitude || "");
+
+    const [priceError, setPriceError] = useState("");
+
+    useEffect(() => {
+        if (price && Number(price) > 200) {
+            setPriceError("Price cannot be greater than 200");
+        } else {
+            setPriceError("");
+        }
+    }, [price]);
 
     const [morningPeak, setMorningPeak] = useState<PeakHour[]>(() => {
         if (gym?.peak_morning && gym.peak_morning.length > 0) {
@@ -337,6 +349,11 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
     const handleSubmit = async () => {
         if (!isFormValid || isLoading) return;
 
+        if (Number(price) > 200) {
+            setPriceError("Price cannot be greater than 200");
+            return;
+        }
+
         (document.activeElement as HTMLElement)?.blur();
 
         setIsLoading(true);
@@ -490,12 +507,16 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
                 <div>
                     <Input2
                         label="How much do you charge per hour?"
-                        placeholder="Example ₹210/Hour"
+                        placeholder="Example ₹150/Hour"
                         value={price}
                         onChange={setPrice}
+                        error={priceError}
                     />
 
-                    <p className="text-[#475569] text-[10px] pt-1"><CiCircleAlert className="inline mr-0.5 text-sm" />Tip: Set a nominal price to attract more customers.You can edit this anytime </p>
+                    <p className="text-[#475569] text-[10px] pt-1">
+                        <CiCircleAlert className="inline mr-0.5 text-sm" />
+                        Tip: Set a nominal price to attract more customers. You can edit this anytime
+                    </p>
                 </div>
 
                 <div>
@@ -666,9 +687,9 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
             {/* Save Button */}
             <div className="fixed bottom-0 left-0 right-0 bg-white p-4 border-t">
                 <button
-                    disabled={!isFormValid || isLoading || !isChanged}
+                    disabled={!isFormValid || isLoading || !isChanged || Number(price) > 200}
                     onClick={handleSubmit}
-                    className={`w-full py-3 rounded-xl font-medium flex items-center justify-center gap-2 transition ${isFormValid && !isLoading && isChanged
+                    className={`w-full py-3 rounded-xl font-medium flex items-center justify-center gap-2 transition ${isFormValid && !isLoading && isChanged && Number(price) <= 200
                         ? "bg-blue-600 text-white"
                         : "bg-gray-300 text-gray-500"
                         }`}
@@ -770,7 +791,7 @@ const Input = ({ label, value, onChange, placeholder, icon }: InputProps) => (
     </div>
 );
 
-const Input2 = ({ label, value, onChange, placeholder, icon }: InputProps) => {
+const Input2 = ({ label, value, onChange, placeholder, icon, error }: InputProps) => {
     // Handle numeric input only
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         // Allow only digits
@@ -791,6 +812,10 @@ const Input2 = ({ label, value, onChange, placeholder, icon }: InputProps) => {
                     onChange={handleChange}
                 />
             </div>
+
+            {error && (
+                <p className="text-red-500 text-xs mt-1">{error}</p>
+            )}
         </div>
     );
 };

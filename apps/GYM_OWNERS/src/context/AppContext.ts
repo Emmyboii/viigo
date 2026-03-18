@@ -27,6 +27,7 @@ export interface GymType {
     phone_number: string;
     location: string;
     address_line_1: string,
+    distance: string;
     area: string,
     city: string,
     state: string,
@@ -155,7 +156,7 @@ export type AppContextType = {
     walletTransactions: WalletTransaction[];
 
     // API FUNCTIONS 🔥
-request: <T = unknown>(url: string, options?: RequestInit) => Promise<T>;
+    request: <T = unknown>(url: string, options?: RequestInit) => Promise<T>;
     fetchUser: () => Promise<void>;
     fetchBookings: () => Promise<void>;
     fetchGyms: () => Promise<void>;

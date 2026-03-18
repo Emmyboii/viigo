@@ -129,13 +129,19 @@ export default function Explore() {
         }
     }, [view]);
 
+    useEffect(() => {
+        return () => {
+            window.history.replaceState({}, document.title);
+        };
+    }, []);
+
     return (
         <div className="relative h-screen bg-white">
             {/* MAP VIEW */}
             {view === "map" && (
                 <div className="relative h-full bg-white">
 
-                    <MapView />
+                    <MapView selectedGymFromDetails={location.state?.gym} />
 
                     {/* Search Bar */}
                     <div

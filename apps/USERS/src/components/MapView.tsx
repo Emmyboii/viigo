@@ -1,4 +1,4 @@
-import { GoogleMap, OverlayView, useJsApiLoader } from "@react-google-maps/api";
+import { GoogleMap, OverlayView, useJsApiLoader} from "@react-google-maps/api";
 import { useEffect, useState } from "react";
 import { useAppContext } from "../context/AppContext";
 import { HiLocationMarker } from "react-icons/hi";
@@ -10,22 +10,49 @@ const containerStyle = {
 };
 
 
-export default function MapView() {
+export default function MapView({ selectedGymFromDetails }: any) {
     const { nearbyGyms, latitude, longitude } = useAppContext();
     const [selectedGym, setSelectedGym] = useState<any>(null);
     const navigate = useNavigate()
     const [map, setMap] = useState<google.maps.Map | null>(null);
 
-    const center = {
-        lat: Number(latitude),
-        lng: Number(longitude),
-    };
+    const center = selectedGymFromDetails
+        ? {
+            lat: parseFloat(selectedGymFromDetails.latitude),
+            lng: parseFloat(selectedGymFromDetails.longitude),
+        }
+        : {
+            lat: Number(latitude),
+            lng: Number(longitude),
+        };
+
 
     useEffect(() => {
         if (nearbyGyms?.length) {
-            setSelectedGym(nearbyGyms[1]);
+            setSelectedGym(nearbyGyms[0]);
         }
     }, [nearbyGyms]);
+
+    useEffect(() => {
+        if (selectedGymFromDetails) {
+            setSelectedGym(selectedGymFromDetails);
+        }
+    }, [selectedGymFromDetails]);
+
+    useEffect(() => {
+        if (map && nearbyGyms?.length) {
+            const bounds = new google.maps.LatLngBounds();
+
+            nearbyGyms.forEach((gym: any) => {
+                bounds.extend({
+                    lat: parseFloat(gym.latitude),
+                    lng: parseFloat(gym.longitude),
+                });
+            });
+
+            map.fitBounds(bounds);
+        }
+    }, [map, nearbyGyms]);
 
     const { isLoaded } = useJsApiLoader({
         googleMapsApiKey: import.meta.env.VITE_GOOGLE_API_KEY,
@@ -50,25 +77,30 @@ export default function MapView() {
                 zoom={14}
                 onLoad={(mapInstance) => setMap(mapInstance)}
                 options={{
-                    disableDefaultUI: true,
-                    clickableIcons: false,
-                    styles: [
-                        {
-                            featureType: "poi",
-                            stylers: [{ visibility: "off" }],
-                        },
-                    ],
+                    disableDefaultUI: false,
+                    clickableIcons: true,
+                    // styles: [
+                    //     {
+                    //         featureType: "poi",
+                    //         stylers: [{ visibility: "off" }],
+                    //     },
+                    // ],
                 }}
             >
-                {nearbyGyms?.map((gym: any, index: number) => {
-                    const offset = index * 0.00005;
+                {nearbyGyms?.map((gym: any) => {
+                    // const offset = index * 0.00005;
 
                     return (
                         <OverlayView
                             key={gym.id}
+                            // position={{
+                            //     lat: Number(gym.latitude),
+                            //     lng: Number(gym.longitude),
+                            // }}
+
                             position={{
-                                lat: Number(gym.lat) + offset,
-                                lng: Number(gym.lng) + offset,
+                                lat: parseFloat(gym.latitude),
+                                lng: parseFloat(gym.longitude),
                             }}
                             mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
                         >
@@ -83,7 +115,7 @@ export default function MapView() {
                                     <div
                                         className={`
                                 w-6 h-6 rounded-full flex items-center justify-center
-                                ${selectedGym?.id === gym.id ? "bg-[2563EB]" : "bg-[#CBD5E1]"}
+                                ${selectedGym?.id === gym.id ? "bg-[#2563EB]" : "bg-[#CBD5E1]"}
                                 `}
                                     >
                                         {/* Inner white circle */}

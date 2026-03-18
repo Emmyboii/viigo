@@ -16,7 +16,7 @@ export default function Header() {
                 <HiLocationMarker className="text-[#475569] text-xl" />
                 <div className="leading-tight">
                     <div className="font-medium text-sm">{selectedGym?.name}</div>
-                    <div className="text-sm font-medium">{selectedGym?.location}</div>
+                    <div className="text-sm font-medium">{selectedGym?.city}, {selectedGym?.state}</div>
                 </div>
             </div>
 

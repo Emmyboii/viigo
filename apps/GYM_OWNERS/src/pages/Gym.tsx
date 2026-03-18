@@ -17,6 +17,7 @@ interface GymType {
     name: string;
     hourly_rate: string;
     phone_number: string;
+    distance: string;
     location: string;
     address_line_1: string,
     area: string,

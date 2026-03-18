@@ -34,6 +34,7 @@ interface GymType {
     hourly_rate: string;
     phone_number: string;
     location: string;
+    distance: string;
     address_line_1: string,
     area: string,
     city: string,
@@ -236,14 +237,14 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
 
                             <div className="flex flex-wrap items-center text-sm text-gray-500 mt-1 gap-1">
                                 <HiLocationMarker size={14} />
-                                <span>{gym?.location}</span>
+                                <span>{gym?.distance} {gym?.area}</span>
                                 <span>•</span>
                                 <span>Open Till</span>
                                 <span>{formatTime12Hour(gym?.close_time)}</span>
                             </div>
                         </div>
 
-                        <div className="bg-blue-600 text-[#ffffff] p-2 rounded-lg">
+                        <div className="bg-[#DBEAFE] text-[#2563EB] p-2 rounded">
                             <HiOutlineLocationMarker size={16} />
                         </div>
                     </div>
@@ -284,7 +285,7 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
                     {gym.amenities.length > 4 && (
                         <button
                             onClick={() => setAmenitiesOpen(true)}
-                            className="mt-4 w-full bg-blue-600 py-3 rounded-xl text-[#ffffff] font-medium"
+                            className="mt-4 w-full bg-[#DBEAFE] py-3 rounded-xl text-[#2563EB] font-medium"
                         >
                             Show all {gym?.amenities.length} amenities
                         </button>
@@ -310,7 +311,7 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
                     {gym.rules.length > 3 && (
                         <button
                             onClick={() => setRulesOpen(true)}
-                            className="mt-4 w-full bg-blue-600 py-3 rounded-xl mb-10 text-[#ffffff] font-medium"
+                            className="mt-4 w-full bg-[#DBEAFE] py-3 rounded-xl mb-10 text-[#2563EB] font-medium"
                         >
                             View all rules
                         </button>
