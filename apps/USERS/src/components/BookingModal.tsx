@@ -7,13 +7,14 @@ import { HiOutlineLocationMarker, HiShare } from "react-icons/hi";
 import three from "../assets/three.png";
 import halfCircle from "../assets/paymentWhiteImg.png";
 import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
-import { BiSolidCalendarAlt } from "react-icons/bi";
-import { useEffect, useState } from "react";
+// import { BiSolidCalendarAlt } from "react-icons/bi";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { useAppContext } from "../context/AppContext";
 import type { Booking } from "../pages/Bookings";
 import type { Gym } from "./types/gym";
 import { MdPending, MdPhone } from "react-icons/md";
+import html2canvas from "html2canvas";
 
 type PaymentSuccessProps = {
     onClose: () => void;
@@ -181,6 +182,37 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
         }
     };
 
+    const shareRef = useRef<HTMLDivElement>(null);
+
+    const handleShare = async () => {
+        if (!shareRef.current) return;
+
+        const canvas = await html2canvas(shareRef.current, {
+            useCORS: true,
+            scale: 2, // better quality
+        });
+
+        const image = canvas.toDataURL("image/png");
+
+        // Convert to file
+        const blob = await (await fetch(image)).blob();
+        const file = new File([blob], "booking.png", { type: "image/png" });
+
+        // Share if supported (mobile)
+        if (navigator.share && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+                files: [file],
+                title: "My Gym Booking",
+            });
+        } else {
+            // fallback: download
+            const link = document.createElement("a");
+            link.href = image;
+            link.download = "booking.png";
+            link.click();
+        }
+    };
+
     const handlePhoneClick = () => {
         if (gym?.phone_number) {
             // Open the phone dialer
@@ -230,130 +262,135 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
     return (
         <div className="min-h-screen pb-28 overflow-x-hidden">
 
-            {/* Top Success Section */}
-            <div className="flex flex-col items-center pt-10 pb-6">
-                {getStatusIcon(booking?.status || "PENDING")}
+            <div ref={shareRef} className="px-4 pb-5">
 
-                <h1 className="mt-4 text-xl font-semibold">
-                    {statusConfig.title}
-                </h1>
+                {/* Top Success Section */}
+                <div className="flex flex-col items-center pt-10 pb-6">
+                    {getStatusIcon(booking?.status || "PENDING")}
 
-                <p className="text-gray-500 text-sm text-center px-5">
-                    {statusConfig.subtitle}
-                </p>
-            </div>
+                    <h1 className="mt-4 text-xl font-semibold">
+                        {statusConfig.title}
+                    </h1>
 
-            <div className="relative bg-gradient-to-b from-blue-600 to-blue-500 text-white rounded-2xl p-4 shadow-xl">
+                    <p className="text-gray-500 text-sm text-center px-5">
+                        {statusConfig.subtitle}
+                    </p>
+                </div>
 
-                <img src={halfCircle} alt="Half Circle" className="absolute bottom-28 left-[-13px] w-[48px] h-[55px]" />
-                <img src={halfCircle} alt="Half Circle" className="absolute bottom-28 right-[-13px] rotate-180 w-[48px] h-[55px]" />
+                <div className="relative bg-gradient-to-b from-blue-600 to-blue-500 text-white rounded-2xl p-4 shadow-xl">
 
-                {/* Gym Header */}
-                <div className="flex gap-3">
-                    <img
-                        src={gym?.images[0]?.image}
-                        alt=""
-                        className="w-[110px] h-[110px] rounded object-cover"
-                    />
+                    <img src={halfCircle} alt="Half Circle" className="absolute bottom-28 left-[-13px] w-[48px] h-[55px]" />
+                    <img src={halfCircle} alt="Half Circle" className="absolute bottom-28 right-[-13px] rotate-180 w-[48px] h-[55px]" />
 
-                    <div className="flex-1">
-                        <div className="flex flex-col justify-between items-start gap-">
-                            <h2 className="font-semibold text-lg">
-                                {gym?.name}
-                            </h2>
+                    {/* Gym Header */}
+                    <div className="flex gap-3">
+                        <img
+                            src={gym?.images[0]?.image}
+                            alt={gym?.name || "Gym"}
+                            // crossOrigin="anonymous"
+                            className="w-[110px] h-[110px] rounded object-cover"
+                        />
 
-                            <div className="flex gap-3 my-3">
-                                {/* Phone */}
-                                <div
-                                    onClick={handlePhoneClick}
-                                    className="bg-[#BFDBFE] text-[#2563EB] p-2 rounded-lg cursor-pointer hover:bg-gray-200 transition"
-                                >
-                                    <MdPhone size={16} />
-                                </div>
+                        <div className="flex-1">
+                            <div className="flex flex-col justify-between items-start gap-">
+                                <h2 className="font-semibold text-lg">
+                                    {gym?.name}
+                                </h2>
 
-                                {/* Location */}
-                                <div
-                                    onClick={handleLocationClick}
-                                    className="bg-[#BFDBFE] text-[#2563EB] p-2 rounded-lg cursor-pointer hover:bg-gray-200 transition"
-                                >
-                                    <HiOutlineLocationMarker size={16} />
+                                <div className="flex gap-3 my-3">
+                                    {/* Phone */}
+                                    <div
+                                        onClick={handlePhoneClick}
+                                        className="bg-[#BFDBFE] text-[#2563EB] p-2 rounded-lg cursor-pointer hover:bg-gray-200 transition"
+                                    >
+                                        <MdPhone size={16} />
+                                    </div>
+
+                                    {/* Location */}
+                                    <div
+                                        onClick={handleLocationClick}
+                                        className="bg-[#BFDBFE] text-[#2563EB] p-2 rounded-lg cursor-pointer hover:bg-gray-200 transition"
+                                    >
+                                        <HiOutlineLocationMarker size={16} />
+                                    </div>
                                 </div>
                             </div>
+
+                            <div className="flex items-center gap-2 text-sm text-[#CBD5E1]">
+                                {gym?.city},{gym?.state}
+                            </div>
+
+                            <div className="flex items-center gap-1 text-sm opacity-90">
+                                <FiMapPin size={14} />
+                                {gym?.distance} <span className="pl-2">{`Open Till ${formatTime12Hour(gym.close_time)}`}</span>
+                            </div>
                         </div>
-
-                        <div className="flex items-center gap-2 text-sm text-[#CBD5E1]">
-                            {gym?.city},{gym?.state}
-                        </div>
-
-                        <div className="flex items-center gap-1 text-sm opacity-90">
-                            <FiMapPin size={14} />
-                            {gym?.distance} <span className="pl-2">{`Open Till ${formatTime12Hour(gym.close_time)}`}</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Details Row */}
-                <div className="grid grid-cols-3 justify-between mt-2 text-sm border-b border-white/30 py-4">
-                    <div>
-                        <p className="text-[#DBEAFE]">Guest Name</p>
-                        <p>{userData?.full_name.split(" ")[0] || userData?.email}</p>
-                    </div>
-                    <div className="border-l border-[#FFFFFF33] pl-2">
-                        <p className="text-[#DBEAFE]">Hours</p>
-                        <p>{hours}</p>
-                    </div>
-                    <div className="border-l border-[#FFFFFF33] pl-2">
-                        <p className="text-[#DBEAFE]">Date</p>
-                        <p>{booking?.display_date}</p>
-                    </div>
-                </div>
-
-                {/* OTP Section */}
-                <div className="text-center mt-6">
-                    <p className="text-[48px] font-semibold">OTP : 1384</p>
-                    <p className="text-xs mt-2 max-w-[261px] mx-auto">
-                        Use OTP during check in. Once OTP is validated, your session timings will start.
-                    </p>
-
-                    <p className="text-xs mt-2 max-w-[261px] mx-auto">
-                        This pass remains valid until 11:59 PM on the selected booking date.
-                    </p>
-                </div>
-
-                {/* Divider */}
-                <div className="border-t border-dashed border-white/40 my-6" />
-
-                {/* Timings */}
-                <div className="space-y-3 text-sm">
-                    <div className="flex items-center text-[#DBEAFE] justify-center gap-2">
-                        <FiClock size={17} />
-                        Gym timings : <span>{formatTime12Hour(gym?.open_time)} – {formatTime12Hour(gym?.close_time)} </span>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                        <img src={three} alt="Three" className="mt-1 w-6" />
+                    {/* Details Row */}
+                    <div className="grid grid-cols-3 gap-1 justify-between mt-2 text-sm border-b border-white/30 py-4">
                         <div>
-                            <div className="flex gap-2 flex-wrap">
-                                Peak hours :
-                                <div className="flex gap-2 flex-wrap">
-                                    {allPeaks.map(([start, end], i) => (
-                                        <span key={i}>
-                                            {formatTime12Hour(start)} - {formatTime12Hour(end)}
-                                            {i !== allPeaks.length - 1 && ","}
-                                        </span>
-                                    ))}
-                                </div>
-                            </div>
-                            <p className="text-[11px] text-[#BFDBFE]">
-                                (Workouts during peak hours may use more minutes)
-                            </p>
+                            <p className="text-[#DBEAFE]">Guest Name</p>
+                            <p className="break-all">{userData?.full_name.split(" ")[0] || userData?.email}</p>
+                        </div>
+                        <div className="border-l border-[#FFFFFF33] pl-2">
+                            <p className="text-[#DBEAFE]">Hours</p>
+                            <p>{hours}</p>
+                        </div>
+                        <div className="border-l border-[#FFFFFF33] pl-2">
+                            <p className="text-[#DBEAFE]">Date</p>
+                            <p>{booking?.display_date}</p>
                         </div>
                     </div>
 
-                    <p className="text-xs text-[#BFDBFE] text-center pt-2">
-                        Last entry for selected duration : 8:30 PM
-                    </p>
+                    {/* OTP Section */}
+                    <div className="text-center mt-6">
+                        <p className="text-[48px] font-semibold">OTP : 1384</p>
+                        <p className="text-xs mt-2 max-w-[261px] mx-auto">
+                            Use OTP during check in. Once OTP is validated, your session timings will start.
+                        </p>
+
+                        <p className="text-xs mt-2 max-w-[261px] mx-auto">
+                            This pass remains valid until 11:59 PM on the selected booking date.
+                        </p>
+                    </div>
+
+                    {/* Divider */}
+                    <div className="border-t border-dashed border-white/40 my-6" />
+
+                    {/* Timings */}
+                    <div className="space-y-3 text-sm">
+                        <div className="flex items-center text-[#DBEAFE] justify-center gap-2">
+                            <FiClock size={17} />
+                            Gym timings : <span>{formatTime12Hour(gym?.open_time)} – {formatTime12Hour(gym?.close_time)} </span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            <img src={three} alt="Three" className="mt-1 w-6" />
+                            <div>
+                                <div className="flex gap-2 flex-wrap">
+                                    Peak hours :
+                                    <div className="flex gap-2 flex-wrap">
+                                        {allPeaks.map(([start, end], i) => (
+                                            <span key={i}>
+                                                {formatTime12Hour(start)} - {formatTime12Hour(end)}
+                                                {i !== allPeaks.length - 1 && ","}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                                <p className="text-[11px] text-[#BFDBFE]">
+                                    (Workouts during peak hours may use more minutes)
+                                </p>
+                            </div>
+                        </div>
+
+                        <p className="text-xs text-[#BFDBFE] text-center pt-2">
+                            Last entry for selected duration : 8:30 PM
+                        </p>
+                    </div>
                 </div>
+
             </div>
 
             {/* Change of Plans */}
@@ -374,7 +411,7 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
             )}
 
             {/* Price Details */}
-            <div className="mt-6 text-sm space-y-2">
+            <div className="mt-6 text-sm space-y-2 px-4">
                 <p className="text-sm">Price Details</p>
                 <div className="flex justify-between">
                     <span className="text-[#6A6A6A]">{hours}</span>
@@ -395,13 +432,13 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
             </div>
 
             {/* Action Buttons */}
-            <div className="mt-6 flex gap-2">
-                <button className="flex-1 bg-blue-100 text-[#2563EB] py-2 px-2 rounded-full text-xs flex items-center justify-center gap-2">
+            <div className="mt-6 flex gap-2 w-fit mx-auto">
+                {/* <button className="flex-1 bg-blue-100 text-[#2563EB] py-2 px-2 rounded-full text-xs flex items-center justify-center gap-2">
                     <BiSolidCalendarAlt size={16} />
                     Add To Calendar
-                </button>
+                </button> */}
 
-                <button className="flex-1 bg-blue-100 text-[#2563EB] py-2 px-2 rounded-full text-xs flex items-center justify-center gap-2">
+                <button onClick={handleShare} className="flex-1 bg-blue-100 text-[#2563EB] py-2 px-2 rounded-full text-xs flex items-center justify-center gap-2">
                     <HiShare size={16} />
                     Share Pass
                 </button>

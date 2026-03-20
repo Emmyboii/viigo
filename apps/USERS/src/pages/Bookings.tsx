@@ -89,10 +89,10 @@ const Bookings = () => {
     }
 
     return (
-        <Container>
+        <div>
 
             {!showModal && (
-                <div>
+                <div className="min-h-screen px-4 py-4">
                     <PageHeader text="Bookings" />
 
                     <div className="pt-14" />
@@ -164,7 +164,7 @@ const Bookings = () => {
                     onClose={() => setShowModal(false)}
                 />
             )}
-        </Container>
+        </div>
     )
 }
 
