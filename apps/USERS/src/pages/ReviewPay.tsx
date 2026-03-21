@@ -465,20 +465,21 @@ import { useNavigate } from "react-router-dom";
 
 import {
     IoTimeOutline,
-    IoPeopleOutline,
-    IoInformationCircleOutline,
+    // IoPeopleOutline,
+    // IoInformationCircleOutline,
 } from "react-icons/io5";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCallback, useEffect, useState } from "react";
 import { FaCheckCircle } from "react-icons/fa";
 import PageHeader from "../components/PageHeader";
-import type { GymCard } from "../context/AppContext";
+import { useAppContext, type GymCard } from "../context/AppContext";
 import FacilityTag from "../components/FacilityTag";
 import { HiLocationMarker, HiOutlineCalendar } from "react-icons/hi";
 import { PiIdentificationCardBold } from "react-icons/pi";
 import { FaCircleCheck } from "react-icons/fa6";
 import { MdError } from "react-icons/md";
 import PaymentSuccess from "./PaymentSuccess";
+import three2 from "../assets/three2.png";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 type ToastType = "success" | "error" | null;
@@ -492,6 +493,9 @@ export interface PreviewData {
 }
 
 export default function ReviewPay() {
+
+    const { userData } = useAppContext()
+
     const navigate = useNavigate();
     const [showSuccess, setShowSuccess] = useState(false);
     const [showSecondSuccess, setShowSecondSuccess] = useState(false);
@@ -526,6 +530,7 @@ export default function ReviewPay() {
 
     const selectedDate = initialState?.selectedDate
     const selectedHours = initialState?.selectedHours
+    const peopleCount = initialState?.peopleCount
     const id = initialState?.id
 
     useEffect(() => {
@@ -542,6 +547,7 @@ export default function ReviewPay() {
 
             if (success === "true") {
                 localStorage.removeItem("paymentSuccess");
+                localStorage.removeItem("selectedBookingId");
             }
         };
 
@@ -674,12 +680,12 @@ export default function ReviewPay() {
         return date.toISOString().split("T")[0]; // "2026-02-28"
     };
 
-    const allPeaks = [
-        ...(Array.isArray(gym?.peak_morning) ? gym.peak_morning : []),
-        ...(Array.isArray(gym?.peak_evening) ? gym.peak_evening : []),
-    ];
-    const closingTime = gym?.close_time
+    // const allPeaks = [
+    //     ...(Array.isArray(gym?.peak_morning) ? gym.peak_morning : []),
+    //     ...(Array.isArray(gym?.peak_evening) ? gym.peak_evening : []),
+    // ];
 
+    const closingTime = gym?.close_time
 
     const calculateLastEntry = () => {
         if (!selectedHours?.value || !closingTime) return "";
@@ -786,6 +792,8 @@ export default function ReviewPay() {
                     localStorage.setItem("paymentSuccess", "true");
                     localStorage.setItem("paid", "true");
 
+                    sessionStorage.clear();
+
                     setShowSuccess(true);
 
                     setTimeout(() => {
@@ -841,6 +849,7 @@ export default function ReviewPay() {
     const handleClose = () => {
         localStorage.removeItem("paymentSuccess");
         localStorage.removeItem("bookingData");
+        localStorage.removeItem("selectedBookingId");
         setShowSecondSuccess(false);
         // navigate("/");
     };
@@ -883,11 +892,11 @@ export default function ReviewPay() {
 
 
                         {/* ===== Gym Summary Card ===== */}
-                        <div className="bg-white rounded-xl border flex gap-1 min-h-[130px]">
+                        <div className="bg-white rounded border flex gap-1 min-h-[130px]">
                             <img
                                 src={gym?.images[0]?.image}
                                 alt={gym?.name}
-                                className="w-[85px] min-h-full rounded-tl-lg rounded-bl-lg object-cover"
+                                className="w-[85px] min-h-full rounded-tl rounded-bl object-cover"
                             />
 
                             <div className="flex-1 p-3">
@@ -908,7 +917,7 @@ export default function ReviewPay() {
 
                                 <div className="flex items-center gap-2 mt-4">
                                     <p className="font-semibold">₹{Number(gym?.hourly_rate)}/Hr</p>
-                                    <span className="text-xs bg-[#22C55E] text-white px-2 py-1 rounded-full">
+                                    <span className="text-xs bg-[#22C55E] text-white px-2 py-0.5 rounded-full">
                                         Confirmed
                                     </span>
                                 </div>
@@ -917,33 +926,54 @@ export default function ReviewPay() {
 
                         {/* ===== Selected Pass ===== */}
                         <div className="bg-white rounded-xl border p-4 space-y-4">
+                            <div>
+                                <div className="flex justify-between gap-2 items-center mb-4">
+                                    <div className="space-y-2">
+                                        <h3 className="font-semibold">Selected Pass</h3>
 
-                            <div className="flex justify-between items-start">
-                                <div>
-                                    <h3 className="font-semibold">Selected Pass</h3>
-
-                                    <div className="flex items-center gap-1 text-sm text-gray-600 mt-2">
-                                        <HiOutlineCalendar size={14} />
-                                        <span>{formattedShortDate}</span>
-                                        <span>•</span>
-                                        <span>{selectedHours?.label}</span>
+                                        <div className="flex items-center gap-1 text-sm mt-2">
+                                            <img src={three2} alt="Three" className="mt- w-4" />
+                                            <p className="break-all text-[#0F172A]">{userData?.full_name.split(" ")[0] || userData?.email} +{peopleCount} {peopleCount > 1 ? "Friends" : "Friend"} </p>
+                                        </div>
                                     </div>
 
-                                    <div className="flex items-center gap-2 text-sm text-gray-600 mt-2">
-                                        <PiIdentificationCardBold size={14} />
-                                        <span>Enter anytime during the day</span>
-                                    </div>
+                                    <button
+                                        onClick={() =>
+                                            navigate(`/gyms/${gym?.slug}/plan`, {
+                                                state: { reopenSheet: true }
+                                            })}
+                                        className="text-sm text-[#2563EB] bg-[#DBEAFE] px-3 py-1 font-medium rounded-md w-[60px]"
+                                    >
+                                        Edit
+                                    </button>
                                 </div>
 
-                                <button
-                                    onClick={() =>
-                                        navigate(`/gyms/${gym?.slug}`, {
-                                            state: { reopenSheet: true }
-                                        })}
-                                    className="text-sm text-[#2563EB] bg-[#DBEAFE] px-3 py-1 font-medium rounded-md"
-                                >
-                                    Change
-                                </button>
+                                <div className="flex justify-between items-center">
+                                    <div className="space-y-3">
+                                        <h3 className="font-semibold">Selected Pass</h3>
+
+                                        <div className="flex items-center gap-1 text-sm text-gray-600 mt-2">
+                                            <HiOutlineCalendar size={14} />
+                                            <span>{formattedShortDate}</span>
+                                            <span>•</span>
+                                            <span>{selectedHours?.label}</span>
+                                        </div>
+
+                                        <div className="flex items-center gap-2 text-sm text-gray-600 mt-2">
+                                            <PiIdentificationCardBold size={14} />
+                                            <span>Enter anytime during the day</span>
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        onClick={() =>
+                                            navigate(`/gyms/${gym?.slug}/plan`)
+                                        }
+                                        className="text-sm text-[#2563EB] bg-[#DBEAFE] px-3 py-1 font-medium rounded-md"
+                                    >
+                                        Change
+                                    </button>
+                                </div>
                             </div>
 
                             <hr />
@@ -958,10 +988,10 @@ export default function ReviewPay() {
                                 </div>
                             </div>
 
-                            <hr />
+                            {/* <hr /> */}
 
                             {/* Peak hours */}
-                            <div>
+                            {/* <div>
                                 <h4 className="font-medium">Peak hours</h4>
 
                                 <div className="flex items-center gap-2 text-sm text-gray-600 mt-2">
@@ -983,7 +1013,7 @@ export default function ReviewPay() {
                                         Workouts during peak hours may use more minutes
                                     </span>
                                 </div>
-                            </div>
+                            </div> */}
                         </div>
 
                         {/* ===== Price Breakdown ===== */}
@@ -1061,9 +1091,15 @@ export default function ReviewPay() {
                                 className="fixed inset-0 bg-blue-500 z-50 flex items-center justify-center"
                             >
                                 <motion.div
-                                    initial={{ scale: 0.5 }}
-                                    animate={{ scale: 1 }}
-                                    transition={{ duration: 0.5 }}
+                                    initial={{ y: -300 }}       // Start above the viewport
+                                    animate={{ y: 0 }}          // Drop to center
+                                    exit={{ y: -300, opacity: 0 }}
+                                    transition={{
+                                        type: "spring",
+                                        stiffness: 400,           // Spring stiffness
+                                        damping: 25,              // Less damping = more bounce
+                                        mass: 1.5
+                                    }}
                                     className="text-white p-8 w-80 text-center"
                                 >
                                     <FaCheckCircle className="text-green-500 text-[85px] mx-auto mb-3" />

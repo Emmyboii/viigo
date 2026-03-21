@@ -22,7 +22,7 @@ const PageHeader = ({ text }: PageHeaderProps) => {
                     <IoArrowBack size={20} />
                 </button>
 
-                <span className="font-medium">{text}</span>
+                <span className="font-semibold text-lg">{text}</span>
             </div>
 
             <button

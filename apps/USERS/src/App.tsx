@@ -22,6 +22,7 @@ import Explore from "./pages/Explore";
 import Recommended from "./pages/Recommended";
 import NearBy from "./pages/NearBy";
 import { useEffect } from "react";
+import PlanYourWorkout from "./pages/PlanYourWorkout";
 
 function App() {
 
@@ -37,11 +38,12 @@ function App() {
     }
   }, [location.pathname]);
 
-   useEffect(() => {
+  useEffect(() => {
     if (
       !location.pathname.startsWith("/reviewpay")
     ) {
       localStorage.removeItem("paid");
+      localStorage.removeItem("paymentSuccess");
     }
   }, [location.pathname]);
 
@@ -133,6 +135,15 @@ function App() {
             element={
               <ProtectedRoute>
                 <GymDetails />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/gyms/:slug/plan"
+            element={
+              <ProtectedRoute>
+                <PlanYourWorkout />
               </ProtectedRoute>
             }
           />

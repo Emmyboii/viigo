@@ -249,12 +249,6 @@ export default function PickHoursSheet({ open, onClose, defaultDate, defaultHour
 
             {/* Info Card */}
             <div className="mt-6 bg-[#F1F5F9] border border-[#DBEAFE] py-2.5 px-[17px] rounded-lg space-y-3 text-sm">
-                {/* <div className="flex items-center gap-2 text-gray-600">
-                    <FiClock size={16} />
-                    <span>
-                        <strong>Gym Timings :</strong> {formatTo12Hour(gymOpenHour)} - {formatTo12Hour(gymCloseHour)}
-                    </span>
-                </div> */}
 
                 <div className="flex items-start gap-2 text-gray-600">
                     <FiUsers size={16} className="mt-1" />

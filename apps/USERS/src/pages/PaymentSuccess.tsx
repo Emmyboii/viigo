@@ -279,7 +279,7 @@ export default function PaymentSuccess({ onClose, gym, preview }: PaymentSuccess
     const hours = hoursPart.trim().toLowerCase();
 
     // Extract only number for calculation
-    // const hoursNumber = Number(hours.replace(/[^\d.]/g, ""));
+    const hoursNumber = Number(hours.replace(/[^\d.]/g, ""));
 
     useEffect(() => {
         const fetchBookings = async () => {
@@ -340,6 +340,30 @@ export default function PaymentSuccess({ onClose, gym, preview }: PaymentSuccess
 
         return `${hour}:${minute} ${ampm}`;
     }
+
+    const closingTime = gym?.close_time
+
+    const calculateLastEntry = () => {
+        if (!gym?.close_time || !closingTime) return "";
+
+        const [hour, minute] = closingTime.split(":").map(Number);
+
+        const closingDate = new Date();
+        closingDate.setHours(hour, minute, 0, 0);
+
+        // subtract selected duration
+        const durationInMinutes = hoursNumber * 60;
+
+        closingDate.setMinutes(closingDate.getMinutes() - durationInMinutes);
+
+        return closingDate.toLocaleTimeString("en-GB", {
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+        });
+    };
+
+    const lastEntryTime = calculateLastEntry();
 
     const handlePhoneClick = () => {
         if (gym?.phone_number) {
@@ -522,7 +546,7 @@ export default function PaymentSuccess({ onClose, gym, preview }: PaymentSuccess
                         </div>
 
                         <p className="text-xs text-[#BFDBFE] text-center pt-2">
-                            Last entry for selected duration : 8:30 PM
+                            Last entry for selected duration: {lastEntryTime}
                         </p>
                     </div>
                 </motion.div>
@@ -530,7 +554,7 @@ export default function PaymentSuccess({ onClose, gym, preview }: PaymentSuccess
             </div>
 
             {/* Change of Plans */}
-            <div className="bg-[#F1F5F9] rounded-lg p-4">
+            <div className="bg-[#F1F5F9] rounded-lg p-4 mx-4">
                 <div className="flex gap-3 items-center">
                     <h3 className="font-semibold text-sm">Change of Plans</h3>
                     <button onClick={() => {

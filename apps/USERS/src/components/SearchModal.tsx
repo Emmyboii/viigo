@@ -69,7 +69,7 @@ export default function SearchModal({ onClose, from, query, setQuery }: Props) {
     };
 
     return (
-        <div className="fixed inset-0 bg-white z-50 p-4 flex flex-col">
+        <div className="fixed inset-0 bg-white z-[100] p-4 flex flex-col">
             {/* HEADER */}
             <div className="flex items-center justify-between mb-4">
                 <div className="bg-white border rounded-xl flex items-center px-3 w-full py-4 cursor-pointer">

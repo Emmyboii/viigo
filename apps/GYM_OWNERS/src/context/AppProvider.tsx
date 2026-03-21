@@ -154,6 +154,11 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }, [request, displayWallet]);
 
     const fetchWalletDashboard = useCallback(async () => {
+
+        const token = localStorage.getItem("token");
+
+        if (!token) return
+
         setIsLoading(true);
         try {
             const data = await request("/wallet/dashboard/");
@@ -168,6 +173,11 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }, [request]);
 
     const fetchWalletTransactions = useCallback(async () => {
+
+        const token = localStorage.getItem("token");
+
+        if (!token) return
+
         try {
             const token = localStorage.getItem("token");
             const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/wallet/transactions/`, {

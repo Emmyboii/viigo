@@ -22,9 +22,9 @@ export default function GymCard({ gym }: GymCardProps) {
         : gym.amenities.slice(0, 2);
 
     return (
-        <div className="bg-white rounded-md shadow-md overflow-hidden h-[355px] flex flex-col">
+        <div className="bg-white rounded-md shadow-md overflow-hidden h-[320px] flex flex-col">
             <div className="h-40">
-                <ImageCarousel images={gym?.images} />
+                <ImageCarousel images={gym?.images} enableFullscreen={false} />
             </div>
 
             <div className="p-4 flex flex-col flex-1">

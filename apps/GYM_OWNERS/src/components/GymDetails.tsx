@@ -220,7 +220,7 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
 
             {/* IMAGE */}
             <ImageCarousel
-                images={gym?.images?.map(img => img.image)}
+                images={gym?.images}
                 height="h-60"
             />
 
@@ -231,21 +231,26 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
 
                 {/* Gym Name */}
                 <div>
-                    <div className="flex items-center justify-between gap-3">
-                        <div className="flex flex-col items-start gap-2">
-                            <h1 className="text-xl font-bold">{gym?.name}</h1>
+                    <div className="flex items-center justify-between gap-3 w-full">
+                        <div className="w-full">
+                            <div className="flex justify-between items-center gap-3">
+                                <h1 className="text-xl font-bold">{gym.name}</h1>
 
-                            <div className="flex flex-wrap items-center text-sm text-gray-500 mt-1 gap-1">
+                                <div
+                                    className="bg-[#DBEAFE] text-[#2563EB] p-2 rounded cursor-pointer transition"
+                                >
+                                    <HiOutlineLocationMarker size={16} />
+                                </div>
+
+                            </div>
+
+                            <div className="flex flex-wrap items-center text-sm text-gray-500 gap-1">
                                 <HiLocationMarker size={14} />
                                 <span>{gym?.distance} {gym?.area}</span>
                                 <span>•</span>
                                 <span>Open Till</span>
                                 <span>{formatTime12Hour(gym?.close_time)}</span>
                             </div>
-                        </div>
-
-                        <div className="bg-[#DBEAFE] text-[#2563EB] p-2 rounded">
-                            <HiOutlineLocationMarker size={16} />
                         </div>
                     </div>
 

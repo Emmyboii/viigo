@@ -213,6 +213,30 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
         }
     };
 
+    const closingTime = gym?.close_time
+
+    const calculateLastEntry = () => {
+        if (!gym?.close_time || !closingTime) return "";
+
+        const [hour, minute] = closingTime.split(":").map(Number);
+
+        const closingDate = new Date();
+        closingDate.setHours(hour, minute, 0, 0);
+
+        // subtract selected duration
+        const durationInMinutes = hoursNumber * 60;
+
+        closingDate.setMinutes(closingDate.getMinutes() - durationInMinutes);
+
+        return closingDate.toLocaleTimeString("en-GB", {
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+        });
+    };
+
+    const lastEntryTime = calculateLastEntry();
+
     const handlePhoneClick = () => {
         if (gym?.phone_number) {
             // Open the phone dialer
@@ -386,7 +410,7 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
                         </div>
 
                         <p className="text-xs text-[#BFDBFE] text-center pt-2">
-                            Last entry for selected duration : 8:30 PM
+                            Last entry for selected duration: {lastEntryTime}
                         </p>
                     </div>
                 </div>
@@ -395,7 +419,7 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
 
             {/* Change of Plans */}
             {booking?.status === "PENDING" && (
-                <div className="bg-[#F1F5F9] rounded-lg p-4">
+                <div className="bg-[#F1F5F9] rounded-lg p-4 mx-4">
                     <div className="flex gap-3 items-center">
                         <h3 className="font-semibold text-sm">Change of Plans</h3>
                         <button onClick={() => navigate(`/cancelbooking/${booking?.booking_reference}`)} className="text-[#F43F5E] font-medium text-sm border border-[#F43F5E] px-3 py-1 rounded-md">
@@ -449,6 +473,7 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
                 <button onClick={() => {
                     onClose();
                     navigate('/')
+                    localStorage.removeItem("selectedBookingId");
                 }}
                     className="text-blue-600"
                 >
@@ -458,6 +483,7 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
                 <button onClick={() => {
                     onClose();
                     navigate('/bookings')
+                    localStorage.removeItem("selectedBookingId");
                 }}
                     className="bg-blue-600 text-white py-3 rounded-md w-[209px]"
                 >

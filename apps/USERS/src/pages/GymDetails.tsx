@@ -1,4 +1,4 @@
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import BottomSheet from "../components/BottomSheet";
 import ImageCarousel from "../components/ImageCarousel";
 import { useEffect, useState } from "react";
@@ -12,9 +12,9 @@ import { HiLocationMarker, HiOutlineLocationMarker } from "react-icons/hi";
 // import { PiUserGearFill } from "react-icons/pi";
 import Footer from "../components/Footer";
 import { MdPhone } from "react-icons/md";
-import PickHoursSheet from "../components/PickHoursSheet";
+// import PickHoursSheet from "../components/PickHoursSheet";
 import PageHeader from "../components/PageHeader";
-import { FaRegEdit } from "react-icons/fa";
+// import { FaRegEdit } from "react-icons/fa";
 import { useAppContext, type GymCard } from "../context/AppContext";
 import type { Gym } from "../components/types/gym";
 
@@ -25,7 +25,7 @@ export default function GymDetails() {
     const { gyms } = useAppContext()
 
     const navigate = useNavigate();
-    const location = useLocation();
+    // const location = useLocation();
 
     const { slug } = useParams();
 
@@ -38,9 +38,9 @@ export default function GymDetails() {
 
     // const [open, setOpen] = useState(initialBookingState?.reopenSheet || false);
 
-    const [open, setOpen] = useState(
-        location.state?.reopenSheet || false
-    );
+    // const [open, setOpen] = useState(
+    //     location.state?.reopenSheet || false
+    // );
 
 
     function formatTime12Hour(time24: string) {
@@ -124,7 +124,7 @@ export default function GymDetails() {
     }, [slug, gyms]);
 
     useEffect(() => {
-        if (amenitiesOpen || rulesOpen || priceBreakdownOpen || open) {
+        if (amenitiesOpen || rulesOpen || priceBreakdownOpen) {
             document.body.style.overflow = "hidden"
         } else {
             document.body.style.overflow = "auto"
@@ -135,68 +135,68 @@ export default function GymDetails() {
         }
     }, [amenitiesOpen, rulesOpen, priceBreakdownOpen, open])
 
-    const storedBooking = localStorage.getItem("bookingData");
+    // const storedBooking = localStorage.getItem("bookingData");
 
-    const initialBookingState = storedBooking
-        ? (() => {
-            const parsed = JSON.parse(storedBooking);
+    // const initialBookingState = storedBooking
+    //     ? (() => {
+    //         const parsed = JSON.parse(storedBooking);
 
-            return {
-                ...parsed,
-                selectedDate: parsed.selectedDate
-                    ? new Date(parsed.selectedDate)
-                    : null,
-            };
-        })()
-        : null;
+    //         return {
+    //             ...parsed,
+    //             selectedDate: parsed.selectedDate
+    //                 ? new Date(parsed.selectedDate)
+    //                 : null,
+    //         };
+    //     })()
+    //     : null;
 
-    const selectedHours = initialBookingState?.selectedHours;
+    // const selectedHours = initialBookingState?.selectedHours;
 
-    const editSelectedHr = initialBookingState?.selectedHours.value === 1 ? "Hr" : initialBookingState?.selectedHours.label
+    // const editSelectedHr = initialBookingState?.selectedHours.value === 1 ? "Hr" : initialBookingState?.selectedHours.label
 
-    const totalWithHr = (initialBookingState?.selectedHours && gym)
-        ? gym.hourly_rate * initialBookingState?.selectedHours.value
-        : gym?.hourly_rate;
+    // const totalWithHr = (initialBookingState?.selectedHours && gym)
+    //     ? gym.hourly_rate * initialBookingState?.selectedHours.value
+    //     : gym?.hourly_rate;
 
-    const formatWithOrdinal = (date: Date) => {
-        const day = date.getDate();
+    // const formatWithOrdinal = (date: Date) => {
+    //     const day = date.getDate();
 
-        const getSuffix = (d: number) => {
-            if (d > 3 && d < 21) return "th";
-            switch (d % 10) {
-                case 1: return "st";
-                case 2: return "nd";
-                case 3: return "rd";
-                default: return "th";
-            }
-        };
+    //     const getSuffix = (d: number) => {
+    //         if (d > 3 && d < 21) return "th";
+    //         switch (d % 10) {
+    //             case 1: return "st";
+    //             case 2: return "nd";
+    //             case 3: return "rd";
+    //             default: return "th";
+    //         }
+    //     };
 
-        const month = date.toLocaleDateString("en-US", { month: "long" });
+    //     const month = date.toLocaleDateString("en-US", { month: "long" });
 
-        return `${day}${getSuffix(day)} ${month}`;
-    };
+    //     return `${day}${getSuffix(day)} ${month}`;
+    // };
 
-    const calculateLastEntry = () => {
-        if (!selectedHours?.value || !gym?.close_time) return "";
+    // const calculateLastEntry = () => {
+    //     if (!selectedHours?.value || !gym?.close_time) return "";
 
-        const [hour, minute] = gym.close_time.split(":").map(Number);
+    //     const [hour, minute] = gym.close_time.split(":").map(Number);
 
-        const closingDate = new Date();
-        closingDate.setHours(hour, minute, 0, 0);
+    //     const closingDate = new Date();
+    //     closingDate.setHours(hour, minute, 0, 0);
 
-        // subtract selected duration
-        const durationInMinutes = selectedHours?.value * 60;
+    //     // subtract selected duration
+    //     const durationInMinutes = selectedHours?.value * 60;
 
-        closingDate.setMinutes(closingDate.getMinutes() - durationInMinutes);
+    //     closingDate.setMinutes(closingDate.getMinutes() - durationInMinutes);
 
-        return closingDate.toLocaleTimeString("en-GB", {
-            hour: "numeric",
-            minute: "2-digit",
-            hour12: true,
-        });
-    };
+    //     return closingDate.toLocaleTimeString("en-GB", {
+    //         hour: "numeric",
+    //         minute: "2-digit",
+    //         hour12: true,
+    //     });
+    // };
 
-    const lastEntryTime = calculateLastEntry();
+    // const lastEntryTime = calculateLastEntry();
 
     const handlePhoneClick = () => {
         if (gym?.phone_number) {
@@ -276,32 +276,36 @@ export default function GymDetails() {
 
                 {/* Gym Name */}
                 <div>
-                    <h1 className="text-xl font-bold">{gym.name}</h1>
+
+                    <div className="flex justify-between items-center gap-3">
+                        <h1 className="text-xl font-bold">{gym.name}</h1>
+
+                        {/* Call & Map Buttons */}
+                        <div className="flex gap-3">
+                            {/* Phone */}
+                            <div
+                                onClick={handlePhoneClick}
+                                className="bg-[#DBEAFE] text-[#2563EB] p-2 rounded cursor-pointer transition"
+                            >
+                                <MdPhone size={16} />
+                            </div>
+
+                            {/* Location */}
+                            <div
+                                onClick={handleLocationClick}
+                                className="bg-[#DBEAFE] text-[#2563EB] p-2 rounded cursor-pointer transition"
+                            >
+                                <HiOutlineLocationMarker size={16} />
+                            </div>
+                        </div>
+
+                    </div>
 
                     <div className="flex items-center text-sm text-gray-500 mt-1 gap-1 flex-wrap">
                         <HiLocationMarker size={14} />
                         <span>{gym.distance} {gym.area}</span>
                         <span>•</span>
                         <span>{gym.open_status || `Open Till ${formatTime12Hour(gym.close_time)}`}</span>
-                    </div>
-
-                    {/* Call & Map Buttons */}
-                    <div className="flex gap-3 mt-3">
-                        {/* Phone */}
-                        <div
-                            onClick={handlePhoneClick}
-                            className="bg-[#DBEAFE] text-[#2563EB] p-2 rounded cursor-pointer transition"
-                        >
-                            <MdPhone size={16} />
-                        </div>
-
-                        {/* Location */}
-                        <div
-                            onClick={handleLocationClick}
-                            className="bg-[#DBEAFE] text-[#2563EB] p-2 rounded cursor-pointer transition"
-                        >
-                            <HiOutlineLocationMarker size={16} />
-                        </div>
                     </div>
 
                     {/* Tags */}
@@ -378,7 +382,7 @@ export default function GymDetails() {
 
             {/* ===== Sticky Bottom CTA ===== */}
 
-            {storedBooking ? (
+            {/* {storedBooking ? (
                 <div className="fixed bottom-14 left-0 right-0 bg-white">
                     <div className="bg-blue-50 text-blue-700 text-sm px-4 py-3 font-medium text-center">
                         Last entry for selected duration: {lastEntryTime}
@@ -410,30 +414,30 @@ export default function GymDetails() {
                         </button>
                     </div>
                 </div>
-            ) : (
-                <div className="fixed bottom-14 left-0 right-0 bg-white border-t px-3 py-3 flex justify-between items-center">
-                    <div className="space-y-2">
-                        <p className="text-[11px] text-gray-500">
-                            Gym timings : {formatTime12Hour(gym.open_time)} - {formatTime12Hour(gym.close_time)}
+            ) : ( */}
+            <div className="fixed bottom-14 left-0 right-0 bg-white border-t px-3 py-3 flex justify-between items-center">
+                <div className="space-y-2">
+                    <p className="text-[11px] text-gray-500">
+                        Gym timings : {formatTime12Hour(gym.open_time)} - {formatTime12Hour(gym.close_time)}
+                    </p>
+
+                    <div className="flex items-center gap-1">
+                        <p className="text-xl font-bold">
+                            ₹{Number(gym.hourly_rate) + 12 + 2.16}/Hr
                         </p>
-
-                        <div className="flex items-center gap-1">
-                            <p className="text-xl font-bold">
-                                ₹{Number(gym.hourly_rate) + 12 + 2.16}/Hr
-                            </p>
-                            <IoInformationCircleOutline
-                                size={22}
-                                onClick={() => setPriceBreakdownOpen(true)}
-                                className="text-gray-400"
-                            />
-                        </div>
+                        <IoInformationCircleOutline
+                            size={22}
+                            onClick={() => setPriceBreakdownOpen(true)}
+                            className="text-gray-400"
+                        />
                     </div>
-
-                    <button onClick={() => setOpen(true)} className="bg-blue-600 text-white px-6 py-3 rounded-md w-[153px] font-medium">
-                        Book Hour
-                    </button>
                 </div>
-            )}
+
+                <button onClick={() => navigate(`/gyms/${gym.slug}/plan`)} className="bg-blue-600 text-white px-6 py-3 rounded-md w-[153px] font-medium">
+                    Book Hour
+                </button>
+            </div>
+            {/* )} */}
 
             <Footer />
 
@@ -499,14 +503,14 @@ export default function GymDetails() {
                 </div>
             </BottomSheet>
 
-            <PickHoursSheet
+            {/* <PickHoursSheet
                 open={open}
                 setOpen={setOpen}
                 onClose={() => setOpen(false)}
                 defaultDate={initialBookingState?.selectedDate}
                 defaultHours={initialBookingState?.selectedHours}
                 gym={gym}
-            />
+            /> */}
         </div>
     );
 }

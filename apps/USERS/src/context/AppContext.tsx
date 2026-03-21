@@ -299,20 +299,31 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const fetchLocation = async () => {
-
-        if (!token) return
+        if (!token) return;
 
         try {
             const data = await request("/api/user/location/");
+            const address = data?.data.current_address;
 
-            const address = data?.data.current_address
+            if (!address) return;
 
-            const parts = address?.split(",");
-            const city = parts[1]?.trim();
-            const state = parts[3]?.trim();
+            const parts: string[] = address.split(",").map((p: string) => p.trim());
+            // assume last part is country
+            // const country = parts[parts.length - 1];
+
+            // assume second last is state
+            const state = parts[parts.length - 2];
+
+            // find city: first non-numeric part from the end that's not state or country
+            let city = "";
+            for (let i = parts.length - 3; i >= 0; i--) {
+                if (!/^\d+$/.test(parts[i])) { // ignore postal codes
+                    city = parts[i];
+                    break;
+                }
+            }
 
             setLocation(`${city}, ${state}`);
-
         } catch (err) {
             console.error(err);
         }

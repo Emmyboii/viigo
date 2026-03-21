@@ -18,7 +18,7 @@ export default function SortModal({ onClose, onSelect, currentSort = "" }: Props
     const [selected, setSelected] = useState<string>(currentSort); // track selection
 
     return (
-        <div className="fixed inset-0 bg-black/40 flex items-end z-50"
+        <div className="fixed inset-0 bg-black/40 flex items-end z-[100]"
             onClick={onClose}
         >
 

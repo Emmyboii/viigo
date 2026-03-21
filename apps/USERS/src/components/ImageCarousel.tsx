@@ -2,15 +2,18 @@ import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
 import { useEffect, useRef, useState } from "react";
 import type { Image } from "./types/gym";
+import { FullscreenCarousel } from "./FullscreenCarousel";
 
 interface Props {
     images: Image[];
     delay?: number;
+    enableFullscreen?: boolean;
 }
 
 export default function ImageCarousel({
     images,
     delay,
+    enableFullscreen = true,
 }: Props) {
     // 🎲 Random delay between 2500–4500ms if not provided
     const randomDelay =
@@ -22,6 +25,21 @@ export default function ImageCarousel({
             stopOnInteraction: false,
         })
     );
+
+    const [isFullscreen, setIsFullscreen] = useState(false);
+    const [startIndex, setStartIndex] = useState(0);
+
+    useEffect(() => {
+        if (isFullscreen) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "auto";
+        }
+
+        return () => {
+            document.body.style.overflow = "auto";
+        };
+    }, [isFullscreen]);
 
     const [emblaRef, emblaApi] = useEmblaCarousel(
         { loop: true },
@@ -58,8 +76,8 @@ export default function ImageCarousel({
                     <div
                         key={index}
                         className={`h-2 w-2 rounded-full ${selectedIndex === index
-                                ? "bg-white"
-                                : "bg-white/50"
+                            ? "bg-white"
+                            : "bg-white/50"
                             }`}
                     />
                 ))}
@@ -71,14 +89,28 @@ export default function ImageCarousel({
                         <div key={index} className="min-w-full h-full">
                             <img
                                 src={img.image}
-                                title="imagess"
-                                className={`w-full h-full object-cover`}
+                                className="w-full h-full object-cover cursor-pointer"
                                 draggable={false}
+                                title="imagess"
+                                onClick={() => {
+                                    if (!enableFullscreen) return;
+
+                                    setStartIndex(index);
+                                    setIsFullscreen(true);
+                                }}
                             />
                         </div>
                     ))}
                 </div>
             </div>
+
+            {enableFullscreen && isFullscreen && (
+                <FullscreenCarousel
+                    images={images}
+                    startIndex={startIndex}
+                    onClose={() => setIsFullscreen(false)}
+                />
+            )}
         </div>
     );
 }

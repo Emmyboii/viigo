@@ -1,5 +1,4 @@
 import FilterChips from "../components/FilterChips"
-import Container from "../components/layout/Container"
 import PageHeader from "../components/PageHeader"
 import SearchBar from "../components/SearchBar"
 import { HiLocationMarker } from "react-icons/hi"
@@ -92,7 +91,7 @@ const Bookings = () => {
         <div>
 
             {!showModal && (
-                <div className="min-h-screen px-4 py-4">
+                <div className="min-h-screen px-2.5 py-4">
                     <PageHeader text="Bookings" />
 
                     <div className="pt-14" />
@@ -131,19 +130,19 @@ const Bookings = () => {
                                             </p>
 
                                             <p className="text-xs text-gray-500 flex items-center gap-1">
-                                                <CiCalendar className="text-[#475569] text-xl" />
+                                                <CiCalendar className="text-[#475569] text-lg" />
                                                 Date and Time : {gym.display_date}
                                             </p>
 
                                             <p className="text-xs text-gray-500 flex items-center gap-1">
-                                                <FiClock className="text-[#475569] text-xl" />
+                                                <FiClock className="text-[#475569] text-lg" />
                                                 Time : {gym.display_time}
                                             </p>
                                         </div>
 
-                                        <div className="flex flex-col justify-between items-start mt-4 gap-2">
-                                            <span className="font-normal text-sm text-nowrap">{gym.price_tag}</span>
-                                            <button className="bg-white rounded-full border border-[#CBD5E1] text-center text-[#475569] text-[11px] px-2.5 py-2">
+                                        <div className="flex flex-co justify-between items-center mt-4 gap-2">
+                                            <span className="font-normal text-xs text-nowrap">{gym.price_tag}</span>
+                                            <button className="bg-white rounded-full border border-[#CBD5E1] text-center text-[#475569] text-[10px] px-2 py-2">
                                                 Booking ID : #{gym.booking_reference}
                                             </button>
                                         </div>
