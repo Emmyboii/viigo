@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import logoUrl from "../assets/icon2.png";
 import html2canvas from "html2canvas";
 import { HiShare } from "react-icons/hi";
+import Footer from "../components/Footer";
 
 type Category = "BOOKINGS" | "PAYMENTS" | "ACCOUNT" | "ABOUT_US";
 
@@ -196,7 +197,7 @@ export default function FAQ() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 px-4 py-6">
+        <div className="min-h-screen px-4 py-6">
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
@@ -269,14 +270,14 @@ export default function FAQ() {
                                             {faq.question}
                                         </span>
                                         {isOpen ? (
-                                            <IoChevronUp size={18} />
+                                            <IoChevronUp size={18} className="text-[#475569]" />
                                         ) : (
-                                            <IoChevronDown size={18} />
+                                            <IoChevronDown size={18} className="text-[#475569]" />
                                         )}
                                     </button>
 
                                     {isOpen && (
-                                        <div className="px-4 pb-4 text-sm font-medium text-[#475569] leading-relaxed">
+                                        <div className="px-4 pb-4 text-xs font-medium text-[#475569] leading-relaxed">
                                             {faq.answer}
                                         </div>
                                     )}
@@ -286,6 +287,8 @@ export default function FAQ() {
                     )}
                 </div>
             </div>
+
+            <Footer />
         </div>
     );
 }

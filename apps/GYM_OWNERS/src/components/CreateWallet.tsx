@@ -232,11 +232,11 @@ const Input = ({
 }: InputProps) => {
     return (
         <div>
-            <p className="text-[14px] mb-1 text-[#0F172A] font-medium">
+            <p className="text-[14px] mb-1.5 text-[#0F172A] font-medium">
                 {label}
             </p>
 
-            <input
+            <input  
                 type={type}
                 value={value}
                 inputMode={inputMode}

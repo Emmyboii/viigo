@@ -95,8 +95,8 @@ const Profile = ({ user }: UserProps) => {
 
             {/* Logout Confirmation Modal */}
             {showLogoutModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 animate-slideUp">
-                    <div className="bg-white rounded-lg p-6 w-[300px] space-y-4">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+                    <div className="bg-white rounded-lg p-6 w-[300px] space-y-4 animate-slideUp">
                         <p className="text-[#0F172A] text-center font-semibold">
                             Are you sure you want to log out?
                         </p>

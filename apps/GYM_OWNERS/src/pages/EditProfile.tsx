@@ -225,7 +225,7 @@ const EditProfile = () => {
                                 value={formData.full_name}
                                 onChange={handleChange}
                                 title='fullname'
-                                className="w-full border border-[#E2E8F0] h-[50px] rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full border border-[#475569] h-[50px] rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                         </div>
 
@@ -237,7 +237,7 @@ const EditProfile = () => {
                                 value={formData.email}
                                 onChange={handleChange}
                                 title='email'
-                                className="w-full border border-[#E2E8F0] h-[50px] rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full border border-[#475569] h-[50px] rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                         </div>
 
@@ -249,7 +249,7 @@ const EditProfile = () => {
                                 value={formData.phone_number}
                                 onChange={handleChange}
                                 title='phone'
-                                className="w-full border border-[#E2E8F0] h-[50px] rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full border border-[#475569] h-[50px] rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                         </div>
                     </div>

@@ -1,8 +1,8 @@
 import { FiArrowLeft } from "react-icons/fi";
 // import { FaRegClock } from "react-icons/fa";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, type JSX } from "react";
 // import { PiUserGearFill } from "react-icons/pi";
-import { HiLocationMarker, HiOutlineLocationMarker, HiShare } from "react-icons/hi";
+import { HiLocationMarker, HiOutlineLocationMarker, HiShare, HiUserAdd } from "react-icons/hi";
 import ImageCarousel from "./ImageCarousel";
 import Footer from "./Footer";
 import BottomSheet from "./BottomSheet";
@@ -11,6 +11,7 @@ import { FaCircleCheck } from "react-icons/fa6";
 import { MdError } from "react-icons/md";
 import logoUrl from "../assets/icon2.png";
 import html2canvas from "html2canvas";
+import { FaRegClock } from "react-icons/fa";
 
 type ToastType = "success" | "error" | null;
 
@@ -69,6 +70,14 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
     const navigate = useNavigate();
 
     const [toast, setToast] = useState<{ type: ToastType; message: string } | null>(null);
+
+    const tags = ["Hourly Access", "Beginner Friendly"];
+
+    const tagIcons: Record<string, JSX.Element> = {
+        // "Premium": <MdStar size={14} />,
+        "Hourly Access": <FaRegClock size={14} />,
+        "Beginner Friendly": <HiUserAdd size={14} />,
+    };
 
     const handleShare = async () => {
         const element = document.getElementById("share-area");
@@ -186,7 +195,8 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
 
         const today = new Date();
         const endDate = new Date();
-        endDate.setMonth(today.getMonth() + 3);
+        // endDate.setMonth(today.getMonth() + 1);
+        endDate.setDate(today.getDate() + 4)
 
         const backendMap = new Map(
             gym?.calendar_availability?.map((item) => [
@@ -326,7 +336,7 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
             <div className="flex items-center justify-between px-4 py-3 bg-white">
                 <div className="flex items-center gap-2">
                     <FiArrowLeft onClick={() => navigate(-1)} size={20} />
-                    <p className="font-medium">Your Gym Details</p>
+                    <p className="font-medium text-lg">Your Gym Details</p>
                 </div>
                 <HiShare onClick={handleShare} size={20} className="text-[#475569]" />
             </div>
@@ -337,7 +347,7 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
                 {/* IMAGE */}
                 <ImageCarousel
                     images={gym?.images}
-                    height="h-60"
+                    height="h-48"
                 />
 
                 {toast && <Toast type={toast.type} text={toast.message} onClose={handleToastClose} />}
@@ -350,7 +360,7 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
                         <div className="flex items-center justify-between gap-3 w-full">
                             <div className="w-full">
                                 <div className="flex justify-between items-center gap-3">
-                                    <h1 className="text-xl font-bold">{gym.name}</h1>
+                                    <h1 className="text-xl font-bold text-[#0F172A]">{gym.name}</h1>
 
                                     <div
                                         className="bg-[#DBEAFE] text-[#2563EB] p-2 rounded cursor-pointer transition"
@@ -360,7 +370,7 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
 
                                 </div>
 
-                                <div className="flex flex-wrap items-center text-sm text-gray-500 gap-1">
+                                <div className="flex flex-wrap items-center text-xs text-[#475569] gap-1">
                                     <HiLocationMarker size={14} />
                                     <span>{gym?.distance} {gym?.area}</span>
                                     <span>•</span>
@@ -371,17 +381,17 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
                         </div>
 
                         {/* Tags */}
-                        {/* <div className="flex gap-2 mt-3 flex-wrap">
-                        {gym.tags.map((tag, i) => (
-                            <span
-                                key={i}
-                                className="flex items-center gap-1 bg-blue-100 text-blue-600 text-xs px-3 py-2 rounded-full"
-                            >
-                                {tagIcons[tag]}
-                                {tag}
-                            </span>
-                        ))}
-                    </div> */}
+                        <div className="flex gap-2 mt-5 flex-wrap">
+                            {tags.map((tag, i) => (
+                                <span
+                                    key={i}
+                                    className="flex items-center gap-1 bg-[#DBEAFE] text-[#2563EB] text-xs px-3 py-2 rounded-full"
+                                >
+                                    {tagIcons[tag]}
+                                    {tag}
+                                </span>
+                            ))}
+                        </div>
                     </div>
 
                     <div className="border border-dashed border-[#CBD5E1]"></div>
@@ -432,18 +442,17 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
                         {gym.rules.length > 3 && (
                             <button
                                 onClick={() => setRulesOpen(true)}
-                                className="mt-4 w-full bg-[#DBEAFE] py-3 rounded-xl mb-10 text-[#2563EB] font-medium"
+                                className="mt-4 w-full bg-[#DBEAFE] py-3 mb-2 rounded-xl text-[#2563EB] font-medium"
                             >
                                 View all rules
                             </button>
                         )}
                     </div>
 
-                    <hr />
 
                     {/* TIMINGS */}
                     <Section title="Manage Gym Availability">
-                        <div className="bg-white rounded-xl border p-3 h-[400px] overflow-y-auto space-y-3">
+                        <div className="bg-white rounded-xl border p-3 h-[300px] overflow-y-auto space-y-3">
 
                             {availability.map((item, index) => (
                                 <div
@@ -482,10 +491,10 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
                 </div>
 
                 {/* FOOTER FIXED */}
-                <div id="share-bottom-bar" className="fixed bottom-14 left-0 right-0 bg-white border-t border-[#F1F5F9] px-4 py-3 flex items-center justify-between">
+                <div id="share-bottom-bar" className="fixed bottom-14 left-0 right-0 bg-white border-t border-[#F1F5F9] px-4 py-3 pb-4 flex items-center justify-between">
                     <div>
-                        <p className="text-xs text-gray-500">Your Gym Price Per hour</p>
-                        <p className="font-semibold text-lg">
+                        <p className="text-xs font-medium text-gray-500">Your Gym Price Per hour</p>
+                        <p className="font-semibold text-[22px]">
                             ₹{gym?.hourly_rate}/Hr
                         </p>
                     </div>
@@ -495,7 +504,7 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
                         localStorage.setItem("gymDisplay", "edit");
                         // navigate('/gym/edit')
                         window.scrollTo({ top: 0, behavior: "smooth" });
-                    }} className="bg-blue-600 text-white px-5 py-2 rounded-md h-[50px]">
+                    }} className="bg-blue-600 text-white px-5 text-sm font-semibold w-[170px] py-2 rounded-md h-[50px]">
                         Edit Gym Details
                     </button>
                 </div>
@@ -547,7 +556,7 @@ function Section({
     return (
         <div>
             <h3 className="font-semibold text-base text-[#0F172A] mb-2">{title}</h3>
-            <p className="text-xs text-[#0F172A] mb-2">Turn your gym ON or OFF for the upcoming dates. Control bookings in advance and avoid last-minute confusion.</p>
+            <p className="text-xs text-[#0F172A] mb-4">Turn your gym ON or OFF for the upcoming dates. Control bookings in advance and avoid last-minute confusion.</p>
             {children}
         </div>
     );

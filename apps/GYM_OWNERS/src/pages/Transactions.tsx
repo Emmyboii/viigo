@@ -56,7 +56,7 @@ const filteredTransactions = transactionsArray.filter((t) => {
           <button
             key={type}
             onClick={() => setTypeFilter(type)}
-            className={`px-4 py-1.5 rounded-lg text-sm border capitalize ${
+            className={`px-4 py-1.5 rounded-lg text-xs font-medium border capitaliz ${
               typeFilter === type
                 ? "bg-[#DBEAFE] text-[#2563EB] border-[#2563EB]"
                 : "bg-white text-[#0F172A] border-[#CBD5E1]"
@@ -107,7 +107,7 @@ const filteredTransactions = transactionsArray.filter((t) => {
             >
               <div>
                 <p className="font-medium text-sm">{t.guest_name}</p>
-                <p className="text-xs text-gray-500">{t.date_formatted}</p>
+                <p className="text-xs text-[#475569]">{t.date_formatted}</p>
               </div>
               <p
                 className={`text-sm font-semibold ${

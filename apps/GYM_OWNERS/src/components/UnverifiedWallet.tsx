@@ -24,7 +24,7 @@ const UnverifiedWallet = ({ balance, isActive }: UnverifiedWalletProps) => {
                 <p className='text-[#F1F5F9] text-lg font-semibold'>Account Balance</p>
                 <p className='font-bold text-[28px]'>₹{balance}</p>
                 <p
-                    className={`rounded-full py-1 px-3 text-xs font-semibold ${isActive ? "bg-[#34C759]" : "bg-[#F59E0B]"
+                    className={`rounded-full py-1 px-3 text-[11px] font-semibold ${isActive ? "bg-[#34C759]" : "bg-[#F59E0B]"
                         }`}
                 >
                     {isActive ? "Wallet Active" : "Verification Pending"}

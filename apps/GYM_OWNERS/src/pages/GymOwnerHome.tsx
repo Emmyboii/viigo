@@ -222,7 +222,7 @@ const GymOwnerHome = () => {
                 className={`${otp.length === 4
                   ? "bg-white text-[#2563EB]"
                   : "bg-[#F1F5F9] text-[#94A3B8]"
-                  } w-[35%] rounded-full px-4 py-2 font-semibold text-[13px] h-[45px]`}
+                  } w-[35%] rounded-full px-4 py-2 font-semibold text-[14px] h-[45px]`}
                 disabled={otp.length !== 4 || status === "verifying"}
                 type="submit">
                 {status === "verifying" ? "Checking..." : "Verify"}
@@ -274,8 +274,8 @@ const GymOwnerHome = () => {
                   transition={{ duration: 0.5 }}
                   className="p-8 w-80 text-center"
                 >
-                  <FaCheckCircle className="text-green-500 text-[80px] mx-auto mb-3" />
-                  <h2 className="text-lg font-semibold mb-2">
+                  <FaCheckCircle className="text-green-500 text-[80px] mx-auto mb-2" />
+                  <h2 className="text-lg text-[#0F172A] font-semibold mb-2">
                     OTP Verified
                   </h2>
                   <p className="text-sm font-normal text-[#475569]">

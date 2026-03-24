@@ -69,12 +69,12 @@ export default function VerifiedWallet() {
             <div className="bg-gradient-to-br from-blue-500 to-blue-700 text-white rounded-2xl px-5 py-6">
                 <div className="flex justify-between gap-6">
                     <div className="text-center bg-[#FFFFFF1A] p-3 rounded-lg space-y-1 w-full">
-                        <p className="text-xs opacity-80">Today's Earnings</p>
+                        <p className="text-xs">Today's Earnings</p>
                         <h3 className="text-lg font-semibold">₹ {walletDashboard?.todays_earnings ?? "0"}</h3>
                         <p className="text-sm text-[#00FF5E]">+12%</p>
                     </div>
                     <div className="text-center bg-[#FFFFFF1A] p-3 rounded-lg space-y-1 w-full">
-                        <p className="text-xs opacity-80">Today's Bookings</p>
+                        <p className="text-xs">Today's Bookings</p>
                         <h3 className="text-lg font-semibold">{walletDashboard?.todays_bookings ?? 0}</h3>
                         <p className="text-sm text-[#00FF5E]">Pending {pendingBookings}</p>
                     </div>
@@ -88,7 +88,7 @@ export default function VerifiedWallet() {
                 <button
                     disabled={!isWithdrawDisabled}
                     onClick={() => setShowWithdrawalModal(true)}
-                    className={`mt-3 w-full max-w-[184px] mx-auto flex items-center justify-center px-4 py-2 rounded text-sm
+                    className={`mt-3 w-full max-w-[184px] mx-auto flex items-center justify-center px-4 py-2 rounded text-sm font-medium
                         ${!isWithdrawDisabled
                             ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                             : "bg-white text-blue-600 hover:bg-blue-50"
@@ -161,7 +161,7 @@ export default function VerifiedWallet() {
                     <div className="flex gap-2 mt-6">
                         <button
                             onClick={() => setRange("week")}
-                            className={`px-4 py-1.5 rounded-lg border text-sm ${range === "week"
+                            className={`px-4 py-1.5 rounded-lg border font-medium text-sm ${range === "week"
                                 ? "bg-[#DBEAFE] text-[#2563EB] border-[#2563EB]"
                                 : "bg-white text-[#0F172A] border-[#CBD5E1]"
                                 }`}
@@ -171,7 +171,7 @@ export default function VerifiedWallet() {
 
                         <button
                             onClick={() => setRange("month")}
-                            className={`px-4 py-1.5 rounded-lg border text-sm ${range === "month"
+                            className={`px-4 py-1.5 rounded-lg border font-medium text-sm ${range === "month"
                                 ? "bg-[#DBEAFE] text-[#2563EB] border-[#2563EB]"
                                 : "bg-white text-[#0F172A] border-[#CBD5E1]"
                                 }`}
@@ -244,7 +244,7 @@ export default function VerifiedWallet() {
                                 >
                                     <div>
                                         <p className="font-medium text-sm">{t.guest_name}</p>
-                                        <p className="text-xs text-gray-500">
+                                        <p className="text-xs text-[#475569]">
                                             {t.date_formatted}
                                         </p>
                                     </div>

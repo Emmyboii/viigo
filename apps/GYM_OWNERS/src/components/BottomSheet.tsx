@@ -30,7 +30,7 @@ export default function BottomSheet({
       <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl flex flex-col max-h-[85vh] animate-slideUp">
         
         {/* Drag handle */}
-        <div className="w-12 h-1 bg-gray-300 rounded-full mx-auto mt-3 mb-4" />
+        <div className="w-12 h-1 bg-gray-300 rounded-full mx-auto mt-3 mb-4 invisible" />
 
         {/* Header */}
         <div className="flex justify-between items-center px-5 mb-3">

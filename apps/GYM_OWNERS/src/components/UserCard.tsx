@@ -32,7 +32,7 @@ export default function UserCard({ booking, onClick }: UserCardProps) {
     return (
         <div
             onClick={onClick}
-            className="flex items-center gap-4 p-4 py-2 rounded-lg border border-[#E2E8F0] bg-white w-full cursor-pointer"
+            className="flex items-center gap-4 p-4 py-2.5 rounded-lg border border-[#E2E8F0] bg-white w-full cursor-pointer"
         >
             {/* Avatar */}
             <div className="w-[66px] h-[66px] flex-shrink-0 rounded-full overflow-hidden flex items-center justify-center bg-gray-100">
@@ -50,8 +50,8 @@ export default function UserCard({ booking, onClick }: UserCardProps) {
             {/* Content */}
             <div className="flex-1 min-w-0 space-y-1">
                 {/* Name + Status */}
-                <div className="flex items-center gap- min-w-0">
-                    <p className="font-semibold text-gray-900 truncate">
+                <div className="flex items-center gap-3 min-w-0">
+                    <p className="font-semibold text-[#0F172A] text-sm truncate">
                         {client_name}
                     </p>
 
@@ -70,19 +70,19 @@ export default function UserCard({ booking, onClick }: UserCardProps) {
                 </div>
 
                 {/* Date */}
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-xs text-[#475569] mt-1">
                     <HiOutlineCalendar className="inline mr-1" />
                     {display_date}
                 </p>
 
                 {/* Duration */}
-                <p className="text-[13px] text-gray-500">
+                <p className="text-[12px] text-[#475569]">
                     <FaRegClock className="inline mr-1" />
                     {duration_text}
                 </p>
 
                 {/* Context */}
-                <p className="text-[13px] text-gray-500 mt-1">
+                <p className="text-[12px] text-[#475569] font-medium mt-1">
                     {statusText}
                 </p>
             </div>

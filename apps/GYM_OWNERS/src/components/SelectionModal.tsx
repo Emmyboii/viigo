@@ -45,7 +45,7 @@ export default function SelectionModal({
             footer={
                 <button
                     onClick={() => onSave(temp)}
-                    className="w-full bg-blue-600 text-white py-3 rounded-xl"
+                    className="w-full bg-[#2563EB] text-white py-4 rounded-md font-semibold text-sm"
                 >
                     Apply
                 </button>

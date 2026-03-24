@@ -130,12 +130,12 @@ export default function EditWallet() {
                         navigate(-1)
                     }}
                     size={20} />
-                <h1 className="text-[20px] font-semibold text-[#0F172A]">
+                <h1 className="text-lg font-semibold text-[#0F172A]">
                     Bank Details & G.S.T Details
                 </h1>
             </div>
 
-            <p className="text-sm text-[#64748B] mt-1">
+            <p className="text-sm text-[#0F172A] mt-1">
                 Add payout details so we can send your earnings .
             </p>
 
@@ -183,7 +183,7 @@ export default function EditWallet() {
                 <button
                     disabled={!isValid || isLoading || !isChanged}
                     type="submit"
-                    className={`mt-8 w-full py-3 rounded-md font-medium transition ${isValid && !isLoading && isChanged
+                    className={`mt-5 text-sm w-full py-4 rounded-md font-semibold transition ${isValid && !isLoading && isChanged
                         ? "bg-[#2563EB] text-white"
                         : "bg-[#94A3B8] text-white"
                         }`}
@@ -223,7 +223,7 @@ const Input = ({
 }: InputProps) => {
     return (
         <div>
-            <p className="text-[14px] mb-1 text-[#0F172A] font-medium">
+            <p className="text-[14px] mb-1.5 text-[#0F172A] font-normal">
                 {label}
             </p>
 

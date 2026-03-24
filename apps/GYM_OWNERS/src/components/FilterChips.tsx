@@ -17,7 +17,7 @@ export function Chip({ label, active, onClick }: ChipProps) {
             className={`px-3 py-1.5 rounded-lg text-[13px] border w-full text-nowrap transition
             ${active
                     ? "bg-[#DBEAFE] border-[#2563EB] text-[#2563EB]"
-                    : "bg-[#F1F5F9] border-[#CBD5E1] text-[#0F172A]"}
+                    : "bg-[#ffffff] border-[#CBD5E1] text-[#0F172A]"}
             `}
         >
             {label}
@@ -33,7 +33,7 @@ interface FilterChipsProps {
 
 export default function FilterChips({ items, activeId, onChange }: FilterChipsProps) {
     return (
-        <div className="flex gap-2 mt-4 overflow-x-auto no-scrollbar">
+        <div className="flex gap-2 w-full mt-5 overflow-x-auto no-scrollbar">
             {items.map((item) => (
                 <Chip
                     key={item.id}

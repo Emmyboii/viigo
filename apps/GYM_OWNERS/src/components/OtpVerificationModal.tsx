@@ -112,8 +112,8 @@ export default function OtpVerificationModal({ user, onClose }: OtpVerificationM
                     <FaTimesCircle className="text-red-500 text-[65px]" />
                 )}
 
-                <h1 className="mt-1 text-lg font-semibold text-[#0F172A]">{getStatusText()}</h1>
-                <p className="text-gray-500 text-sm text-center">
+                <h1 className="text-lg font-semibold text-[#0F172A]">{getStatusText()}</h1>
+                <p className="text-[#475569] mt-1 text-sm text-center">
                     {bookingIdText()}
                 </p>
             </div>
@@ -124,11 +124,11 @@ export default function OtpVerificationModal({ user, onClose }: OtpVerificationM
                     <div className="space-y-3">
                         <p className="text-[#0F172A] font-semibold">Guest</p>
                         <div className="flex items-center gap-2">
-                            <FaUser size={16} />
+                            <FaUser size={14} />
                             <p className="text-[#0F172A] font-normal text-sm">{user?.client_name}</p>
                         </div>
                         <div className="flex items-center gap-2">
-                            <FaRegClock size={16} />
+                            <FaRegClock size={14} />
                             <p className="text-[#0F172A] font-normal text-sm">{duration}</p>
                             {user?.status === "ACTIVE" && (
                                 <p className='bg-[#22C55E] rounded-full text-white font-medium p-1 px-2 text-xs'>
@@ -152,7 +152,7 @@ export default function OtpVerificationModal({ user, onClose }: OtpVerificationM
                             )}
                         </div>
                         <div className="flex items-center gap-2">
-                            <HiMiniCurrencyRupee size={19} />
+                            <HiMiniCurrencyRupee size={17} />
                             <p className="text-[#0F172A] font-normal text-sm">Amount Paid : <span className='font-semibold'>₹390</span></p>
                         </div>
                     </div>
@@ -218,10 +218,10 @@ export default function OtpVerificationModal({ user, onClose }: OtpVerificationM
             </div>
 
             {/* Bottom Buttons */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white p-4 border-t border-[#F1F5F9] flex gap-4 items-center justify-between">
+            <div className="fixed bottom-0 left-0 right-0 bg-white p-4 border-t border-[#F1F5F9] flex gap-4 items-center justify-between px-7">
                 <button
                     onClick={() => setPriceBreakdownOpen(true)}
-                    className="text-blue-600 text-sm font-medium"
+                    className="text-[#2563EB] text-sm font-semibold"
                 >
                     View Payment Details
                 </button>
@@ -230,7 +230,7 @@ export default function OtpVerificationModal({ user, onClose }: OtpVerificationM
                     onClose();
                     navigate('/')
                 }}
-                    className="bg-blue-600 text-white py-3 rounded-md min-w-[140px]"
+                    className="bg-[#2563EB] text-white py-3 text-sm rounded-md min-w-[140px]"
                 >
                     Home
                 </button>

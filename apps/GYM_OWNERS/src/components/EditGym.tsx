@@ -617,10 +617,10 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
                                                 : [...prev, item.id]
                                         )
                                     }
-                                    className={`flex items-center gap-2 px-3 py-2 rounded-full text-sm border transition
+                                    className={`flex items-center gap-2 px-3 py-2 rounded-full text-xs font-medium transition
                                         ${active
                                             ? "bg-blue-100 border-blue-500 text-blue-600"
-                                            : "bg-gray-100 border-gray-200 text-gray-600"
+                                            : "bg-[#F1F5F9] text-[#0F172A]"
                                         }
                                     `}
                                 >
@@ -633,7 +633,7 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
 
                     <button
                         onClick={() => setModalType("amenities")}
-                        className="mt-4 w-full bg-gray-100 py-3 rounded-xl mb-10 text-[#94A3B8] font-medium"
+                        className="mt-6 w-full bg-[#F1F5F9] py-3 rounded-md mb-10 text-[#94A3B8] font-semibold text-sm"
                     >
                         Add More
                     </button>
@@ -641,7 +641,7 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
 
                 {/* Rules */}
                 <Section title="Rules">
-                    <div className="space-y-3 mt-2">
+                    <div className="space-y-3">
                         {visibleRules.map((item) => {
                             const active = selectedRules.includes(item.id);
 
@@ -655,8 +655,8 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
                                                 : [...prev, item.id]
                                         )
                                     }
-                                    className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition
-                                        ${active ? "border-blue-500 bg-blue-50" : "border-gray-200"}
+                                    className={`flex items-center gap-3 p-3 rounded border cursor-pointer transition
+                                        ${active ? "border-[#2563EB] bg-blue-50" : "border-[#E2E8F0]"}
                                     `}
                                 >
                                     <div
@@ -677,7 +677,7 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
 
                     <button
                         onClick={() => setModalType("rules")}
-                        className="mt-4 w-full bg-gray-100 py-3 rounded-xl mb-10 text-[#94A3B8] font-medium"
+                        className="mt-6 w-full bg-[#F1F5F9] py-3 rounded-md mb-10 text-[#94A3B8] font-semibold text-sm"
                     >
                         Add More
                     </button>
@@ -689,9 +689,9 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
                 <button
                     disabled={!isFormValid || isLoading || !isChanged || Number(price) > 200}
                     onClick={handleSubmit}
-                    className={`w-full py-3 rounded-xl font-medium flex items-center justify-center gap-2 transition ${isFormValid && !isLoading && isChanged && Number(price) <= 200
-                        ? "bg-blue-600 text-white"
-                        : "bg-gray-300 text-gray-500"
+                    className={`w-full py-4 rounded-md text-sm font-semibold flex items-center justify-center gap-2 transition ${isFormValid && !isLoading && isChanged && Number(price) <= 200
+                        ? "bg-[#2563EB] text-white"
+                        : "bg-[#CBD5E1] text-[#FFFFFF]"
                         }`}
                 >
                     {isLoading ? (
@@ -836,7 +836,7 @@ const TimeInput = ({ value, onChange }: TimeInputProps) => {
     return (
         <div
             onClick={handleClick}
-            className="flex items-center justify-center bg-white rounded-xl px-3 py-3 w-full shadow-sm cursor-pointer"
+            className="flex items-center justify-center bg-white rounded-lg px-3 py-2 w-full shadow-sm cursor-pointer"
         >
             <FiClock className="text-gray-400 mr-2" size={16} />
 
@@ -872,14 +872,14 @@ const GymTimings = ({
             <div className="bg-blue-100 rounded-lg p-3 py-5">
                 <div className="flex items-center justify-between gap-1">
                     <div className="flex-">
-                        <p className="text-sm mb-2 text-gray-700">Start Time</p>
+                        <p className="text-sm mb-2 text-[#0F172A] font-medium">Start Time</p>
                         <TimeInput value={start} onChange={setStart} />
                     </div>
 
                     <FiArrowRight className="mt-6 text-gray-600" size={18} />
 
                     <div className="flex-">
-                        <p className="text-sm mb-2 text-gray-700">End Time</p>
+                        <p className="text-sm mb-2 text-[#0F172A] font-medium">End Time</p>
                         <TimeInput value={end} onChange={setEnd} />
                     </div>
                 </div>
@@ -1067,7 +1067,7 @@ const PeakSection = ({
                     {(index === data.length - 1 && title === "Morning") && (
                         <button
                             onClick={addMore}
-                            className="w-full bg-blue-200 text-gray-600 py-2 rounded-xl text-sm font-medium hover:bg-blue-300 transition"
+                            className="w-full bg-[#F1F5F9] text-[#94A3B8] py-2 rounded-md text-xs font-medium hover:bg-blue-300 transition"
                         >
                             Add More
                         </button>
@@ -1080,7 +1080,7 @@ const PeakSection = ({
 
 const Section = ({ title, children }: SectionProps) => (
     <div>
-        <h2 className="font-medium mb-2">{title}</h2>
+        <h2 className="font-semibold text-[#0F172A] mb-2">{title}</h2>
         {children}
     </div>
 );

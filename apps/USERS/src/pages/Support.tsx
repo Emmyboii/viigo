@@ -1,10 +1,10 @@
 import { FiArrowLeft } from "react-icons/fi"
 import { HiShare } from "react-icons/hi"
 import { useNavigate } from "react-router-dom";
-import Container from "../components/layout/Container";
 import { MdEmail, MdKeyboardArrowRight } from "react-icons/md";
 import logoUrl from "../assets/icon2.png";
 import html2canvas from "html2canvas";
+import Footer from "../components/Footer";
 
 const companyEmail = "Support@viigo.in";
 
@@ -132,7 +132,7 @@ const Support = () => {
     };
 
     return (
-        <Container>
+        <div className="px-5 py-4">
             <div className="flex items-center justify-between bg-white">
                 <div className="flex items-center gap-2">
                     <FiArrowLeft onClick={() => navigate(-1)} size={20} />
@@ -159,7 +159,9 @@ const Support = () => {
                 </div>
             </div>
 
-        </Container>
+            <Footer />
+
+        </div>
     )
 }
 

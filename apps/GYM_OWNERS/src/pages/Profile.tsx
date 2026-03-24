@@ -90,7 +90,7 @@ const Profile = ({ user }: UserProps) => {
 
                 <div className="border border-[#F2F2F2] border-dotted"></div>
 
-                <div className='space-y-4'>
+                <div className='space-y-3'>
                     <p className="text-[#0F172A] font-semibold">Help</p>
                     <div onClick={() => navigate('/faq')} className="flex items-center gap-1">
                         <FaRegCircleQuestion size={16} />
@@ -103,14 +103,14 @@ const Profile = ({ user }: UserProps) => {
                 </div>
             </div>
 
-            <button onClick={() => setShowLogoutModal(true)} className="mt-20 bg-[#2563EB] w-full h-[50px] font-semibold text-sm text-white py-2 px-4 rounded-md">Log Out</button>
+            <button onClick={() => setShowLogoutModal(true)} className="mt-16 bg-[#2563EB] w-full h-[50px] font-semibold text-sm text-white py-2 px-4 rounded-md">Log Out</button>
 
             <Footer />
 
             {/* Logout Confirmation Modal */}
             {showLogoutModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 animate-slideUp">
-                    <div className="bg-white rounded-lg p-6 w-[300px] space-y-4">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+                    <div className="bg-white rounded-lg p-6 w-[300px] space-y-4 animate-slideUp">
                         <p className="text-[#0F172A] text-center font-semibold">
                             Are you sure you want to log out?
                         </p>

@@ -153,7 +153,7 @@ const TransactionDetails = () => {
             <div ref={captureRef} className="space-y-4">
                 {/* Amount */}
                 <div className="text-center pt-5">
-                    <h1 className="text-2xl font-bold">
+                    <h1 className="text-[28px] font-bold">
                         {formatAmount(amountNum)}
                     </h1>
                     <p className={`text-white rounded-full py-1 px-3 my-3 w-fit mx-auto text-xs ${transaction.status === 'SETTLED'
@@ -164,7 +164,7 @@ const TransactionDetails = () => {
                         }`}>
                         {transaction.status}
                     </p>
-                    <p className="text-xs text-[#0F172A]">{new Date(transaction.created_at).toLocaleString()}</p>
+                    <p className="text-xs text-[#0F172A] font-medium">{new Date(transaction.created_at).toLocaleString()}</p>
                 </div>
 
                 <div className='border border-[#DBEAFE] py-3 px-4 rounded-md space-y-4'>
@@ -172,19 +172,19 @@ const TransactionDetails = () => {
                         <div className="space-y-3">
                             <p className="text-[#0F172A] font-semibold">Guest</p>
                             <div className="flex items-center gap-2">
-                                <FaUser size={16} />
+                                <FaUser size={14} />
                                 <p className="text-[#0F172A] font-normal text-sm">
                                     {transaction.guest_details?.name || 'N/A'}
                                 </p>
                             </div>
                             <div className="flex items-center gap-2">
-                                <FaRegClock size={16} />
+                                <FaRegClock size={14} />
                                 <p className="text-[#0F172A] font-normal text-sm">
                                     {transaction.guest_details?.duration}
                                 </p>
                             </div>
                             <div className="flex items-center gap-2">
-                                <HiMiniCurrencyRupee size={19} />
+                                <HiMiniCurrencyRupee size={17} />
                                 <p className="text-[#0F172A] font-normal text-sm">Amount Paid : <span className='font-semibold'>₹{amountNum}</span></p>
                             </div>
                         </div>
@@ -244,13 +244,13 @@ const TransactionDetails = () => {
                 <div className='pt-5 space-y-3'>
                     <p className="font-semibold text-base">Payment breakdown</p>
 
-                    <p className="text-sm flex justify-between">
-                        <span className='text-[#6A6A6A]'>Base Price</span>
+                    <p className="text-xs text-[#0F172A] flex justify-between">
+                        <span className='text-[#6A6A6A] text-xs'>Base Price</span>
                         <span>₹{transaction.payment_breakdown?.base_price}</span>
                     </p>
 
-                    <p className="text-sm flex justify-between">
-                        <span className='text-[#6A6A6A]'>Platform Fee</span>
+                    <p className="text-xs text-[#0F172A] flex justify-between">
+                        <span className='text-[#6A6A6A] text-xs'>Platform Fee</span>
                         <span>₹{transaction.payment_breakdown?.platform_fee}</span>
                     </p>
 
@@ -258,7 +258,7 @@ const TransactionDetails = () => {
 
                     <p className="text-sm flex justify-between">
                         <span className='text-[#0F172A]'>Total Earnings</span>
-                        <span className='text-[#22C55E] font-semibold'>
+                        <span className='text-[#22C55E] font-semibold text-base'>
                             ₹{transaction.payment_breakdown?.total_earnings}
                         </span>
                     </p>
@@ -269,7 +269,7 @@ const TransactionDetails = () => {
             <div className="flex gap-3 py-5">
                 <button
                     type="button"
-                    className="flex-1 bg-[#DBEAFE] text-[#2563EB] py-2 rounded-full text-sm"
+                    className="flex-1 bg-[#DBEAFE] text-[#2563EB] py-2 rounded-full font-medium text-xs"
                     onClick={downloadPDF}
                 >
                     <TbDownload className='inline mr-1 mb-0.5' />
@@ -278,7 +278,7 @@ const TransactionDetails = () => {
 
                 <button
                     type="button"
-                    className="flex-1 bg-[#DBEAFE] text-[#2563EB] py-2 rounded-full text-sm"
+                    className="flex-1 bg-[#DBEAFE] text-[#2563EB] py-2 rounded-full font-medium text-xs"
                     onClick={sharePage}
                 >
                     <HiShare className='inline mr-1 mb-0.5' />

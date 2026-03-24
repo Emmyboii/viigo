@@ -54,6 +54,9 @@ export interface WalletType {
     gst_number: string;
     is_active: boolean;
     balance: string;
+    verification_status: "unverified" | "pending" | "verified" | "failed";
+    verified_at: string;
+    is_locked: string;
 }
 
 export type Booking = {

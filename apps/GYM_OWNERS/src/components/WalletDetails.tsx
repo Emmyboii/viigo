@@ -13,7 +13,7 @@ const WalletDetails = () => {
 
     // const verified = true
 
-    const verified = wallet?.is_active === true
+    const verified = wallet?.verification_status === "verified"
     const balance = wallet?.balance ?? "0.00"
 
     return (
