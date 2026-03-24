@@ -19,14 +19,14 @@ export default function UserCard({ booking, onClick }: UserCardProps) {
     } = booking;
 
     // 🔥 STATUS MAPPING
-    const isUpcoming = status === "PENDING";
-    const isActive = status === "CONFIRMED";
+    const isUpcoming = status === "CONFIRMED";
+    const isActive = status === "ACTIVE";
     const isCancelled = status === "CANCELLED";
 
     let statusText = "";
     if (isActive) statusText = `${contextual_text}`;
     else if (isUpcoming) statusText = `${contextual_text}`;
-    else if (isCancelled) statusText = "Session Cancelled";
+    else if (isCancelled) statusText = `${contextual_text}`;
     else statusText = "Session Ended";
 
     return (
@@ -35,10 +35,10 @@ export default function UserCard({ booking, onClick }: UserCardProps) {
             className="flex items-center gap-4 p-4 py-2 rounded-lg border border-[#E2E8F0] bg-white w-full cursor-pointer"
         >
             {/* Avatar */}
-            <div className="w-12 h-10 rounded-full overflow-hidden flex items-center justify-center bg-gray-100">
+            <div className="w-[66px] h-[66px] flex-shrink-0 rounded-full overflow-hidden flex items-center justify-center bg-gray-100">
                 {client_image ? (
                     <img
-                        src={client_image}
+                        src={`https://api.viigo.in/${client_image}`}
                         alt={client_name}
                         className="w-full h-full object-cover"
                     />
@@ -48,21 +48,21 @@ export default function UserCard({ booking, onClick }: UserCardProps) {
             </div>
 
             {/* Content */}
-            <div className="flex-1 space-y-1">
+            <div className="flex-1 min-w-0 space-y-1">
                 {/* Name + Status */}
-                <div className="flex items-center gap-2">
-                    <p className="font-semibold text-gray-900 text-nowrap">
+                <div className="flex items-center gap- min-w-0">
+                    <p className="font-semibold text-gray-900 truncate">
                         {client_name}
                     </p>
 
                     <span
                         className={`text-xs px-3 py-1.5 rounded-full font-medium ${isActive
-                                ? "bg-[#22C55E] text-white"
-                                : isUpcoming
-                                    ? "bg-[#FACC15] text-white"
-                                    : isCancelled
-                                        ? "bg-[#FDECEA] text-[#F43F5E]"
-                                        : "bg-gray-200 text-gray-600"
+                            ? "bg-[#22C55E] text-white"
+                            : isUpcoming
+                                ? "bg-[#FACC15] text-white"
+                                : isCancelled
+                                    ? "bg-[#FDECEA] text-[#F43F5E]"
+                                    : "bg-[#CBD5E1] text-[#FFFFFF]"
                             }`}
                     >
                         {display_status}

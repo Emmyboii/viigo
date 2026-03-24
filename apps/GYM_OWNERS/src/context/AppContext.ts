@@ -64,7 +64,7 @@ export type Booking = {
     duration_text: string;
     contextual_text: string;
     display_date: string;
-    status: "PENDING" | "CONFIRMED" | "CANCELLED";
+    status: "PENDING" | "CONFIRMED" | "CANCELLED" | "ACTIVE" | "COMPLETED";
 };
 
 type NotificationTypeEnum =

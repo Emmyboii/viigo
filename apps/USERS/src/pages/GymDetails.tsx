@@ -2,7 +2,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import BottomSheet from "../components/BottomSheet";
 import ImageCarousel from "../components/ImageCarousel";
 import { useEffect, useState } from "react";
-
+import logoUrl from "../assets/icon2.png";
 import {
     IoInformationCircleOutline,
     IoWarningOutline,
@@ -17,6 +17,7 @@ import PageHeader from "../components/PageHeader";
 // import { FaRegEdit } from "react-icons/fa";
 import { useAppContext, type GymCard } from "../context/AppContext";
 import type { Gym } from "../components/types/gym";
+import html2canvas from "html2canvas";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -42,6 +43,118 @@ export default function GymDetails() {
     //     location.state?.reopenSheet || false
     // );
 
+
+    const handleShare = async () => {
+        const element = document.getElementById("share-area");
+        const bottomBar = document.getElementById("share-bottom-bar");
+
+        if (!element) return;
+
+        if (bottomBar) {
+            bottomBar.style.position = "relative";
+            bottomBar.style.bottom = "0px";
+        }
+
+        try {
+            await document.fonts.ready;
+
+            const canvas = await html2canvas(element, {
+                useCORS: true,
+                allowTaint: false,
+                scrollX: 0,
+                scrollY: -window.scrollY,
+                windowWidth: document.documentElement.clientWidth,
+                windowHeight: document.documentElement.clientHeight,
+                scale: 2,
+            });
+
+            const finalCanvas = document.createElement("canvas");
+            const ctx = finalCanvas.getContext("2d");
+            if (!ctx) return;
+
+            const headerHeight = 100;
+            const padding = 40; // 👈 adjust spacing here
+
+            // ✅ Increase canvas size
+            finalCanvas.width = canvas.width + padding * 2;
+            finalCanvas.height = canvas.height + headerHeight + padding * 2;
+
+            // 🔵 Header background (include padding)
+            ctx.fillStyle = "#2563EB";
+            ctx.fillRect(0, 0, finalCanvas.width, headerHeight + padding);
+
+            // 🧠 Logo
+            const logo = new Image();
+            logo.src = logoUrl;
+
+            await new Promise((resolve) => {
+                logo.onload = resolve;
+                logo.onerror = resolve;
+            });
+
+            const maxLogoHeight = 40;
+            const logoRatio = logo.width / logo.height;
+            const logoWidth = maxLogoHeight * logoRatio;
+            const logoHeight = maxLogoHeight;
+
+            // Text
+            const text = "Viigo";
+            ctx.font = "bold 50px sans-serif";
+            ctx.fillStyle = "#fff";
+            ctx.textAlign = "left";
+            ctx.textBaseline = "middle";
+
+            const textWidth = ctx.measureText(text).width;
+            const gap = 20;
+
+            // ✅ Center properly (with padding accounted)
+            const totalWidth = logoWidth + gap + textWidth;
+            const startX = (finalCanvas.width - totalWidth) / 2;
+
+            // Draw logo
+            ctx.drawImage(
+                logo,
+                startX,
+                (headerHeight + padding - logoHeight) / 2,
+                logoWidth,
+                logoHeight
+            );
+
+            // Draw text
+            ctx.fillText(
+                text,
+                startX + logoWidth + gap,
+                (headerHeight + padding) / 2
+            );
+
+            // 🖼 Draw content with padding offset
+            ctx.drawImage(canvas, padding, headerHeight + padding);
+
+            const dataUrl = finalCanvas.toDataURL("image/png");
+            const blob = await (await fetch(dataUrl)).blob();
+
+            const file = new File([blob], `${gym?.name || "gym"}-Viigo.png`, { type: "image/png" });
+            const shareText = `${gym?.name}\n\nMore info: https://viigousers.vercel.app/gyms/${gym?.slug}`;
+
+            if (navigator.share && navigator.canShare({ files: [file] })) {
+                await navigator.share({ files: [file], text: shareText });
+            } else {
+                window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, "_blank");
+
+                const link = document.createElement("a");
+                link.href = dataUrl;
+                link.download = `${gym?.name || "gym"}.png`;
+                link.click();
+            }
+        } catch (err) {
+            console.error("Share failed:", err);
+        }
+
+        if (bottomBar) {
+            bottomBar.style.position = "fixed";
+            bottomBar.style.bottom = "3.5rem";
+        }
+    };
 
     function formatTime12Hour(time24: string) {
         const [hourStr, minuteStr] = time24.split(":");
@@ -261,55 +374,58 @@ export default function GymDetails() {
         <div className="pb-32 bg-white min-h-screen">
 
             {/* ===== Header ===== */}
-            <PageHeader text="Details" />
-
+            <PageHeader text="Details" onShare={handleShare} />
 
             <div className="pt-14" />
 
-            {/* ===== Image Carousel ===== */}
-            <div className="h-60">
-                <ImageCarousel images={gym.images} />
-            </div>
+            <div id="share-area" className="min-h-screen bg-white">
 
-            {/* ===== Content ===== */}
-            <div className="bg-white p-4 px-5 space-y-6">
+                {/* ===== Image Carousel ===== */}
+                <div className="h-60">
+                    <ImageCarousel images={gym.images} />
+                </div>
 
-                {/* Gym Name */}
-                <div>
+                {/* ===== Content ===== */}
+                <div className="bg-white p-4 px-5 space-y-6">
 
-                    <div className="flex justify-between items-center gap-3">
-                        <h1 className="text-xl font-bold">{gym.name}</h1>
+                    {/* Gym Name */}
+                    <div>
 
-                        {/* Call & Map Buttons */}
-                        <div className="flex gap-3">
-                            {/* Phone */}
-                            <div
-                                onClick={handlePhoneClick}
-                                className="bg-[#DBEAFE] text-[#2563EB] p-2 rounded cursor-pointer transition"
-                            >
-                                <MdPhone size={16} />
+                        <div className="flex justify-between items-center gap-3">
+                            <h1 className="text-xl font-bold">{gym.name}</h1>
+
+                            {/* Call & Map Buttons */}
+                            <div className="flex gap-3">
+                                {/* Phone */}
+                                <div
+                                    onClick={handlePhoneClick}
+                                    className="bg-[#DBEAFE] text-[#2563EB] p-2 rounded cursor-pointer transition"
+                                >
+                                    <MdPhone size={16} />
+                                </div>
+
+                                {/* Location */}
+                                <div
+                                    onClick={handleLocationClick}
+                                    className="bg-[#DBEAFE] text-[#2563EB] p-2 rounded cursor-pointer transition"
+                                >
+                                    <HiOutlineLocationMarker size={16} />
+                                </div>
                             </div>
 
-                            {/* Location */}
-                            <div
-                                onClick={handleLocationClick}
-                                className="bg-[#DBEAFE] text-[#2563EB] p-2 rounded cursor-pointer transition"
-                            >
-                                <HiOutlineLocationMarker size={16} />
-                            </div>
                         </div>
 
-                    </div>
+                        <div className="flex items-center gap-1 text-sm text-gray-500 mt-1 leading-none">
+                            <HiLocationMarker size={14} className="flex-shrink-0" />
+                            <span className="flex items-center gap-1">
+                                <span>{gym.distance} {gym.area}</span>
+                                <span>•</span>
+                                <span>{gym.open_status || `Open Till ${formatTime12Hour(gym.close_time)}`}</span>
+                            </span>
+                        </div>
 
-                    <div className="flex items-center text-sm text-gray-500 mt-1 gap-1 flex-wrap">
-                        <HiLocationMarker size={14} />
-                        <span>{gym.distance} {gym.area}</span>
-                        <span>•</span>
-                        <span>{gym.open_status || `Open Till ${formatTime12Hour(gym.close_time)}`}</span>
-                    </div>
-
-                    {/* Tags */}
-                    {/* <div className="flex gap-2 mt-3 flex-wrap">
+                        {/* Tags */}
+                        {/* <div className="flex gap-2 mt-3 flex-wrap">
                         {gym.tags.map((tag, i) => (
                             <span
                                 key={i}
@@ -320,69 +436,91 @@ export default function GymDetails() {
                             </span>
                         ))}
                     </div> */}
-                </div>
-
-                <div className="border border-dashed border-[#CBD5E1]"></div>
-
-                {/* ===== Amenities ===== */}
-                <div>
-                    <h2 className="text-lg font-semibold mb-3">
-                        What’s Included
-                    </h2>
-
-                    <div className="space-y-3">
-                        {visibleAmenities.map((item, i) => (
-                            <p key={i} className="text-sm text-gray-700 flex items-center gap-2">
-                                <img
-                                    src={item?.icon}
-                                    alt={item?.name}
-                                    className="w-3 h-3 object-contain"
-                                />
-                                {item.name}
-                            </p>
-                        ))}
                     </div>
 
-                    {gym.amenities.length > 4 && (
-                        <button
-                            onClick={() => setAmenitiesOpen(true)}
-                            className="mt-4 w-full bg-[#DBEAFE] text-[#2563EB] py-3 rounded-xl font-medium"
-                        >
-                            Show all {gym.amenities.length} amenities
-                        </button>
-                    )}
-                </div>
+                    <div className="border border-dashed border-[#CBD5E1]"></div>
 
-                <div className="border border-dashed border-[#CBD5E1]"></div>
+                    {/* ===== Amenities ===== */}
+                    <div>
+                        <h2 className="text-lg font-semibold mb-3">
+                            What’s Included
+                        </h2>
 
-                {/* ===== Rules ===== */}
-                <div className="pb-20">
-                    <h2 className="text-lg font-semibold mb-3">
-                        Rules
-                    </h2>
+                        <div className="space-y-3">
+                            {visibleAmenities.map((item, i) => (
+                                <p key={i} className="text-sm text-gray-700 flex items-center gap-2">
+                                    <img
+                                        src={item?.icon}
+                                        alt={item?.name}
+                                        className="w-3 h-3 object-contain"
+                                    />
+                                    {item.name}
+                                </p>
+                            ))}
+                        </div>
 
-                    <div className="space-y-2 text-sm text-gray-600">
-                        {visibleRules.map((rule, i) => (
-                            <p key={i}>
-                                {i + 1}. {rule.description}
-                            </p>
-                        ))}
+                        {gym.amenities.length > 4 && (
+                            <button style={{
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                width: "100%",
+                                height: "48px",
+                                backgroundColor: "#DBEAFE",
+                                color: "#2563EB",
+                                borderRadius: "6px",
+                                fontWeight: 500,
+                                fontSize: "16px",
+                                marginTop: "16px",
+                                padding: "0",
+                            }}
+                            >
+                                Show all {gym.amenities.length} amenities
+                            </button>
+                        )}
                     </div>
 
-                    {gym.rules.length > 3 && (
-                        <button
-                            onClick={() => setRulesOpen(true)}
-                            className="mt-4 w-full bg-[#DBEAFE] text-[#2563EB] py-3 rounded-xl font-medium"
-                        >
-                            View all rules
-                        </button>
-                    )}
+                    <div className="border border-dashed border-[#CBD5E1]"></div>
+
+                    {/* ===== Rules ===== */}
+                    <div className="pb-20">
+                        <h2 className="text-lg font-semibold mb-3">
+                            Rules
+                        </h2>
+
+                        <div className="space-y-2 text-sm text-gray-600">
+                            {visibleRules.map((rule, i) => (
+                                <p key={i}>
+                                    {i + 1}. {rule.description}
+                                </p>
+                            ))}
+                        </div>
+
+                        {gym.rules.length > 3 && (
+                            <button style={{
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                width: "100%",
+                                height: "48px",
+                                backgroundColor: "#DBEAFE",
+                                color: "#2563EB",
+                                borderRadius: "6px",
+                                fontWeight: 500,
+                                fontSize: "16px",
+                                marginTop: "16px",
+                                padding: "0",
+                            }}
+                            >
+                                View all rules
+                            </button>
+                        )}
+                    </div>
                 </div>
-            </div>
 
-            {/* ===== Sticky Bottom CTA ===== */}
+                {/* ===== Sticky Bottom CTA ===== */}
 
-            {/* {storedBooking ? (
+                {/* {storedBooking ? (
                 <div className="fixed bottom-14 left-0 right-0 bg-white">
                     <div className="bg-blue-50 text-blue-700 text-sm px-4 py-3 font-medium text-center">
                         Last entry for selected duration: {lastEntryTime}
@@ -415,27 +553,49 @@ export default function GymDetails() {
                     </div>
                 </div>
             ) : ( */}
-            <div className="fixed bottom-14 left-0 right-0 bg-white border-t px-3 py-3 flex justify-between items-center">
-                <div className="space-y-2">
-                    <p className="text-[11px] text-gray-500">
-                        Gym timings : {formatTime12Hour(gym.open_time)} - {formatTime12Hour(gym.close_time)}
-                    </p>
-
-                    <div className="flex items-center gap-1">
-                        <p className="text-xl font-bold">
-                            ₹{Number(gym.hourly_rate) + 12 + 2.16}/Hr
+                <div id="share-bottom-bar" className="fixed bottom-14 left-0 right-0 bg-white border-t px-3 py-3 flex justify-between items-center">
+                    <div className="space-y-2">
+                        <p className="text-[11px] text-gray-500">
+                            Gym timings : {formatTime12Hour(gym.open_time)} - {formatTime12Hour(gym.close_time)}
                         </p>
-                        <IoInformationCircleOutline
-                            size={22}
-                            onClick={() => setPriceBreakdownOpen(true)}
-                            className="text-gray-400"
-                        />
+
+                        <div className="flex items-center gap-2 leading-none">
+                            <p className="text-xl font-bold flex items-center">
+                                ₹{Number(gym.hourly_rate) + 12 + 2.16}/Hr
+                            </p>
+
+                            <IoInformationCircleOutline
+                                size={20}
+                                onClick={() => setPriceBreakdownOpen(true)}
+                                className="text-gray-400 flex-shrink-0"
+                                style={{ transform: "translateY(1px)" }}
+                            />
+                        </div>
                     </div>
+
+                    <button
+                        style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            width: "153px",
+                            height: "48px",
+                            backgroundColor: "#DBEAFE",
+                            color: "#2563EB",
+                            borderRadius: "6px",
+                            fontWeight: 500,
+                            fontSize: "16px",
+                            marginTop: "16px",
+                            padding: "0",
+                        }}
+
+                        onClick={() => navigate(`/gyms/${gym.slug}/plan`)}
+                    //   className="bg-blue-600 text-white px-6 py-3 rounded-md w-[153px] font-medium"
+                    >
+                        Book Hour
+                    </button>
                 </div>
 
-                <button onClick={() => navigate(`/gyms/${gym.slug}/plan`)} className="bg-blue-600 text-white px-6 py-3 rounded-md w-[153px] font-medium">
-                    Book Hour
-                </button>
             </div>
             {/* )} */}
 

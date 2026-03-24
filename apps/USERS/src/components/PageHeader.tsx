@@ -1,12 +1,13 @@
-import { HiShare } from 'react-icons/hi2'
 import { IoArrowBack } from 'react-icons/io5'
 import { useNavigate } from 'react-router-dom';
+import { RiShareFill } from "react-icons/ri";
 
 interface PageHeaderProps {
     text: string
+    onShare: () => void;
 }
 
-const PageHeader = ({ text }: PageHeaderProps) => {
+const PageHeader = ({ text, onShare }: PageHeaderProps) => {
 
     const navigate = useNavigate();
 
@@ -27,9 +28,10 @@ const PageHeader = ({ text }: PageHeaderProps) => {
 
             <button
                 aria-label="Share gym"
+                onClick={onShare}
                 className="p-1"
             >
-                <HiShare className="text-[#475569]" size={20} />
+                <RiShareFill className="text-[#475569] text-lg" size={22} />
             </button>
         </div>
     )

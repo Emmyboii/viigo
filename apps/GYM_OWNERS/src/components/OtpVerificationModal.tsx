@@ -1,6 +1,5 @@
-import { FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
+import { FaCheckCircle, FaTimesCircle, FaUserCircle } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import profile from '../assets/userProfileImg.png'
 import { FaUser, FaRegClock } from "react-icons/fa6";
 import { HiMiniCurrencyRupee } from 'react-icons/hi2';
 import { HiOutlineCalendar } from 'react-icons/hi';
@@ -48,8 +47,8 @@ export default function OtpVerificationModal({ user, onClose }: OtpVerificationM
     const formattedTime = time.replace(/\s/, "");
 
 
-    const isActive = user?.status === "CONFIRMED";
-    const isUpcoming = user?.status === "PENDING";
+    const isActive = user?.status === "ACTIVE";
+    const isUpcoming = user?.status === "CONFIRMED";
     const isCancelled = user?.status === "CANCELLED";
 
     // Determine dynamic status text
@@ -105,9 +104,9 @@ export default function OtpVerificationModal({ user, onClose }: OtpVerificationM
             {/* Top Success Section */}
             <div className="flex flex-col items-center pt-10 pb-6">
                 {/* {(user?.status === "CONFIRMED" || user?.status === "completed") ? ( */}
-                {(user?.status === "CONFIRMED") ? (
+                {(user?.status === "ACTIVE" || user?.status === "COMPLETED") ? (
                     <FaCheckCircle className="text-green-500 text-[65px]" />
-                ) : user?.status === "PENDING" ? (
+                ) : user?.status === "CONFIRMED" ? (
                     <img src={upcoming} className="w-16 h-16" alt="Upcoming Status" />
                 ) : (
                     <FaTimesCircle className="text-red-500 text-[65px]" />
@@ -131,21 +130,21 @@ export default function OtpVerificationModal({ user, onClose }: OtpVerificationM
                         <div className="flex items-center gap-2">
                             <FaRegClock size={16} />
                             <p className="text-[#0F172A] font-normal text-sm">{duration}</p>
-                            {user?.status === "CONFIRMED" && (
+                            {user?.status === "ACTIVE" && (
                                 <p className='bg-[#22C55E] rounded-full text-white font-medium p-1 px-2 text-xs'>
                                     Active
                                 </p>
                             )}
-                            {user?.status === "PENDING" && (
+                            {user?.status === "CONFIRMED" && (
                                 <p className='bg-[#FACC15] rounded-full text-white font-medium p-1 px-2 text-xs'>
                                     Upcoming
                                 </p>
                             )}
-                            {/* {user?.status === "CONFIRMED" && (
+                            {user?.status === "COMPLETED" && (
                                 <p className='bg-[#CBD5E1] rounded-full text-white font-medium p-1 px-2 text-xs'>
                                     Completed
                                 </p>
-                            )} */}
+                            )}
                             {user?.status === "CANCELLED" && (
                                 <p className='bg-[#FDECEA] text-[#F43F5E] rounded-full font-medium p-1 px-2 text-xs'>
                                     Cancelled
@@ -158,7 +157,17 @@ export default function OtpVerificationModal({ user, onClose }: OtpVerificationM
                         </div>
                     </div>
 
-                    <img src={user?.client_image || profile} className="w-[69px] rounded-full" alt="Profile Image" />
+                    <div className="w-[66px] h-[66px] flex-shrink-0 rounded-full overflow-hidden flex items-center justify-center bg-gray-100">
+                        {user?.client_image ? (
+                            <img
+                                src={`https://api.viigo.in/${user?.client_image}`}
+                                alt={user?.client_image}
+                                className="w-full h-full object-cover"
+                            />
+                        ) : (
+                            <FaUserCircle className="text-gray-400 text-7xl" />
+                        )}
+                    </div>
                 </div>
 
                 <div className="border border-[#F2F2F2] border-dotted"></div>
@@ -172,8 +181,7 @@ export default function OtpVerificationModal({ user, onClose }: OtpVerificationM
                         </div>
                     )}
 
-                    {/* {(user?.status === "completed" || user?.status === "CONFIRMED") && ( */}
-                    {(user?.status === "CONFIRMED") && (
+                    {(user?.status === "COMPLETED") && (
                         <>
                             <div className="space-y-1">
                                 <p className="text-[#0F172A] font-semibold">Session Completed</p>
@@ -184,13 +192,13 @@ export default function OtpVerificationModal({ user, onClose }: OtpVerificationM
 
                             <div className="border border-[#F2F2F2] border-dotted"></div>
 
-                            {/* {user?.status === "completed" && (
-                                <p className='text-[#2563EB] font-medium text-xs'>Session Ended</p>
-                            )} */}
+                            {user?.status === "COMPLETED" && (
+                                <p className='text-[#2563EB] font-medium text-xs mt-5'>Session Ended</p>
+                            )}
                         </>
                     )}
 
-                    {user?.status === "PENDING" && (
+                    {user?.status === "CONFIRMED" && (
                         <div className="space-y-1">
                             <p className="text-[#0F172A] font-semibold">Session Upcoming</p>
                             <p className="text-[#0F172A] text-sm"><HiOutlineCalendar className="inline mr-1" /> {user.display_date}</p>
@@ -202,7 +210,7 @@ export default function OtpVerificationModal({ user, onClose }: OtpVerificationM
                 {getRemainingTime() && (
                     <div className='space-y-1'>
                         <p className='text-[#475569] font-medium text-xs'>
-                            {user?.status === "CONFIRMED" ? "Remaining Time" : user?.status === "PENDING" ? "Last Entry is at" : ""}
+                            {user?.status === "ACTIVE" ? "Remaining Time" : user?.status === "CONFIRMED" ? "Last Entry is at" : ""}
                         </p>
                         <p className='text-[#1D4ED8] font-semibold text-base'>{getRemainingTime()}</p>
                     </div>

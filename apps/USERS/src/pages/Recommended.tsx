@@ -1,12 +1,14 @@
 import { useAppContext } from '../context/AppContext';
-import PageHeader from '../components/PageHeader';
 import Container from '../components/layout/Container';
 import GymHorizontalCard from '../components/GymHorizontalCard';
 import SearchBar2 from '../components/SearchBar2';
 import { useState } from 'react';
+import { IoArrowBack } from 'react-icons/io5';
+import { useNavigate } from 'react-router-dom';
 
 const Recommended = () => {
 
+    const navigate = useNavigate();
 
     const { recommendedGyms, loading2 } = useAppContext()
     // const [activeId, setActiveId] = useState("");
@@ -58,7 +60,22 @@ const Recommended = () => {
 
     return (
         <Container>
-            <PageHeader text='Recommended' />
+
+            <div className="fixed top-0 left-0 right-0 z-40 bg-white flex items-center justify-between px-4 py-3" >
+
+                <div className='flex items-center gap-2'>
+                    <button
+                        onClick={() => navigate(-1)}
+                        aria-label="Go back"
+                        className="p-1"
+                    >
+                        <IoArrowBack size={20} />
+                    </button>
+
+                    <span className="font-semibold text-lg">Recommended</span>
+                </div>
+            </div>
+
             <div className='mt-14 pb-2'>
                 <SearchBar2
                     value={query}

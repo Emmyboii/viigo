@@ -12,6 +12,8 @@ import FilterChips from "../components/FilterChips";
 import SortModal from "../components/SortModal";
 import { FaFilter } from "react-icons/fa";
 import { BiSortAlt2 } from "react-icons/bi";
+import logoUrl from "../assets/icon2.png";
+import html2canvas from "html2canvas";
 
 export default function Explore() {
     const {
@@ -135,6 +137,106 @@ export default function Explore() {
         };
     }, []);
 
+    const handleShare = async () => {
+        const element = document.getElementById("share-area");
+
+        if (!element) return;
+
+        try {
+            await document.fonts.ready;
+
+            const canvas = await html2canvas(element, {
+                useCORS: true,
+                allowTaint: false,
+                scrollX: 0,
+                scrollY: -window.scrollY,
+                windowWidth: document.documentElement.clientWidth,
+                windowHeight: document.documentElement.clientHeight,
+                scale: 2,
+            });
+
+            const finalCanvas = document.createElement("canvas");
+            const ctx = finalCanvas.getContext("2d");
+            if (!ctx) return;
+
+            const headerHeight = 100;
+            const padding = 40; // 👈 adjust spacing here
+
+            // ✅ Increase canvas size
+            finalCanvas.width = canvas.width + padding * 2;
+            finalCanvas.height = canvas.height + headerHeight + padding * 2;
+
+            // 🔵 Header background (include padding)
+            ctx.fillStyle = "#2563EB";
+            ctx.fillRect(0, 0, finalCanvas.width, headerHeight + padding);
+
+            // 🧠 Logo
+            const logo = new Image();
+            logo.src = logoUrl;
+
+            await new Promise((resolve) => {
+                logo.onload = resolve;
+                logo.onerror = resolve;
+            });
+
+            const maxLogoHeight = 40;
+            const logoRatio = logo.width / logo.height;
+            const logoWidth = maxLogoHeight * logoRatio;
+            const logoHeight = maxLogoHeight;
+
+            // Text
+            const text = "Viigo";
+            ctx.font = "bold 50px sans-serif";
+            ctx.fillStyle = "#fff";
+            ctx.textAlign = "left";
+            ctx.textBaseline = "middle";
+
+            const textWidth = ctx.measureText(text).width;
+            const gap = 20;
+
+            // ✅ Center properly (with padding accounted)
+            const totalWidth = logoWidth + gap + textWidth;
+            const startX = (finalCanvas.width - totalWidth) / 2;
+
+            // Draw logo
+            ctx.drawImage(
+                logo,
+                startX,
+                (headerHeight + padding - logoHeight) / 2,
+                logoWidth,
+                logoHeight
+            );
+
+            // Draw text
+            ctx.fillText(
+                text,
+                startX + logoWidth + gap,
+                (headerHeight + padding) / 2
+            );
+
+            // 🖼 Draw content with padding offset
+            ctx.drawImage(canvas, padding, headerHeight + padding);
+
+            const dataUrl = finalCanvas.toDataURL("image/png");
+
+            // ✅ Share or fallback to download
+            if (navigator.share) {
+                await navigator.share({
+                    title: "Viigo Share",
+                    text: "Check out this gym!",
+                    url: dataUrl,
+                });
+            } else {
+                const link = document.createElement("a");
+                link.href = dataUrl;
+                link.download = "viigo-share.png";
+                link.click();
+            }
+        } catch (err) {
+            console.error("Share failed:", err);
+        }
+    };
+
     return (
         <div className="relative h-screen bg-white">
             {/* MAP VIEW */}
@@ -168,100 +270,89 @@ export default function Explore() {
 
             {/* LIST VIEW */}
             {view === "list" && (
-                <div className="p-4 h-full overflow-y-auto">
-                    <div className="pt-12"></div>
+                <div className="p-4 h-full overflow-y-auto pb-28">
 
-                    {/* Header */}
-                    <div className="flex items-center gap-3 mb-4">
-                        <div
-                            onClick={() => setShowSearch(true)}
-                            className="flex items-center flex-1 border rounded-xl px-3 py-3 cursor-pointer"
-                        >
-                            <IoSearchSharp className="mr-2 text-xl text-gray-500" />
-                            <p className="text-sm text-gray-600">
-                                {query ? query : "Search by Name or location"}
-                            </p>
-                        </div>
-                    </div>
+                    <div id="share-area" className="min-h-screen bg-white">
 
-                    <div className="flex items-center gap-2 w-full">
-                        <FilterChips
-                            items={currentSortLabel ? chipData2 : chipData}
-                            activeId={activeId}
-                            onChange={(id) => {
-                                setActiveId(id);
-
-                                if (id === "filters") {
-                                    setShowFilter(true);
-                                }
-
-                                if (id === "sort") {
-                                    setShowSortModal(true);
-                                }
-                            }}
-                        />
-
-                        {currentSortLabel && (
-                            <div className="mt-4 w-full">
-                                <button
-                                    onClick={() => setShowSortModal(true)}
-                                    className="inline-flex items-center text-nowrap gap-2 bg-[#DBEAFE] border border-[#2563EB] text-[#2563EB] px-3 py-1.5 rounded-lg text-sm w-full justify-center"
-                                >
-                                    <BiSortAlt2 className="text-xl" /> Sort By : {currentSortLabel}
+                        {/* HEADER (OUTSIDE MAP) */}
+                        <div className="fixed top-0 left-0 right-0 z-40 bg-white flex items-center justify-between px-4 py-3">
+                            <div className="flex items-center gap-2">
+                                <button title="back" onClick={() => setView("map")} className="p-1">
+                                    <IoArrowBack size={20} />
                                 </button>
+
+                                <span className="font-medium">Explore Gym</span>
                             </div>
-                        )}
-                    </div>
 
-                    {/* Loading */}
-                    {searchLoading && (
-                        <p className="text-center py-6">Searching...</p>
-                    )}
+                            <button onClick={handleShare} title="share" className="p-1">
+                                <HiShare className="text-[#475569]" size={20} />
+                            </button>
+                        </div>
 
-                    {/* Empty */}
-                    {!searchLoading && searchResults.length === 0 && (
-                        <p className="text-center py-6 text-gray-400">
-                            No gyms found
+                        <div className="pt-12"></div>
+
+                        {/* Search + Filters */}
+                        <div className="flex items-center gap-3 mb-2">
+                            <div
+                                onClick={() => setShowSearch(true)}
+                                className="flex items-center flex-1 border rounded-xl px-3 py-3 cursor-pointer"
+                            >
+                                <IoSearchSharp className="mr-2 text-xl text-gray-500" />
+                                <p className="text-sm text-gray-600">
+                                    {query ? query : "Search by Name or location"}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 w-full">
+                            <FilterChips
+                                items={currentSortLabel ? chipData2 : chipData}
+                                activeId={activeId}
+                                onChange={(id) => {
+                                    setActiveId(id);
+
+                                    if (id === "filters") {
+                                        setShowFilter(true);
+                                    }
+
+                                    if (id === "sort") {
+                                        setShowSortModal(true);
+                                    }
+                                }}
+                            />
+
+                            {currentSortLabel && (
+                                <div className="mt-4 w-full">
+                                    <button
+                                        onClick={() => setShowSortModal(true)}
+                                        className="inline-flex items-center text-nowrap gap-2 bg-[#DBEAFE] border border-[#2563EB] text-[#2563EB] px-3 py-1.5 rounded-lg text-sm w-full justify-center"
+                                    >
+                                        <BiSortAlt2 className="text-xl" /> Sort By : {currentSortLabel}
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+
+                        <p className="text-[#94A3B8] text-sm my-3">
+                            {searchResults.length} Gym{searchResults.length > 1 && "s"} found
                         </p>
-                    )}
 
-                    {!searchLoading && (
-                        <>
-                            <p className="text-[#94A3B8] text-sm my-3">{searchResults.length} Gym{searchResults.length > 1 && "s"} found</p>
-
-                            {/* Results */}
+                        {/* RESULTS */}
+                        {searchLoading ? (
+                            <p className="text-center py-6">Searching...</p>
+                        ) : searchResults.length === 0 ? (
+                            <p className="text-center py-6 text-gray-400">
+                                No gyms found
+                            </p>
+                        ) : (
                             <div className="space-y-4">
-                                {searchResults.map((gym, i) => (
-                                    <div key={i} className="mt-4">
-                                        <div className="fixed top-0 left-0 right-0 z-40 bg-white flex items-center justify-between px-4 py-3" >
-
-                                            <div className='flex items-center gap-2'>
-                                                <button
-                                                    onClick={() => {
-                                                        setView("map");
-                                                    }}
-                                                    aria-label="Go back"
-                                                    className="p-1"
-                                                >
-                                                    <IoArrowBack size={20} />
-                                                </button>
-
-                                                <span className="font-medium">Explore Gym</span>
-                                            </div>
-
-                                            <button
-                                                aria-label="Share gym"
-                                                className="p-1"
-                                            >
-                                                <HiShare className="text-[#475569]" size={20} />
-                                            </button>
-                                        </div>
-                                        <GymHorizontalCard key={gym.id} gym={gym} />
-                                    </div>
+                                {searchResults.map((gym) => (
+                                    <GymHorizontalCard key={gym.id} gym={gym} />
                                 ))}
                             </div>
-                        </>
-                    )}
+                        )}
+
+                    </div>
                 </div>
             )}
 

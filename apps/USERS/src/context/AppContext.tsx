@@ -146,7 +146,7 @@ type AppContextType = {
     fetchNotifications: () => Promise<void>;
     searchGyms: (query: string) => Promise<void>;
     fetchGyms: () => Promise<void>;
-    fetchRecommendedGyms: () => Promise<void>;
+    fetchRecommendedGyms: (lat: number, long: number) => Promise<void>;
     fetchFilteredGyms: (filters: any) => Promise<void>;
     fetchSortedGyms: (sort: string, label: string) => Promise<void>;
     fetchLocation: () => Promise<void>;
@@ -271,10 +271,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
-    const fetchRecommendedGyms = async () => {
+    const fetchRecommendedGyms = async (lat: number, long: number) => {
         setLoading2(true);
         try {
-            const data = await request("/client/gyms/recommended/");
+            const data = await request(`/client/gyms/recommended/?lat=${lat}&long=${long}`);
             setRecommendedGyms(data?.data || []);
         } catch (err) {
             console.error("Failed to fetch recommended gyms", err);
@@ -308,19 +308,33 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             if (!address) return;
 
             const parts: string[] = address.split(",").map((p: string) => p.trim());
-            // assume last part is country
-            // const country = parts[parts.length - 1];
 
-            // assume second last is state
-            const state = parts[parts.length - 2];
+            // ✅ STATE: usually second to last
+            let state = parts[parts.length - 2] || "";
 
-            // find city: first non-numeric part from the end that's not state or country
+            // normalize state (remove numbers if any)
+            state = state.replace(/\d+/g, "").trim();
+
+            // ✅ CITY: find closest valid part before state
             let city = "";
+
             for (let i = parts.length - 3; i >= 0; i--) {
-                if (!/^\d+$/.test(parts[i])) { // ignore postal codes
-                    city = parts[i];
-                    break;
+                let cleaned = parts[i].replace(/\d+/g, "").trim();
+
+                // skip empty, numeric, or street-like values
+                if (
+                    !cleaned ||
+                    /^\d+$/.test(cleaned) ||
+                    cleaned.toLowerCase().includes("street") ||
+                    cleaned.toLowerCase().includes("st") ||
+                    cleaned.toLowerCase().includes("road") ||
+                    cleaned.toLowerCase().includes("rd")
+                ) {
+                    continue;
                 }
+
+                city = cleaned;
+                break;
             }
 
             setLocation(`${city}, ${state}`);
@@ -377,7 +391,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             const data = await res.json();
 
             if (data.status === "OK" && data.results.length > 0) {
-                return data.results[1].formatted_address;
+                return data.results[0].formatted_address;
             }
 
             return "";
@@ -481,10 +495,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }, [userData]);
 
     useEffect(() => {
-        if (userData) {
-            fetchRecommendedGyms();
+        if (userData && latitude && longitude) {
+            fetchRecommendedGyms(Number(latitude), Number(longitude));
         }
-    }, [userData]);
+    }, [userData, latitude, longitude]);
 
     useEffect(() => {
         if (userData && latitude && longitude) {

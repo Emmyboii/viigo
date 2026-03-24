@@ -9,6 +9,8 @@ import BottomSheet from "./BottomSheet";
 import { useNavigate } from "react-router";
 import { FaCircleCheck } from "react-icons/fa6";
 import { MdError } from "react-icons/md";
+import logoUrl from "../assets/icon2.png";
+import html2canvas from "html2canvas";
 
 type ToastType = "success" | "error" | null;
 
@@ -67,6 +69,117 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
     const navigate = useNavigate();
 
     const [toast, setToast] = useState<{ type: ToastType; message: string } | null>(null);
+
+    const handleShare = async () => {
+        const element = document.getElementById("share-area");
+        const bottomBar = document.getElementById("share-bottom-bar");
+
+        if (!element) return;
+
+        if (bottomBar) {
+            bottomBar.style.position = "relative";
+            bottomBar.style.bottom = "0px";
+        }
+
+        try {
+            await document.fonts.ready;
+
+            const canvas = await html2canvas(element, {
+                useCORS: true,
+                allowTaint: false,
+                scrollX: 0,
+                scrollY: -window.scrollY,
+                windowWidth: document.documentElement.clientWidth,
+                windowHeight: document.documentElement.clientHeight,
+                scale: 2,
+            });
+
+            const finalCanvas = document.createElement("canvas");
+            const ctx = finalCanvas.getContext("2d");
+            if (!ctx) return;
+
+            const headerHeight = 100;
+            const padding = 40; // 👈 adjust spacing here
+
+            // ✅ Increase canvas size
+            finalCanvas.width = canvas.width + padding * 2;
+            finalCanvas.height = canvas.height + headerHeight + padding * 2;
+
+            // 🔵 Header background (include padding)
+            ctx.fillStyle = "#2563EB";
+            ctx.fillRect(0, 0, finalCanvas.width, headerHeight + padding);
+
+            // 🧠 Logo
+            const logo = new Image();
+            logo.src = logoUrl;
+
+            await new Promise((resolve) => {
+                logo.onload = resolve;
+                logo.onerror = resolve;
+            });
+
+            const maxLogoHeight = 40;
+            const logoRatio = logo.width / logo.height;
+            const logoWidth = maxLogoHeight * logoRatio;
+            const logoHeight = maxLogoHeight;
+
+            // Text
+            const text = "Viigo";
+            ctx.font = "bold 50px sans-serif";
+            ctx.fillStyle = "#fff";
+            ctx.textAlign = "left";
+            ctx.textBaseline = "middle";
+
+            const textWidth = ctx.measureText(text).width;
+            const gap = 20;
+
+            // ✅ Center properly (with padding accounted)
+            const totalWidth = logoWidth + gap + textWidth;
+            const startX = (finalCanvas.width - totalWidth) / 2;
+
+            // Draw logo
+            ctx.drawImage(
+                logo,
+                startX,
+                (headerHeight + padding - logoHeight) / 2,
+                logoWidth,
+                logoHeight
+            );
+
+            // Draw text
+            ctx.fillText(
+                text,
+                startX + logoWidth + gap,
+                (headerHeight + padding) / 2
+            );
+
+            // 🖼 Draw content with padding offset
+            ctx.drawImage(canvas, padding, headerHeight + padding);
+
+            const dataUrl = finalCanvas.toDataURL("image/png");
+
+            // ✅ Share or fallback to download
+            if (navigator.share) {
+                await navigator.share({
+                    title: "Viigo Gym Share",
+                    text: "Check out my gym!",
+                    url: dataUrl,
+                });
+            } else {
+                const link = document.createElement("a");
+                link.href = dataUrl;
+                link.download = "viigo-gym.png";
+                link.click();
+            }
+        } catch (err) {
+            console.error("Share failed:", err);
+        }
+
+        if (bottomBar) {
+            bottomBar.style.position = "fixed";
+            bottomBar.style.bottom = "3.5rem";
+        }
+    };
 
     const initialAvailability = useMemo(() => {
         if (!gym) return [];
@@ -215,47 +328,50 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
                     <FiArrowLeft onClick={() => navigate(-1)} size={20} />
                     <p className="font-medium">Your Gym Details</p>
                 </div>
-                <HiShare size={20} />
+                <HiShare onClick={handleShare} size={20} className="text-[#475569]" />
             </div>
 
-            {/* IMAGE */}
-            <ImageCarousel
-                images={gym?.images}
-                height="h-60"
-            />
+            <div id="share-area" className="min-h-screen bg-white">
 
-            {toast && <Toast type={toast.type} text={toast.message} onClose={handleToastClose} />}
 
-            {/* CONTENT */}
-            <div className="bg-white p-4 px-5 space-y-6 mb-10">
+                {/* IMAGE */}
+                <ImageCarousel
+                    images={gym?.images}
+                    height="h-60"
+                />
 
-                {/* Gym Name */}
-                <div>
-                    <div className="flex items-center justify-between gap-3 w-full">
-                        <div className="w-full">
-                            <div className="flex justify-between items-center gap-3">
-                                <h1 className="text-xl font-bold">{gym.name}</h1>
+                {toast && <Toast type={toast.type} text={toast.message} onClose={handleToastClose} />}
 
-                                <div
-                                    className="bg-[#DBEAFE] text-[#2563EB] p-2 rounded cursor-pointer transition"
-                                >
-                                    <HiOutlineLocationMarker size={16} />
+                {/* CONTENT */}
+                <div className="bg-white p-4 px-5 space-y-6 mb-10">
+
+                    {/* Gym Name */}
+                    <div>
+                        <div className="flex items-center justify-between gap-3 w-full">
+                            <div className="w-full">
+                                <div className="flex justify-between items-center gap-3">
+                                    <h1 className="text-xl font-bold">{gym.name}</h1>
+
+                                    <div
+                                        className="bg-[#DBEAFE] text-[#2563EB] p-2 rounded cursor-pointer transition"
+                                    >
+                                        <HiOutlineLocationMarker size={16} />
+                                    </div>
+
                                 </div>
 
-                            </div>
-
-                            <div className="flex flex-wrap items-center text-sm text-gray-500 gap-1">
-                                <HiLocationMarker size={14} />
-                                <span>{gym?.distance} {gym?.area}</span>
-                                <span>•</span>
-                                <span>Open Till</span>
-                                <span>{formatTime12Hour(gym?.close_time)}</span>
+                                <div className="flex flex-wrap items-center text-sm text-gray-500 gap-1">
+                                    <HiLocationMarker size={14} />
+                                    <span>{gym?.distance} {gym?.area}</span>
+                                    <span>•</span>
+                                    <span>Open Till</span>
+                                    <span>{formatTime12Hour(gym?.close_time)}</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    {/* Tags */}
-                    {/* <div className="flex gap-2 mt-3 flex-wrap">
+                        {/* Tags */}
+                        {/* <div className="flex gap-2 mt-3 flex-wrap">
                         {gym.tags.map((tag, i) => (
                             <span
                                 key={i}
@@ -266,123 +382,126 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
                             </span>
                         ))}
                     </div> */}
-                </div>
-
-                <div className="border border-dashed border-[#CBD5E1]"></div>
-
-                {/* ===== Amenities ===== */}
-                <div>
-                    <h2 className="text-lg font-semibold mb-3">
-                        What’s Included
-                    </h2>
-
-                    <div className="space-y-3">
-                        {visibleAmenities.map((item) => (
-                            <div key={item.id} className="flex items-center gap-2">
-                                <img src={item.icon} alt={item.name} className="w-4 h-4" />
-                                <p className="text-sm text-gray-700">
-                                    {item.name}
-                                </p>
-                            </div>
-                        ))}
                     </div>
 
-                    {gym.amenities.length > 4 && (
-                        <button
-                            onClick={() => setAmenitiesOpen(true)}
-                            className="mt-4 w-full bg-[#DBEAFE] py-3 rounded-xl text-[#2563EB] font-medium"
-                        >
-                            Show all {gym?.amenities.length} amenities
-                        </button>
-                    )}
-                </div>
+                    <div className="border border-dashed border-[#CBD5E1]"></div>
 
-                <div className="border border-dashed border-[#CBD5E1]"></div>
+                    {/* ===== Amenities ===== */}
+                    <div>
+                        <h2 className="text-lg font-semibold mb-3">
+                            What’s Included
+                        </h2>
 
-                {/* ===== Rules ===== */}
-                <div>
-                    <h2 className="text-lg font-semibold mb-3">
-                        Rules
-                    </h2>
+                        <div className="space-y-3">
+                            {visibleAmenities.map((item) => (
+                                <div key={item.id} className="flex items-center gap-2">
+                                    <img src={item.icon} alt={item.name} className="w-4 h-4" />
+                                    <p className="text-sm text-gray-700">
+                                        {item.name}
+                                    </p>
+                                </div>
+                            ))}
+                        </div>
 
-                    <div className="space-y-2 text-sm text-gray-600">
-                        {visibleRules.map((rule, i) => (
-                            <p key={`${rule.id}-${i}`}>
-                                {i + 1}. {rule.description}
-                            </p>
-                        ))}
-                    </div>
-
-                    {gym.rules.length > 3 && (
-                        <button
-                            onClick={() => setRulesOpen(true)}
-                            className="mt-4 w-full bg-[#DBEAFE] py-3 rounded-xl mb-10 text-[#2563EB] font-medium"
-                        >
-                            View all rules
-                        </button>
-                    )}
-                </div>
-
-                <hr />
-
-                {/* TIMINGS */}
-                <Section title="Manage Gym Availability">
-                    <div className="bg-white rounded-xl border p-3 h-[400px] overflow-y-auto space-y-3">
-
-                        {availability.map((item, index) => (
-                            <div
-                                key={item.date}
-                                className="flex items-center justify-between py-2"
+                        {gym.amenities.length > 4 && (
+                            <button
+                                onClick={() => setAmenitiesOpen(true)}
+                                className="mt-4 w-full bg-[#DBEAFE] py-3 rounded-xl text-[#2563EB] font-medium"
                             >
-                                <p className="text-sm font-semibold text-[#0F172A]">
-                                    {new Date(item.date).toDateString()}
-                                </p>
+                                Show all {gym?.amenities.length} amenities
+                            </button>
+                        )}
+                    </div>
 
-                                <button
-                                    onClick={() => toggleDate(index)}
-                                    className={`relative w-16 h-7 rounded-full transition duration-300 ${item.is_open
-                                        ? "bg-[#22C55E] border border-[#22C55E]"
-                                        : "bg-[#94A3B8]"
-                                        }`}
+                    <div className="border border-dashed border-[#CBD5E1]"></div>
+
+                    {/* ===== Rules ===== */}
+                    <div>
+                        <h2 className="text-lg font-semibold mb-3">
+                            Rules
+                        </h2>
+
+                        <div className="space-y-2 text-sm text-gray-600">
+                            {visibleRules.map((rule, i) => (
+                                <p key={`${rule.id}-${i}`}>
+                                    {i + 1}. {rule.description}
+                                </p>
+                            ))}
+                        </div>
+
+                        {gym.rules.length > 3 && (
+                            <button
+                                onClick={() => setRulesOpen(true)}
+                                className="mt-4 w-full bg-[#DBEAFE] py-3 rounded-xl mb-10 text-[#2563EB] font-medium"
+                            >
+                                View all rules
+                            </button>
+                        )}
+                    </div>
+
+                    <hr />
+
+                    {/* TIMINGS */}
+                    <Section title="Manage Gym Availability">
+                        <div className="bg-white rounded-xl border p-3 h-[400px] overflow-y-auto space-y-3">
+
+                            {availability.map((item, index) => (
+                                <div
+                                    key={item.date}
+                                    className="flex items-center justify-between py-2"
                                 >
-                                    <span
-                                        className={`absolute inset-0 flex items-center text-[10px] font-semibold px-2 ${item.is_open
-                                            ? "justify-start text-white"
-                                            : "justify-end text-white"
+                                    <p className="text-sm font-semibold text-[#0F172A]">
+                                        {new Date(item.date).toDateString()}
+                                    </p>
+
+                                    <button
+                                        onClick={() => toggleDate(index)}
+                                        className={`relative w-16 h-7 rounded-full transition duration-300 ${item.is_open
+                                            ? "bg-[#22C55E] border border-[#22C55E]"
+                                            : "bg-[#94A3B8]"
                                             }`}
                                     >
-                                        {item.is_open ? "Open" : "Closed"}
-                                    </span>
+                                        <span
+                                            className={`absolute inset-0 flex items-center text-[10px] font-semibold px-2 ${item.is_open
+                                                ? "justify-start text-white"
+                                                : "justify-end text-white"
+                                                }`}
+                                        >
+                                            {item.is_open ? "Open" : "Closed"}
+                                        </span>
 
-                                    <div
-                                        className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-md transition-all duration-300 ${item.is_open ? "right-1" : "left-1"
-                                            }`}
-                                    />
-                                </button>
-                            </div>
-                        ))}
-                    </div>
-                </Section>
-            </div>
-
-            {/* FOOTER FIXED */}
-            <div className="fixed bottom-14 left-0 right-0 bg-white border-t border-[#F1F5F9] px-4 py-3 flex items-center justify-between">
-                <div>
-                    <p className="text-xs text-gray-500">Your Gym Price Per hour</p>
-                    <p className="font-semibold text-lg">
-                        ₹{gym?.hourly_rate}/Hr
-                    </p>
+                                        <div
+                                            className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-md transition-all duration-300 ${item.is_open ? "right-1" : "left-1"
+                                                }`}
+                                        />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    </Section>
                 </div>
 
-                <button onClick={() => {
-                    setDisplay("edit")
-                    localStorage.setItem("gymDisplay", "edit");
-                    // navigate('/gym/edit')
-                    window.scrollTo({ top: 0, behavior: "smooth" });
-                }} className="bg-blue-600 text-white px-5 py-2 rounded-md h-[50px]">
-                    Edit Gym Details
-                </button>
+                {/* FOOTER FIXED */}
+                <div id="share-bottom-bar" className="fixed bottom-14 left-0 right-0 bg-white border-t border-[#F1F5F9] px-4 py-3 flex items-center justify-between">
+                    <div>
+                        <p className="text-xs text-gray-500">Your Gym Price Per hour</p>
+                        <p className="font-semibold text-lg">
+                            ₹{gym?.hourly_rate}/Hr
+                        </p>
+                    </div>
+
+                    <button onClick={() => {
+                        setDisplay("edit")
+                        localStorage.setItem("gymDisplay", "edit");
+                        // navigate('/gym/edit')
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                    }} className="bg-blue-600 text-white px-5 py-2 rounded-md h-[50px]">
+                        Edit Gym Details
+                    </button>
+                </div>
+
             </div>
+
 
             <Footer />
 

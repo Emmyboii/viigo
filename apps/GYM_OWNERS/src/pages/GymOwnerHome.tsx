@@ -42,11 +42,14 @@ const GymOwnerHome = () => {
   // )
 
   const filteredBookings = bookings.filter((b) => {
+
+    if (b.status === "PENDING") return false;
+
     switch (filter) {
       case "upcoming":
-        return b.status === "PENDING";
-      case "active":
         return b.status === "CONFIRMED";
+      case "active":
+        return b.status === "ACTIVE";
       case "cancelled":
         return b.status === "CANCELLED";
       case "completed":
@@ -78,43 +81,73 @@ const GymOwnerHome = () => {
   };
 
   /* ---------------- Submit ---------------- */
-  const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
     if (otp.length !== 4) return;
 
-    // 👇 dismiss keyboard (important for mobile)
     inputRef.current?.blur();
-
     setStatus("verifying");
 
-    setTimeout(() => {
-      if (otp === "2345") {
-        setStatus("success");
+    try {
+      const token = localStorage.getItem("token");
 
-        setOtp("");
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/gymowner/check-in/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ otp }),
+      });
 
-        // Navigate after toast
-        setTimeout(() => {
-          setStatus('idle')
-          // setShowPaymentModal(true);
+      const data = await res.json();
 
-          setSelectedUser({
-            id: 999,
-            client_name: "Dummy Verified User",
-            status: "PENDING",
-            display_date: "12th Feb",
-            duration_text: "1.5 Hrs",
-            display_status: '',
-            contextual_text: "00:45 min",
-            client_image: "https://randomuser.me/api/portraits/men/99.jpg"
-          });
-          window.scrollTo(0, 0);
-        }, 3000);
-      } else {
-        setStatus("error");
-        setToast({ type: "error", message: "Incorrect OTP. Try again." });
+      if (!res.ok) {
+
+        const message =
+          data?.data?.message?.[0] || data?.data.error || "Invalid OTP, or no confirmed booking found for today.";
+
+        // Show toast for 3 seconds
+        setToast({ type: "error", message });
+        setStatus("idle");
+
+        // Auto-hide toast after 3 seconds
+        setTimeout(() => setToast(null), 2000);
+        return;
       }
-    }, 800); // simulate API delay
+
+      // ✅ SUCCESS
+      setStatus("success");
+      setOtp("");
+
+      // Optional: show success toast
+      setToast({ type: "success", message: "Check-in successful!" });
+
+      // 👉 If API returns booking/user, use it
+      if (data?.data) {
+        setSelectedUser(data.data);
+      }
+
+      // Scroll to top
+      window.scrollTo(0, 0);
+
+    } catch (err: unknown) {
+      console.error(err);
+
+      setStatus("error");
+
+      let message = "OTP verification failed";
+
+      if (err instanceof Error) {
+        message = err.message;
+      }
+
+      setToast({
+        type: "error",
+        message,
+      });
+    }
   };
 
   const handleClose = () => {

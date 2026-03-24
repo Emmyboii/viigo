@@ -1,13 +1,14 @@
 import { useAppContext } from '../context/AppContext';
-import PageHeader from '../components/PageHeader';
 import Container from '../components/layout/Container';
 import GymHorizontalCard from '../components/GymHorizontalCard';
 import { useState } from 'react';
 import SearchBar2 from '../components/SearchBar2';
+import { IoArrowBack } from 'react-icons/io5';
+import { useNavigate } from 'react-router-dom';
 
 const NearBy = () => {
 
-    // const navigate = useNavigate();
+    const navigate = useNavigate();
     const { nearbyGyms, loading2 } = useAppContext()
     // const [activeId, setActiveId] = useState("");
     // const [showSortModal, setShowSortModal] = useState(false);
@@ -59,7 +60,20 @@ const NearBy = () => {
 
     return (
         <Container>
-            <PageHeader text='Hourly Gyms Near You' />
+            <div className="fixed top-0 left-0 right-0 z-40 bg-white flex items-center justify-between px-4 py-3" >
+
+                <div className='flex items-center gap-2'>
+                    <button
+                        onClick={() => navigate(-1)}
+                        aria-label="Go back"
+                        className="p-1"
+                    >
+                        <IoArrowBack size={20} />
+                    </button>
+
+                    <span className="font-semibold text-lg">Hourly Gyms Near You</span>
+                </div>
+            </div>
             <div className='mt-14 pb-2'>
                 <SearchBar2
                     value={query}
