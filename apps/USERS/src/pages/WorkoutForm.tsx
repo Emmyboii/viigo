@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MdError } from 'react-icons/md';
 import { FaCircleCheck } from 'react-icons/fa6';
+import { HiArrowLeft } from 'react-icons/hi';
 
 type ToastType = "success" | "error" | null;
 
@@ -120,6 +121,53 @@ export default function WorkoutForm() {
         }
     };
 
+    const handleSkip = async () => {
+        if (isLoading) return;
+
+        setIsLoading(true);
+
+        try {
+            const token = localStorage.getItem('token');
+
+            const payload = {
+                full_name: name || "User", // fallback
+                workout_duration: dailyWorkout || "not_sure",
+                workout_frequency: weeklyWorkout || "not_sure",
+            };
+
+            const res = await fetch(`${backendUrl}/api/onboarding/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify(payload),
+            });
+
+            if (!res.ok) {
+                throw new Error("Failed to skip onboarding");
+            }
+
+            // optional toast
+            // setToast({ type: 'success', message: 'Skipped successfully!' });
+
+            setTimeout(() => {
+                setToast(null);
+                navigate('/');
+            }, 1000);
+
+        } catch (err: any) {
+            console.error(err);
+            setToast({
+                type: 'error',
+                message: err.message || 'Something went wrong',
+            });
+            setTimeout(() => setToast(null), 2000);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     /* ---------------- Render ---------------- */
     if (checkingOnboarding) {
         return (
@@ -136,9 +184,28 @@ export default function WorkoutForm() {
     }
 
     return (
-        <div className="p-5 space-y-6 flex flex-col h-screen pt-10">
+        <div className="p-5 space-y-4 flex flex-col h-screen pt-5">
             {/* Toast */}
             {toast && <Toast type={toast.type} text={toast.message} />}
+
+            <div className="flex items-center justify-between">
+                {/* Back */}
+                <button
+                    title='back'
+                    onClick={() => navigate(-1)}
+                    className="flex items-center gap-1 text-[#0F172A] text-sm font-medium"
+                >
+                    <HiArrowLeft size={18} />
+                </button>
+
+                {/* Skip */}
+                <button
+                    onClick={handleSkip}
+                    className="border border-[#0F172A] rounded-full px-3 py-0.5 text-xs text-[#0F172A]"
+                >
+                    Skip
+                </button>
+            </div>
 
             <div className="flex-1 overflow-y-auto space-y-6">
                 {/* Question 1 */}
@@ -157,17 +224,17 @@ export default function WorkoutForm() {
 
                 {/* Question 2 */}
                 <div>
-                    <p className="mb-2 font-semibold text-black text-[22px]">
+                    <p className="mb-3 font-semibold text-black text-[22px]">
                         How many hours a day do you workout?
                     </p>
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="flex flex-wrap gap-3">
                         {dailyOptions.map((option) => (
                             <div
                                 key={option.value}
                                 onClick={() => setDailyWorkout(option.value)}
-                                className={`cursor-pointer p-1.5 text-[10px] text-center font-normal text-nowrap rounded-full border ${dailyWorkout === option.value
+                                className={`cursor-pointer p-1.5 text-[12px] text-center font-medium text-nowrap rounded-full border ${dailyWorkout === option.value
                                     ? 'bg-[#DBEAFE] text-[#2563EB] border-[#2563EB]'
-                                    : 'border-[#475569] bg-white text-[#475569]'
+                                    : 'border-[#CBD5E1] bg-white text-[#475569]'
                                     }`}
                             >
                                 {option.name}
@@ -178,17 +245,17 @@ export default function WorkoutForm() {
 
                 {/* Question 3 */}
                 <div>
-                    <p className="mb-2 font-semibold text-black text-[22px]">
+                    <p className="mb-3 font-semibold text-black text-[22px]">
                         How often do you usually work out in a week?
                     </p>
-                    <div className="grid grid-cols-4 gap-2">
+                    <div className="flex flex-wrap gap-3">
                         {weeklyOptions.map((option) => (
                             <div
                                 key={option.value}
                                 onClick={() => setWeeklyWorkout(option.value)}
-                                className={`cursor-pointer p-1.5 text-[10px] text-center font-normal rounded-full border ${weeklyWorkout === option.value
+                                className={`cursor-pointer p-1.5 px-2 text-[12px] text-center font-medium rounded-full border ${weeklyWorkout === option.value
                                     ? 'bg-[#DBEAFE] text-[#2563EB] border-[#2563EB]'
-                                    : 'border-[#475569] bg-white text-[#475569]'
+                                    : 'border-[#CBD5E1] bg-white text-[#475569]'
                                     }`}
                             >
                                 {option.name}

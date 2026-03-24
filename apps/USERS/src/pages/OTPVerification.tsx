@@ -275,7 +275,7 @@ export default function OTPVerification() {
                     </p>
 
 
-                    <div className="mt-6 font-semibold">
+                    <div className="mt-7 font-semibold text-center">
                         {Math.floor(time / 60)
                             .toString()
                             .padStart(2, "0")}
@@ -295,17 +295,17 @@ export default function OTPVerification() {
                                 onChange={(e) => handleChange(e.target.value, index)}
                                 onKeyDown={(e) => handleKeyDown(e, index)}
                                 onPaste={handlePaste}
-                                className={`sm:w-14 w-10 sm:h-14 h-10 text-3xl font-bold text-center border-2 rounded-md focus:outline-none ${borderColor}`}
+                                className={`sm:w-14 w-10 sm:h-14 h-10 text-3xl font-bold border-[#CBD5E1] text-center border-2 rounded-md focus:outline-none ${borderColor}`}
                             />
                         ))}
                     </div>
 
-                    <p className="text-sm mt-6 text-center">
+                    <p className="text-sm mt-7 text-center text-[#0F172A]">
                         Didn’t receive the OTP?
                         <button
                             disabled={time > 0}
                             onClick={handleResend}
-                            className={`ml-1 font-medium ${time > 0 ? "text-gray-400 cursor-not-allowed" : "text-blue-600"
+                            className={`ml-1 font-medium ${time > 0 ? "text-[#94A3B8] cursor-not-allowed" : "text-[#2563EB]"
                                 }`}
                         >
                             Resend

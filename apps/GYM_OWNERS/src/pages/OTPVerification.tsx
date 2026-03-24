@@ -268,7 +268,7 @@ export default function OTPVerification() {
                         </span>
                     </p>
 
-                    <div className="mt-6 font-semibold">
+                    <div className="mt-7 font-semibold text-center">
                         {Math.floor(time / 60)
                             .toString()
                             .padStart(2, "0")}
@@ -288,7 +288,7 @@ export default function OTPVerification() {
                                 onChange={(e) => handleChange(e.target.value, index)}
                                 onKeyDown={(e) => handleKeyDown(e, index)}
                                 onPaste={handlePaste}
-                                className={`sm:w-14 w-10 sm:h-14 h-10 text-3xl font-bold text-center border-2 rounded-md focus:outline-none ${borderColor}`}
+                                className={`sm:w-14 w-10 sm:h-14 h-10 text-3xl border-[#CBD5E1] font-bold text-center border-2 rounded-md focus:outline-none ${borderColor}`}
                             />
                         ))}
                     </div>
