@@ -172,7 +172,7 @@ const EditProfile = () => {
 
                 <div className='border border-[#DBEAFE] py-6 px-4 rounded-md space-y-4'>
                     <div className="flex items-center justify-between">
-                        <div className="space-y-3">
+                        <div className="space-y-2">
                             <p className="text-[#0F172A] font-semibold text-base">{formData?.full_name || "User"}</p>
                             <p className="text-[#0F172A] font-normal text-sm">Total Fitness Hours : {formData.total_fitness_hours || 0}</p>
                         </div>
@@ -217,7 +217,7 @@ const EditProfile = () => {
 
                     <div className="border border-[#F2F2F2] border-dotted"></div>
 
-                    <div className='space-y-2'>
+                    <div className='space-y-2.5'>
                         <p className="text-[#0F172A] font-semibold">Account Details</p>
 
                         <div className='space-y-2 pt-2'>
@@ -228,7 +228,7 @@ const EditProfile = () => {
                                 value={formData.full_name}
                                 onChange={handleChange}
                                 title='fullname'
-                                className="w-full border border-[#E2E8F0] h-[50px] rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full border border-[#475569] h-[50px] rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                         </div>
 
@@ -241,7 +241,7 @@ const EditProfile = () => {
                                 onChange={handleChange}
                                 title='email'
                                 required
-                                className="w-full border border-[#E2E8F0] h-[50px] rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full border border-[#475569] h-[50px] rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                         </div>
 
@@ -254,7 +254,7 @@ const EditProfile = () => {
                                 onChange={handleChange}
                                 title='phone'
                                 required
-                                className="w-full border border-[#E2E8F0] h-[50px] rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full border border-[#475569] h-[50px] rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                         </div>
                     </div>

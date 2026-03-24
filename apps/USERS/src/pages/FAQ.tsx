@@ -198,7 +198,7 @@ export default function FAQ() {
     return (
         <div className="min-h-screen bg-gray-50 px-4 py-6">
             {/* Header */}
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                     <IoArrowBack
                         size={22}
@@ -225,7 +225,7 @@ export default function FAQ() {
                                 setActiveCategory(category);
                                 setOpenIndex(0);
                             }}
-                            className={`px-4 py-2 rounded-lg border text-sm whitespace-nowrap transition 
+                            className={`px-4 py-2 rounded-lg border font-medium text-xs whitespace-nowrap transition 
                                 ${activeCategory === category
                                     ? "bg-[#DBEAFE] text-[#2563EB] border-[#2563EB]"
                                     : "bg-white text-[#0F172A] border-[#CBD5E1]"

@@ -558,17 +558,17 @@ Time: ${selectedHours?.label}
 
 
                             {/* ===== Gym Summary Card ===== */}
-                            <div className="bg-white rounded border flex gap-1 min-h-[130px]">
+                            <div className="bg-white rounded border flex gap-1 h-[143px]">
                                 <img
                                     src={gym?.images[0]?.image}
                                     alt={gym?.name}
                                     className="w-[85px] min-h-full rounded-tl rounded-bl object-cover"
                                 />
 
-                                <div className="flex-1 p-3">
+                                <div className="flex-1 p-2">
                                     <h2 className="font-semibold">{gym?.name}</h2>
 
-                                    <div className="flex items-center text-xs text-gray-500 gap-1 mt-2 flex-wrap">
+                                    <div className="flex items-center text-xs text-[#475569] gap-1 mt-2 flex-wrap">
                                         <HiLocationMarker size={12} />
                                         <span>{gym?.distance} {gym?.area}</span>
                                         <span>•</span>
@@ -582,7 +582,7 @@ Time: ${selectedHours?.label}
                                     </div>
 
                                     <div className="flex items-center gap-2 mt-4">
-                                        <p className="font-semibold">₹{Number(gym?.hourly_rate)}/Hr</p>
+                                        <p className="font-semibold text-[#0F172A]">₹{Number(gym?.hourly_rate)}/Hr</p>
                                         <span className="text-xs bg-[#22C55E] text-white px-2 py-0.5 rounded-full">
                                             Confirmed
                                         </span>
@@ -618,14 +618,14 @@ Time: ${selectedHours?.label}
                                         <div className="space-y-3">
                                             <h3 className="font-semibold">Selected Pass</h3>
 
-                                            <div className="flex items-center gap-1 text-sm text-gray-600 mt-2">
+                                            <div className="flex items-center gap-1 text-sm text-[#0F172A] mt-2">
                                                 <HiOutlineCalendar size={14} />
                                                 <span>{formattedShortDate}</span>
                                                 <span>•</span>
                                                 <span>{selectedHours?.label}</span>
                                             </div>
 
-                                            <div className="flex items-center gap-2 text-sm text-gray-600 mt-2">
+                                            <div className="flex items-center gap-2 text-sm text-[#0F172A] mt-2">
                                                 <PiIdentificationCardBold size={14} />
                                                 <span>Enter anytime during the day</span>
                                             </div>
@@ -648,7 +648,7 @@ Time: ${selectedHours?.label}
                                 <div>
                                     <h4 className="font-medium">Gym timings</h4>
 
-                                    <div className="flex items-center gap-2 text-sm text-gray-600 mt-2">
+                                    <div className="flex items-center gap-2 text-sm text-[#0F172A] mt-2">
                                         <IoTimeOutline size={14} />
                                         <span>{formatTime12Hour(gym?.open_time)} – {formatTime12Hour(gym?.close_time)} </span>
                                     </div>
@@ -683,49 +683,49 @@ Time: ${selectedHours?.label}
                             </div>
 
                             {/* ===== Price Breakdown ===== */}
-                            <div className="space-y-2 text-sm text-gray-700 mt-2">
-                                <h3 className="font-semibold text-gray-800 mb-2">
+                            <div className="space-y-2 text-sm text-[#6A6A6A] mt-2">
+                                <h3 className="text-black text-sm mb-2">
                                     Price Breakdown
                                 </h3>
 
                                 <div className="flex justify-between">
                                     {/* <span>{previewData?.duration ?? "N/A"} Hours</span> */}
                                     <span>{selectedHours?.label}</span>
-                                    <span>Rs. {previewData?.base_price ?? "N/A"}</span>
+                                    <span className="font-medium text-[#0F172A]">Rs. {previewData?.base_price ?? "N/A"}</span>
                                 </div>
 
                                 <div className="flex justify-between">
                                     <span>Platform Fee</span>
-                                    <span>Rs. {previewData?.platform_fee ?? "N/A"}</span>
+                                    <span className="font-medium text-[#0F172A]">Rs. {previewData?.platform_fee ?? "N/A"}</span>
                                 </div>
 
                                 <div className="flex justify-between">
                                     <span>GST on Platform Fee</span>
-                                    <span>Rs. {previewData?.gst_fee ?? "N/A"}</span>
+                                    <span className="font-medium text-[#0F172A]">Rs. {previewData?.gst_fee ?? "N/A"}</span>
                                 </div>
 
                                 <hr className="border-dashed my-2" />
 
-                                <div className="flex justify-between font-semibold text-base">
+                                <div className="flex justify-between text-[#0F172A] text-sm">
                                     <span>Total</span>
-                                    <span>Rs. {previewData?.total_payable ?? "N/A"}</span>
+                                    <span className="text-sm text-black">Rs. {previewData?.total_payable ?? "N/A"}</span>
                                 </div>
                             </div>
                         </div>
 
                         {/* ===== Sticky Bottom Pay Bar ===== */}
                         <div id="share-bottom-bar" className="fixed bottom-0 left-0 right-0 bg-white">
-                            <div className="bg-blue-50 text-blue-700 text-sm px-4 py-3 font-medium text-center">
+                            <div className="bg-[#DBEAFE] text-[#2563EB] text-sm px-4 py-3 font-medium text-center">
                                 Last entry for selected duration: {lastEntryTime}
                             </div>
 
                             <div className="flex justify-between items-center px-4 py-5">
                                 <div>
-                                    <p className="text-xs text-[#475569] font-medium mb-2">
+                                    <p className="text-xs text-[#475569] font-medium mb-1">
                                         Valid on {formattedLongDate}
                                     </p>
 
-                                    <p className="text-xl font-bold">
+                                    <p className="text-[22px] font-semibold">
                                         ₹{previewData?.total_payable ?? "N/A"}/{selectedHours?.label}
                                     </p>
                                 </div>
@@ -733,7 +733,7 @@ Time: ${selectedHours?.label}
                                 <button
                                     onClick={handlePayment}
                                     disabled={payLoading}
-                                    className="bg-blue-600 text-white px-6 py-3 w-[163px] text-xs rounded-md font-medium flex items-center justify-center gap-2 disabled:opacity-60"
+                                    className="bg-[#2563EB] text-white px-6 py-4 w-[163px] text-xs rounded-md font-medium flex items-center justify-center gap-2 disabled:opacity-60"
                                 >
                                     {payLoading ? (
                                         <>

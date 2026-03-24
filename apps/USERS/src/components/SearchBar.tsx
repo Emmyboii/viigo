@@ -12,9 +12,9 @@ export default function SearchBar() {
           state: { openSearch: true, from: location.pathname },
         })
       }
-      className="bg-white border rounded-xl flex items-center px-3 py-4 cursor-pointer"
+      className="bg-white border rounded-lg flex items-center px-3 py-4 cursor-pointer"
     >
-      <IoSearchSharp className="text-[#475569] mr-2 text-2xl" />
+      <IoSearchSharp className="text-[#475569] mr-2 text-xl" />
       <input
         type="text"
         placeholder="Search for Hourly Gyms"

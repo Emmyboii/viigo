@@ -299,7 +299,7 @@ const PlanYourWorkout = () => {
                         <IoArrowBack size={20} />
                     </button>
 
-                    <span className="font-semibold text-lg">Plan Your Workout</span>
+                    <span className="font-semibold text-lg text-[#0F172A]">Plan Your Workout</span>
                 </div>
             </div>
 
@@ -318,7 +318,7 @@ const PlanYourWorkout = () => {
                     <div className="p-3">
                         <h2 className="font-semibold">{gym?.name}</h2>
 
-                        <div className="flex items-center text-xs text-gray-500 gap-1 mt-2 flex-wrap">
+                        <div className="flex items-center text-xs text-[#475569] gap-1 mt-2 flex-wrap">
                             <HiLocationMarker size={12} />
                             <span>{gym?.distance} {gym?.area}</span>
                             <span>•</span>
@@ -483,11 +483,11 @@ const PlanYourWorkout = () => {
                         </p> */}
 
                         <div className="space-y-2">
-                            <p className="text-xs text-[#475569]">
+                            <p className="text-xs text-[#475569] font-medium">
                                 Gym timings : {formatTime12Hour(gym?.open_time)} - {formatTime12Hour(gym?.close_time)}
                             </p>
 
-                            <p className="text-xl font-bold">
+                            <p className="text-[22px] font-semibold">
                                 ₹{totalWithHr}{selectedHours?.label ? `/${editSelectedHr}` : ""}
                             </p>
                         </div>
@@ -495,7 +495,7 @@ const PlanYourWorkout = () => {
                         <button
                             disabled={allHoursDisabled}
                             onClick={handleApply}
-                            className={`w-[150px] text-white px-6 py-3 rounded-md font-medium ${allHoursDisabled ? "bg-[#a6a7a8] cursor-not-allowed" : "bg-blue-600 cursor-pointer"}`}
+                            className={`w-[146px] text-white px-6 py-3 rounded-md font-semibold text-sm ${allHoursDisabled ? "bg-[#a6a7a8] cursor-not-allowed" : "bg-blue-600 cursor-pointer"}`}
                         >
                             Apply
                         </button>

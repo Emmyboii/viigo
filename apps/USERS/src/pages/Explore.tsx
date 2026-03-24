@@ -260,7 +260,7 @@ export default function Explore() {
                     <button
                         title="filter"
                         onClick={() => setShowFilter(true)}
-                        className="absolute top-6 right-4 bg-white w-12 h-12 rounded-full text-[#94A3B8] border border-[#94A3B8] shadow-md flex items-center justify-center"
+                        className="absolute top-6 right-4 bg-[#F1F5F9] w-12 h-12 rounded-full text-[#94A3B8] border border-[#CBD5E1] shadow-md flex items-center justify-center"
                     >
                         <HiFilter />
                     </button>
@@ -281,7 +281,7 @@ export default function Explore() {
                                     <IoArrowBack size={20} />
                                 </button>
 
-                                <span className="font-medium">Explore Gym</span>
+                                <span className="font-semibold text-[#0F172A] text-lg">Explore Gym</span>
                             </div>
 
                             <button onClick={handleShare} title="share" className="p-1">
@@ -289,10 +289,10 @@ export default function Explore() {
                             </button>
                         </div>
 
-                        <div className="pt-12"></div>
+                        <div className="pt-11"></div>
 
                         {/* Search + Filters */}
-                        <div className="flex items-center gap-3 mb-2">
+                        <div className="flex items-center gap-3 mb-">
                             <div
                                 onClick={() => setShowSearch(true)}
                                 className="flex items-center flex-1 border rounded-xl px-3 py-3 cursor-pointer"

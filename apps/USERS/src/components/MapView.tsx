@@ -1,4 +1,4 @@
-import { GoogleMap, OverlayView, useJsApiLoader} from "@react-google-maps/api";
+import { GoogleMap, OverlayView, useJsApiLoader } from "@react-google-maps/api";
 import { useEffect, useState } from "react";
 import { useAppContext } from "../context/AppContext";
 import { HiLocationMarker } from "react-icons/hi";
@@ -152,17 +152,14 @@ export default function MapView({ selectedGymFromDetails }: any) {
                                 onClick={() => setSelectedGym(gym)}
                                 className={`
                                     min-w-[280px] bg-white rounded shadow-xl
-                                    transition-all duration-200 cursor-pointer flex gap-2 justify-between items-center
-                                    ${selectedGym?.id === gym.id
-                                        ? "ring-2 ring-blue-600"
-                                        : ""
-                                    }
+                                    transition-all duration-200 cursor-pointer flex gap-3 items-center
+                                    ${selectedGym?.id === gym.id ? "ring-2 ring-blue-600" : ""}
                                 `}
                             >
                                 <img
                                     src={gym?.images[0]?.image}
                                     alt={gym.name}
-                                    className="w-[71px] h-full object-cover rounded-tl rounded-bl"
+                                    className="w-[71px] h-[106px] object-cover rounded-tl rounded-bl"
                                 />
 
                                 <div className="p-2 pl-0">
@@ -170,7 +167,7 @@ export default function MapView({ selectedGymFromDetails }: any) {
                                         {gym.name}
                                     </h3>
 
-                                    <p className="text-sm text-gray-500 flex items-center gap-1 mt-1">
+                                    <p className="text-sm text-gray-500 flex items-center gap-1 mt-2">
                                         <HiLocationMarker size={16} className="mt-" />
                                         {gym.distance} • {gym.open_status}
                                     </p>

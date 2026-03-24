@@ -102,7 +102,7 @@ export default function FilterModal({ filters, onClose, onApply }: Props) {
             >
 
                 {/* Header */}
-                <div className="flex items-center justify-between px-4 py-4 bg-white border-b">
+                <div className="flex items-center justify-between px-4 py-2.5 bg-white border-b">
                     <div className="flex items-center gap-3">
                         <IoArrowBack
                             size={20}
@@ -114,7 +114,7 @@ export default function FilterModal({ filters, onClose, onApply }: Props) {
 
                     <button
                         onClick={handleReset}
-                        className="text-blue-600 text-sm font-medium"
+                        className="text-[#2563EB] text-xs font-medium"
                     >
                         Reset All
                     </button>
@@ -137,9 +137,9 @@ export default function FilterModal({ filters, onClose, onApply }: Props) {
                                 <button
                                     key={item.value}
                                     onClick={() => setSort(item.value)}
-                                    className={`px-4 py-2 rounded-full text-sm border transition ${sort === item.value
-                                        ? "bg-blue-100 border-blue-500 text-blue-600"
-                                        : "bg-gray-100 border-gray-200 text-gray-700"
+                                    className={`px-4 py-2 rounded-lg font-medium text-xs border transition ${sort === item.value
+                                        ? "bg-[#DBEAFE] border-[#2563EB] text-[#2563EB]"
+                                        : "border-gray-200 text-gray-700"
                                         }`}
                                 >
                                     {item.label}
@@ -168,7 +168,7 @@ export default function FilterModal({ filters, onClose, onApply }: Props) {
                             step={0.5}
                             value={radius}
                             onChange={(e) => setRadius(Number(e.target.value))}
-                            className="w-full h-1 accent-blue-600"
+                            className="w-full h-[3px] accent-blue-600"
                         />
                     </div>
 
@@ -184,9 +184,9 @@ export default function FilterModal({ filters, onClose, onApply }: Props) {
                                 <button
                                     key={p.value}
                                     onClick={() => setPrice(p.value)}
-                                    className={`px-4 py-2 rounded-full text-sm border transition ${price === p.value
-                                        ? "bg-blue-100 border-blue-500 text-blue-600"
-                                        : "bg-gray-100 border-gray-200 text-gray-700"
+                                    className={`px-4 py-2 rounded-lg font-medium text-xs border transition ${price === p.value
+                                        ? "bg-[#DBEAFE] border-[#2563EB] text-[#2563EB]"
+                                        : "border-gray-200 text-gray-700"
                                         }`}
                                 >
                                     {p.label}
@@ -204,8 +204,8 @@ export default function FilterModal({ filters, onClose, onApply }: Props) {
                                     key={item.id}
                                     onClick={() => toggleAmenity(item.name)}
                                     className={`px-4 py-2 rounded-full text-sm border flex items-center gap-1 transition ${amenitiesSelected.includes(item.name)
-                                        ? "bg-blue-100 border-blue-500 text-blue-600"
-                                        : "bg-gray-100 border-gray-200 text-gray-700"
+                                        ? "bg-[#DBEAFE] border-[#2563EB] text-[#2563EB]"
+                                        : "bg-[#F1F5F9] border-gray-200 text-[#0F172A]"
                                         }`}
                                 >
                                     {/* Optional icon */}
@@ -218,7 +218,7 @@ export default function FilterModal({ filters, onClose, onApply }: Props) {
                 </div>
 
                 {/* Bottom Section */}
-                <div className="fixed bottom-0 left-0 right-0 bg-white px-4 pt-3 pb-6 border-t">
+                <div className="fixed bottom-0 left-0 right-0 bg-white px-4 pt-3 pb-3 border-t">
                     <p className="text-center text-sm text-gray-500 mb-3">
                         {filtersApplied} Filters applied
                     </p>

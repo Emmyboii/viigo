@@ -172,6 +172,18 @@ const Bookings = () => {
         fetchBookings();
     }, []);
 
+    const formatLocation = (address: string) => {
+        if (!address) return "";
+
+        const parts = address.split(",").map(p => p.trim());
+
+        const cleaned = parts.map(p =>
+            p.replace(/\d+$/, "").trim() // remove trailing numbers
+        );
+
+        return cleaned.slice(-2).join(", ");
+    };
+
     const filteredBookings = bookings.filter((b) => {
 
         if (b.status === "PENDING") return false;
@@ -240,26 +252,26 @@ const Bookings = () => {
 
                                         <div className="flex flex-col justify-between w-full p-3 pl-0">
 
-                                            <div className="space-y-1.5">
+                                            <div className="space-y-[7px]">
                                                 <h3 className="font-normal">{gym.gym_name}</h3>
-                                                <p className="text-xs text-gray-500 flex items-center gap-1">
-                                                    <HiLocationMarker className="text-[#475569] text-xl" />
-                                                    {gym.gym_location}
+                                                <p className="text-xs text-[#475569] flex items-center gap-1">
+                                                    <HiLocationMarker className="text-[#475569] text-base" />
+                                                    {formatLocation(gym.gym_location)}
                                                 </p>
 
-                                                <p className="text-xs text-gray-500 flex items-center gap-1">
+                                                <p className="text-xs text-[#475569] flex items-center gap-1">
                                                     <CiCalendar className="text-[#475569] text-lg" />
                                                     Date and Time : {gym.display_date}
                                                 </p>
 
-                                                <p className="text-xs text-gray-500 flex items-center gap-1">
+                                                <p className="text-xs text-[#475569] flex items-center gap-1">
                                                     <FiClock className="text-[#475569] text-lg" />
                                                     Time : {gym.display_time}
                                                 </p>
                                             </div>
 
                                             <div className="flex flex-co justify-between items-center mt-4 gap-2">
-                                                <span className="font-normal text-xs text-nowrap">{gym.price_tag}</span>
+                                                <span className="font-normal text-xs text-nowrap text-[#0F172A]">{gym.price_tag}</span>
                                                 <button className="bg-white rounded-full border border-[#CBD5E1] text-center text-[#475569] text-[10px] px-2 py-2">
                                                     Booking ID : #{gym.booking_reference}
                                                 </button>

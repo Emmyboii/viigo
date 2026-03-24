@@ -244,8 +244,8 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
 
                 <div className="relative bg-gradient-to-b from-blue-600 to-blue-500 text-white rounded-2xl p-4 shadow-xl">
 
-                    <img src={halfCircle} alt="Half Circle" className="absolute bottom-28 left-[-13px] w-[48px] h-[55px]" />
-                    <img src={halfCircle} alt="Half Circle" className="absolute bottom-28 right-[-13px] rotate-180 w-[48px] h-[55px]" />
+                    <img src={halfCircle} alt="Half Circle" className="absolute bottom-[200px] left-[-13px] w-[48px] h-[55px]" />
+                    <img src={halfCircle} alt="Half Circle" className="absolute bottom-[200px] right-[-13px] rotate-180 w-[48px] h-[55px]" />
 
                     {/* Gym Header */}
                     <div className="flex gap-3">
@@ -396,7 +396,7 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
                     Add To Calendar
                 </button> */}
 
-                <button onClick={handleShare} className="flex-1 bg-blue-100 text-[#2563EB] py-2 px-2 rounded-full text-xs flex items-center justify-center gap-2">
+                <button onClick={handleShare} className="flex-1 bg-blue-100 text-[#2563EB] w-[150px] py-2 px-2 rounded-full text-xs flex items-center justify-center gap-2">
                     <HiShare size={16} />
                     Share Pass
                 </button>

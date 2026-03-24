@@ -1,7 +1,6 @@
 import FacilityTag from "./FacilityTag";
 // import { FaDumbbell, FaShower } from "react-icons/fa";
 import type { Gym } from "./types/gym";
-import { useState } from "react";
 import ImageCarousel from "./ImageCarousel";
 import { useNavigate } from "react-router";
 import { GoDotFill } from "react-icons/go";
@@ -15,11 +14,14 @@ export default function GymCard({ gym }: GymCardProps) {
 
     const navigate = useNavigate();
 
-    const [showAll, setShowAll] = useState(false);
+    // const [showAll, setShowAll] = useState(false);
 
-    const visibleAmenities = showAll
-        ? gym.amenities
-        : gym.amenities.slice(0, 2);
+    // const visibleAmenities = showAll
+    //     ? gym.amenities
+    //     : gym.amenities.slice(0, 2);
+
+    const visibleAmenities =
+        gym.amenities.slice(0, 2);
 
     return (
         <div className="bg-white rounded-md shadow-md overflow-hidden h-[320px] flex flex-col">
@@ -28,9 +30,9 @@ export default function GymCard({ gym }: GymCardProps) {
             </div>
 
             <div className="p-4 flex flex-col flex-1">
-                <h3 className="font-semibold">{gym?.name}</h3>
+                <h3 className="font-semibold text-[#0F172A]">{gym?.name}</h3>
 
-                <p className="text-xs text-gray-500 mt-1 flex items-center flex-wrap gap-1">
+                <p className="text-[11px] text-[#475569] font-medium mt-1 flex items-center flex-wrap gap-1">
                     <HiLocationMarker className="text-[#475569] text-sm" />
                     {gym?.distance}, {gym?.area} <GoDotFill /> {gym?.open_status}
                 </p>
@@ -40,23 +42,23 @@ export default function GymCard({ gym }: GymCardProps) {
                         <FacilityTag key={index} amenity={amenity} />
                     ))}
 
-                    {!showAll && gym?.amenities.length > 2 && (
+                    {/* {!showAll && gym?.amenities.length > 2 && (
                         <div
                             onClick={() => setShowAll(true)}
                             className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-md text-xs cursor-pointer"
                         >
                             <span>+ More</span>
                         </div>
-                    )}
+                    )} */}
                 </div>
 
                 <div className="flex justify-between items-center mt-auto pt-4">
-                    <span className="font-semibold text-lg">₹{gym?.hourly_rate}/Hr</span>
+                    <span className="font-semibold text-lg text-[#0F172A]">₹{gym?.hourly_rate}/Hr</span>
                     <button onClick={() => {
                         navigate(`/gyms/${gym?.slug}`)
                         window.scrollTo(0, 0);
                     }}
-                        className="text-blue-600 text-sm font-medium"
+                        className="text-[#2563EB] text-sm font-semibold"
                     >
                         View Details
                     </button>

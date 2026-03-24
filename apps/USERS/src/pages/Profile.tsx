@@ -76,7 +76,7 @@ const Profile = ({ user }: UserProps) => {
 
                 <div className="border border-[#F2F2F2] border-dotted"></div>
 
-                <div className='space-y-2'>
+                <div className='space-y-3'>
                     <p className="text-[#0F172A] font-semibold">Help</p>
                     <div onClick={() => navigate('/faq')} className="flex items-center gap-1">
                         <FaClock size={16} />

@@ -295,7 +295,7 @@ export default function CancelBooking() {
 
             {/* Reason */}
             <div className="mt-8">
-                <h3 className="text-sm font-semibold mb-3">
+                <h3 className="text-base font-semibold mb-3">
                     Reason for Cancellation
                 </h3>
 
@@ -310,18 +310,18 @@ export default function CancelBooking() {
                                     setSelectedReason(reason);
                                     setError("");
                                 }}
-                                className={`w-full flex items-center gap-3 p-3 rounded-lg border transition
+                                className={`w-full flex items-center gap-3 p-3 rounded border transition
                                         ${active
-                                        ? "border-blue-500 bg-blue-50"
-                                        : "border-gray-300 bg-white"
+                                        ? "border-[#2563EB] bg-[#DBEAFE]"
+                                        : "border-[#E2E8F0] bg-white"
                                     }
                                     `}
                             >
                                 <div
                                     className={`w-4 h-4 rounded-full border flex items-center justify-center
                                         ${active
-                                            ? "border-blue-500"
-                                            : "border-gray-400"
+                                            ? "border-[#2563EB]"
+                                            : "border-[#E2E8F0]"
                                         }
                                     `}
                                 >
@@ -332,8 +332,8 @@ export default function CancelBooking() {
 
                                 <span
                                     className={`text-sm ${active
-                                        ? "text-blue-600"
-                                        : "text-gray-700"
+                                        ? "text-[#0F172A]"
+                                        : "text-[#0F172A]"
                                         }`}
                                 >
                                     {reason}
@@ -351,12 +351,12 @@ export default function CancelBooking() {
             {/* Bottom */}
             <div className="fixed bottom-0 left-0 w-full bg-white p-4 border-t border-[#F1F5F9]">
                 <div className="max-w-md mx-auto flex items-center justify-center gap-4">
-                    <button onClick={() => navigate(-1)} className="text-blue-600 text-sm font-medium">
+                    <button onClick={() => navigate(-1)} className="text-[#2563EB] text-sm font-semibold">
                         Don’t Cancel
                     </button>
 
                     <button
-                        className="w-[209px] bg-red-500 text-white py-3 rounded-md font-semibold flex justify-center items-center gap-2"
+                        className="w-[209px] bg-[#F43F5E] text-white py-3 rounded-md text-sm font-semibold flex justify-center items-center gap-2"
                         onClick={handleCancel}
                         disabled={isCancelling}
                     >

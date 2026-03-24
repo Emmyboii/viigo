@@ -23,17 +23,17 @@ export default function SortModal({ onClose, onSelect, currentSort = "" }: Props
         >
 
             <div
-                className="bg-white w-full rounded-t-2xl p-4"
+                className="bg-white w-full rounded-t-2xl p-4 pt-6 animate-slideUp"
                 onClick={(e) => e.stopPropagation()} // Prevent closing when clicking modal
             >
                 {/* Header */}
-                <div className="flex justify-between items-center mb-4">
+                <div className="flex justify-between items-center mb-3">
                     <h2 className="text-lg font-semibold">Sort By</h2>
                     <IoClose size={22} onClick={onClose} className="cursor-pointer" />
                 </div>
 
                 {/* Options */}
-                <div className="space-y-3">
+                <div className="space-y-">
                     {options.map((opt) => (
                         <div
                             key={opt.value}
@@ -41,14 +41,14 @@ export default function SortModal({ onClose, onSelect, currentSort = "" }: Props
                                 setSelected(opt.value);
                                 onSelect(opt.value, opt.label);
                             }}
-                            className="flex items-center gap-2 cursor-pointer"
+                            className="flex items-center gap-2 cursor-pointer py-3 border-b-[0.05px] last:border-b-0 border-[#94A3B8"
                         >
                             <div className="w-4 h-4 rounded-full border border-gray-400 flex items-center justify-center">
                                 {selected === opt.value && (
                                     <div className="w-2 h-2 bg-blue-500 rounded-full" />
                                 )}
                             </div>
-                            <p className="text-sm">{opt.label}</p>
+                            <p className="text-xs text-[#0F172A]">{opt.label}</p>
                         </div>
                     ))}
                 </div>

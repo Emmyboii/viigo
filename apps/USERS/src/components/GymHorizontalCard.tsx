@@ -28,9 +28,9 @@ export default function GymHorizontalCard({ gym }: GymHorizontalCardProps) {
 
             <div className="flex flex-col justify-between w-full p-3">
                 <div>
-                    <h3 className="font-medium">{gym.name}</h3>
-                    <p className="text-xs text-gray-500 mt-1 flex items-center gap-0.5 flex-wrap">
-                        <HiLocationMarker className="text-[#475569] text-xs" />
+                    <h3 className="font-semibold text-[#0F172A]">{gym.name}</h3>
+                    <p className="text-[11px] text-gray-500 mt-1.5 flex items-center gap-0.5 flex-wrap">
+                        <HiLocationMarker className="text-[#475569] text-[11px]" />
                         {gym.distance}, {gym?.area} <GoDotFill /> {gym.open_status}
                     </p>
 
@@ -51,8 +51,8 @@ export default function GymHorizontalCard({ gym }: GymHorizontalCardProps) {
                 </div>
 
                 <div className="flex justify-between items-center mt-4">
-                    <span className="font-semibold">₹{Number(gym.hourly_rate)}/Hr</span>
-                    <button onClick={() => navigate(`/gyms/${gym.slug}`)} className="bg-blue-600 text-white text-sm px-4 py-2 rounded w-[124px]">
+                    <span className="font-semibold text-[#0F172A]">₹{Number(gym.hourly_rate)}/Hr</span>
+                    <button onClick={() => navigate(`/gyms/${gym.slug}`)} className="bg-[#2563EB] text-white text-sm font-semibold px-4 py-2 rounded w-[121px]">
                         Book Now
                     </button>
                 </div>

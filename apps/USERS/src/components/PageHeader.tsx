@@ -23,7 +23,7 @@ const PageHeader = ({ text, onShare }: PageHeaderProps) => {
                     <IoArrowBack size={20} />
                 </button>
 
-                <span className="font-semibold text-lg">{text}</span>
+                <span className="font-semibold text-[#0F172A] text-lg">{text}</span>
             </div>
 
             <button

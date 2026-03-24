@@ -23,7 +23,7 @@ export function Chip({ label, onClick, icon, active }: ChipProps) {
     return (
         <button
             onClick={onClick}
-            className={`px-3 py-1.5 rounded-lg text-[13px] flex items-center gap-2 justify-center border w-full text-nowrap transition
+            className={`px-3 py-1.5 rounded-lg text-[13px] flex font-medium items-center gap-2 justify-center border w-full text-nowrap transition
                   ${active && location.pathname === '/bookings'
                     ? "bg-[#DBEAFE] border-[#2563EB] text-[#2563EB]"
                     : "bg-[#F1F5F9] border-[#CBD5E1] text-[#0F172A]"}
@@ -44,7 +44,7 @@ interface FilterChipsProps {
 export default function FilterChips({ items, activeId, onChange }: FilterChipsProps) {
 
     return (
-        <div className="flex gap-2 w-full mt-4 overflow-x-auto no-scrollbar">
+        <div className="flex gap-2 w-full mt-5 overflow-x-auto no-scrollbar">
             {items.map((item) => (
                 <Chip
                     key={item.id}

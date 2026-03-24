@@ -1,13 +1,13 @@
 import { useNavigate, useParams } from "react-router-dom";
 import BottomSheet from "../components/BottomSheet";
 import ImageCarousel from "../components/ImageCarousel";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type JSX } from "react";
 import logoUrl from "../assets/icon2.png";
 import {
     IoInformationCircleOutline,
     IoWarningOutline,
 } from "react-icons/io5";
-import { HiLocationMarker, HiOutlineLocationMarker } from "react-icons/hi";
+import { HiLocationMarker, HiOutlineLocationMarker, HiUserAdd } from "react-icons/hi";
 // import { FaRegClock } from "react-icons/fa6";
 // import { PiUserGearFill } from "react-icons/pi";
 import Footer from "../components/Footer";
@@ -18,6 +18,7 @@ import PageHeader from "../components/PageHeader";
 import { useAppContext, type GymCard } from "../context/AppContext";
 import type { Gym } from "../components/types/gym";
 import html2canvas from "html2canvas";
+import { FaRegClock } from "react-icons/fa";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -168,10 +169,12 @@ export default function GymDetails() {
         return `${hour}:${minute} ${ampm}`;
     }
 
-    // const tagIcons: Record<string, JSX.Element> = {
-    //     "Hourly Access": <FaRegClock size={12} />,
-    //     "Beginner Friendly": <PiUserGearFill size={12} />,
-    // };
+    const tags = ["Hourly Access", "Beginner Friendly"];
+
+    const tagIcons: Record<string, JSX.Element> = {
+        "Hourly Access": <FaRegClock size={14} />,
+        "Beginner Friendly": <HiUserAdd size={14} />,
+    };
 
     useEffect(() => {
         const fetchGymById = async () => {
@@ -248,69 +251,6 @@ export default function GymDetails() {
         }
     }, [amenitiesOpen, rulesOpen, priceBreakdownOpen, open])
 
-    // const storedBooking = localStorage.getItem("bookingData");
-
-    // const initialBookingState = storedBooking
-    //     ? (() => {
-    //         const parsed = JSON.parse(storedBooking);
-
-    //         return {
-    //             ...parsed,
-    //             selectedDate: parsed.selectedDate
-    //                 ? new Date(parsed.selectedDate)
-    //                 : null,
-    //         };
-    //     })()
-    //     : null;
-
-    // const selectedHours = initialBookingState?.selectedHours;
-
-    // const editSelectedHr = initialBookingState?.selectedHours.value === 1 ? "Hr" : initialBookingState?.selectedHours.label
-
-    // const totalWithHr = (initialBookingState?.selectedHours && gym)
-    //     ? gym.hourly_rate * initialBookingState?.selectedHours.value
-    //     : gym?.hourly_rate;
-
-    // const formatWithOrdinal = (date: Date) => {
-    //     const day = date.getDate();
-
-    //     const getSuffix = (d: number) => {
-    //         if (d > 3 && d < 21) return "th";
-    //         switch (d % 10) {
-    //             case 1: return "st";
-    //             case 2: return "nd";
-    //             case 3: return "rd";
-    //             default: return "th";
-    //         }
-    //     };
-
-    //     const month = date.toLocaleDateString("en-US", { month: "long" });
-
-    //     return `${day}${getSuffix(day)} ${month}`;
-    // };
-
-    // const calculateLastEntry = () => {
-    //     if (!selectedHours?.value || !gym?.close_time) return "";
-
-    //     const [hour, minute] = gym.close_time.split(":").map(Number);
-
-    //     const closingDate = new Date();
-    //     closingDate.setHours(hour, minute, 0, 0);
-
-    //     // subtract selected duration
-    //     const durationInMinutes = selectedHours?.value * 60;
-
-    //     closingDate.setMinutes(closingDate.getMinutes() - durationInMinutes);
-
-    //     return closingDate.toLocaleTimeString("en-GB", {
-    //         hour: "numeric",
-    //         minute: "2-digit",
-    //         hour12: true,
-    //     });
-    // };
-
-    // const lastEntryTime = calculateLastEntry();
-
     const handlePhoneClick = () => {
         if (gym?.phone_number) {
             // Open the phone dialer
@@ -381,7 +321,7 @@ export default function GymDetails() {
             <div id="share-area" className="min-h-screen bg-white">
 
                 {/* ===== Image Carousel ===== */}
-                <div className="h-60">
+                <div className="h-[174px]">
                     <ImageCarousel images={gym.images} />
                 </div>
 
@@ -390,8 +330,7 @@ export default function GymDetails() {
 
                     {/* Gym Name */}
                     <div>
-
-                        <div className="flex justify-between items-center gap-3">
+                        <div className="flex justify-between items-center gap-3 mt-1">
                             <h1 className="text-xl font-bold">{gym.name}</h1>
 
                             {/* Call & Map Buttons */}
@@ -425,30 +364,30 @@ export default function GymDetails() {
                         </div>
 
                         {/* Tags */}
-                        {/* <div className="flex gap-2 mt-3 flex-wrap">
-                        {gym.tags.map((tag, i) => (
-                            <span
-                                key={i}
-                                className="flex items-center gap-1 bg-blue-100 text-blue-600 text-xs px-3 py-2 rounded-full"
-                            >
-                                {tagIcons[tag]}
-                                {tag}
-                            </span>
-                        ))}
-                    </div> */}
+                        <div className="flex gap-2 mt-5 flex-wrap">
+                            {tags.map((tag, i) => (
+                                <span
+                                    key={i}
+                                    className="flex items-center gap-1 bg-[#DBEAFE] text-[#2563EB] text-xs px-3 py-2 rounded-full"
+                                >
+                                    {tagIcons[tag]}
+                                    {tag}
+                                </span>
+                            ))}
+                        </div>
                     </div>
 
                     <div className="border border-dashed border-[#CBD5E1]"></div>
 
                     {/* ===== Amenities ===== */}
                     <div>
-                        <h2 className="text-lg font-semibold mb-3">
+                        <h2 className="text-base font-semibold mb-3">
                             What’s Included
                         </h2>
 
                         <div className="space-y-3">
                             {visibleAmenities.map((item, i) => (
-                                <p key={i} className="text-sm text-gray-700 flex items-center gap-2">
+                                <p key={i} className="text-xs text-[#0F172A] flex items-center gap-2">
                                     <img
                                         src={item?.icon}
                                         alt={item?.name}
@@ -467,13 +406,15 @@ export default function GymDetails() {
                                 width: "100%",
                                 height: "48px",
                                 backgroundColor: "#DBEAFE",
-                                color: "#2563EB",
+                                color: "#60A5FA",
                                 borderRadius: "6px",
                                 fontWeight: 500,
-                                fontSize: "16px",
-                                marginTop: "16px",
+                                fontSize: "14px",
+                                marginTop: "24px",
                                 padding: "0",
                             }}
+                                onClick={() => setAmenitiesOpen(true)}
+                                className="font-semibold"
                             >
                                 Show all {gym.amenities.length} amenities
                             </button>
@@ -484,11 +425,11 @@ export default function GymDetails() {
 
                     {/* ===== Rules ===== */}
                     <div className="pb-20">
-                        <h2 className="text-lg font-semibold mb-3">
+                        <h2 className="text-base font-semibold mb-3">
                             Rules
                         </h2>
 
-                        <div className="space-y-2 text-sm text-gray-600">
+                        <div className="space-y-3 text-xs text-[#0F172A]">
                             {visibleRules.map((rule, i) => (
                                 <p key={i}>
                                     {i + 1}. {rule.description}
@@ -504,13 +445,15 @@ export default function GymDetails() {
                                 width: "100%",
                                 height: "48px",
                                 backgroundColor: "#DBEAFE",
-                                color: "#2563EB",
+                                color: "#60A5FA",
                                 borderRadius: "6px",
                                 fontWeight: 500,
                                 fontSize: "16px",
-                                marginTop: "16px",
+                                marginTop: "24px",
+                                fontWidth: "600",
                                 padding: "0",
                             }}
+                                onClick={() => setRulesOpen(true)}
                             >
                                 View all rules
                             </button>
@@ -553,21 +496,21 @@ export default function GymDetails() {
                     </div>
                 </div>
             ) : ( */}
-                <div id="share-bottom-bar" className="fixed bottom-14 left-0 right-0 bg-white border-t px-3 py-3 flex justify-between items-center">
+                <div id="share-bottom-bar" className="fixed bottom-14 left-0 right-0 bg-white border-t px-3 pb-4 pt-1 flex justify-between items-center">
                     <div className="space-y-2">
-                        <p className="text-[11px] text-gray-500">
+                        <p className="text-[11px] text-[#475569] font-medium">
                             Gym timings : {formatTime12Hour(gym.open_time)} - {formatTime12Hour(gym.close_time)}
                         </p>
 
                         <div className="flex items-center gap-2 leading-none">
-                            <p className="text-xl font-bold flex items-center">
+                            <p className="text-[22px] font-semibold flex items-center text-[#0F172A]">
                                 ₹{Number(gym.hourly_rate) + 12 + 2.16}/Hr
                             </p>
 
                             <IoInformationCircleOutline
                                 size={20}
                                 onClick={() => setPriceBreakdownOpen(true)}
-                                className="text-gray-400 flex-shrink-0"
+                                className="text-[#94A3B8] flex-shrink-0"
                                 style={{ transform: "translateY(1px)" }}
                             />
                         </div>
@@ -580,11 +523,11 @@ export default function GymDetails() {
                             alignItems: "center",
                             width: "153px",
                             height: "48px",
-                            backgroundColor: "#DBEAFE",
-                            color: "#2563EB",
+                            backgroundColor: "#2563EB",
+                            color: "#ffffff",
                             borderRadius: "6px",
                             fontWeight: 500,
-                            fontSize: "16px",
+                            fontSize: "14px",
                             marginTop: "16px",
                             padding: "0",
                         }}
