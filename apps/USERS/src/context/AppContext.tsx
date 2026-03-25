@@ -104,12 +104,13 @@ export interface NotificationType {
     created_at: string;
 }
 
+const BASE_URL = "http://api.viigo.in";
 
 export const normalizeImagePath = (url?: string) => {
     if (!url) return "";
 
     // Remove base URL if it exists
-    return url.replace(backendUrl, "");
+    return url.replace(BASE_URL, "");
 };
 
 export const getFullImageUrl = (path: string) => {
@@ -118,7 +119,7 @@ export const getFullImageUrl = (path: string) => {
     // If already full URL, return as is
     if (path.startsWith("http")) return path;
 
-    return `${backendUrl}${path}`;
+    return `${BASE_URL}${path}`;
 };
 
 type AppContextType = {
