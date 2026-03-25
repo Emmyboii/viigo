@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useCallback, useEffect, useState } from "react";
 import { FaCheckCircle } from "react-icons/fa";
 import PageHeader from "../components/PageHeader";
-import { useAppContext, type GymCard } from "../context/AppContext";
+import { normalizeImagePath, useAppContext, type GymCard } from "../context/AppContext";
 import FacilityTag from "../components/FacilityTag";
 import { HiLocationMarker, HiOutlineCalendar } from "react-icons/hi";
 import { PiIdentificationCardBold } from "react-icons/pi";
@@ -578,7 +578,7 @@ Time: ${selectedHours?.label}
                             {/* ===== Gym Summary Card ===== */}
                             <div className="bg-white rounded border flex gap-1 h-[143px]">
                                 <img
-                                    src={gym?.images[0]?.image}
+                                    src={`http://api.viigo.in/${normalizeImagePath(gym?.images[0]?.image)}`}
                                     alt={gym?.name}
                                     className="w-[85px] min-h-full rounded-tl rounded-bl object-cover"
                                 />

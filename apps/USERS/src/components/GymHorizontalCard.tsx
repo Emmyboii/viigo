@@ -6,6 +6,7 @@ import ImageCarousel from "./ImageCarousel";
 import { HiLocationMarker } from "react-icons/hi";
 import { GoDotFill } from "react-icons/go";
 import { useNavigate } from "react-router-dom";
+import { normalizeImagePath } from "../context/AppContext";
 
 interface GymHorizontalCardProps {
     gym: Gym
@@ -23,7 +24,13 @@ export default function GymHorizontalCard({ gym }: GymHorizontalCardProps) {
     return (
         <div className="bg-white rounded border border-[#E2E8F0] flex">
             <div className="w-28 rounded-tl rounded-bl overflow-hidden">
-                <ImageCarousel images={gym.images} enableFullscreen={false} />
+                <ImageCarousel
+                    images={gym.images.map(img => ({
+                        ...img,
+                        image: normalizeImagePath(img.image)
+                    }))}
+                    enableFullscreen={false}
+                />
             </div>
 
             <div className="flex flex-col justify-between w-full p-3">

@@ -3,6 +3,7 @@ import Autoplay from "embla-carousel-autoplay";
 import { useEffect, useRef, useState } from "react";
 import type { Image } from "./types/gym";
 import { FullscreenCarousel } from "./FullscreenCarousel";
+import { getFullImageUrl } from "../context/AppContext";
 
 interface Props {
     images: Image[];
@@ -88,7 +89,7 @@ export default function ImageCarousel({
                     {images.map((img, index) => (
                         <div key={index} className="min-w-full h-full">
                             <img
-                                src={img.image}
+                                src={getFullImageUrl(img.image)}
                                 className="w-full h-full object-cover cursor-pointer"
                                 draggable={false}
                                 title="imagess"

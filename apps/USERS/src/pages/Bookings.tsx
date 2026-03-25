@@ -9,7 +9,7 @@ import { useEffect, useState } from "react"
 import BookingModal from "../components/BookingModal"
 import logoUrl from "../assets/icon2.png";
 import * as htmlToImage from "html-to-image";
-import { useAppContext } from "../context/AppContext"
+import { normalizeImagePath, useAppContext } from "../context/AppContext"
 
 export type Booking = {
     id: number;
@@ -275,7 +275,7 @@ const Bookings = () => {
                                         }}
                                         className="bg-white rounded border border-[#E2E8F0] min-h-[140px] h-full flex gap-3"
                                     >
-                                        <img src={`http://api.viigo.in/${gym.gym_image}`} title="gym" className="w-20 min-h-full rounded-tl rounded-bl object-cover" />
+                                        <img src={`http://api.viigo.in/${normalizeImagePath(gym.gym_image)}`} title="gym" className="w-20 min-h-full rounded-tl rounded-bl object-cover" />
 
                                         <div className="flex flex-col justify-between w-full p-3 pl-0">
 

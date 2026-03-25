@@ -1,3 +1,4 @@
+import { normalizeImagePath } from "../context/AppContext";
 
 interface FacilityTagProps {
     amenity: {
@@ -13,17 +14,17 @@ export default function FacilityTag({
 }: FacilityTagProps) {
 
 
-    const getIconUrl = (icon?: string) => {
-        if (!icon) return "";
+    // const getIconUrl = (icon?: string) => {
+    //     if (!icon) return "";
 
-        // If it's already a full URL
-        if (icon.startsWith("http://") || icon.startsWith("https://")) {
-            return icon;
-        }
+    //     // If it's already a full URL
+    //     if (icon.startsWith("http://") || icon.startsWith("https://")) {
+    //         return icon;
+    //     }
 
-        // Otherwise prepend base URL
-        return `https://api.viigo.in/${icon}`;
-    };
+    //     // Otherwise prepend base URL
+    //     return `https://api.viigo.in/${icon}`;
+    // };
 
     return (
         <div
@@ -32,7 +33,7 @@ export default function FacilityTag({
         >
             {amenity?.icon && (
                 <img
-                    src={getIconUrl(amenity.icon)}
+                    src={`http://api.viigo.in/${normalizeImagePath(amenity.icon)}`}
                     alt={amenity?.name}
                     className="w-3 h-3 object-contain"
                 />

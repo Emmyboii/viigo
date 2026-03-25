@@ -126,11 +126,11 @@ export default function PaymentSuccess({ onClose }: PaymentSuccessProps) {
                 });
                 const data = await res.json();
 
-                const lastBooking = data.data[data.data.length - 1];
+                const firstBooking = data.data[0];
 
-                localStorage.setItem("selectedBookingId", String(lastBooking.id));
+                localStorage.setItem("selectedBookingId", String(firstBooking.id));
 
-                setBooking(lastBooking);
+                setBooking(firstBooking);
 
             } catch (err) {
                 console.log(err);

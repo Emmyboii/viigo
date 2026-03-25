@@ -216,7 +216,7 @@ export default function FAQ() {
     return (
         <div className="min-h-screen py-6">
             {/* Header */}
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-4 px-4">
                 <div className="flex items-center gap-3">
                     <IoArrowBack
                         size={22}

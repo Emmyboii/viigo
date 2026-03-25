@@ -104,6 +104,23 @@ export interface NotificationType {
     created_at: string;
 }
 
+
+export const normalizeImagePath = (url?: string) => {
+    if (!url) return "";
+
+    // Remove base URL if it exists
+    return url.replace(backendUrl, "");
+};
+
+export const getFullImageUrl = (path: string) => {
+    if (!path) return "";
+
+    // If already full URL, return as is
+    if (path.startsWith("http")) return path;
+
+    return `${backendUrl}${path}`;
+};
+
 type AppContextType = {
     userData: UserType | null;
     setUserData: (user: UserType | null) => void;

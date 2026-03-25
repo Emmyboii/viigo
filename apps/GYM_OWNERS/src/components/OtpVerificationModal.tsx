@@ -93,7 +93,7 @@ export default function OtpVerificationModal({ user, onClose }: OtpVerificationM
     };
 
     const getRemainingTime = () => {
-        if (isActive) return `${user?.contextual_text} left`;
+        if (isActive) return `${user?.contextual_text}`;
         if (isUpcoming) return formattedTime;
         return null;
     };

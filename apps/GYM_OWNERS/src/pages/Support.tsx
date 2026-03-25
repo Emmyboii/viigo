@@ -128,7 +128,7 @@ const Support = () => {
                 await navigator.share({
                     files: [file],
                     title: "Viigo Support",
-                    text: "Need help? Contact Viigo support.",
+                    text: "Need help? Contact Viigo support. Support@viigo.in",
                 });
             } else {
                 const link = document.createElement("a");
@@ -148,7 +148,7 @@ const Support = () => {
 
     return (
         <div className="py-4">
-            <div className="flex items-center justify-between bg-white">
+            <div className="flex items-center justify-between bg-white px-4">
                 <div className="flex items-center gap-2">
                     <FiArrowLeft onClick={() => navigate(-1)} size={20} />
                     <p className="font-semibold text-lg">Support</p>

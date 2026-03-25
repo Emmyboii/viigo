@@ -15,7 +15,7 @@ import { MdPhone } from "react-icons/md";
 // import PickHoursSheet from "../components/PickHoursSheet";
 import PageHeader from "../components/PageHeader";
 // import { FaRegEdit } from "react-icons/fa";
-import { useAppContext, type GymCard } from "../context/AppContext";
+import { normalizeImagePath, useAppContext, type GymCard } from "../context/AppContext";
 import type { Gym } from "../components/types/gym";
 import * as htmlToImage from "html-to-image";
 import { FaRegClock } from "react-icons/fa";
@@ -341,7 +341,12 @@ export default function GymDetails() {
 
                 {/* ===== Image Carousel ===== */}
                 <div className="h-[174px]">
-                    <ImageCarousel images={gym.images} />
+                    <ImageCarousel
+                        images={gym.images.map(img => ({
+                            ...img,
+                            image: normalizeImagePath(img.image)
+                        }))}
+                    />
                 </div>
 
                 {/* ===== Content ===== */}
@@ -408,7 +413,7 @@ export default function GymDetails() {
                             {visibleAmenities.map((item, i) => (
                                 <p key={i} className="text-xs text-[#0F172A] flex items-center gap-2">
                                     <img
-                                        src={item?.icon}
+                                        src={`http://api.viigo.in/${normalizeImagePath(item?.icon)}`}
                                         alt={item?.name}
                                         className="w-3 h-3 object-contain"
                                     />
@@ -456,7 +461,7 @@ export default function GymDetails() {
 
                 {/* ===== Sticky Bottom CTA ===== */}
 
-                <div id="share-bottom-bar" className="fixed bottom-14 left-0 right-0 bg-white border-t px-3 pb-4 pt-1 flex justify-between items-center">
+                <div id="share-bottom-bar" className="fixed bottom-14 left-0 right-0 bg-white border-t px-3 pb-4 pt-2.5 flex justify-between items-center">
                     <div className="space-y-2">
                         <p className="text-[11px] text-[#475569] font-medium">
                             Gym timings : {formatTime12Hour(gym.open_time)} - {formatTime12Hour(gym.close_time)}

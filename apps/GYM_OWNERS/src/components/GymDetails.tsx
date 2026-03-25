@@ -12,6 +12,7 @@ import { MdError } from "react-icons/md";
 import logoUrl from "../assets/icon2.png";
 import * as htmlToImage from "html-to-image";
 import { FaRegClock } from "react-icons/fa";
+import { normalizeImagePath } from "../context/AppContext";
 
 type ToastType = "success" | "error" | null;
 
@@ -364,7 +365,10 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
 
                 {/* IMAGE */}
                 <ImageCarousel
-                    images={gym?.images}
+                    images={gym.images.map(img => ({
+                        ...img,
+                        image: normalizeImagePath(img.image)
+                    }))}
                     height="h-48"
                 />
 
@@ -423,7 +427,7 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
                         <div className="space-y-3">
                             {visibleAmenities.map((item) => (
                                 <div key={item.id} className="flex items-center gap-2">
-                                    <img src={item.icon} alt={item.name} className="w-4 h-4" />
+                                    <img src={`http://api.viigo.in/${normalizeImagePath(item?.icon)}`} alt={item.name} className="w-3 h-3" />
                                     <p className="text-sm text-gray-700">
                                         {item.name}
                                     </p>

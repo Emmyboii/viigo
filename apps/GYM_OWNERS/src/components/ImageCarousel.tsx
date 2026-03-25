@@ -2,6 +2,7 @@ import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
 import { useEffect, useRef, useState } from "react";
 import { FullscreenCarousel } from "./FullscreenCarousel";
+import { getFullImageUrl } from "../context/AppContext";
 
 interface Props {
     images: { id: number; image: string }[];
@@ -89,7 +90,7 @@ export default function ImageCarousel({
                     {images?.map((img, index) => (
                         <div key={index} className="min-w-full">
                             <img
-                                src={img.image}
+                                src={getFullImageUrl(img.image)}
                                 title="imagess"
                                 className={`w-full ${height} object-cover`}
                                 draggable={false}

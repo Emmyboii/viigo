@@ -124,6 +124,24 @@ export interface WalletTransaction {
 
 export type DisplayType = "details" | "edit" | "create";
 
+const BASE_URL = "http://api.viigo.in";
+
+export const normalizeImagePath = (url?: string) => {
+    if (!url) return "";
+
+    // Remove base URL if it exists
+    return url.replace(BASE_URL, "");
+};
+
+export const getFullImageUrl = (path: string) => {
+    if (!path) return "";
+
+    // If already full URL, return as is
+    if (path.startsWith("http")) return path;
+
+    return `${BASE_URL}${path}`;
+};
+
 export type AppContextType = {
     userData: UserType | null;
     setUserData: (user: UserType | null) => void;

@@ -12,12 +12,12 @@ export default function Footer() {
         { name: "Home", icon: AiFillHome, path: "/" },
         { name: "Explore", icon: MdExplore, path: "/explore" },
         { name: "My Bookings", icon: PiCalendarDotsFill, path: "/bookings" },
-        { name: "Profile", icon: FaUser, path: "/profile", path2: "/notifications",path3: "/profile/edit", path4: "/faq", path5: "/support" },
+        { name: "Profile", icon: FaUser, path: "/profile", path2: "/notifications", path3: "/profile/edit", path4: "/faq", path5: "/support" },
     ];
 
     return (
         <div className="fixed bottom-0 left-0 w-full bg-white border-t border-[#F1F5F9] shadow-sm z-50">
-            <div className="flex justify-between items-center px-4 py-2">
+            <div className="flex justify-between items-center px-4 py-3.5">
                 {tabs.map((tab) => {
                     const isActive = location.pathname === tab.path || location.pathname === tab.path2 || location.pathname === tab.path3 || location.pathname === tab.path4 || location.pathname === tab.path5;
                     const Icon = tab.icon;
@@ -30,13 +30,13 @@ export default function Footer() {
                         >
                             <Icon
                                 size={22}
-                                className={isActive ? "text-gray-900" : "text-gray-400"}
+                                className={isActive ? "text-[#0F172A]" : "text-[#94A3B8]"}
                             />
 
                             <span
-                                className={`text-xs mt-1 ${isActive
-                                    ? "text-gray-900 font-medium"
-                                    : "text-gray-400"
+                                className={`text-xs mt-1 font-medium ${isActive
+                                    ? "text-[#0F172A]"
+                                    : "text-[#94A3B8]"
                                     }`}
                             >
                                 {tab.name}

@@ -5,6 +5,7 @@ import ImageCarousel from "./ImageCarousel";
 import { useNavigate } from "react-router";
 import { GoDotFill } from "react-icons/go";
 import { HiLocationMarker } from "react-icons/hi";
+import { normalizeImagePath } from "../context/AppContext";
 
 interface GymCardProps {
     gym: Gym;
@@ -26,7 +27,13 @@ export default function GymCard({ gym }: GymCardProps) {
     return (
         <div className="bg-white rounded-md shadow-md overflow-hidden h-[320px] flex flex-col">
             <div className="h-40">
-                <ImageCarousel images={gym?.images} enableFullscreen={false} />
+                <ImageCarousel
+                    images={gym.images.map(img => ({
+                        ...img,
+                        image: normalizeImagePath(img.image)
+                    }))}
+                    enableFullscreen={false}
+                />
             </div>
 
             <div className="p-4 flex flex-col flex-1">
