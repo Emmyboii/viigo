@@ -13,7 +13,7 @@ import SortModal from "../components/SortModal";
 import { FaFilter } from "react-icons/fa";
 import { BiSortAlt2 } from "react-icons/bi";
 import logoUrl from "../assets/icon2.png";
-import html2canvas from "html2canvas";
+import * as htmlToImage from "html-to-image";
 
 export default function Explore() {
     const {
@@ -139,85 +139,110 @@ export default function Explore() {
 
     const handleShare = async () => {
         const element = document.getElementById("share-area");
+        const bottomBar = document.getElementById("share-bottom-bar");
 
         if (!element) return;
+
+        if (bottomBar) {
+            bottomBar.style.position = "relative";
+            bottomBar.style.bottom = "0px";
+        }
 
         try {
             await document.fonts.ready;
 
-            const canvas = await html2canvas(element, {
-                useCORS: true,
-                allowTaint: false,
-                scrollX: 0,
-                scrollY: -window.scrollY,
-                windowWidth: document.documentElement.clientWidth,
-                windowHeight: document.documentElement.clientHeight,
-                scale: 2,
+            // 🧠 Convert DOM → image
+            const dataUrl = await htmlToImage.toPng(element, {
+                pixelRatio: 2,
+                cacheBust: true,
             });
 
-            const finalCanvas = document.createElement("canvas");
-            const ctx = finalCanvas.getContext("2d");
+            const baseImage = new Image();
+            baseImage.src = dataUrl;
+
+            await new Promise((res) => {
+                baseImage.onload = res;
+            });
+
+            // 🎨 Create final canvas
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
             if (!ctx) return;
 
-            const headerHeight = 100;
-            const padding = 40; // 👈 adjust spacing here
+            const headerHeight = 120;
 
-            // ✅ Increase canvas size
-            finalCanvas.width = canvas.width + padding * 2;
-            finalCanvas.height = canvas.height + headerHeight + padding * 2;
+            canvas.width = baseImage.width;
+            canvas.height = baseImage.height + headerHeight;
 
-            // 🔵 Header background (include padding)
-            ctx.fillStyle = "#2563EB";
-            ctx.fillRect(0, 0, finalCanvas.width, headerHeight + padding);
+            // 🔵 Background
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 🔷 Header gradient
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+            gradient.addColorStop(0, "#2563EB");
+            gradient.addColorStop(1, "#3B82F6");
+
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, headerHeight);
 
             // 🧠 Logo
             const logo = new Image();
             logo.src = logoUrl;
 
-            await new Promise((resolve) => {
-                logo.onload = resolve;
-                logo.onerror = resolve;
+            await new Promise((res) => {
+                logo.onload = res;
+                logo.onerror = res;
             });
 
-            const maxLogoHeight = 40;
-            const logoRatio = logo.width / logo.height;
-            const logoWidth = maxLogoHeight * logoRatio;
-            const logoHeight = maxLogoHeight;
 
-            // Text
+            // Max height constraint (this controls visual size)
+            const maxLogoHeight = 50;
+
+            // Calculate aspect ratio
+            const aspectRatio = logo.width / logo.height;
+
+            // Compute final dimensions
+            const logoHeight = maxLogoHeight;
+            const logoWidth = logoHeight * aspectRatio;
+
+            // Center content
             const text = "Viigo";
             ctx.font = "bold 50px sans-serif";
             ctx.fillStyle = "#fff";
-            ctx.textAlign = "left";
-            ctx.textBaseline = "middle";
 
+            // Measure text
             const textWidth = ctx.measureText(text).width;
+
+            // spacing between logo & text
             const gap = 20;
 
-            // ✅ Center properly (with padding accounted)
+            // total width for centering
             const totalWidth = logoWidth + gap + textWidth;
-            const startX = (finalCanvas.width - totalWidth) / 2;
+            const startX = (canvas.width - totalWidth) / 2;
 
-            // Draw logo
+            // draw logo (no distortion)
             ctx.drawImage(
                 logo,
                 startX,
-                (headerHeight + padding - logoHeight) / 2,
+                (headerHeight - logoHeight) / 2,
                 logoWidth,
                 logoHeight
             );
 
-            // Draw text
+            // draw text
             ctx.fillText(
                 text,
                 startX + logoWidth + gap,
-                (headerHeight + padding) / 2
+                headerHeight / 2 + 16
             );
 
-            // 🖼 Draw content with padding offset
-            ctx.drawImage(canvas, padding, headerHeight + padding);
+            // 🖼 Draw main content
+            ctx.drawImage(baseImage, 0, headerHeight);
 
-            const dataUrl = finalCanvas.toDataURL("image/png");
+            // 📦 Export
+
+            const finalUrl = canvas.toDataURL("image/png");
 
             // ✅ Share or fallback to download
             if (navigator.share) {
@@ -228,7 +253,7 @@ export default function Explore() {
                 });
             } else {
                 const link = document.createElement("a");
-                link.href = dataUrl;
+                link.href = finalUrl;
                 link.download = "viigo-share.png";
                 link.click();
             }
@@ -270,9 +295,9 @@ export default function Explore() {
 
             {/* LIST VIEW */}
             {view === "list" && (
-                <div className="p-4 h-full overflow-y-auto pb-28">
+                <div className="h-full overflow-y-auto pb-28">
 
-                    <div id="share-area" className="min-h-screen bg-white">
+                    <div id="share-area" className="min-h-screen bg-white p-4">
 
                         {/* HEADER (OUTSIDE MAP) */}
                         <div className="fixed top-0 left-0 right-0 z-40 bg-white flex items-center justify-between px-4 py-3">

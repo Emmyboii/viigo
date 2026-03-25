@@ -11,7 +11,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { useAppContext, type GymCard } from "../context/AppContext";
 import { MdPhone } from "react-icons/md";
-import { snapdom } from "@zumer/snapdom";
+import { toPng } from "html-to-image";
 import { TiLocation } from "react-icons/ti";
 
 type PaymentSuccessProps = {
@@ -42,7 +42,7 @@ type BookingPass = {
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-export default function PaymentSuccess({ onClose, gym }: PaymentSuccessProps) {
+export default function PaymentSuccess({ onClose }: PaymentSuccessProps) {
 
     const shareRef = useRef<HTMLDivElement>(null);
 
@@ -56,27 +56,27 @@ export default function PaymentSuccess({ onClose, gym }: PaymentSuccessProps) {
         if (!shareRef.current) return;
 
         try {
-            const result = await snapdom(shareRef.current, {
-                scale: 2,
-                backgroundColor: "#ffffff",
-                // useProxy: "https://proxy.corsfix.com/?", // only if you choose a proxy service
+            const dataUrl = await toPng(shareRef.current, {
+                cacheBust: true,   // avoids stale images
+                pixelRatio: 2,     // high quality
             });
 
-            const blob = await result.toBlob();
-            const file = new File([blob], "booking.png", { type: "image/png" });
+            const blob = await (await fetch(dataUrl)).blob();
+            const file = new File([blob], "booking-pass.png", {
+                type: "image/png",
+            });
 
-            if (navigator.share && navigator.canShare?.({ files: [file] })) {
+            if (navigator.share && navigator.canShare({ files: [file] })) {
                 await navigator.share({
                     files: [file],
-                    title: "My Gym Booking",
+                    title: "My Booking Pass",
                 });
             } else {
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = "booking.png";
-                a.click();
-                URL.revokeObjectURL(url);
+                // fallback (download)
+                const link = document.createElement("a");
+                link.href = dataUrl;
+                link.download = "booking-pass.png";
+                link.click();
             }
         } catch (err) {
             console.error("Share failed:", err);
@@ -149,18 +149,18 @@ export default function PaymentSuccess({ onClose, gym }: PaymentSuccessProps) {
     //     }
     // };
 
-    const handleLocationClick = () => {
-        if (!gym) return;
+    // const handleLocationClick = () => {
+    //     if (!gym) return;
 
-        // Navigate to /explore with coordinates and gym info
-        navigate("/explore", {
-            state: {
-                gym,
-                latitude: gym.latitude,
-                longitude: gym.longitude,
-            }
-        });
-    };
+    //     // Navigate to /explore with coordinates and gym info
+    //     navigate("/explore", {
+    //         state: {
+    //             gym,
+    //             latitude: gym.latitude,
+    //             longitude: gym.longitude,
+    //         }
+    //     });
+    // };
 
     if (loading || !pass || !booking) {
         return (
@@ -210,7 +210,6 @@ export default function PaymentSuccess({ onClose, gym }: PaymentSuccessProps) {
                         <img
                             src={`https://api.viigo.in/${pass?.gym_image}`}
                             alt={pass?.gym_name || "Gym"}
-                            // crossOrigin="anonymous"
                             className="w-[97px] h-[97px] rounded object-cover"
                         />
 
@@ -231,7 +230,7 @@ export default function PaymentSuccess({ onClose, gym }: PaymentSuccessProps) {
 
                                     {/* Location */}
                                     <div
-                                        onClick={handleLocationClick}
+                                        // onClick={handleLocationClick}
                                         className="bg-[#BFDBFE] text-[#2563EB] p-1 rounded-lg cursor-pointer hover:bg-gray-200 transition"
                                     >
                                         <TiLocation size={16} />

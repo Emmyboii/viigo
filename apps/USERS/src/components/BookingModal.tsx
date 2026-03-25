@@ -11,7 +11,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import type { Booking } from "../pages/Bookings";
 import { MdPending, MdPhone } from "react-icons/md";
-import { snapdom } from "@zumer/snapdom";
+import { toPng } from "html-to-image";
 
 type PaymentSuccessProps = {
     onClose: () => void;
@@ -118,60 +118,31 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
 
     const shareRef = useRef<HTMLDivElement>(null);
 
-    // const handleShare = async () => {
-    //     if (!shareRef.current) return;
-
-    //     const canvas = await html2canvas(shareRef.current, {
-    //         useCORS: true,
-    //         scale: 2, // better quality
-    //     });
-
-    //     const image = canvas.toDataURL("image/png");
-
-    //     // Convert to file
-    //     const blob = await (await fetch(image)).blob();
-    //     const file = new File([blob], "booking.png", { type: "image/png" });
-
-    //     // Share if supported (mobile)
-    //     if (navigator.share && navigator.canShare({ files: [file] })) {
-    //         await navigator.share({
-    //             files: [file],
-    //             title: "My Gym Booking",
-    //         });
-    //     } else {
-    //         // fallback: download
-    //         const link = document.createElement("a");
-    //         link.href = image;
-    //         link.download = "booking.png";
-    //         link.click();
-    //     }
-    // };
-
     const handleShare = async () => {
         if (!shareRef.current) return;
 
         try {
-            const result = await snapdom(shareRef.current, {
-                scale: 2,
-                backgroundColor: "#ffffff",
-                // useProxy: "https://proxy.corsfix.com/?", // only if you choose a proxy service
+            const dataUrl = await toPng(shareRef.current, {
+                cacheBust: true,   // avoids stale images
+                pixelRatio: 2,     // high quality
             });
 
-            const blob = await result.toBlob();
-            const file = new File([blob], "booking.png", { type: "image/png" });
+            const blob = await (await fetch(dataUrl)).blob();
+            const file = new File([blob], "booking-pass.png", {
+                type: "image/png",
+            });
 
-            if (navigator.share && navigator.canShare?.({ files: [file] })) {
+            if (navigator.share && navigator.canShare({ files: [file] })) {
                 await navigator.share({
                     files: [file],
-                    title: "My Gym Booking",
+                    title: "My Booking Pass",
                 });
             } else {
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = "booking.png";
-                a.click();
-                URL.revokeObjectURL(url);
+                // fallback (download)
+                const link = document.createElement("a");
+                link.href = dataUrl;
+                link.download = "booking-pass.png";
+                link.click();
             }
         } catch (err) {
             console.error("Share failed:", err);
@@ -185,18 +156,18 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
     //     }
     // };
 
-    const handleLocationClick = () => {
-        if (!pass) return;
+    // const handleLocationClick = () => {
+    //     if (!pass) return;
 
-        // Navigate to /explore with coordinates and gym info
-        navigate("/explore", {
-            state: {
-                pass,
-                latitude: pass.latitude,
-                longitude: pass.longitude,
-            }
-        });
-    };
+    //     // Navigate to /explore with coordinates and gym info
+    //     navigate("/explore", {
+    //         state: {
+    //             pass,
+    //             latitude: pass.latitude,
+    //             longitude: pass.longitude,
+    //         }
+    //     });
+    // };
 
     const statusConfig = getStatusConfig(booking?.status || "PENDING");
 
@@ -252,7 +223,6 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
                         <img
                             src={`https://api.viigo.in/${pass?.gym_image}`}
                             alt={pass?.gym_name || "Gym"}
-                            // crossOrigin="anonymous"
                             className="w-[97px] h-[97px] rounded object-cover"
                         />
 
@@ -273,7 +243,7 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
 
                                     {/* Location */}
                                     <div
-                                        onClick={handleLocationClick}
+                                        // onClick={handleLocationClick}
                                         className="bg-[#BFDBFE] text-[#2563EB] p-1 rounded-lg cursor-pointer hover:bg-gray-200 transition"
                                     >
                                         <TiLocation size={16} />

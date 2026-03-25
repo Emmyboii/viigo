@@ -8,7 +8,7 @@ import { TbDownload } from 'react-icons/tb';
 import NotFound from './NotFound';
 import { useAppContext } from '../context/AppContext';
 import { useEffect, useRef, useState } from 'react';
-import html2canvas from "html2canvas";
+import * as htmlToImage from "html-to-image";
 import jsPDF from "jspdf";
 
 const formatAmount = (n: number) => `${n > 0 ? "+" : "-"}₹${Math.abs(n)}`;
@@ -60,46 +60,63 @@ const TransactionDetails = () => {
     const downloadPDF = async () => {
         if (!captureRef.current) return;
 
-        const canvas = await html2canvas(captureRef.current, { scale: 2 });
-        const imgData = canvas.toDataURL("image/png");
+        try {
+            await document.fonts.ready;
 
-        const pdf = new jsPDF("p", "mm", "a4");
+            const dataUrl = await htmlToImage.toPng(captureRef.current, {
+                pixelRatio: 2,
+                cacheBust: true,
+            });
 
-        const imgProps = pdf.getImageProperties(imgData);
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+            const pdf = new jsPDF("p", "mm", "a4");
 
-        pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-        pdf.save(`transaction-${transaction?.id}.pdf`);
+            const imgProps = pdf.getImageProperties(dataUrl);
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+
+            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+            pdf.addImage(dataUrl, "PNG", 0, 0, pdfWidth, pdfHeight);
+
+            pdf.save(`transaction-${transaction?.id}.pdf`);
+        } catch (err) {
+            console.error("PDF generation failed:", err);
+        }
     };
 
     const sharePage = async () => {
         if (!captureRef.current) return;
 
-        const canvas = await html2canvas(captureRef.current, { scale: 2 });
+        try {
+            await document.fonts.ready;
 
-        const blob = await new Promise<Blob | null>((resolve) =>
-            canvas.toBlob(resolve)
-        );
+            const dataUrl = await htmlToImage.toPng(captureRef.current, {
+                pixelRatio: 2,
+                cacheBust: true,
+            });
 
-        if (!blob) return;
+            const blob = await (await fetch(dataUrl)).blob();
 
-        const file = new File([blob], `transaction-${transaction?.id}.png`, {
-            type: "image/png",
-        });
+            const file = new File(
+                [blob],
+                `transaction-${transaction?.id}.png`,
+                { type: "image/png" }
+            );
 
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            try {
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
                 await navigator.share({
                     files: [file],
                     title: "Transaction Details",
                     text: "Here is my transaction detail.",
                 });
-            } catch (err) {
-                console.error("Share failed", err);
+            } else {
+                // fallback download
+                const link = document.createElement("a");
+                link.href = dataUrl;
+                link.download = `transaction-${transaction?.id}.png`;
+                link.click();
             }
-        } else {
-            alert("Sharing not supported on this browser.");
+        } catch (err) {
+            console.error("Share failed:", err);
         }
     };
 
@@ -141,16 +158,16 @@ const TransactionDetails = () => {
     const amountNum = parseFloat(transaction.amount) || 0;
 
     return (
-        <div className="p-4 space-y-4">
+        <div className="space-y-4 py-4">
             {/* Header */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center px-4 gap-3">
                 <button onClick={() => navigate(-1)} title="Go back" aria-label="Go back">
                     <FiArrowLeft />
                 </button>
                 <h2 className="font-semibold text-lg">Transaction Details</h2>
             </div>
 
-            <div ref={captureRef} className="space-y-4">
+            <div ref={captureRef} className="space-y-4 px-4">
                 {/* Amount */}
                 <div className="text-center pt-5">
                     <h1 className="text-[28px] font-bold">

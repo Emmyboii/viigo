@@ -70,13 +70,14 @@ export type Booking = {
     status: "PENDING" | "CONFIRMED" | "CANCELLED" | "ACTIVE" | "COMPLETED";
 };
 
-type NotificationTypeEnum =
-    | "SESSION"
-    | "PAYMENT"
-    | "SYSTEM"
-    | "PROMO"
+export type NotificationTypeEnum =
+    | "BOOKING_CANCELLED"
+    | "PAYMENT_SUCCESS_CLIENT"
+    | "BOOKING_CREATED"
+    | "NEW_BOOKING_PAID_OWNER"
     | "NEW_BOOKING_RECEIVED"
-    | "BOOKING_CREATED";
+    | "BOOKING_CREATED"
+    | "BOOKING_CANCELLED_OWNER";
 
 
 export interface NotificationType {

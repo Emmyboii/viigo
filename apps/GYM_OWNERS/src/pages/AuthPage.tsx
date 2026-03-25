@@ -6,6 +6,8 @@ import { useNavigate } from "react-router-dom";
 import { FaPhoneAlt } from 'react-icons/fa';
 import { MdError } from 'react-icons/md';
 import { FaCircleCheck } from 'react-icons/fa6';
+import { FcGoogle } from 'react-icons/fc';
+import { useGoogleLogin } from '@react-oauth/google';
 
 type ToastType = "success" | "error" | null;
 
@@ -57,6 +59,32 @@ const AuthPage = () => {
 
     // Set value with +91 and a space
     setPhoneNumber(`+91 ${digitsOnly}`);
+  };
+
+  const checkOnboardingAndRedirect = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(`${backendUrl}/api/onboarding/`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+
+      if (data?.data?.is_completed) {
+        window.location.reload()
+        navigate("/");
+      } else {
+        navigate("/onboarding");
+      }
+    } catch (err) {
+      console.error("Failed to check onboarding:", err);
+      navigate("/onboarding"); // fallback
+    }
   };
 
   const handleContinue = async (e: React.SubmitEvent<HTMLFormElement>) => {
@@ -123,6 +151,52 @@ const AuthPage = () => {
       setIsLoading(false);
     }
   };
+
+  const loginWithGoogle = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      try {
+        const response = await fetch(`${backendUrl}/auth/google/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            access_token: tokenResponse.access_token,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          setToast({ type: "error", message: data.message || "Google login failed" });
+          return;
+        }
+
+        localStorage.setItem("token", data.data?.access);
+        localStorage.setItem("tokenTimestamp", Date.now().toString());
+
+        setToast({ type: "success", message: "Login successful" });
+
+        setTimeout(() => {
+          checkOnboardingAndRedirect();
+          setToast(null);
+        }, 3000);
+
+      } catch (error: unknown) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Something went wrong during Google login";
+
+        setToast({ type: "error", message });
+        setTimeout(() => setToast(null), 2000);
+      }
+    },
+    onError: () => {
+      setToast({ type: "error", message: "Google login failed" });
+      setTimeout(() => setToast(null), 2000);
+    },
+  });
 
   return (
     <div className="bg-[#ffffff] overflow-x-hidden">
@@ -211,9 +285,12 @@ const AuthPage = () => {
               <img src={email} className="w-[24px] h-[20px]" alt="Email login icon" />
             </div>
           )}
-          {/* <div className="rounded-full border border-[#E2E8F0] p-2.5">
+          <div
+            onClick={() => loginWithGoogle()}
+            className="rounded-full border border-[#E2E8F0] p-2.5 cursor-pointer hover:shadow-md transition"
+          >
             <FcGoogle className="size-6" />
-          </div> */}
+          </div>
         </div>
 
         <div className="text-center font-redhat">

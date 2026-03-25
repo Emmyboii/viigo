@@ -1,17 +1,18 @@
 import { useEffect, useState } from "react";
 import {
     FiArrowLeft,
-    FiCalendar,
-    FiCreditCard,
 } from "react-icons/fi";
 import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import Footer from "../components/Footer";
 // import { IoStopCircle } from "react-icons/io5";
-import { IoMdPlayCircle } from "react-icons/io";
-import { FaClock } from "react-icons/fa";
+// import { IoMdPlayCircle } from "react-icons/io";
+// import { FaClock } from "react-icons/fa";
+import { FiCalendar, FiCreditCard } from "react-icons/fi";
+import { MdNotificationsActive, MdPayments } from "react-icons/md";
 import { useNavigate } from "react-router";
 import { FiBellOff } from "react-icons/fi";
-import { useAppContext } from "../context/AppContext";
+import { useAppContext, type NotificationTypeEnum } from "../context/AppContext";
+import { PiWarningCircleBold } from "react-icons/pi";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -124,25 +125,25 @@ export default function Notifications({ Loading = false }: { Loading?: boolean }
         }
     };
 
-    const getIcon = (type: string) => {
+    const getIcon = (type: NotificationTypeEnum) => {
         switch (type) {
-            case "SESSION":
-                return <FiCalendar size={18} />;
-
-            case "PAYMENT":
-                return <FiCreditCard size={18} />;
-
-            case "SYSTEM":
-                return <FaClock size={18} />;
-
-            case "PROMO":
-                return <IoMdPlayCircle size={18} />;
-
-            case "NEW_BOOKING_RECEIVED":
-                return <FiCalendar size={18} />;
-
             case "BOOKING_CREATED":
                 return <FiCalendar size={18} />;
+
+            case "NEW_BOOKING_RECEIVED":
+                return <MdNotificationsActive size={18} />;
+
+            case "NEW_BOOKING_PAID_OWNER":
+                return <FiCreditCard size={18} />;
+
+            case "PAYMENT_SUCCESS_CLIENT":
+                return <MdPayments size={18} />;
+
+            case "BOOKING_CANCELLED":
+                return <PiWarningCircleBold size={18} />;
+
+            case "BOOKING_CANCELLED_OWNER":
+                return <PiWarningCircleBold size={18} />;
 
             default:
                 return <FiCalendar size={18} />;

@@ -17,7 +17,7 @@ import PageHeader from "../components/PageHeader";
 // import { FaRegEdit } from "react-icons/fa";
 import { useAppContext, type GymCard } from "../context/AppContext";
 import type { Gym } from "../components/types/gym";
-import html2canvas from "html2canvas";
+import * as htmlToImage from "html-to-image";
 import { FaRegClock } from "react-icons/fa";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -27,7 +27,6 @@ export default function GymDetails() {
     const { gyms } = useAppContext()
 
     const navigate = useNavigate();
-    // const location = useLocation();
 
     const { slug } = useParams();
 
@@ -37,13 +36,6 @@ export default function GymDetails() {
     const [amenitiesOpen, setAmenitiesOpen] = useState(false);
     const [rulesOpen, setRulesOpen] = useState(false);
     const [priceBreakdownOpen, setPriceBreakdownOpen] = useState(false);
-
-    // const [open, setOpen] = useState(initialBookingState?.reopenSheet || false);
-
-    // const [open, setOpen] = useState(
-    //     location.state?.reopenSheet || false
-    // );
-
 
     const handleShare = async () => {
         const element = document.getElementById("share-area");
@@ -59,94 +51,121 @@ export default function GymDetails() {
         try {
             await document.fonts.ready;
 
-            const canvas = await html2canvas(element, {
-                useCORS: true,
-                allowTaint: false,
-                scrollX: 0,
-                scrollY: -window.scrollY,
-                windowWidth: document.documentElement.clientWidth,
-                windowHeight: document.documentElement.clientHeight,
-                scale: 2,
+            // 🧠 Convert DOM → image
+            const dataUrl = await htmlToImage.toPng(element, {
+                pixelRatio: 2,
+                cacheBust: true,
             });
 
-            const finalCanvas = document.createElement("canvas");
-            const ctx = finalCanvas.getContext("2d");
+            const baseImage = new Image();
+            baseImage.src = dataUrl;
+
+            await new Promise((res) => {
+                baseImage.onload = res;
+            });
+
+            // 🎨 Create final canvas
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
             if (!ctx) return;
 
-            const headerHeight = 100;
-            const padding = 40; // 👈 adjust spacing here
+            const headerHeight = 120;
 
-            // ✅ Increase canvas size
-            finalCanvas.width = canvas.width + padding * 2;
-            finalCanvas.height = canvas.height + headerHeight + padding * 2;
+            canvas.width = baseImage.width;
+            canvas.height = baseImage.height + headerHeight;
 
-            // 🔵 Header background (include padding)
-            ctx.fillStyle = "#2563EB";
-            ctx.fillRect(0, 0, finalCanvas.width, headerHeight + padding);
+            // 🔵 Background
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 🔷 Header gradient
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+            gradient.addColorStop(0, "#2563EB");
+            gradient.addColorStop(1, "#3B82F6");
+
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, headerHeight);
 
             // 🧠 Logo
             const logo = new Image();
             logo.src = logoUrl;
 
-            await new Promise((resolve) => {
-                logo.onload = resolve;
-                logo.onerror = resolve;
+            await new Promise((res) => {
+                logo.onload = res;
+                logo.onerror = res;
             });
 
-            const maxLogoHeight = 40;
-            const logoRatio = logo.width / logo.height;
-            const logoWidth = maxLogoHeight * logoRatio;
-            const logoHeight = maxLogoHeight;
 
-            // Text
+            // Max height constraint (this controls visual size)
+            const maxLogoHeight = 50;
+
+            // Calculate aspect ratio
+            const aspectRatio = logo.width / logo.height;
+
+            // Compute final dimensions
+            const logoHeight = maxLogoHeight;
+            const logoWidth = logoHeight * aspectRatio;
+
+            // Center content
             const text = "Viigo";
             ctx.font = "bold 50px sans-serif";
             ctx.fillStyle = "#fff";
-            ctx.textAlign = "left";
-            ctx.textBaseline = "middle";
 
+            // Measure text
             const textWidth = ctx.measureText(text).width;
+
+            // spacing between logo & text
             const gap = 20;
 
-            // ✅ Center properly (with padding accounted)
+            // total width for centering
             const totalWidth = logoWidth + gap + textWidth;
-            const startX = (finalCanvas.width - totalWidth) / 2;
+            const startX = (canvas.width - totalWidth) / 2;
 
-            // Draw logo
+            // draw logo (no distortion)
             ctx.drawImage(
                 logo,
                 startX,
-                (headerHeight + padding - logoHeight) / 2,
+                (headerHeight - logoHeight) / 2,
                 logoWidth,
                 logoHeight
             );
 
-            // Draw text
+            // draw text
             ctx.fillText(
                 text,
                 startX + logoWidth + gap,
-                (headerHeight + padding) / 2
+                headerHeight / 2 + 16
             );
 
-            // 🖼 Draw content with padding offset
-            ctx.drawImage(canvas, padding, headerHeight + padding);
+            // 🖼 Draw main content
+            ctx.drawImage(baseImage, 0, headerHeight);
 
-            const dataUrl = finalCanvas.toDataURL("image/png");
-            const blob = await (await fetch(dataUrl)).blob();
+            // 📦 Export
+            const finalUrl = canvas.toDataURL("image/png");
+            const blob = await (await fetch(finalUrl)).blob();
 
-            const file = new File([blob], `${gym?.name || "gym"}-Viigo.png`, { type: "image/png" });
+            const file = new File(
+                [blob],
+                `${gym?.name || "gym"}-Viigo.png`,
+                { type: "image/png" }
+            );
+
             const shareText = `${gym?.name}\n\nMore info: https://viigousers.vercel.app/gyms/${gym?.slug}`;
 
             if (navigator.share && navigator.canShare({ files: [file] })) {
                 await navigator.share({ files: [file], text: shareText });
             } else {
-                window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, "_blank");
+                window.open(
+                    `https://wa.me/?text=${encodeURIComponent(shareText)}`,
+                    "_blank"
+                );
 
                 const link = document.createElement("a");
-                link.href = dataUrl;
+                link.href = finalUrl;
                 link.download = `${gym?.name || "gym"}.png`;
                 link.click();
             }
+
         } catch (err) {
             console.error("Share failed:", err);
         }
@@ -326,7 +345,7 @@ export default function GymDetails() {
                 </div>
 
                 {/* ===== Content ===== */}
-                <div className="bg-white p-4 px-5 space-y-6">
+                <div className="bg-white p-4 space-y-6">
 
                     {/* Gym Name */}
                     <div>
@@ -399,22 +418,9 @@ export default function GymDetails() {
                         </div>
 
                         {gym.amenities.length > 4 && (
-                            <button style={{
-                                display: "flex",
-                                justifyContent: "center",
-                                alignItems: "center",
-                                width: "100%",
-                                height: "48px",
-                                backgroundColor: "#DBEAFE",
-                                color: "#60A5FA",
-                                borderRadius: "6px",
-                                fontWeight: 500,
-                                fontSize: "14px",
-                                marginTop: "24px",
-                                padding: "0",
-                            }}
+                            <button
                                 onClick={() => setAmenitiesOpen(true)}
-                                className="font-semibold"
+                                className="flex items-center justify-center w-full h-12 mt-6 rounded-md bg-blue-100 text-blue-400 font-semibold text-sm"
                             >
                                 Show all {gym.amenities.length} amenities
                             </button>
@@ -438,21 +444,8 @@ export default function GymDetails() {
                         </div>
 
                         {gym.rules.length > 3 && (
-                            <button style={{
-                                display: "flex",
-                                justifyContent: "center",
-                                alignItems: "center",
-                                width: "100%",
-                                height: "48px",
-                                backgroundColor: "#DBEAFE",
-                                color: "#60A5FA",
-                                borderRadius: "6px",
-                                fontWeight: 500,
-                                fontSize: "16px",
-                                marginTop: "24px",
-                                fontWidth: "600",
-                                padding: "0",
-                            }}
+                            <button
+                                className="flex items-center justify-center w-full h-12 mt-6 rounded-md bg-blue-100 text-blue-400 font-semibold text-sm"
                                 onClick={() => setRulesOpen(true)}
                             >
                                 View all rules
@@ -463,39 +456,6 @@ export default function GymDetails() {
 
                 {/* ===== Sticky Bottom CTA ===== */}
 
-                {/* {storedBooking ? (
-                <div className="fixed bottom-14 left-0 right-0 bg-white">
-                    <div className="bg-blue-50 text-blue-700 text-sm px-4 py-3 font-medium text-center">
-                        Last entry for selected duration: {lastEntryTime}
-                    </div>
-
-                    <div className="flex justify-between items-center px-4 pb-5 pt-2">
-                        <div className="space-y-2">
-
-                            <p className="text-xs font-semibold text-[#4A4A4A] mt-2">
-                                {initialBookingState?.selectedDate &&
-                                    formatWithOrdinal(initialBookingState.selectedDate)}
-                                <span
-                                    className="ml-1 cursor-pointer text-[#2563EB] inline-flex items-center"
-                                    onClick={() => setOpen(true)}
-                                >
-                                    <FaRegEdit />
-                                </span>
-                            </p>
-
-                            <div className="flex items-center gap-1">
-                                <p className="text-xl font-bold">
-                                    ₹{totalWithHr && totalWithHr + 12 + 2.16}{initialBookingState?.selectedHours?.label ? `/${editSelectedHr}` : "Hr"}
-                                </p>
-                            </div>
-                        </div>
-
-                        <button onClick={() => navigate("/reviewpay")} className="bg-blue-600 text-white px-6 py-3 rounded-md w-[163px] font-medium">
-                            Confirm
-                        </button>
-                    </div>
-                </div>
-            ) : ( */}
                 <div id="share-bottom-bar" className="fixed bottom-14 left-0 right-0 bg-white border-t px-3 pb-4 pt-1 flex justify-between items-center">
                     <div className="space-y-2">
                         <p className="text-[11px] text-[#475569] font-medium">
@@ -517,23 +477,8 @@ export default function GymDetails() {
                     </div>
 
                     <button
-                        style={{
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            width: "153px",
-                            height: "48px",
-                            backgroundColor: "#2563EB",
-                            color: "#ffffff",
-                            borderRadius: "6px",
-                            fontWeight: 500,
-                            fontSize: "14px",
-                            marginTop: "16px",
-                            padding: "0",
-                        }}
-
                         onClick={() => navigate(`/gyms/${gym.slug}/plan`)}
-                    //   className="bg-blue-600 text-white px-6 py-3 rounded-md w-[153px] font-medium"
+                        className="bg-blue-600 text-white px-6 py-4 text-sm rounded-md w-[153px] font-medium"
                     >
                         Book Hour
                     </button>

@@ -18,7 +18,7 @@ import { MdError } from "react-icons/md";
 import PaymentSuccess from "./PaymentSuccess";
 import three2 from "../assets/three2.png";
 import logoUrl from "../assets/icon2.png";
-import html2canvas from "html2canvas";
+import * as htmlToImage from "html-to-image";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 type ToastType = "success" | "error" | null;
@@ -48,93 +48,111 @@ export default function ReviewPay() {
     const storedData = localStorage.getItem("bookingData");
 
     const handleShare = async () => {
-        const element = document.getElementById("share-area");
-        const bottomBar = document.getElementById("share-bottom-bar");
-
-        if (!element) return;
-
-        if (bottomBar) {
-            bottomBar.style.position = "relative";
-            bottomBar.style.bottom = "0px";
-        }
-
-        try {
-            await document.fonts.ready;
-
-            const canvas = await html2canvas(element, {
-                useCORS: true,
-                allowTaint: false,
-                scrollX: 0,
-                scrollY: -window.scrollY,
-                windowWidth: document.documentElement.clientWidth,
-                windowHeight: document.documentElement.clientHeight,
-                scale: 2,
-            });
-
-            const finalCanvas = document.createElement("canvas");
-            const ctx = finalCanvas.getContext("2d");
-            if (!ctx) return;
-
-            const headerHeight = 100;
-            const padding = 40; // 👈 adjust spacing here
-
-            // ✅ Increase canvas size
-            finalCanvas.width = canvas.width + padding * 2;
-            finalCanvas.height = canvas.height + headerHeight + padding * 2;
-
-            // 🔵 Header background (include padding)
-            ctx.fillStyle = "#2563EB";
-            ctx.fillRect(0, 0, finalCanvas.width, headerHeight + padding);
-
-            // 🧠 Logo
-            const logo = new Image();
-            logo.src = logoUrl;
-
-            await new Promise((resolve) => {
-                logo.onload = resolve;
-                logo.onerror = resolve;
-            });
-
-            const maxLogoHeight = 40;
-            const logoRatio = logo.width / logo.height;
-            const logoWidth = maxLogoHeight * logoRatio;
-            const logoHeight = maxLogoHeight;
-
-            // Text
-            const text = "Viigo";
-            ctx.font = "bold 50px sans-serif";
-            ctx.fillStyle = "#fff";
-            ctx.textAlign = "left";
-            ctx.textBaseline = "middle";
-
-            const textWidth = ctx.measureText(text).width;
-            const gap = 20;
-
-            // ✅ Center properly (with padding accounted)
-            const totalWidth = logoWidth + gap + textWidth;
-            const startX = (finalCanvas.width - totalWidth) / 2;
-
-            // Draw logo
-            ctx.drawImage(
-                logo,
-                startX,
-                (headerHeight + padding - logoHeight) / 2,
-                logoWidth,
-                logoHeight
-            );
-
-            // Draw text
-            ctx.fillText(
-                text,
-                startX + logoWidth + gap,
-                (headerHeight + padding) / 2
-            );
-
-            // 🖼 Draw content with padding offset
-            ctx.drawImage(canvas, padding, headerHeight + padding);
-
-            const dataUrl = finalCanvas.toDataURL("image/png");
-            const blob = await (await fetch(dataUrl)).blob();
+            const element = document.getElementById("share-area");
+            const bottomBar = document.getElementById("share-bottom-bar");
+    
+            if (!element) return;
+    
+            if (bottomBar) {
+                bottomBar.style.position = "relative";
+                bottomBar.style.bottom = "0px";
+            }
+    
+            try {
+                await document.fonts.ready;
+    
+                // 🧠 Convert DOM → image
+                const dataUrl = await htmlToImage.toPng(element, {
+                    pixelRatio: 2,
+                    cacheBust: true,
+                });
+    
+                const baseImage = new Image();
+                baseImage.src = dataUrl;
+    
+                await new Promise((res) => {
+                    baseImage.onload = res;
+                });
+    
+                // 🎨 Create final canvas
+                const canvas = document.createElement("canvas");
+                const ctx = canvas.getContext("2d");
+                if (!ctx) return;
+    
+                const headerHeight = 120;
+    
+                canvas.width = baseImage.width;
+                canvas.height = baseImage.height + headerHeight;
+    
+                // 🔵 Background
+                ctx.fillStyle = "#ffffff";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+                // 🔷 Header gradient
+                const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+                gradient.addColorStop(0, "#2563EB");
+                gradient.addColorStop(1, "#3B82F6");
+    
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, canvas.width, headerHeight);
+    
+                // 🧠 Logo
+                const logo = new Image();
+                logo.src = logoUrl;
+    
+                await new Promise((res) => {
+                    logo.onload = res;
+                    logo.onerror = res;
+                });
+    
+    
+                // Max height constraint (this controls visual size)
+                const maxLogoHeight = 50;
+    
+                // Calculate aspect ratio
+                const aspectRatio = logo.width / logo.height;
+    
+                // Compute final dimensions
+                const logoHeight = maxLogoHeight;
+                const logoWidth = logoHeight * aspectRatio;
+    
+                // Center content
+                const text = "Viigo";
+                ctx.font = "bold 50px sans-serif";
+                ctx.fillStyle = "#fff";
+    
+                // Measure text
+                const textWidth = ctx.measureText(text).width;
+    
+                // spacing between logo & text
+                const gap = 20;
+    
+                // total width for centering
+                const totalWidth = logoWidth + gap + textWidth;
+                const startX = (canvas.width - totalWidth) / 2;
+    
+                // draw logo (no distortion)
+                ctx.drawImage(
+                    logo,
+                    startX,
+                    (headerHeight - logoHeight) / 2,
+                    logoWidth,
+                    logoHeight
+                );
+    
+                // draw text
+                ctx.fillText(
+                    text,
+                    startX + logoWidth + gap,
+                    headerHeight / 2 + 16
+                );
+    
+                // 🖼 Draw main content
+                ctx.drawImage(baseImage, 0, headerHeight);
+    
+                // 📦 Export
+                const finalUrl = canvas.toDataURL("image/png");
+                const blob = await (await fetch(finalUrl)).blob();
 
             const userName = userData?.full_name
 
@@ -653,33 +671,6 @@ Time: ${selectedHours?.label}
                                         <span>{formatTime12Hour(gym?.open_time)} – {formatTime12Hour(gym?.close_time)} </span>
                                     </div>
                                 </div>
-
-                                {/* <hr /> */}
-
-                                {/* Peak hours */}
-                                {/* <div>
-                                <h4 className="font-medium">Peak hours</h4>
-
-                                <div className="flex items-center gap-2 text-sm text-gray-600 mt-2">
-                                    <IoPeopleOutline size={14} />
-
-                                    <div className="flex gap-2 flex-wrap">
-                                        {allPeaks.map(([start, end], i) => (
-                                            <span key={i}>
-                                                {formatTime12Hour(start)} - {formatTime12Hour(end)}
-                                                {i !== allPeaks.length - 1 && ","}
-                                            </span>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                <div className="flex items-start gap-2 text-xs text-gray-500 mt-2">
-                                    <IoInformationCircleOutline size={14} />
-                                    <span>
-                                        Workouts during peak hours may use more minutes
-                                    </span>
-                                </div>
-                            </div> */}
                             </div>
 
                             {/* ===== Price Breakdown ===== */}
