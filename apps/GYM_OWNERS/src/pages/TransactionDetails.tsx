@@ -8,8 +8,9 @@ import { TbDownload } from 'react-icons/tb';
 import NotFound from './NotFound';
 import { useAppContext } from '../context/AppContext';
 import { useEffect, useRef, useState } from 'react';
-import * as htmlToImage from "html-to-image";
+// import * as htmlToImage from "html-to-image";
 import jsPDF from "jspdf";
+import { snapdom } from '@zumer/snapdom';
 
 const formatAmount = (n: number) => `${n > 0 ? "+" : "-"}₹${Math.abs(n)}`;
 
@@ -63,16 +64,17 @@ const TransactionDetails = () => {
         try {
             await document.fonts.ready;
 
-            const dataUrl = await htmlToImage.toPng(captureRef.current, {
-                pixelRatio: 2,
-                cacheBust: true,
+            // Use Snapdom instead of html-to-image
+            const canvasEl = await snapdom.toCanvas(captureRef.current, {
+                scale: 2,
+                backgroundColor: "#ffffff",
             });
 
-            const pdf = new jsPDF("p", "mm", "a4");
+            const dataUrl = canvasEl.toDataURL("image/png");
 
+            const pdf = new jsPDF("p", "mm", "a4");
             const imgProps = pdf.getImageProperties(dataUrl);
             const pdfWidth = pdf.internal.pageSize.getWidth();
-
             const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
 
             pdf.addImage(dataUrl, "PNG", 0, 0, pdfWidth, pdfHeight);
@@ -89,12 +91,17 @@ const TransactionDetails = () => {
         try {
             await document.fonts.ready;
 
-            const dataUrl = await htmlToImage.toPng(captureRef.current, {
-                pixelRatio: 2,
-                cacheBust: true,
+            // Snapdom for canvas
+            const canvasEl = await snapdom.toCanvas(captureRef.current, {
+                scale: 2,
+                backgroundColor: "#ffffff",
             });
 
-            const blob = await (await fetch(dataUrl)).blob();
+            // Convert canvas → Blob
+            const blob = await new Promise<Blob | null>((resolve) =>
+                canvasEl.toBlob(resolve, "image/png")
+            );
+            if (!blob) throw new Error("Failed to create image blob");
 
             const file = new File(
                 [blob],
@@ -111,7 +118,7 @@ const TransactionDetails = () => {
             } else {
                 // fallback download
                 const link = document.createElement("a");
-                link.href = dataUrl;
+                link.href = URL.createObjectURL(file);
                 link.download = `transaction-${transaction?.id}.png`;
                 link.click();
             }

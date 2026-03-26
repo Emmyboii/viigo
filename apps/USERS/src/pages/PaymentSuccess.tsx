@@ -11,8 +11,8 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { useAppContext, type GymCard } from "../context/AppContext";
 import { MdPhone } from "react-icons/md";
-import { toPng } from "html-to-image";
 import { TiLocation } from "react-icons/ti";
+import { snapdom } from "@zumer/snapdom";
 
 type PaymentSuccessProps = {
     gym: GymCard | null
@@ -56,25 +56,32 @@ export default function PaymentSuccess({ onClose }: PaymentSuccessProps) {
         if (!shareRef.current) return;
 
         try {
-            const dataUrl = await toPng(shareRef.current, {
-                cacheBust: true,   // avoids stale images
-                pixelRatio: 2,     // high quality
+            // 🧠 SNAPDOM: generate canvas from element
+            const canvasEl = await snapdom.toCanvas(shareRef.current, {
+                scale: 2,
+                backgroundColor: "#ffffff",
             });
 
-            const blob = await (await fetch(dataUrl)).blob();
-            const file = new File([blob], "booking-pass.png", {
-                type: "image/png",
+            // convert canvas → Blob
+            const blob = await new Promise<Blob | null>((resolve) => {
+                canvasEl.toBlob(resolve, "image/png");
             });
 
+            if (!blob) throw new Error("Failed to create image blob");
+
+            // create File object
+            const file = new File([blob], "booking-pass.png", { type: "image/png" });
+
+            // use Web Share API if available
             if (navigator.share && navigator.canShare({ files: [file] })) {
                 await navigator.share({
                     files: [file],
                     title: "My Booking Pass",
                 });
             } else {
-                // fallback (download)
+                // fallback download
                 const link = document.createElement("a");
-                link.href = dataUrl;
+                link.href = URL.createObjectURL(file);
                 link.download = "booking-pass.png";
                 link.click();
             }
@@ -215,7 +222,7 @@ export default function PaymentSuccess({ onClose }: PaymentSuccessProps) {
 
                         <div className="flex-1">
                             <div className="flex justify-between items-center gap-2">
-                                <h2 className="font-semibold text-lg">
+                                <h2 className="font-semibold text-nowrap text-lg">
                                     {pass?.gym_name}
                                 </h2>
 
@@ -244,7 +251,7 @@ export default function PaymentSuccess({ onClose }: PaymentSuccessProps) {
 
                             <div className="flex items-center gap-1 text-sm opacity-90">
                                 <FiMapPin className="w-4 h-4" />
-                                <span className="pl-2">{`${pass.gym_open_till}`}</span>
+                                <span className="pl-2 text-nowrap">{`${pass.gym_open_till}`}</span>
                             </div>
                         </div>
                     </div>
@@ -282,7 +289,7 @@ export default function PaymentSuccess({ onClose }: PaymentSuccessProps) {
 
                     {/* Timings */}
                     <div className="space-y-3 text-sm">
-                        <div className="flex items-center text-[#DBEAFE] justify-center gap-2">
+                        <div className="flex items-center text-nowrap text-[#DBEAFE] justify-center gap-2">
                             <FiClock className="w-4 h-4" />
                             Gym timings : <span>{pass.gym_timings} </span>
                         </div>
@@ -292,7 +299,7 @@ export default function PaymentSuccess({ onClose }: PaymentSuccessProps) {
                             <div>
                                 <div className="flex gap-2 flex-wrap">
                                     Peak hours :
-                                    <div className="flex gap-2 flex-wrap">
+                                    <div className="flex gap-2 flex-wrap text-nowrap">
                                         {pass.peak_hours}
                                     </div>
                                 </div>

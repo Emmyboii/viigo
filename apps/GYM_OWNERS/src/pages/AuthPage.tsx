@@ -1,5 +1,7 @@
 import email from '../assets/loginEmail.png'
 import login from '../assets/loginIng.png'
+import logo from '../assets/icon2.png'
+import lock from '../assets/lock.png'
 // import { FcGoogle } from "react-icons/fc";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -199,15 +201,30 @@ const AuthPage = () => {
   });
 
   return (
-    <div className="bg-[#ffffff] overflow-x-hidden">
-      <div className="relative h-[50vh] bg-[#ffffff] text-white overflow-hidden">
+    <div className="bg-[#ffffff] overflow-x-hidden flex mk:flex-row flex-col w-full">
+      <div className="relative mk:h-screen h-[50vh] bg-[#ffffff] text-white overflow-hidden block mk:hidden">
         <img src={login} alt="Login background" className="w-full h-full object-cover" />
       </div>
 
-      <div className="bg-white rounded-t-3xl h-1/2 p-5 space-y-6">
+      <div className='bg-[#2563EB] text-white space-y-5 h-screen mk:flex flex-col justify-center pt-[340px] p-7 lg:p-16 w-1/2 hidden'>
+        <img src={logo} alt="" className='lg:w-40 w-24' />
+        <p className='lg:text-[55px] lf:text-[60px] text-[30px] font-semibold'>Manage your gym efficiently</p>
+        <p className='lg:text-2xl text-lg font-medium max-w-[590px]'>Join thousands of gym owners who use Viigo to streamline bookings, manage memberships, and grow their fitness business.</p>
+      </div>
+
+      <div className="bg-white relative rounded-t-3xl mk:h-screen h-1/2 mk:flex flex-col justify-center p-5 mk:p-7 space-y-6 mk:w-1/2 mk:max-w-[450px] mk:mx-auto">
         {toast && <Toast type={toast.type} text={toast.message} />}
 
-        <p className="font-semibold text-lg">Login or signup Viigo to Book <br /> Workouts on hourly basis </p>
+        <p className="font-semibold text-lg block mk:hidden">Login or signup Viigo to Book <br /> Workouts on hourly basis </p>
+
+        <div className='space-y-2 mk:flex hidden flex-col items-center'>
+          <img src={lock} alt="" className='w-[50px]' />
+
+          <p className='text-center text-[28px] font-bold'>Welcome Back</p>
+
+          <p className='text-center text-[#475569] font-semibold'>Login or Signup to manage your gym</p>
+
+        </div>
 
         {!useEmail ? (
           <form onSubmit={handleContinue}>
@@ -313,7 +330,7 @@ function Toast({ text, type }: { text: string; type: ToastType }) {
   return (
     <div
       role="alert"
-      className={`fixed w-[280px] bottom-10 z-50 left-1/2 justify-center -translate-x-1/2 
+      className={`mk:absolute fixed w-[280px] bottom-10 z-50 left-1/2 justify-center -translate-x-1/2 
       bg-white px-4 py-3 rounded-lg flex items-center gap-3
       shadow-[0_10px_40px_rgba(0,0,0,0.18)] animate-[fadeIn_0.2s_ease-out]`}
     >

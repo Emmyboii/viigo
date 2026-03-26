@@ -42,8 +42,17 @@
     }
 }
 
+@keyframes slideRight {
+    from { right: -480px; } /* width of your modal */
+    to { right: 0; }
+}
+
 .animate-slideUp {
     animation: slideUp 0.5s ease-out;
+}
+
+.animate-slideRight {
+    animation: slideRight 0.5s ease-out;
 }
 
 /* Hide scrollbar */

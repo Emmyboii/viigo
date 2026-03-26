@@ -26,7 +26,7 @@ const WalletDetails = () => {
                 <UnverifiedWallet balance={balance} isActive={wallet?.is_active ?? false} />
             )}
 
-            <Footer />
+            
         </Container>
     )
 }

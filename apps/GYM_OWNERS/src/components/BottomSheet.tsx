@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { FiX } from "react-icons/fi";
+import { useLocation } from "react-router-dom";
 
 interface BottomSheetProps {
   open: boolean;
@@ -16,10 +17,13 @@ export default function BottomSheet({
   children,
   footer,
 }: BottomSheetProps) {
+
+  const location = useLocation()
+
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50">
+    <div className={`${location.pathname === "/gym" ? 'fixed mk:absolute inset-0 z-[99]' : 'fixed inset-0 z-[99]'}`}>
       {/* Overlay */}
       <div
         onClick={onClose}
@@ -27,8 +31,7 @@ export default function BottomSheet({
       />
 
       {/* Sheet */}
-      <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl flex flex-col max-h-[85vh] animate-slideUp">
-        
+      <div className={`${location.pathname === "/" ? "absolute bottom-0 right-0 left-0 mk:left-auto bg-white rounded-t-3xl flex flex-col max-h-[85vh] animate-slideUp mk:w-[480px] mk:rounded-l-3xl" : "absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl flex flex-col max-h-[85vh] animate-slideUp"}`}>
         {/* Drag handle */}
         <div className="w-12 h-1 bg-gray-300 rounded-full mx-auto mt-3 mb-4 invisible" />
 

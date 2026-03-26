@@ -14,7 +14,7 @@ export function Chip({ label, active, onClick }: ChipProps) {
     return (
         <button
             onClick={onClick}
-            className={`px-3 py-1.5 rounded-lg text-[13px] border w-full text-nowrap transition
+            className={`px-3 py-1.5 rounded-lg text-[13px] border w-full mk:w-fit text-nowrap transition
             ${active
                     ? "bg-[#DBEAFE] border-[#2563EB] text-[#2563EB]"
                     : "bg-[#ffffff] border-[#CBD5E1] text-[#0F172A]"}

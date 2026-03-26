@@ -18,7 +18,8 @@ import { MdError } from "react-icons/md";
 import PaymentSuccess from "./PaymentSuccess";
 import three2 from "../assets/three2.png";
 import logoUrl from "../assets/icon2.png";
-import * as htmlToImage from "html-to-image";
+// import * as htmlToImage from "html-to-image";
+import { snapdom } from "@zumer/snapdom";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 type ToastType = "success" | "error" | null;
@@ -48,115 +49,103 @@ export default function ReviewPay() {
     const storedData = localStorage.getItem("bookingData");
 
     const handleShare = async () => {
-            const element = document.getElementById("share-area");
-            const bottomBar = document.getElementById("share-bottom-bar");
-    
-            if (!element) return;
-    
-            if (bottomBar) {
-                bottomBar.style.position = "relative";
-                bottomBar.style.bottom = "0px";
-            }
-    
-            try {
-                await document.fonts.ready;
-    
-                // 🧠 Convert DOM → image
-                const dataUrl = await htmlToImage.toPng(element, {
-                    pixelRatio: 2,
-                    cacheBust: true,
-                });
-    
-                const baseImage = new Image();
-                baseImage.src = dataUrl;
-    
-                await new Promise((res) => {
-                    baseImage.onload = res;
-                });
-    
-                // 🎨 Create final canvas
-                const canvas = document.createElement("canvas");
-                const ctx = canvas.getContext("2d");
-                if (!ctx) return;
-    
-                const headerHeight = 120;
-    
-                canvas.width = baseImage.width;
-                canvas.height = baseImage.height + headerHeight;
-    
-                // 🔵 Background
-                ctx.fillStyle = "#ffffff";
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-                // 🔷 Header gradient
-                const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
-                gradient.addColorStop(0, "#2563EB");
-                gradient.addColorStop(1, "#3B82F6");
-    
-                ctx.fillStyle = gradient;
-                ctx.fillRect(0, 0, canvas.width, headerHeight);
-    
-                // 🧠 Logo
-                const logo = new Image();
-                logo.src = logoUrl;
-    
-                await new Promise((res) => {
-                    logo.onload = res;
-                    logo.onerror = res;
-                });
-    
-    
-                // Max height constraint (this controls visual size)
-                const maxLogoHeight = 50;
-    
-                // Calculate aspect ratio
-                const aspectRatio = logo.width / logo.height;
-    
-                // Compute final dimensions
-                const logoHeight = maxLogoHeight;
-                const logoWidth = logoHeight * aspectRatio;
-    
-                // Center content
-                const text = "Viigo";
-                ctx.font = "bold 50px sans-serif";
-                ctx.fillStyle = "#fff";
-    
-                // Measure text
-                const textWidth = ctx.measureText(text).width;
-    
-                // spacing between logo & text
-                const gap = 20;
-    
-                // total width for centering
-                const totalWidth = logoWidth + gap + textWidth;
-                const startX = (canvas.width - totalWidth) / 2;
-    
-                // draw logo (no distortion)
-                ctx.drawImage(
-                    logo,
-                    startX,
-                    (headerHeight - logoHeight) / 2,
-                    logoWidth,
-                    logoHeight
-                );
-    
-                // draw text
-                ctx.fillText(
-                    text,
-                    startX + logoWidth + gap,
-                    headerHeight / 2 + 16
-                );
-    
-                // 🖼 Draw main content
-                ctx.drawImage(baseImage, 0, headerHeight);
-    
-                // 📦 Export
-                const finalUrl = canvas.toDataURL("image/png");
-                const blob = await (await fetch(finalUrl)).blob();
+        const element = document.getElementById("share-area");
+        const bottomBar = document.getElementById("share-bottom-bar");
+
+        if (!element) return;
+
+        // Save original styles
+        let originalPosition = "";
+        let originalBottom = "";
+        if (bottomBar) {
+            originalPosition = bottomBar.style.position;
+            originalBottom = bottomBar.style.bottom;
+
+            bottomBar.style.position = "relative";
+            bottomBar.style.bottom = "0px";
+        }
+        try {
+            await document.fonts.ready;
+
+            // 🧠 SNAPDOM (replaces html-to-image)
+            const canvasEl = await snapdom.toCanvas(element, {
+                scale: 2, // similar to pixelRatio
+                backgroundColor: "#ffffff",
+            });
+
+            const baseImage = new Image();
+            baseImage.src = canvasEl.toDataURL("image/png");
+
+            await new Promise((res) => {
+                baseImage.onload = res;
+            });
+
+            // 🎨 FINAL CANVAS
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+            if (!ctx) return;
+
+            // Adjust header height dynamically if needed
+            const headerHeight = 150 * 3; // taller header for bigger logo/text
+
+            canvas.width = baseImage.width;
+            canvas.height = baseImage.height + headerHeight;
+
+            // 🔷 Gradient header
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+            gradient.addColorStop(0, "#2563EB");
+            gradient.addColorStop(1, "#3B82F6");
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, headerHeight);
+
+            // 🧠 Logo
+            const logo = new Image();
+            logo.crossOrigin = "anonymous";
+            logo.src = logoUrl;
+            await new Promise((res) => { logo.onload = res; logo.onerror = res; });
+
+            // Scale logo bigger
+            const logoHeight = 80 * 3; // bigger than before
+            const logoWidth = logoHeight * (logo.width / logo.height);
+
+            // 🧠 Text
+            const text = "Viigo";
+            ctx.font = `bold ${70 * 3}px sans-serif`; // larger font
+            ctx.fillStyle = "#fff";
+
+            // Center logo + text horizontally
+            const textWidth = ctx.measureText(text).width;
+            const gap = 20;
+            const totalWidth = logoWidth + gap + textWidth;
+            const startX = (canvas.width - totalWidth) / 2;
+
+            // Draw logo
+            ctx.drawImage(
+                logo,
+                startX,
+                (headerHeight - logoHeight) / 2, // vertically center
+                logoWidth,
+                logoHeight
+            );
+
+            // Draw text vertically centered
+            ctx.textBaseline = "middle";
+            ctx.fillText(
+                text,
+                startX + logoWidth + gap,
+                headerHeight / 2
+            );
+
+            // 🖼 Draw main content
+            ctx.drawImage(baseImage, 0, headerHeight);
+
+            // 📦 Export
+            const finalUrl = canvas.toDataURL("image/png");
+            const blob = await (await fetch(finalUrl)).blob();
 
             const userName = userData?.full_name
 
-            const fileName = `viigo-booking-${selectedHours?.value || "session"}hr-${selectedDate || "date"}.png`;
+            const fileName = `viigo-booking.png`;
 
             const file = new File([blob], fileName, { type: "image/png" });
 
@@ -176,7 +165,7 @@ Time: ${selectedHours?.label}
                 window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, "_blank");
 
                 const link = document.createElement("a");
-                link.href = dataUrl;
+                link.href = finalUrl;
                 link.download = fileName
                 link.click();
             }
@@ -578,7 +567,8 @@ Time: ${selectedHours?.label}
                             {/* ===== Gym Summary Card ===== */}
                             <div className="bg-white rounded border flex gap-1 h-[143px]">
                                 <img
-                                    src={`http://api.viigo.in/${normalizeImagePath(gym?.images[0]?.image)}`}
+                                    crossOrigin="anonymous"
+                                    src={`https://api.viigo.in/${normalizeImagePath(gym?.images[0]?.image)}`}
                                     alt={gym?.name}
                                     className="w-[85px] min-h-full rounded-tl rounded-bl object-cover"
                                 />
@@ -586,7 +576,7 @@ Time: ${selectedHours?.label}
                                 <div className="flex-1 p-2">
                                     <h2 className="font-semibold">{gym?.name}</h2>
 
-                                    <div className="flex items-center text-xs text-[#475569] gap-1 mt-2 flex-wrap">
+                                    <div className="flex items-center text-nowrap text-xs text-[#475569] gap-1 mt-2 flex-wrap">
                                         <HiLocationMarker size={12} />
                                         <span>{gym?.distance} {gym?.area}</span>
                                         <span>•</span>
@@ -615,9 +605,9 @@ Time: ${selectedHours?.label}
                                         <div className="space-y-2">
                                             <h3 className="font-semibold">Selected Pass</h3>
 
-                                            <div className="flex items-center gap-1 text-sm mt-2">
+                                            <div className="flex items-center gap-1 text-nowrap text-sm mt-2">
                                                 <img src={three2} alt="Three" className="mt- w-4" />
-                                                <p className="break-all text-[#0F172A]">{userData?.full_name.split(" ")[0] || userData?.email} +{peopleCount} {peopleCount > 1 ? "Friends" : "Friend"} </p>
+                                                <p className="break-al text-[#0F172A]">{userData?.full_name.split(" ")[0] || userData?.email} +{peopleCount} {peopleCount > 1 ? "Friends" : "Friend"} </p>
                                             </div>
                                         </div>
 
@@ -636,7 +626,7 @@ Time: ${selectedHours?.label}
                                         <div className="space-y-3">
                                             <h3 className="font-semibold">Selected Pass</h3>
 
-                                            <div className="flex items-center gap-1 text-sm text-[#0F172A] mt-2">
+                                            <div className="flex items-center gap-1 text-nowrap text-sm text-[#0F172A] mt-2">
                                                 <HiOutlineCalendar size={14} />
                                                 <span>{formattedShortDate}</span>
                                                 <span>•</span>
@@ -666,7 +656,7 @@ Time: ${selectedHours?.label}
                                 <div>
                                     <h4 className="font-medium">Gym timings</h4>
 
-                                    <div className="flex items-center gap-2 text-sm text-[#0F172A] mt-2">
+                                    <div className="flex items-center gap-2 text-nowrap text-sm text-[#0F172A] mt-2">
                                         <IoTimeOutline size={14} />
                                         <span>{formatTime12Hour(gym?.open_time)} – {formatTime12Hour(gym?.close_time)} </span>
                                     </div>
@@ -674,30 +664,30 @@ Time: ${selectedHours?.label}
                             </div>
 
                             {/* ===== Price Breakdown ===== */}
-                            <div className="space-y-2 text-sm text-[#6A6A6A] mt-2">
+                            <div className="space-y-2 text-sm text-[#6A6A6A] text-nowrap mt-2">
                                 <h3 className="text-black text-sm mb-2">
                                     Price Breakdown
                                 </h3>
 
-                                <div className="flex justify-between">
+                                <div className="flex justify-between text-nowrap">
                                     {/* <span>{previewData?.duration ?? "N/A"} Hours</span> */}
                                     <span>{selectedHours?.label}</span>
                                     <span className="font-medium text-[#0F172A]">Rs. {previewData?.base_price ?? "N/A"}</span>
                                 </div>
 
-                                <div className="flex justify-between">
+                                <div className="flex justify-between text-nowrap">
                                     <span>Platform Fee</span>
                                     <span className="font-medium text-[#0F172A]">Rs. {previewData?.platform_fee ?? "N/A"}</span>
                                 </div>
 
-                                <div className="flex justify-between">
+                                <div className="flex justify-between text-nowrap">
                                     <span>GST on Platform Fee</span>
                                     <span className="font-medium text-[#0F172A]">Rs. {previewData?.gst_fee ?? "N/A"}</span>
                                 </div>
 
                                 <hr className="border-dashed my-2" />
 
-                                <div className="flex justify-between text-[#0F172A] text-sm">
+                                <div className="flex justify-between text-nowrap text-[#0F172A] text-sm">
                                     <span>Total</span>
                                     <span className="text-sm text-black">Rs. {previewData?.total_payable ?? "N/A"}</span>
                                 </div>
@@ -712,11 +702,11 @@ Time: ${selectedHours?.label}
 
                             <div className="flex justify-between items-center px-4 py-5">
                                 <div>
-                                    <p className="text-xs text-[#475569] font-medium mb-1">
+                                    <p className="text-xs text-[#475569] text-nowrap font-medium mb-1">
                                         Valid on {formattedLongDate}
                                     </p>
 
-                                    <p className="text-[22px] font-semibold">
+                                    <p className="text-[22px] font-semibold text-nowrap">
                                         ₹{previewData?.total_payable ?? "N/A"}/{selectedHours?.label}
                                     </p>
                                 </div>

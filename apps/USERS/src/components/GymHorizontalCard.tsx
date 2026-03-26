@@ -2,7 +2,7 @@ import FacilityTag from "./FacilityTag";
 // import { FaDumbbell, FaShower } from "react-icons/fa";
 import type { Gym } from "./types/gym";
 import { useState } from "react";
-import ImageCarousel from "./ImageCarousel";
+// import ImageCarousel from "./ImageCarousel";
 import { HiLocationMarker } from "react-icons/hi";
 import { GoDotFill } from "react-icons/go";
 import { useNavigate } from "react-router-dom";
@@ -23,7 +23,7 @@ export default function GymHorizontalCard({ gym }: GymHorizontalCardProps) {
 
     return (
         <div className="bg-white rounded border border-[#E2E8F0] flex">
-            <div className="w-28 rounded-tl rounded-bl overflow-hidden">
+            {/* <div className="w-28 rounded-tl rounded-bl overflow-hidden">
                 <ImageCarousel
                     images={gym.images.map(img => ({
                         ...img,
@@ -31,7 +31,14 @@ export default function GymHorizontalCard({ gym }: GymHorizontalCardProps) {
                     }))}
                     enableFullscreen={false}
                 />
-            </div>
+            </div> */}
+
+            <img
+                crossOrigin="anonymous"
+                src={`https://api.viigo.in/${normalizeImagePath(gym?.images[0]?.image)}`}
+                alt={gym?.name}
+                className="w-[85px] min-h-full rounded-tl rounded-bl object-cover"
+            />
 
             <div className="flex flex-col justify-between w-full p-3">
                 <div>

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import Footer from "../components/Footer";
+
 import { useAppContext, type WalletType } from "../context/AppContext";
 import { FaCircleCheck } from "react-icons/fa6";
 import { MdError } from "react-icons/md";
@@ -199,7 +199,7 @@ export default function EditWallet() {
                 </button>
 
             </form>
-            <Footer />
+            
         </div>
     );
 }

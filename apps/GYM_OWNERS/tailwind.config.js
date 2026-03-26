@@ -8,7 +8,7 @@ export default {
     extend: {
       screens: {
         '3xl': '2050px',
-        'lj': '1400px',
+        'lj': '1300px',
         'lf': '1050px',
         'lw': '1101px',
         'mf': '950px',

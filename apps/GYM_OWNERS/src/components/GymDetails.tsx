@@ -2,17 +2,19 @@ import { FiArrowLeft } from "react-icons/fi";
 // import { FaRegClock } from "react-icons/fa";
 import { useCallback, useEffect, useMemo, useState, type JSX } from "react";
 // import { PiUserGearFill } from "react-icons/pi";
-import { HiLocationMarker, HiOutlineLocationMarker, HiShare, HiUserAdd } from "react-icons/hi";
+import { HiLocationMarker, HiShare, HiUserAdd } from "react-icons/hi";
 import ImageCarousel from "./ImageCarousel";
-import Footer from "./Footer";
+
 import BottomSheet from "./BottomSheet";
 import { useNavigate } from "react-router";
 import { FaCircleCheck } from "react-icons/fa6";
 import { MdError } from "react-icons/md";
 import logoUrl from "../assets/icon2.png";
-import * as htmlToImage from "html-to-image";
+import edit from "../assets/edit.png";
+// import * as htmlToImage from "html-to-image";
 import { FaRegClock } from "react-icons/fa";
 import { normalizeImagePath } from "../context/AppContext";
+import { snapdom } from "@zumer/snapdom";
 
 type ToastType = "success" | "error" | null;
 
@@ -86,118 +88,107 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
 
         if (!element) return;
 
+        // Save original styles
         if (bottomBar) {
+
             bottomBar.style.position = "relative";
             bottomBar.style.bottom = "0px";
         }
-
         try {
             await document.fonts.ready;
 
-            // 🧠 Convert DOM → image
-            const dataUrl = await htmlToImage.toPng(element, {
-                pixelRatio: 2,
-                cacheBust: true,
+            // 🧠 SNAPDOM (replaces html-to-image)
+            const canvasEl = await snapdom.toCanvas(element, {
+                scale: 2, // similar to pixelRatio
+                backgroundColor: "#ffffff",
             });
 
             const baseImage = new Image();
-            baseImage.src = dataUrl;
+            baseImage.src = canvasEl.toDataURL("image/png");
 
             await new Promise((res) => {
                 baseImage.onload = res;
             });
 
-            // 🎨 Create final canvas
+            // 🎨 FINAL CANVAS
             const canvas = document.createElement("canvas");
             const ctx = canvas.getContext("2d");
             if (!ctx) return;
 
-            const headerHeight = 120;
+            // Adjust header height dynamically if needed
+            const headerHeight = 150 * 3; // taller header for bigger logo/text
 
             canvas.width = baseImage.width;
             canvas.height = baseImage.height + headerHeight;
 
-            // 🔵 Background
-            ctx.fillStyle = "#ffffff";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // 🔷 Header gradient
+            // 🔷 Gradient header
             const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
             gradient.addColorStop(0, "#2563EB");
             gradient.addColorStop(1, "#3B82F6");
-
             ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, canvas.width, headerHeight);
 
             // 🧠 Logo
             const logo = new Image();
+            logo.crossOrigin = "anonymous";
             logo.src = logoUrl;
+            await new Promise((res) => { logo.onload = res; logo.onerror = res; });
 
-            await new Promise((res) => {
-                logo.onload = res;
-                logo.onerror = res;
-            });
+            // Scale logo bigger
+            const logoHeight = 80 * 3; // bigger than before
+            const logoWidth = logoHeight * (logo.width / logo.height);
 
-
-            // Max height constraint (this controls visual size)
-            const maxLogoHeight = 50;
-
-            // Calculate aspect ratio
-            const aspectRatio = logo.width / logo.height;
-
-            // Compute final dimensions
-            const logoHeight = maxLogoHeight;
-            const logoWidth = logoHeight * aspectRatio;
-
-            // Center content
+            // 🧠 Text
             const text = "Viigo";
-            ctx.font = "bold 50px sans-serif";
+            ctx.font = `bold ${70 * 3}px sans-serif`; // larger font
             ctx.fillStyle = "#fff";
 
-            // Measure text
+            // Center logo + text horizontally
             const textWidth = ctx.measureText(text).width;
-
-            // spacing between logo & text
             const gap = 20;
-
-            // total width for centering
             const totalWidth = logoWidth + gap + textWidth;
             const startX = (canvas.width - totalWidth) / 2;
 
-            // draw logo (no distortion)
+            // Draw logo
             ctx.drawImage(
                 logo,
                 startX,
-                (headerHeight - logoHeight) / 2,
+                (headerHeight - logoHeight) / 2, // vertically center
                 logoWidth,
                 logoHeight
             );
 
-            // draw text
+            // Draw text vertically centered
+            ctx.textBaseline = "middle";
             ctx.fillText(
                 text,
                 startX + logoWidth + gap,
-                headerHeight / 2 + 16
+                headerHeight / 2
             );
 
             // 🖼 Draw main content
             ctx.drawImage(baseImage, 0, headerHeight);
 
             // 📦 Export
-            const finalUrl = canvas.toDataURL("image/png");
+            // const finalUrl = canvas.toDataURL("image/png");
+            const blob = await new Promise<Blob | null>((resolve) =>
+                canvas.toBlob(resolve, "image/png")
+            );
 
-            // ✅ Share or fallback to download
-            if (navigator.share) {
-                await navigator.share({
-                    title: "Viigo Gym Share",
-                    text: "Check out my gym!",
-                    url: finalUrl,
-                });
-            } else {
-                const link = document.createElement("a");
-                link.href = dataUrl;
-                link.download = "viigo-gym.png";
-                link.click();
+            if (blob) {
+                const file = new File([blob], "viigo-share.png", { type: "image/png" });
+
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        title: "Viigo Gym Share",
+                        text: "Check out my gym!",
+                    });
+                } else {
+                    const link = document.createElement("a");
+                    link.href = URL.createObjectURL(file);;
+                    link.download = "viigo-gym.png";
+                    link.click();
+                }
             }
         } catch (err) {
             console.error("Share failed:", err);
@@ -346,134 +337,198 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
     }
 
     const visibleAmenities = gym?.amenities?.slice(0, 4);
+    const visibleAmenities2 = gym?.amenities?.slice(0, 9);
     const visibleRules = gym?.rules?.slice(0, 3);
+    const visibleRules2 = gym?.rules?.slice(0, 9);
 
     return (
-        <div className="min-h-screen pb-28">
+        <div className="min-h-screen pb-28 mk:pb-0 bg-[#CBD5E1] max-w-[1900px] mx-auto">
 
             {/* HEADER */}
-            <div className="flex items-center justify-between px-4 py-3 bg-white">
+            <div className="flex items-center justify-between px-4 py-3 mk:py-4 mk:px-5 bg-white">
                 <div className="flex items-center gap-2">
-                    <FiArrowLeft onClick={() => navigate(-1)} size={20} />
-                    <p className="font-medium text-lg">Your Gym Details</p>
+                    <FiArrowLeft onClick={() => navigate(-1)} size={20} className="mk:hidden" />
+                    <p className="font-medium text-lg mk:block hidden">Gym Details</p>
+                    <p className="font-medium text-lg block mk:hidden">Your Gym Details</p>
                 </div>
-                <HiShare onClick={handleShare} size={20} className="text-[#475569]" />
+                <HiShare onClick={handleShare} size={20} className="text-[#475569] mk:hidden" />
+
+                <button onClick={() => {
+                    setDisplay("edit")
+                    localStorage.setItem("gymDisplay", "edit");
+                    // navigate('/gym/edit')
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                }} className="bg-blue-600 text-white px-5 text-sm font-semibold w-[150px] mr-14 py-2 rounded-md h-[50px] hidden mk:flex items-center justify-center gap-2">
+                    <img src={edit} className="size-[16px]" alt="" />
+                    Edit Details
+                </button>
             </div>
 
-            <div id="share-area" className="min-h-screen bg-white">
+            <div id="share-area" className="min-h-screen mk:min-h-0 bg-white mk:bg-transparent">
 
+                <div className="mk:rounded-lg mk:border-t mk:border-b border-[#E2E8F0] bg-white">
+                    {/* IMAGE */}
+                    <div className="mk:pt-5">
+                        <ImageCarousel
+                            images={gym.images.map(img => ({
+                                ...img,
+                                image: normalizeImagePath(img.image)
+                            }))}
+                            height="h-48 mk:h-80"
+                        />
+                    </div>
 
-                {/* IMAGE */}
-                <ImageCarousel
-                    images={gym.images.map(img => ({
-                        ...img,
-                        image: normalizeImagePath(img.image)
-                    }))}
-                    height="h-48"
-                />
+                    {toast && <Toast type={toast.type} text={toast.message} onClose={handleToastClose} />}
 
-                {toast && <Toast type={toast.type} text={toast.message} onClose={handleToastClose} />}
+                    {/* CONTENT */}
+                    <div className="bg-white p-4 px-5 space-y-6 mb-3">
 
-                {/* CONTENT */}
-                <div className="bg-white p-4 px-5 space-y-6 mb-10">
+                        {/* Gym Name */}
+                        <div>
+                            <div className="flex items-center justify-between gap-3 w-full">
+                                <div className="w-full">
+                                    <div className="flex justify-between items-center gap-3">
+                                        <h1 className="text-xl font-bold text-[#0F172A]">{gym.name}</h1>
 
-                    {/* Gym Name */}
-                    <div>
-                        <div className="flex items-center justify-between gap-3 w-full">
-                            <div className="w-full">
-                                <div className="flex justify-between items-center gap-3">
-                                    <h1 className="text-xl font-bold text-[#0F172A]">{gym.name}</h1>
-
-                                    <div
+                                        {/* <div
                                         className="bg-[#DBEAFE] text-[#2563EB] p-2 rounded cursor-pointer transition"
                                     >
                                         <HiOutlineLocationMarker size={16} />
+                                    </div> */}
+
                                     </div>
 
+                                    <div className="flex flex-wrap items-center text-xs text-[#475569] gap-1">
+                                        <HiLocationMarker size={14} />
+                                        <span>{gym?.distance} {gym?.area}</span>
+                                        <span>•</span>
+                                        <span>Open Till</span>
+                                        <span>{formatTime12Hour(gym?.close_time)}</span>
+                                    </div>
                                 </div>
+                            </div>
 
-                                <div className="flex flex-wrap items-center text-xs text-[#475569] gap-1">
-                                    <HiLocationMarker size={14} />
-                                    <span>{gym?.distance} {gym?.area}</span>
-                                    <span>•</span>
-                                    <span>Open Till</span>
-                                    <span>{formatTime12Hour(gym?.close_time)}</span>
-                                </div>
+                            {/* Tags */}
+                            <div className="flex gap-2 mt-5 flex-wrap">
+                                {tags.map((tag, i) => (
+                                    <span
+                                        key={i}
+                                        className="flex items-center gap-1 bg-[#DBEAFE] text-[#2563EB] text-xs px-3 py-2 rounded-full"
+                                    >
+                                        {tagIcons[tag]}
+                                        {tag}
+                                    </span>
+                                ))}
+                            </div>
+
+                            <div className="mk:block hidden mt-5 space-y-2">
+                                <p className="text-xs font-medium text-gray-500">Your Gym Price Per hour</p>
+                                <p className="font-semibold text-[22px]">
+                                    ₹{gym?.hourly_rate}/Hr
+                                </p>
                             </div>
                         </div>
 
-                        {/* Tags */}
-                        <div className="flex gap-2 mt-5 flex-wrap">
-                            {tags.map((tag, i) => (
-                                <span
-                                    key={i}
-                                    className="flex items-center gap-1 bg-[#DBEAFE] text-[#2563EB] text-xs px-3 py-2 rounded-full"
+                        <div className="border border-dashed border-[#CBD5E1] mk:hidden"></div>
+
+                        {/* ===== Amenities ===== */}
+                        <div className="mk:hidden">
+                            <h2 className="text-lg font-semibold mb-3">
+                                What’s Included
+                            </h2>
+
+                            <div className="space-y-3">
+                                {visibleAmenities.map((item) => (
+                                    <div key={item.id} className="flex items-center gap-2">
+                                        <img src={`https://api.viigo.in/${normalizeImagePath(item?.icon)}`} alt={item.name} className="w-3 h-3" />
+                                        <p className="text-sm text-gray-700">
+                                            {item.name}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {gym.amenities.length > 4 && (
+                                <button
+                                    onClick={() => setAmenitiesOpen(true)}
+                                    className="mt-4 w-full bg-[#DBEAFE] py-3 rounded-xl text-[#2563EB] font-medium"
                                 >
-                                    {tagIcons[tag]}
-                                    {tag}
-                                </span>
-                            ))}
+                                    Show all {gym?.amenities.length} amenities
+                                </button>
+                            )}
                         </div>
-                    </div>
 
-                    <div className="border border-dashed border-[#CBD5E1]"></div>
+                        <div className="border border-dashed border-[#CBD5E1] mk:hidden"></div>
 
-                    {/* ===== Amenities ===== */}
-                    <div>
-                        <h2 className="text-lg font-semibold mb-3">
-                            What’s Included
-                        </h2>
+                        {/* ===== Rules ===== */}
+                        <div className="mk:hidden">
+                            <h2 className="text-lg font-semibold mb-3">
+                                Rules
+                            </h2>
 
-                        <div className="space-y-3">
-                            {visibleAmenities.map((item) => (
-                                <div key={item.id} className="flex items-center gap-2">
-                                    <img src={`http://api.viigo.in/${normalizeImagePath(item?.icon)}`} alt={item.name} className="w-3 h-3" />
-                                    <p className="text-sm text-gray-700">
-                                        {item.name}
+                            <div className="space-y-2 text-sm text-gray-600">
+                                {visibleRules.map((rule, i) => (
+                                    <p key={`${rule.id}-${i}`}>
+                                        {i + 1}. {rule.description}
                                     </p>
-                                </div>
-                            ))}
+                                ))}
+                            </div>
+
+                            {gym.rules.length > 3 && (
+                                <button
+                                    onClick={() => setRulesOpen(true)}
+                                    className="mt-4 w-full bg-[#DBEAFE] py-3 mb-2 rounded-xl text-[#2563EB] font-medium"
+                                >
+                                    View all rules
+                                </button>
+                            )}
                         </div>
 
-                        {gym.amenities.length > 4 && (
-                            <button
-                                onClick={() => setAmenitiesOpen(true)}
-                                className="mt-4 w-full bg-[#DBEAFE] py-3 rounded-xl text-[#2563EB] font-medium"
-                            >
-                                Show all {gym?.amenities.length} amenities
-                            </button>
-                        )}
+
+                        {/* TIMINGS */}
+                        <Section title="Manage Gym Availability">
+                            <div className="bg-white rounded-xl border p-3 h-[300px] overflow-y-auto space-y-3 mb-5">
+
+                                {availability.map((item, index) => (
+                                    <div
+                                        key={item.date}
+                                        className="flex items-center justify-between py-2"
+                                    >
+                                        <p className="text-sm font-semibold text-[#0F172A]">
+                                            {new Date(item.date).toDateString()}
+                                        </p>
+
+                                        <button
+                                            onClick={() => toggleDate(index)}
+                                            className={`relative w-16 h-7 rounded-full transition duration-300 ${item.is_open
+                                                ? "bg-[#22C55E] border border-[#22C55E]"
+                                                : "bg-[#94A3B8]"
+                                                }`}
+                                        >
+                                            <span
+                                                className={`absolute inset-0 flex items-center text-[10px] font-semibold px-2 ${item.is_open
+                                                    ? "justify-start text-white"
+                                                    : "justify-end text-white"
+                                                    }`}
+                                            >
+                                                {item.is_open ? "Open" : "Closed"}
+                                            </span>
+
+                                            <div
+                                                className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-md transition-all duration-300 ${item.is_open ? "right-1" : "left-1"
+                                                    }`}
+                                            />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        </Section>
                     </div>
+                </div>
 
-                    <div className="border border-dashed border-[#CBD5E1]"></div>
-
-                    {/* ===== Rules ===== */}
-                    <div>
-                        <h2 className="text-lg font-semibold mb-3">
-                            Rules
-                        </h2>
-
-                        <div className="space-y-2 text-sm text-gray-600">
-                            {visibleRules.map((rule, i) => (
-                                <p key={`${rule.id}-${i}`}>
-                                    {i + 1}. {rule.description}
-                                </p>
-                            ))}
-                        </div>
-
-                        {gym.rules.length > 3 && (
-                            <button
-                                onClick={() => setRulesOpen(true)}
-                                className="mt-4 w-full bg-[#DBEAFE] py-3 mb-2 rounded-xl text-[#2563EB] font-medium"
-                            >
-                                View all rules
-                            </button>
-                        )}
-                    </div>
-
-
+                <div className="lj:flex mk:grid lg:grid-cols-2 items-stretch p-10 justify-between gap-6 hidden">
                     {/* TIMINGS */}
-                    <Section title="Manage Gym Availability">
+                    <Section2 title="Manage Gym Availability">
                         <div className="bg-white rounded-xl border p-3 h-[300px] overflow-y-auto space-y-3">
 
                             {availability.map((item, index) => (
@@ -509,11 +564,93 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
                                 </div>
                             ))}
                         </div>
-                    </Section>
+                    </Section2>
+
+                    {/* ===== Amenities ===== */}
+                    <div className="lj:w-[70%] w-full bg-white p-6 rounded-lg flex flex-col relative">
+                        <h2 className="text-lg font-semibold mb-3">
+                            What’s Included
+                        </h2>
+
+                        <div className="flex-1">
+                            <div className="space-y-3">
+                                {visibleAmenities2.map((item) => (
+                                    <div key={item.id} className="flex items-center gap-2">
+                                        <img src={`https://api.viigo.in/${normalizeImagePath(item?.icon)}`} alt={item.name} className="w-3 h-3" />
+                                        <p className="text-sm text-gray-700">
+                                            {item.name}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {gym.amenities.length > 4 && (
+                            <button
+                                onClick={() => setAmenitiesOpen(true)}
+                                className="mt-4 w-full bg-[#DBEAFE] py-3 rounded-xl text-[#2563EB] font-medium"
+                            >
+                                Show all {gym?.amenities.length} amenities
+                            </button>
+                        )}
+
+                        <BottomSheet
+                            open={amenitiesOpen}
+                            onClose={() => setAmenitiesOpen(false)}
+                            title="What This Place Offers"
+                        >
+                            {gym?.amenities.map((item) => (
+                                <div key={item.id} className="flex items-center gap-2">
+                                    <img src={item.icon} alt={item.name} className="w-4 h-4" />
+                                    <p key={item.id} className="mb-3 text-sm">
+                                        {item.name}
+                                    </p>
+                                </div>
+                            ))}
+                        </BottomSheet>
+                    </div>
+
+                    {/* ===== Rules ===== */}
+                    <div className="w-full bg-white p-6 rounded-lg flex flex-col relative">
+                        <h2 className="text-lg font-semibold mb-3">
+                            Rules
+                        </h2>
+
+                        <div className="flex-1">
+                            <div className="space-y-2 text-sm text-gray-600">
+                                {visibleRules2.map((rule, i) => (
+                                    <p key={`${rule.id}-${i}`}>
+                                        {i + 1}. {rule.description}
+                                    </p>
+                                ))}
+                            </div>
+                        </div>
+
+                        {gym.rules.length > 3 && (
+                            <button
+                                onClick={() => setRulesOpen(true)}
+                                className="mt-4 w-full bg-[#DBEAFE] py-3 mb-2 rounded-xl text-[#2563EB] font-medium"
+                            >
+                                View all rules
+                            </button>
+                        )}
+
+                        <BottomSheet
+                            open={rulesOpen}
+                            onClose={() => setRulesOpen(false)}
+                            title="Things to Know"
+                        >
+                            {gym?.rules.map((rule, i) => (
+                                <p key={rule.id} className="mb-3 text-sm">
+                                    {i + 1}. {rule.description}
+                                </p>
+                            ))}
+                        </BottomSheet>
+                    </div>
                 </div>
 
                 {/* FOOTER FIXED */}
-                <div id="share-bottom-bar" className="fixed bottom-14 left-0 right-0 bg-white border-t border-[#F1F5F9] px-4 py-3 pb-4 flex items-center justify-between">
+                <div id="share-bottom-bar" className="fixed mk:hidden bottom-14 left-0 right-0 bg-white border-t border-[#F1F5F9] px-4 py-3 pb-4 flex items-center justify-between">
                     <div>
                         <p className="text-xs font-medium text-gray-500">Your Gym Price Per hour</p>
                         <p className="font-semibold text-[22px]">
@@ -534,36 +671,42 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
             </div>
 
 
-            <Footer />
+
 
             {/* ===== Amenities Bottom Sheet ===== */}
-            <BottomSheet
-                open={amenitiesOpen}
-                onClose={() => setAmenitiesOpen(false)}
-                title="What This Place Offers"
-            >
-                {gym?.amenities.map((item) => (
-                    <div key={item.id} className="flex items-center gap-2">
-                        <img src={item.icon} alt={item.name} className="w-4 h-4" />
-                        <p key={item.id} className="mb-3 text-sm">
-                            {item.name}
-                        </p>
-                    </div>
-                ))}
-            </BottomSheet>
+            <div className="mk:hidden">
+                <BottomSheet
+                    open={amenitiesOpen}
+                    onClose={() => setAmenitiesOpen(false)}
+                    title="What This Place Offers"
+                >
+                    {gym?.amenities.map((item) => (
+                        <div key={item.id} className="flex items-center gap-2">
+                            <img src={item.icon} alt={item.name} className="w-4 h-4" />
+                            <p key={item.id} className="mb-3 text-sm">
+                                {item.name}
+                            </p>
+                        </div>
+                    ))}
+                </BottomSheet>
+            </div>
 
-            {/* ===== Rules Bottom Sheet ===== */}
-            <BottomSheet
-                open={rulesOpen}
-                onClose={() => setRulesOpen(false)}
-                title="Things to Know"
-            >
-                {gym?.rules.map((rule, i) => (
-                    <p key={rule.id} className="mb-3 text-sm">
-                        {i + 1}. {rule.description}
-                    </p>
-                ))}
-            </BottomSheet>
+
+            <div className="mk:hidden">
+                {/* ===== Rules Bottom Sheet ===== */}
+                <BottomSheet
+                    open={rulesOpen}
+                    onClose={() => setRulesOpen(false)}
+                    title="Things to Know"
+                >
+                    {gym?.rules.map((rule, i) => (
+                        <p key={rule.id} className="mb-3 text-sm">
+                            {i + 1}. {rule.description}
+                        </p>
+                    ))}
+                </BottomSheet>
+            </div>
+
         </div>
     );
 }
@@ -576,7 +719,23 @@ function Section({
     children: React.ReactNode;
 }) {
     return (
-        <div>
+        <div className="mk:hidden">
+            <h3 className="font-semibold text-base text-[#0F172A] mb-2">{title}</h3>
+            <p className="text-xs text-[#0F172A] mb-4">Turn your gym ON or OFF for the upcoming dates. Control bookings in advance and avoid last-minute confusion.</p>
+            {children}
+        </div>
+    );
+}
+
+function Section2({
+    title,
+    children,
+}: {
+    title: string;
+    children: React.ReactNode;
+}) {
+    return (
+        <div className="lj:w-[70%] w-full bg-white p-6 rounded-lg flex flex-col h-full">
             <h3 className="font-semibold text-base text-[#0F172A] mb-2">{title}</h3>
             <p className="text-xs text-[#0F172A] mb-4">Turn your gym ON or OFF for the upcoming dates. Control bookings in advance and avoid last-minute confusion.</p>
             {children}

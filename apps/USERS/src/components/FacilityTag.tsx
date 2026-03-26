@@ -33,7 +33,7 @@ export default function FacilityTag({
         >
             {amenity?.icon && (
                 <img
-                    src={`http://api.viigo.in/${normalizeImagePath(amenity.icon)}`}
+                    src={`https://api.viigo.in/${normalizeImagePath(amenity.icon)}`}
                     alt={amenity?.name}
                     className="w-3 h-3 object-contain"
                 />

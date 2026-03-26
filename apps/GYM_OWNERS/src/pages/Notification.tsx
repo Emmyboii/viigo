@@ -3,7 +3,7 @@ import {
     FiArrowLeft,
 } from "react-icons/fi";
 import { motion, AnimatePresence, useAnimation } from "framer-motion";
-import Footer from "../components/Footer";
+
 // import { IoStopCircle } from "react-icons/io5";
 // import { IoMdPlayCircle } from "react-icons/io";
 // import { FaClock } from "react-icons/fa";
@@ -290,7 +290,7 @@ export default function Notifications({ Loading = false }: { Loading?: boolean }
                 )}
             </AnimatePresence>
 
-            <Footer />
+            
         </div>
     );
 }

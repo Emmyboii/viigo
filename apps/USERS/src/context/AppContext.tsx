@@ -119,7 +119,7 @@ export const getFullImageUrl = (path: string) => {
     // If already full URL, return as is
     if (path.startsWith("http")) return path;
 
-    return `${BASE_URL}${path}`;
+    return `${backendUrl}${path}`;
 };
 
 type AppContextType = {

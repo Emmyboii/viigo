@@ -1,6 +1,5 @@
 import { FaRegCircleQuestion, FaRegFaceSmile, FaUser } from 'react-icons/fa6'
 import icon from '../assets/profileIcon.png'
-import Footer from '../components/Footer'
 import { useNavigate } from 'react-router'
 import { HiOutlineCurrencyRupee } from 'react-icons/hi'
 import { useState } from 'react'
@@ -53,9 +52,9 @@ const Profile = ({ user }: UserProps) => {
     };
 
     return (
-        <div className='p-4 pt-10'>
+        <div className='p-4 pt-10 '>
             <div className='border border-[#DBEAFE] py-3 px-4 rounded-md space-y-4'>
-                <div onClick={() => navigate('/profile/edit')} className="flex items-center justify-between">
+                <div onClick={() => navigate('/profile/edit')} className="flex items-center justify-between cursor-pointer">
                     <div className="space-y-3">
                         <div className="flex items-center gap-1">
                             <p className="text-[#0F172A] font-semibold">Profile</p>
@@ -78,7 +77,7 @@ const Profile = ({ user }: UserProps) => {
 
                 <div className="border border-[#F2F2F2] border-dotted"></div>
 
-                <div onClick={() => navigate('/wallet/edit')} className="space-y-3">
+                <div onClick={() => navigate('/wallet/edit')} className="space-y-3 cursor-pointer">
                     <div className="flex items-center gap-1">
                         <p className="text-[#0F172A] font-semibold">Finance</p>
                     </div>
@@ -92,11 +91,11 @@ const Profile = ({ user }: UserProps) => {
 
                 <div className='space-y-3'>
                     <p className="text-[#0F172A] font-semibold">Help</p>
-                    <div onClick={() => navigate('/faq')} className="flex items-center gap-1">
+                    <div onClick={() => navigate('/faq')} className="flex items-center gap-1 cursor-pointer">
                         <FaRegCircleQuestion size={16} />
                         <p className="text-[#0F172A] font-normal text-sm">FAQ</p>
                     </div>
-                    <div onClick={() => navigate('/support')} className="flex items-center gap-1">
+                    <div onClick={() => navigate('/support')} className="flex items-center gap-1 cursor-pointer">
                         <FaRegFaceSmile size={16} />
                         <p className="text-[#0F172A] font-normal text-sm">Support</p>
                     </div>
@@ -105,7 +104,7 @@ const Profile = ({ user }: UserProps) => {
 
             <button onClick={() => setShowLogoutModal(true)} className="mt-16 bg-[#2563EB] w-full h-[50px] font-semibold text-sm text-white py-2 px-4 rounded-md">Log Out</button>
 
-            <Footer />
+            
 
             {/* Logout Confirmation Modal */}
             {showLogoutModal && (

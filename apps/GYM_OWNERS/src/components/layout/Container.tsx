@@ -5,7 +5,7 @@ interface ContainerProps {
 
 export default function Container({ children }: ContainerProps) {
   return (
-    <div className="max-w-s mx-aut min-h-screen px-5 py-4 relative">
+    <div className="min-h-screen px-5 py-4 relative max-w-[1900px] mx-auto">
       {children}
     </div>
   );

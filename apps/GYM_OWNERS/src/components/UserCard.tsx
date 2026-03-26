@@ -48,41 +48,45 @@ export default function UserCard({ booking, onClick }: UserCardProps) {
             </div>
 
             {/* Content */}
-            <div className="flex-1 min-w-0 space-y-1">
-                {/* Name + Status */}
-                <div className="flex items-center gap-3 min-w-0">
-                    <p className="font-semibold text-[#0F172A] text-sm truncate">
-                        {client_name}
-                    </p>
+            <div className="flex-1 min-w-0 space-y-1 mk:flex items-center justify-between">
+                <div>
+                    {/* Name + Status */}
+                    <div className="flex items-center gap-3 min-w-0">
+                        <p className="font-semibold text-[#0F172A] text-sm truncate">
+                            {client_name}
+                        </p>
 
-                    <span
-                        className={`text-xs px-3 py-1.5 rounded-full font-medium ${isActive
-                            ? "bg-[#22C55E] text-white"
-                            : isUpcoming
-                                ? "bg-[#FACC15] text-white"
-                                : isCancelled
-                                    ? "bg-[#FDECEA] text-[#F43F5E]"
-                                    : "bg-[#CBD5E1] text-[#FFFFFF]"
-                            }`}
-                    >
-                        {display_status}
-                    </span>
+                        <span
+                            className={`text-xs px-3 py-1.5 rounded-full font-medium ${isActive
+                                ? "bg-[#22C55E] text-white"
+                                : isUpcoming
+                                    ? "bg-[#FACC15] text-white"
+                                    : isCancelled
+                                        ? "bg-[#FDECEA] text-[#F43F5E]"
+                                        : "bg-[#CBD5E1] text-[#FFFFFF]"
+                                }`}
+                        >
+                            {display_status}
+                        </span>
+                    </div>
+
+                    <div className="mk:flex items-center gap-1 mk:mt-1 mt-0">
+                        {/* Date */}
+                        <p className="text-xs text-[#475569] mk:mt-0 mt-1 flex items-center gap-1">
+                            <HiOutlineCalendar className="inline mr-" />
+                            {display_date}
+                        </p>
+
+                        {/* Duration */}
+                        <p className="text-[12px] text-[#475569] flex items-center gap-1">
+                            <FaRegClock className="" />
+                            {duration_text}
+                        </p>
+                    </div>
                 </div>
 
-                {/* Date */}
-                <p className="text-xs text-[#475569] mt-1">
-                    <HiOutlineCalendar className="inline mr-1" />
-                    {display_date}
-                </p>
-
-                {/* Duration */}
-                <p className="text-[12px] text-[#475569]">
-                    <FaRegClock className="inline mr-1" />
-                    {duration_text}
-                </p>
-
                 {/* Context */}
-                <p className="text-[12px] text-[#475569] font-medium mt-1">
+                <p className="text-[12px] mk:text-lg mk:font-semibold text-[#475569] font-medium mt-1">
                     {statusText}
                 </p>
             </div>

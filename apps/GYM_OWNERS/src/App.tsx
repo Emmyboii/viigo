@@ -191,6 +191,7 @@ import FAQ from "./pages/FAQ";
 import { useAppContext } from "./context/AppContext";
 import OnboardingGuard from "./components/OnboardingGuard";
 import EditWallet from "./pages/EditWallet";
+import AppLayout from "./components/AppLayout";
 
 function App() {
 
@@ -248,7 +249,9 @@ function App() {
             element={
               <ProtectedRoute>
                 <OnboardingGuard>
-                  <GymOwnerHome />
+                  <AppLayout>
+                    <GymOwnerHome />
+                  </AppLayout>
                 </OnboardingGuard>
               </ProtectedRoute>
             }
@@ -259,7 +262,9 @@ function App() {
             element={
               <ProtectedRoute>
                 <OnboardingGuard>
-                  {userData && <Gym setGym={setSelectedGym} display={display} setDisplay={setDisplay} gym={selectedGym} loading={isLoading} />}
+                  <AppLayout>
+                    {userData && <Gym setGym={setSelectedGym} display={display} setDisplay={setDisplay} gym={selectedGym} loading={isLoading} />}
+                  </AppLayout>
                 </OnboardingGuard>
               </ProtectedRoute>
             }
@@ -270,7 +275,9 @@ function App() {
             element={
               <ProtectedRoute>
                 <OnboardingGuard>
-                  <Wallet />
+                  <AppLayout>
+                    <Wallet />
+                  </AppLayout>
                 </OnboardingGuard>
               </ProtectedRoute>
             }
@@ -281,7 +288,9 @@ function App() {
             element={
               <ProtectedRoute>
                 <OnboardingGuard>
-                  <EditWallet />
+                  <AppLayout>
+                    <EditWallet />
+                  </AppLayout>
                 </OnboardingGuard>
               </ProtectedRoute>
             }
@@ -292,7 +301,9 @@ function App() {
             element={
               <ProtectedRoute>
                 <OnboardingGuard>
-                  <Transactions />
+                  <AppLayout>
+                    <Transactions />
+                  </AppLayout>
                 </OnboardingGuard>
               </ProtectedRoute>
             }
@@ -303,7 +314,9 @@ function App() {
             element={
               <ProtectedRoute>
                 <OnboardingGuard>
-                  <TransactionDetails />
+                  {/* <AppLayout> */}
+                    <TransactionDetails />
+                  {/* </AppLayout> */}
                 </OnboardingGuard>
               </ProtectedRoute>
             }
@@ -315,7 +328,9 @@ function App() {
             element={
               <ProtectedRoute>
                 <OnboardingGuard>
-                  <Profile user={userData} />
+                  <AppLayout>
+                    <Profile user={userData} />
+                  </AppLayout>
                 </OnboardingGuard>
               </ProtectedRoute>
             }
@@ -326,7 +341,9 @@ function App() {
             element={
               <ProtectedRoute>
                 <OnboardingGuard>
-                  <EditProfile />
+                  <AppLayout>
+                    <EditProfile />
+                  </AppLayout>
                 </OnboardingGuard>
               </ProtectedRoute>
             }
@@ -337,7 +354,9 @@ function App() {
             element={
               <ProtectedRoute>
                 <OnboardingGuard>
-                  <Notifications Loading={loading} />
+                  <AppLayout>
+                    <Notifications Loading={loading} />
+                  </AppLayout>
                 </OnboardingGuard>
               </ProtectedRoute>
             }
@@ -348,7 +367,9 @@ function App() {
             element={
               <ProtectedRoute>
                 <OnboardingGuard>
-                  <Support />
+                  <AppLayout>
+                    <Support />
+                  </AppLayout>
                 </OnboardingGuard>
               </ProtectedRoute>
             }
@@ -359,7 +380,9 @@ function App() {
             element={
               <ProtectedRoute>
                 <OnboardingGuard>
-                  <FAQ />
+                  <AppLayout>
+                    <FAQ />
+                  </AppLayout>
                 </OnboardingGuard>
               </ProtectedRoute>
             }

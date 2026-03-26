@@ -11,47 +11,56 @@ export default function Footer() {
     const tabs = [
         { name: "Home", icon: AiFillHome, path: "/" },
         { name: "Gym", image: muscle, icon: '', path: "/gym", path2: "/gym/edit" },
-        { name: "Wallet", icon: IoWalletOutline, path: "/wallet",path2: "/wallet/edit" },
+        { name: "Wallet", icon: IoWalletOutline, path: "/wallet", path2: "/wallet/edit" },
         { name: "Profile", icon: FaUser, path: "/profile", path2: "/notifications", path3: "/profile/edit", path4: "/faq", path5: "/support" },
     ];
 
     return (
-        <div className="fixed z-50 bottom-0 left-0 w-full bg-white border-t border-[#F1F5F9] shadow-sm">
-            <div className="flex justify-between items-center px-4 py-3.5">
-                {tabs.map((tab) => {
-                    const isActive = location.pathname === tab.path || location.pathname === tab.path2 || location.pathname === tab.path3 || location.pathname === tab.path4 || location.pathname === tab.path5;
-                    const Icon = tab.icon;
+        <>
+            {/* ✅ Mobile Bottom Nav */}
+            <div className="fixed z-40 bottom-0 left-0 w-full bg-white border-t border-[#F1F5F9] shadow-sm mk:hidden">
+                <div className="flex justify-between items-center px-4 py-3.5">
+                    {tabs.map((tab) => {
+                        const isActive =
+                            location.pathname === tab.path ||
+                            location.pathname === tab.path2 ||
+                            location.pathname === tab.path3 ||
+                            location.pathname === tab.path4 ||
+                            location.pathname === tab.path5;
 
-                    return (
-                        <div
-                            key={tab.name}
-                            onClick={() => {
-                                window.scrollTo(0, 0)
-                                navigate(tab.path)
-                            }}
-                            className="flex flex-col items-center justify-center flex-1 cursor-pointer"
-                        >
-                            {tab.image ? (
-                                <img src={tab.image} alt={tab.name} className="w-6 h-6" />
-                            ) : (
-                                <Icon
-                                    size={22}
-                                    className={isActive ? "text-[#0F172A]" : "text-[#94A3B8]"}
-                                />
-                            )}
+                        const Icon = tab.icon;
 
-                            <span
-                                className={`text-xs mt-1 font-medium ${isActive
-                                    ? "text-[#0F172A]"
-                                    : "text-[#94A3B8]"
-                                    }`}
+                        return (
+                            <div
+                                key={tab.name}
+                                onClick={() => {
+                                    window.scrollTo(0, 0);
+                                    navigate(tab.path);
+                                }}
+                                className="flex flex-col items-center justify-center flex-1 cursor-pointer"
                             >
-                                {tab.name}
-                            </span>
-                        </div>
-                    );
-                })}
+                                {tab.image ? (
+                                    <img src={tab.image} alt={tab.name} className="w-6 h-6" />
+                                ) : (
+                                    <Icon
+                                        size={22}
+                                        className={isActive ? "text-[#0F172A]" : "text-[#94A3B8]"}
+                                    />
+                                )}
+
+                                <span
+                                    className={`text-xs mt-1 font-medium ${isActive ? "text-[#0F172A]" : "text-[#94A3B8]"
+                                        }`}
+                                >
+                                    {tab.name}
+                                </span>
+                            </div>
+                        );
+                    })}
+                </div>
             </div>
-        </div>
+
+           
+        </>
     );
 }

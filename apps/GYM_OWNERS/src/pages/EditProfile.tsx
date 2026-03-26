@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router-dom'
 import { IoArrowBack } from 'react-icons/io5'
-import Footer from '../components/Footer'
 import React, { useCallback, useEffect, useState } from 'react'
 import { FaCircleCheck } from 'react-icons/fa6'
 import { MdError } from 'react-icons/md'
@@ -147,7 +146,7 @@ const EditProfile = () => {
     }
 
     return (
-        <div className='p-5'>
+        <div className='p-5 '>
             <div className="fixed top-0 left-0 right-0 z-40 bg-white flex items-center px-4 py-3" >
 
                 <button
@@ -266,7 +265,7 @@ const EditProfile = () => {
 
             </form>
 
-            <Footer />
+            
         </div>
     )
 }

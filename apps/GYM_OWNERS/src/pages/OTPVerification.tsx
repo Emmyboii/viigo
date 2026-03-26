@@ -6,6 +6,7 @@ import lockWrong from "../assets/lockWrong.png";
 import { MdError } from "react-icons/md";
 import { FaCircleCheck } from "react-icons/fa6";
 import { FaRegEdit } from "react-icons/fa";
+import logo from '../assets/icon2.png'
 
 type Status =
     | "idle"
@@ -241,19 +242,25 @@ export default function OTPVerification() {
         status === "success" ? lockChecked : status === "error" ? lockWrong : lock;
 
     return (
-        <div>
-            {/* 🔄 Center Modal */}
-            {(status === "verifying" || status === "resending") && (
-                <CenterModal
-                    text={status === "verifying" ? "Validating credentials" : "Resending OTP"}
-                />
-            )}
+        <div className="bg-[#ffffff] overflow-x-hidden flex mk:flex-row flex-col w-full">
+
+            <div className='bg-[#2563EB] text-white space-y-5 h-screen mk:flex flex-col justify-center pt-[340px] p-7 lg:p-16 w-1/2 hidden'>
+                <img src={logo} alt="" className='lg:w-40 w-24' />
+                <p className='lg:text-[55px] lf:text-[60px] text-[30px] font-semibold'>Manage your gym efficiently</p>
+                <p className='lg:text-2xl text-lg font-medium max-w-[590px]'>Join thousands of gym owners who use Viigo to streamline bookings, manage memberships, and grow their fitness business.</p>
+            </div>            {/* 🔄 Center Modal */}
+
 
             {/* ❌ Bottom Toast */}
-            {toast && <Toast type={toast.type} text={toast.message} onClose={handleToastClose} />}
 
-            <div className="min-h-screen py-10 bg-white flex justify-center">
-                <div className="w-full max-w-s px-6">
+            <div className="h-screen relative py-10 bg-white flex justify-center max-w-[400px] mx-auto mk:w-1/2 w-full">
+                {(status === "verifying" || status === "resending") && (
+                    <CenterModal
+                        text={status === "verifying" ? "Validating credentials" : "Resending OTP"}
+                    />
+                )}
+                {toast && <Toast type={toast.type} text={toast.message} onClose={handleToastClose} />}
+                <div className="px-6">
                     <img src={lockImage} title="img" className="mx-auto size-[120px]" />
 
                     <h2 className="text-3xl font-bold mt-4">OTP Verification</h2>
@@ -268,14 +275,14 @@ export default function OTPVerification() {
                         </span>
                     </p>
 
-                    <div className="mt-7 font-semibold text-center">
+                    <div className="mt-7 font-semibold text-center mx-auto">
                         {Math.floor(time / 60)
                             .toString()
                             .padStart(2, "0")}
                         :{(time % 60).toString().padStart(2, "0")}
                     </div>
 
-                    <div className="flex justify-between gap-3 mt-6">
+                    <div className="flex justify-between items-center gap-3 lg:gap-[26px] mt-6">
                         {otp.map((digit, index) => (
                             <input
                                 title="otp"
@@ -288,7 +295,7 @@ export default function OTPVerification() {
                                 onChange={(e) => handleChange(e.target.value, index)}
                                 onKeyDown={(e) => handleKeyDown(e, index)}
                                 onPaste={handlePaste}
-                                className={`sm:w-14 w-10 sm:h-14 h-10 text-3xl border-[#CBD5E1] font-bold text-center border-2 rounded-md focus:outline-none ${borderColor}`}
+                                className={`sm:w-14 w-10 sm:h-14 h-10 text-3xl border-[#22C55E] font-bold text-center border-2 rounded-md focus:outline-none ${borderColor}`}
                             />
                         ))}
                     </div>
@@ -314,7 +321,7 @@ export default function OTPVerification() {
 
 function CenterModal({ text }: { text: string }) {
     return (
-        <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
+        <div className="mk:absolute fixed inset-0 bg-black/2 flex items-center justify-center z-50">
             <div className="bg-white px-6 py-4 rounded-lg flex items-center gap-3 shadow-lg">
                 <Spinner />
                 <p className="font-medium">{text}</p>
@@ -335,7 +342,7 @@ function Toast({ text, type, onClose }: { text: string; type: ToastType; onClose
 
     return (
         <div
-            className={`fixed w-[280px] bottom-20 z-50 left-1/2 justify-center -translate-x-1/2 
+            className={`mk:absolute fixed w-[280px] bottom-20 z-50 left-1/2 justify-center -translate-x-1/2 
       bg-white px-4 py-3 rounded-lg flex items-center gap-3
       shadow-[0_10px_40px_rgba(0,0,0,0.18)] animate-[fadeIn_0.2s_ease-out]`}
         >

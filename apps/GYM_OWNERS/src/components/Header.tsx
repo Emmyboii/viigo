@@ -11,7 +11,7 @@ export default function Header() {
     const navigate = useNavigate();
 
     return (
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex justify-between items-center mb-4 border-b border-[#E2E8F0] pb-6 pt-2 px-5">
             <div className="flex items-center gap-2">
                 <HiLocationMarker className="text-[#475569] text-xl" />
                 <div className="leading-tight">
@@ -27,7 +27,7 @@ export default function Header() {
                 />
 
                 {hasUnread && (
-                    <span className="absolute top-0 right-0 w-2 h-2 bg-blue-600 rounded-full"></span>
+                    <span className="absolute top-0.5 right-1 w-2 h-2 bg-blue-600 rounded-full"></span>
                 )}
             </div>
         </div>

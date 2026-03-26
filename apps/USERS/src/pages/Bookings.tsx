@@ -8,8 +8,9 @@ import Footer from "../components/Footer"
 import { useEffect, useState } from "react"
 import BookingModal from "../components/BookingModal"
 import logoUrl from "../assets/icon2.png";
-import * as htmlToImage from "html-to-image";
+// import * as htmlToImage from "html-to-image";
 import { normalizeImagePath, useAppContext } from "../context/AppContext"
+import { snapdom } from "@zumer/snapdom";
 
 export type Booking = {
     id: number;
@@ -50,98 +51,81 @@ const Bookings = () => {
 
         if (!element) return;
 
+        // Save original styles
         if (bottomBar) {
             bottomBar.style.position = "relative";
             bottomBar.style.bottom = "0px";
         }
-
         try {
             await document.fonts.ready;
 
-            // 🧠 Convert DOM → image
-            const dataUrl = await htmlToImage.toPng(element, {
-                pixelRatio: 2,
-                cacheBust: true,
+            // 🧠 SNAPDOM (replaces html-to-image)
+            const canvasEl = await snapdom.toCanvas(element, {
+                scale: 2, // similar to pixelRatio
+                backgroundColor: "#ffffff",
             });
 
             const baseImage = new Image();
-            baseImage.src = dataUrl;
+            baseImage.src = canvasEl.toDataURL("image/png");
 
             await new Promise((res) => {
                 baseImage.onload = res;
             });
 
-            // 🎨 Create final canvas
+            // 🎨 FINAL CANVAS
             const canvas = document.createElement("canvas");
             const ctx = canvas.getContext("2d");
             if (!ctx) return;
 
-            const headerHeight = 120;
+            // Adjust header height dynamically if needed
+            const headerHeight = 150 * 3; // taller header for bigger logo/text
 
             canvas.width = baseImage.width;
             canvas.height = baseImage.height + headerHeight;
 
-            // 🔵 Background
-            ctx.fillStyle = "#ffffff";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // 🔷 Header gradient
+            // 🔷 Gradient header
             const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
             gradient.addColorStop(0, "#2563EB");
             gradient.addColorStop(1, "#3B82F6");
-
             ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, canvas.width, headerHeight);
 
             // 🧠 Logo
             const logo = new Image();
+            logo.crossOrigin = "anonymous";
             logo.src = logoUrl;
+            await new Promise((res) => { logo.onload = res; logo.onerror = res; });
 
-            await new Promise((res) => {
-                logo.onload = res;
-                logo.onerror = res;
-            });
+            // Scale logo bigger
+            const logoHeight = 80 * 3; // bigger than before
+            const logoWidth = logoHeight * (logo.width / logo.height);
 
-
-            // Max height constraint (this controls visual size)
-            const maxLogoHeight = 50;
-
-            // Calculate aspect ratio
-            const aspectRatio = logo.width / logo.height;
-
-            // Compute final dimensions
-            const logoHeight = maxLogoHeight;
-            const logoWidth = logoHeight * aspectRatio;
-
-            // Center content
+            // 🧠 Text
             const text = "Viigo";
-            ctx.font = "bold 50px sans-serif";
+            ctx.font = `bold ${70 * 3}px sans-serif`; // larger font
             ctx.fillStyle = "#fff";
 
-            // Measure text
+            // Center logo + text horizontally
             const textWidth = ctx.measureText(text).width;
-
-            // spacing between logo & text
             const gap = 20;
-
-            // total width for centering
             const totalWidth = logoWidth + gap + textWidth;
             const startX = (canvas.width - totalWidth) / 2;
 
-            // draw logo (no distortion)
+            // Draw logo
             ctx.drawImage(
                 logo,
                 startX,
-                (headerHeight - logoHeight) / 2,
+                (headerHeight - logoHeight) / 2, // vertically center
                 logoWidth,
                 logoHeight
             );
 
-            // draw text
+            // Draw text vertically centered
+            ctx.textBaseline = "middle";
             ctx.fillText(
                 text,
                 startX + logoWidth + gap,
-                headerHeight / 2 + 16
+                headerHeight / 2
             );
 
             // 🖼 Draw main content
@@ -151,13 +135,9 @@ const Bookings = () => {
             const finalUrl = canvas.toDataURL("image/png");
             const blob = await (await fetch(finalUrl)).blob();
 
-
-            // Better file name (booking-focused)
             const fileName = `${userData?.full_name}-bookings.png`;
-
             const file = new File([blob], fileName, { type: "image/png" });
 
-            // Optional cleaner share text (or remove completely)
             const shareText = `My Bookings`;
 
             if (navigator.share && navigator.canShare({ files: [file] })) {
@@ -166,8 +146,8 @@ const Bookings = () => {
                 window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, "_blank");
 
                 const link = document.createElement("a");
-                link.href = dataUrl;
-                link.download = fileName
+                link.href = finalUrl;
+                link.download = fileName;
                 link.click();
             }
         } catch (err) {
@@ -247,9 +227,10 @@ const Bookings = () => {
 
                     <PageHeader text="Bookings" onShare={handleShare} />
 
-                    <div id="share-area" className="min-h-screen bg-white px-4">
+                    <div className="pt-10" />
 
-                        <div className="pt-14" />
+                    <div id="share-area" className="min-h-screen bg-white px-4 pt-4">
+
 
                         <SearchBar />
                         <FilterChips
@@ -258,7 +239,7 @@ const Bookings = () => {
                             onChange={(id) => setActiveFilter(id)}
                         />
                         <div className="space-y-4 mb-20 mt-8">
-                            {filteredBookings.length === 0 ? (
+                            {filteredBookings.length == 0 ? (
                                 <div className="text-center text-gray-500 mt-10">
                                     No bookings found for "{chipData.find(c => c.id === activeFilter)?.label}"
                                 </div>
@@ -275,7 +256,7 @@ const Bookings = () => {
                                         }}
                                         className="bg-white rounded border border-[#E2E8F0] min-h-[140px] h-full flex gap-3"
                                     >
-                                        <img src={`http://api.viigo.in/${normalizeImagePath(gym.gym_image)}`} title="gym" className="w-20 min-h-full rounded-tl rounded-bl object-cover" />
+                                        <img crossOrigin="anonymous" src={`https://api.viigo.in/${normalizeImagePath(gym.gym_image)}`} title="gym" className="w-20 min-h-full rounded-tl rounded-bl object-cover" />
 
                                         <div className="flex flex-col justify-between w-full p-3 pl-0">
 
@@ -299,7 +280,7 @@ const Bookings = () => {
 
                                             <div className="flex justify-between items-center mt-4 gap-2">
                                                 <span className="font-normal text-xs text-nowrap text-[#0F172A]">{gym.price_tag}</span>
-                                                <button className="bg-white rounded-full border border-[#CBD5E1] text-center text-[#475569] text-[10px] px-2 py-2">
+                                                <button className="bg-white rounded-full text-nowrap border border-[#CBD5E1] text-center text-[#475569] text-[10px] px-2 py-2">
                                                     Booking ID : #{gym.booking_reference}
                                                 </button>
                                             </div>

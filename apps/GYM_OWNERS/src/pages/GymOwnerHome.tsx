@@ -1,13 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Header from "../components/Header";
-import Container from "../components/layout/Container";
 import { MdError } from "react-icons/md";
 import { FaCircleCheck } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
 import { FaCheckCircle } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import OtpVerificationModal from "../components/OtpVerificationModal";
-import Footer from "../components/Footer";
+
 import FilterChips from "../components/FilterChips";
 import UserCard from "../components/UserCard";
 import { useAppContext, type Booking } from "../context/AppContext";
@@ -194,106 +193,120 @@ const GymOwnerHome = () => {
 
   return (
     <>
-      {!selectedUser && (
-        <Container>
-          <Header />
+      {/* {!selectedUser && ( */}
+      <div className={`min-h-screen py-4 relative max-w-[1900px] mx-auto ${!selectedUser && "mk:block"}`}>
+        <Header />
 
-          {toast && <Toast type={toast.type} text={toast.message} onClose={handleToastClose} />}
+        {toast && <Toast type={toast.type} text={toast.message} onClose={handleToastClose} />}
 
-          <div className="bg-[#2563EB] text-white rounded-lg p-4">
+        <div className="bg-[#2563EB] text-white rounded-lg p-4 mk:flex justify-between mx-5">
+          <div>
             <p className="font-semibold">Quick Checkin</p>
             <p className="text-[#CBD5E1] text-sm pt-1">
               Enter Customer’s 4 Digit OTP to start the session
             </p>
-
-            <form onSubmit={handleSubmit} className="flex items-center gap-4 justify-between">
-              <input
-                ref={inputRef}
-                type="text"
-                inputMode="numeric"
-                autoComplete="one-time-code"
-                value={otp}
-                onChange={handleChange}
-                className={`mt-2 w-[65%] bg-transparent rounded-lg px-4 border ${borderColor} outline-none h-[45px] ${textColor} font-bold text-2xl`}
-                placeholder="OTP"
-              />
-
-              <button
-                className={`${otp.length === 4
-                  ? "bg-white text-[#2563EB]"
-                  : "bg-[#F1F5F9] text-[#94A3B8]"
-                  } w-[35%] rounded-full px-4 py-2 font-semibold text-[14px] h-[45px]`}
-                disabled={otp.length !== 4 || status === "verifying"}
-                type="submit">
-                {status === "verifying" ? "Checking..." : "Verify"}
-              </button>
-            </form>
           </div>
 
-          <div className="mt-5 mb-14">
-            <h2 className="font-semibold text-base text-[#0F172A]">Bookings</h2>
-
-            <FilterChips
-              items={chipData}
-              activeId={filter}
-              onChange={(id) => setFilter(id)}
+          <form onSubmit={handleSubmit} className="flex items-center gap-4 justify-between mk:w-[250px]">
+            <input
+              ref={inputRef}
+              type="text"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              value={otp}
+              onChange={handleChange}
+              className={`mt-2 w-[65%] bg-transparent rounded-lg px-4 border ${borderColor} outline-none h-[45px] ${textColor} font-bold text-2xl`}
+              placeholder="OTP"
             />
 
-            {filteredBookings.length === 0 ? (
-              <div className="text-center text-gray-500 mt-10">
-                No "{chipData.find(c => c.id === filter)?.label}" Booking yet.
-              </div>
-            ) : (
-              <div className="py-5 space-y-4">
-                {filteredBookings.map((book) => (
-                  <UserCard
-                    key={book.id}
-                    booking={book}
-                    onClick={() => setSelectedUser(book)}
-                  />
-                ))}
-              </div>
-            )}
+            <button
+              className={`${otp.length === 4
+                ? "bg-white text-[#2563EB]"
+                : "bg-[#F1F5F9] text-[#94A3B8]"
+                } w-[35%] rounded-full px-4 py-2 font-semibold text-[14px] h-[45px]`}
+              disabled={otp.length !== 4 || status === "verifying"}
+              type="submit">
+              {status === "verifying" ? "Checking..." : "Verify"}
+            </button>
+          </form>
+        </div>
 
-          </div>
+        <div className="mt-5 mb-14 px-5">
+          <h2 className="font-semibold text-base text-[#0F172A]">Bookings</h2>
 
-          <Footer />
+          <FilterChips
+            items={chipData}
+            activeId={filter}
+            onChange={(id) => setFilter(id)}
+          />
 
-          {/* Success Modal */}
-          <AnimatePresence>
-            {status === 'success' && (
+          {filteredBookings.length === 0 ? (
+            <div className="text-center text-gray-500 mt-10">
+              No "{chipData.find(c => c.id === filter)?.label}" Booking yet.
+            </div>
+          ) : (
+            <div className="py-5 space-y-4">
+              {filteredBookings.map((book) => (
+                <UserCard
+                  key={book.id}
+                  booking={book}
+                  onClick={() => setSelectedUser(book)}
+                />
+              ))}
+            </div>
+          )}
+
+        </div>
+
+        {status === 'success' && (
+          <div className="hidden mk:block fixed inset-0 z-[90] bg-[#0C0A0AC7]" onClick={handleClose}></div>
+        )}
+
+        
+
+        {/* Success Modal */}
+        <AnimatePresence>
+          {status === 'success' && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed z-[99] flex items-center justify-center bg-white overflow-y-auto inset-0 mk:inset-auto mk:right-0 mk:top-0 mk:min-h-screen mk:w-[480px] p-5 animate-slideUp mk:animate-slideRight"
+            >
+
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-white text-black z-50 flex items-center justify-center"
+                initial={{ scale: 0.5 }}
+                animate={{ scale: 1 }}
+                transition={{ duration: 0.5 }}
+                className="p-8 w-80 text-center"
               >
-                <motion.div
-                  initial={{ scale: 0.5 }}
-                  animate={{ scale: 1 }}
-                  transition={{ duration: 0.5 }}
-                  className="p-8 w-80 text-center"
-                >
-                  <FaCheckCircle className="text-green-500 text-[80px] mx-auto mb-2" />
-                  <h2 className="text-lg text-[#0F172A] font-semibold mb-2">
-                    OTP Verified
-                  </h2>
-                  <p className="text-sm font-normal text-[#475569]">
-                    Booking ID #37272 has been verified and the session has started
-                  </p>
-                </motion.div>
+                <FaCheckCircle className="text-green-500 text-[80px] mx-auto mb-2" />
+                <h2 className="text-lg text-[#0F172A] font-semibold mb-2">
+                  OTP Verified
+                </h2>
+                <p className="text-sm font-normal text-[#475569]">
+                  Booking ID #37272 has been verified and the session has started
+                </p>
               </motion.div>
-            )}
-          </AnimatePresence>
-        </Container>
-      )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+      {/* )} */}
 
       <AnimatePresence>
         {selectedUser && (
-          <OtpVerificationModal
-            user={selectedUser}
-            onClose={handleClose}
-          />
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex justify-center items-start mk:items-center"
+          >
+            {/* Overlay for desktop only */}
+            <div className="hidden mk:block fixed inset-0 bg-[#0C0A0AC7]" onClick={handleClose}></div>
+
+            <OtpVerificationModal user={selectedUser} onClose={handleClose} />
+          </motion.div>
         )}
       </AnimatePresence>
     </>
