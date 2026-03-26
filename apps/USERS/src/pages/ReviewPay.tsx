@@ -153,7 +153,7 @@ Viigo Booking
 Name: ${userName}
 Gym: ${gym?.name}
 Date: ${formattedLongDate}
-Time: ${selectedHours?.label}
+Hours: ${selectedHours?.label}
 `.trim();
 
             if (navigator.share && navigator.canShare({ files: [file] })) {
@@ -269,6 +269,7 @@ Time: ${selectedHours?.label}
                     gym_id: id,
                     date: formatDateForAPI(selectedDate),
                     duration: String(selectedHours.value),
+                    number_of_friends: peopleCount
                 };
 
                 const headers = {
@@ -562,7 +563,7 @@ Time: ${selectedHours?.label}
 
 
                             {/* ===== Gym Summary Card ===== */}
-                            <div className="bg-white rounded border flex gap-1 h-[143px]">
+                            <div className="bg-white rounded border flex gap-1">
                                 <img
                                     crossOrigin="anonymous"
                                     src={`https://api.viigo.in/${normalizeImagePath(gym?.images[0]?.image)}`}

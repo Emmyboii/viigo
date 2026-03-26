@@ -78,8 +78,8 @@ const PlanYourWorkout = () => {
 
     const editSelectedHr = selectedHours.value === 1 ? "Hr" : selectedHours.label
 
-    const totalWithHr = selectedHours && gym?.hourly_rate
-        ? gym?.hourly_rate * selectedHours.value
+    const totalWithHr = selectedHours && gym?.hourly_rate && peopleCount > 0
+        ? gym?.hourly_rate * selectedHours.value * (peopleCount + 1)
         : gym?.hourly_rate;
 
     const id = gym?.id
