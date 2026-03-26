@@ -55,11 +55,8 @@ export default function ReviewPay() {
         if (!element) return;
 
         // Save original styles
-        let originalPosition = "";
-        let originalBottom = "";
+    
         if (bottomBar) {
-            originalPosition = bottomBar.style.position;
-            originalBottom = bottomBar.style.bottom;
 
             bottomBar.style.position = "relative";
             bottomBar.style.bottom = "0px";

@@ -1,6 +1,5 @@
 import Header from './Header'
 import Container from './layout/Container'
-import Footer from './Footer'
 // import { useState } from 'react';
 import VerifiedWallet from './VerifiedWallet';
 import UnverifiedWallet from './UnverifiedWallet';
