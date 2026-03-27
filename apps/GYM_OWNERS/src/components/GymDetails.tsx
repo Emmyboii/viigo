@@ -182,6 +182,7 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
                     await navigator.share({
                         title: "Viigo Gym Share",
                         text: "Check out my gym!",
+                        files: [file],
                     });
                 } else {
                     const link = document.createElement("a");
@@ -317,7 +318,7 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
     // };
 
     useEffect(() => {
-        if (amenitiesOpen || rulesOpen) {
+        if ((amenitiesOpen || rulesOpen) && window.innerWidth < 850) {
             document.body.style.overflow = "hidden"
         } else {
             document.body.style.overflow = "auto"
@@ -342,7 +343,7 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
     const visibleRules2 = gym?.rules?.slice(0, 9);
 
     return (
-        <div className="min-h-screen pb-28 mk:pb-0 bg-[#CBD5E1] max-w-[1900px] mx-auto">
+        <div className="min-h-screen pb-28 mk:pb-0 mk:bg-[#CBD5E1] max-w-[1900px] mx-auto">
 
             {/* HEADER */}
             <div className="flex items-center justify-between px-4 py-3 mk:py-4 mk:px-5 bg-white">
@@ -388,7 +389,7 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
                             <div className="flex items-center justify-between gap-3 w-full">
                                 <div className="w-full">
                                     <div className="flex justify-between items-center gap-3">
-                                        <h1 className="text-xl font-bold text-[#0F172A]">{gym.name}</h1>
+                                        <h1 className="text-xl font-bold text-[#0F172A] text-nowrap">{gym.name}</h1>
 
                                         {/* <div
                                         className="bg-[#DBEAFE] text-[#2563EB] p-2 rounded cursor-pointer transition"
@@ -398,7 +399,7 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
 
                                     </div>
 
-                                    <div className="flex flex-wrap items-center text-xs text-[#475569] gap-1">
+                                    <div className="flex flex-wrap items-center text-xs text-[#475569] gap-1 text-nowrap">
                                         <HiLocationMarker size={14} />
                                         <span>{gym?.distance} {gym?.area}</span>
                                         <span>•</span>
@@ -413,10 +414,12 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
                                 {tags.map((tag, i) => (
                                     <span
                                         key={i}
-                                        className="flex items-center gap-1 bg-[#DBEAFE] text-[#2563EB] text-xs px-3 py-2 rounded-full"
+                                        className="flex items-center gap-1 text-nowrap bg-[#DBEAFE] text-[#2563EB] text-xs px-3 py-2 rounded-full"
                                     >
                                         {tagIcons[tag]}
-                                        {tag}
+                                        <span className="text-nowrap">
+                                            {tag}
+                                        </span>
                                     </span>
                                 ))}
                             </div>
@@ -487,7 +490,7 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
 
                         {/* TIMINGS */}
                         <Section title="Manage Gym Availability">
-                            <div className="bg-white rounded-xl border p-3 h-[300px] overflow-y-auto space-y-3 mb-5">
+                            <div className="bg-white rounded-xl border p-3 h-[300px] overflow-y-auto space-y-3 mb-8">
 
                                 {availability.map((item, index) => (
                                     <div
@@ -650,10 +653,10 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
                 </div>
 
                 {/* FOOTER FIXED */}
-                <div id="share-bottom-bar" className="fixed mk:hidden bottom-14 left-0 right-0 bg-white border-t border-[#F1F5F9] px-4 py-3 pb-4 flex items-center justify-between">
+                <div id="share-bottom-bar" className="fixed mk:hidden bottom-14 left-0 right-0 bg-white border-t border-[#F1F5F9] px-4 py-3 pb-8 flex items-center justify-between">
                     <div>
-                        <p className="text-xs font-medium text-gray-500">Your Gym Price Per hour</p>
-                        <p className="font-semibold text-[22px]">
+                        <p className="text-xs font-medium text-gray-500 text-nowrap">Your Gym Price Per hour</p>
+                        <p className="font-semibold text-[22px] text-nowrap">
                             ₹{gym?.hourly_rate}/Hr
                         </p>
                     </div>

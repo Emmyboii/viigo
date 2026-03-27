@@ -199,7 +199,7 @@ const GymOwnerHome = () => {
 
         {toast && <Toast type={toast.type} text={toast.message} onClose={handleToastClose} />}
 
-        <div className="bg-[#2563EB] text-white rounded-lg p-4 mk:flex justify-between mx-5">
+        <div className="bg-[#2563EB] text-white rounded-lg p-4 mk:flex justify-between mx-5 mt-4">
           <div>
             <p className="font-semibold">Quick Checkin</p>
             <p className="text-[#CBD5E1] text-sm pt-1">

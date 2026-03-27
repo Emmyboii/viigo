@@ -55,7 +55,7 @@ export default function ReviewPay() {
         if (!element) return;
 
         // Save original styles
-    
+
         if (bottomBar) {
 
             bottomBar.style.position = "relative";
@@ -415,6 +415,7 @@ Hours: ${selectedHours?.label}
                 gym: id,
                 booking_date: formatDateForAPI(selectedDate),
                 duration_in_hours: String(selectedHours.value),
+                number_of_friends: peopleCount
             };
 
             const headers = {

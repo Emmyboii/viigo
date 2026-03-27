@@ -1,5 +1,4 @@
 import Header from './Header'
-import Container from './layout/Container'
 // import { useState } from 'react';
 import VerifiedWallet from './VerifiedWallet';
 import UnverifiedWallet from './UnverifiedWallet';
@@ -16,17 +15,17 @@ const WalletDetails = () => {
     const balance = wallet?.balance ?? "0.00"
 
     return (
-        <Container>
+        <div className='min-h-screen pt-4 relative'>
             <Header />
 
-            {verified ? (
+            {!verified ? (
                 <VerifiedWallet />
             ) : (
                 <UnverifiedWallet balance={balance} isActive={wallet?.is_active ?? false} />
             )}
 
             
-        </Container>
+        </div>
     )
 }
 

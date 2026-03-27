@@ -100,6 +100,7 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
     const [toast, setToast] = useState<{ type: ToastType; message: string } | null>(null);
 
     const [gymName, setGymName] = useState(gym?.name || "");
+    const [bookingFor, setBookingFor] = useState<"everyone" | "women">("everyone");
     const [price, setPrice] = useState(gym?.hourly_rate || "");
     const [phone, setPhone] = useState(gym?.phone_number || "+91 ");
     const [location, setLocation] = useState(gym?.location || "");
@@ -174,6 +175,7 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
     // const visibleRules = rules.slice(0, 6);
 
     const [visibleAmenities, setVisibleAmenities] = useState<Amenity[]>([])
+    const [visibleAmenities2, setVisibleAmenities2] = useState<Amenity[]>([])
     const [visibleRules, setVisibleRules] = useState<Rule[]>([])
 
     const [modalType, setModalType] = useState<"amenities" | "rules" | null>(null);
@@ -297,6 +299,7 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
                 setAmenities(data.data);
                 setAmenitiesCount(data.data.length);
                 setVisibleAmenities(data.data.slice(0, 6));
+                setVisibleAmenities2(data.data.slice(0, 10));
 
                 const res2 = await fetch(`${backendUrl}/gymowner/rules/`, {
                     headers: { Authorization: `Bearer ${token}` },
@@ -480,212 +483,376 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
         );
 
     return (
-        <div className="min-h-screen pb-32">
+        <div className="min-h-screen pb-32 mk:bg-[#CBD5E1] max-w-[1900px] mx-auto">
             {/* Header */}
-            <div className="flex items-center gap-3 p-4 bg-white cursor-pointer">
-                <FiArrowLeft
-                    onClick={() => {
-                        if (display === "edit" && gym?.images.length !== 0) {
-                            setDisplay("details");
-                            localStorage.setItem("gymDisplay", "details");
-                        } else if (display === "create") {
-                            navigate(-1)
-                        } else {
-                            navigate(-1)
-                        }
-                    }}
-                    size={20} />
-                <h1 className="font-semibold text-lg">Edit Gym Details</h1>
+            <div className="flex items-center justify-between mk:p-4 bg-white">
+                <div className="flex items-center gap-3 p-4 bg-white cursor-pointer">
+                    <FiArrowLeft
+                        onClick={() => {
+                            if (display === "edit" && gym?.images.length !== 0) {
+                                setDisplay("details");
+                                localStorage.setItem("gymDisplay", "details");
+                            } else if (display === "create") {
+                                navigate(-1)
+                            } else {
+                                navigate(-1)
+                            }
+                        }}
+                        size={20} />
+                    <h1 className="font-semibold text-lg">Edit Gym Details</h1>
+                </div>
+
+                <div className="mk:flex hidden items-center gap-4">
+                    <button
+                        onClick={() => {
+                            if (display === "edit" && gym?.images.length !== 0) {
+                                setDisplay("details");
+                                localStorage.setItem("gymDisplay", "details");
+                            } else if (display === "create") {
+                                navigate(-1)
+                            } else {
+                                navigate(-1)
+                            }
+                        }}
+                        className={`bg-white border border-[#CBD5E1] cursor-pointer rounded-md text-sm font-semibold py-3 px-4`}
+                    >
+                        Cancel
+                    </button>
+
+                    <button
+                        disabled={!isFormValid || isLoading || !isChanged || Number(price) > 200}
+                        onClick={handleSubmit}
+                        className={`w-full py-3 px-4 rounded-md text-sm font-semibold flex items-center justify-center gap-2 transition ${isFormValid && !isLoading && isChanged && Number(price) <= 200
+                            ? "bg-[#2563EB] text-white cursor-pointer"
+                            : "bg-[#CBD5E1] text-[#FFFFFF] cursor-not-allowed"
+                            }`}
+                    >
+                        {isLoading ? (
+                            <div className="flex items-center justify-center gap-2">
+                                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                Saving...
+                            </div>
+                        ) : (
+                            "Save Changes"
+                        )}
+                    </button>
+                </div>
             </div>
 
             {toast && <Toast type={toast.type} text={toast.message} onClose={handleToastClose} />}
 
-            <div className="p-4 space-y-6">
-                {/* Gym Name */}
-                <Input label="Gym Name" value={gymName} onChange={setGymName} />
+            <div className="p-4 lj:p-14 lg:p-6 lg:space-y-6 mk:space-y-4 space-y-6">
+                <div className="mk:grid grid-cols-2 lj:gap-12 lg:gap-6 gap-4">
+                    <div className="lg::space-y-6 mk:space-y-4">
+                        <div className="lg:p-6 mk:p-4 space-y-6 bg-white mk:border border-[#CBD5E1] mk:rounded-lg">
 
-                <div>
-                    <Input2
-                        label="How much do you charge per hour?"
-                        placeholder="Example ₹150/Hour"
-                        value={price}
-                        onChange={setPrice}
-                        error={priceError}
-                    />
+                            <p className="hidden mk:block text-[22px] font-semibold text-[#0F172A]">General Information</p>
+                            {/* Gym Name */}
+                            <Input label="Gym Name" value={gymName} onChange={setGymName} />
 
-                    <p className="text-[#475569] text-[10px] pt-1">
-                        <CiCircleAlert className="inline mr-0.5 text-sm" />
-                        Tip: Set a nominal price to attract more customers. You can edit this anytime
-                    </p>
-                </div>
+                            <div className="relative">
+                                <p className="text-base mb-1 text-[#0F172A] font-semibold">Who Can Book This Gym?</p>
+                                <div className="flex items-start gap-6 flex-col mt-6">
+                                    <label className="flex items-center mr-4 cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="bookingFor"
+                                            value="everyone"
+                                            checked={bookingFor === "everyone"}
+                                            onChange={() => setBookingFor("everyone")}
+                                            className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                                        />
+                                        <span className="ml-2 text-sm text-[#0F172A]">Everyone</span>
+                                    </label>
+                                    <label className="flex items-center cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="bookingFor"
+                                            value="women"
+                                            checked={bookingFor === "women"}
+                                            onChange={() => setBookingFor("women")}
+                                            className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                                        />
+                                        <span className="ml-2 text-sm text-[#0F172A]">Women Only</span>
+                                    </label>
+                                </div>
 
-                <div>
-                    <p className="text-base mb-1 text-[#0F172A] font-semibold">Phone Number</p>
-                    <div className="relative">
-                        <input
-                            type="text"
-                            name=""
-                            id=""
-                            value={phone}
-                            onChange={handleChange}
-                            title="number"
-                            className="border border-[#475569] text-[#0F172A] text-sm w-full rounded-lg py-2 px-4 outline-none pt-7"
-                        />
-                        <p className="text-[#475569] absolute top-2 left-4 text-xs font-normal">10 Digit Phone Number</p>
-                    </div>
-                </div>
-
-                <div>
-                    <p className="text-base mb-1 text-[#0F172A] font-semibold">Location</p>
-
-                    <div
-                        onClick={() => setLocationModal(true)}
-                        className="flex items-center justify-between border border-[#475569] h-[50px] rounded-lg px-3 py-2 bg-white cursor-pointer"
-                    >
-                        <div className="flex items-center gap-2 text-sm text-[#0F172A] truncate">
-                            <FiMapPin className="text-[#475569]" />
-                            {location || "Select Gym Location"}
-                        </div>
-
-                        <RiArrowRightSLine className="text-[#475569]" />
-                    </div>
-                </div>
-
-                {/* Gym Timings */}
-                <GymTimings
-                    start={startTime}
-                    end={endTime}
-                    setStart={setStartTime}
-                    setEnd={setEndTime}
-                />
-
-                {/* Peak Hours */}
-                <GymPeakHours
-                    morning={morningPeak}
-                    evening={eveningPeak}
-                    setMorning={setMorningPeak}
-                    setEvening={setEveningPeak}
-                    gymEndTime={endTime}
-                />
-
-                {/* Photos */}
-                <Section title="Gym Photos">
-                    <div className="flex gap-3 flex-wrap">
-                        {photos.map((photo) => (
-                            <div key={photo.url} className="relative">
-                                <img
-                                    src={photo.url}
-                                    title="gymphotos"
-                                    className="w-24 h-24 object-cover rounded-lg"
-                                />
-                                <button
-                                    onClick={() => removePhoto(photo.url)}
-                                    title="remove"
-                                    className="absolute -top-2 -right-2 bg-white p-1 rounded-full shadow"
-                                >
-                                    <FiX size={14} />
-                                </button>
+                                <p className="text-[#475569] text-[11px] pt-6">
+                                    <CiCircleAlert className="inline mr-0.5 text-sm" />
+                                    Tip: This setting helps us show your gym to the appropriate audience.
+                                </p>
                             </div>
-                        ))}
 
-                        <label className="w-24 h-24 border-2 border-dashed border-[#2563EB] rounded-lg flex items-center justify-center cursor-pointer">
-                            <FaPlus className="size-6 text-[#2563EB]" />
-                            <input
-                                type="file"
-                                multiple
-                                hidden
-                                onChange={handlePhotoUpload}
-                            />
-                        </label>
-                    </div>
-                    <p className="text-[11px] text-[#0F172A] mt-3">Add Atleast 3 high quality Photos</p>
-                </Section>
+                            <div>
+                                <Input2
+                                    label="How much do you charge per hour?"
+                                    placeholder="Example ₹150/Hour"
+                                    value={price}
+                                    onChange={setPrice}
+                                    error={priceError}
+                                />
 
-                {/* Amenities */}
-                <Section title="Amenities">
-                    <div className="flex flex-wrap gap-3 mt-2">
-                        {visibleAmenities.map((item) => {
-                            const active = selectedAmenities.includes(item.id);
+                                <p className="text-[#475569] text-[11px] pt-2">
+                                    <CiCircleAlert className="inline mr-0.5 text-sm" />
+                                    Tip: Set a nominal price to attract more customers. You can edit this anytime
+                                </p>
+                            </div>
 
-                            return (
-                                <button
-                                    key={item.id}
-                                    onClick={() =>
-                                        setSelectedAmenities((prev) =>
-                                            prev.includes(item.id)
-                                                ? prev.filter((i) => i !== item.id)
-                                                : [...prev, item.id]
-                                        )
-                                    }
-                                    className={`flex items-center gap-2 px-3 py-2 rounded-full text-xs font-medium transition
-                                        ${active
-                                            ? "bg-blue-100 border-blue-500 text-blue-600"
-                                            : "bg-[#F1F5F9] text-[#0F172A]"
-                                        }
-                                    `}
-                                >
-                                    <img src={item.icon} alt={item.name} className="w-4 h-4" />
-                                    {item.name}
-                                </button>
-                            );
-                        })}
-                    </div>
+                            <div>
+                                <p className="text-base mb-1 text-[#0F172A] font-semibold">Phone Number</p>
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        name=""
+                                        id=""
+                                        value={phone}
+                                        onChange={handleChange}
+                                        title="number"
+                                        className="border border-[#475569] text-[#0F172A] text-sm w-full rounded-lg py-2 px-4 outline-none pt-7"
+                                    />
+                                    <p className="text-[#475569] absolute top-2 left-4 text-xs font-normal">10 Digit Phone Number</p>
+                                </div>
+                            </div>
 
-                    <button
-                        onClick={() => setModalType("amenities")}
-                        className="mt-6 w-full bg-[#F1F5F9] py-3 rounded-md mb-10 text-[#94A3B8] font-semibold text-sm"
-                    >
-                        Add More
-                    </button>
-                </Section>
+                            <div>
+                                <p className="text-base mb-1 text-[#0F172A] font-semibold">Location</p>
 
-                {/* Rules */}
-                <Section title="Rules">
-                    <div className="space-y-3">
-                        {visibleRules.map((item) => {
-                            const active = selectedRules.includes(item.id);
-
-                            return (
                                 <div
-                                    key={item.id}
-                                    onClick={() =>
-                                        setSelectedRules((prev) =>
-                                            prev.includes(item.id)
-                                                ? prev.filter((i) => i !== item.id)
-                                                : [...prev, item.id]
-                                        )
-                                    }
-                                    className={`flex items-center gap-3 p-3 rounded border cursor-pointer transition
-                                        ${active ? "border-[#2563EB] bg-blue-50" : "border-[#E2E8F0]"}
-                                    `}
+                                    onClick={() => setLocationModal(true)}
+                                    className="flex items-center justify-between border border-[#475569] h-[50px] rounded-lg px-3 py-2 bg-white cursor-pointer"
                                 >
-                                    <div
-                                        className={`w-5 h-5 rounded-full border flex items-center justify-center
-                                        ${active ? "border-blue-500" : "border-gray-400"}
-                                    `}
-                                    >
-                                        {active && (
-                                            <div className="w-2.5 h-2.5 bg-blue-500 rounded-full" />
-                                        )}
+                                    <div className="flex items-center gap-2 text-sm text-[#0F172A] truncate">
+                                        <FiMapPin className="text-[#475569]" />
+                                        {location || "Select Gym Location"}
                                     </div>
 
-                                    <p className="text-sm flex-1 text-gray-700">{item.description}</p>
+                                    <RiArrowRightSLine className="text-[#475569]" />
                                 </div>
-                            );
-                        })}
+                            </div>
+                        </div>
+
+                        <div className="lg:p-6 mk:p-4 space-y-6 bg-white mk:border border-[#CBD5E1] mk:rounded-lg min-h-[200px] mk:block hidden">
+                            <Section title="Gym Photos">
+                                <div className="flex gap-3 flex-wrap">
+                                    {photos.map((photo) => (
+                                        <div key={photo.url} className="relative">
+                                            <img
+                                                src={photo.url}
+                                                title="gymphotos"
+                                                className="w-24 h-24 object-cover rounded-lg"
+                                            />
+                                            <button
+                                                onClick={() => removePhoto(photo.url)}
+                                                title="remove"
+                                                className="absolute -top-2 -right-2 bg-white p-1 rounded-full shadow"
+                                            >
+                                                <FiX size={14} />
+                                            </button>
+                                        </div>
+                                    ))}
+
+                                    <label className="w-24 h-24 border-2 border-dashed border-[#2563EB] rounded-lg flex items-center justify-center cursor-pointer">
+                                        <FaPlus className="size-6 text-[#2563EB]" />
+                                        <input
+                                            type="file"
+                                            multiple
+                                            hidden
+                                            onChange={handlePhotoUpload}
+                                        />
+                                    </label>
+                                </div>
+                                <p className="text-[11px] text-[#0F172A] mt-3">Add Atleast 3 high quality Photos</p>
+                            </Section>
+                        </div>
                     </div>
 
-                    <button
-                        onClick={() => setModalType("rules")}
-                        className="mt-6 w-full bg-[#F1F5F9] py-3 rounded-md mb-10 text-[#94A3B8] font-semibold text-sm"
-                    >
-                        Add More
-                    </button>
-                </Section>
+                    <div className="lg::space-y-6 mk:space-y-4">
+                        <div className="lg:p-6 mk:p-4 space-y-6 bg-white mk:border border-[#CBD5E1] mk:rounded-lg">
+                            {/* Gym Timings */}
+                            <GymTimings
+                                start={startTime}
+                                end={endTime}
+                                setStart={setStartTime}
+                                setEnd={setEndTime}
+                            />
+
+                            {/* Peak Hours */}
+                            <GymPeakHours
+                                morning={morningPeak}
+                                evening={eveningPeak}
+                                setMorning={setMorningPeak}
+                                setEvening={setEveningPeak}
+                                gymEndTime={endTime}
+                            />
+
+                        </div>
+
+                        {/* Amenities */}
+                        <div className="mk:pt-6 lg:px-6 mk:px-4 space-y-6 bg-white mk:border border-[#CBD5E1] mk:rounded-lg mk:block hidden">
+                            <Section title="Amenities">
+                                <div className="flex flex-wrap gap-3 mt-2">
+                                    {visibleAmenities2.map((item) => {
+                                        const active = selectedAmenities.includes(item.id);
+
+                                        return (
+                                            <button
+                                                key={item.id}
+                                                onClick={() =>
+                                                    setSelectedAmenities((prev) =>
+                                                        prev.includes(item.id)
+                                                            ? prev.filter((i) => i !== item.id)
+                                                            : [...prev, item.id]
+                                                    )
+                                                }
+                                                className={`flex items-center gap-2 px-3 py-2 rounded-full text-xs font-medium transition
+                                        ${active
+                                                        ? "bg-blue-100 border-blue-500 text-blue-600"
+                                                        : "bg-[#F1F5F9] text-[#0F172A]"
+                                                    }
+                                    `}
+                                            >
+                                                <img src={item.icon} alt={item.name} className="w-4 h-4" />
+                                                {item.name}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+
+                                <button
+                                    onClick={() => setModalType("amenities")}
+                                    className="mt-6 w-full bg-[#F1F5F9] py-3 rounded-md mb-10 text-[#94A3B8] font-semibold text-sm"
+                                >
+                                    Add More
+                                </button>
+                            </Section>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Photos */}
+                <div className="mk:hidden">
+                    <Section title="Gym Photos">
+                        <div className="flex gap-3 flex-wrap">
+                            {photos.map((photo) => (
+                                <div key={photo.url} className="relative">
+                                    <img
+                                        src={photo.url}
+                                        title="gymphotos"
+                                        className="w-24 h-24 object-cover rounded-lg"
+                                    />
+                                    <button
+                                        onClick={() => removePhoto(photo.url)}
+                                        title="remove"
+                                        className="absolute -top-2 -right-2 bg-white p-1 rounded-full shadow"
+                                    >
+                                        <FiX size={14} />
+                                    </button>
+                                </div>
+                            ))}
+
+                            <label className="w-24 h-24 border-2 border-dashed border-[#2563EB] rounded-lg flex items-center justify-center cursor-pointer">
+                                <FaPlus className="size-6 text-[#2563EB]" />
+                                <input
+                                    type="file"
+                                    multiple
+                                    hidden
+                                    onChange={handlePhotoUpload}
+                                />
+                            </label>
+                        </div>
+                        <p className="text-[11px] text-[#0F172A] mt-3">Add Atleast 3 high quality Photos</p>
+                    </Section>
+                </div>
+
+                {/* Amenities */}
+                <div className="mk:hidden">
+                    <Section title="Amenities">
+                        <div className="flex flex-wrap gap-3 mt-2">
+                            {visibleAmenities.map((item) => {
+                                const active = selectedAmenities.includes(item.id);
+
+                                return (
+                                    <button
+                                        key={item.id}
+                                        onClick={() =>
+                                            setSelectedAmenities((prev) =>
+                                                prev.includes(item.id)
+                                                    ? prev.filter((i) => i !== item.id)
+                                                    : [...prev, item.id]
+                                            )
+                                        }
+                                        className={`flex items-center gap-2 px-3 py-2 rounded-full text-xs font-medium transition
+                                        ${active
+                                                ? "bg-blue-100 border-blue-500 text-blue-600"
+                                                : "bg-[#F1F5F9] text-[#0F172A]"
+                                            }
+                                    `}
+                                    >
+                                        <img src={item.icon} alt={item.name} className="w-4 h-4" />
+                                        {item.name}
+                                    </button>
+                                );
+                            })}
+                        </div>
+
+                        <button
+                            onClick={() => setModalType("amenities")}
+                            className="mt-6 w-full bg-[#F1F5F9] py-3 rounded-md mb-10 text-[#94A3B8] font-semibold text-sm"
+                        >
+                            Add More
+                        </button>
+                    </Section>
+                </div>
+
+                {/* Rules */}
+                <div className="mk:pt-6 lg:px-6 px-4 space-y-6 bg-white mk:border border-[#CBD5E1] mk:rounded-lg">
+                    <Section title="Rules">
+                        <div className="space-y-3">
+                            {visibleRules.map((item) => {
+                                const active = selectedRules.includes(item.id);
+
+                                return (
+                                    <div
+                                        key={item.id}
+                                        onClick={() =>
+                                            setSelectedRules((prev) =>
+                                                prev.includes(item.id)
+                                                    ? prev.filter((i) => i !== item.id)
+                                                    : [...prev, item.id]
+                                            )
+                                        }
+                                        className={`flex items-center gap-3 p-3 rounded border cursor-pointer transition
+                                        ${active ? "border-[#2563EB] bg-blue-50" : "border-[#E2E8F0]"}
+                                    `}
+                                    >
+                                        <div
+                                            className={`w-5 h-5 rounded-full border flex items-center justify-center
+                                        ${active ? "border-blue-500" : "border-gray-400"}
+                                    `}
+                                        >
+                                            {active && (
+                                                <div className="w-2.5 h-2.5 bg-blue-500 rounded-full" />
+                                            )}
+                                        </div>
+
+                                        <p className="text-sm flex-1 text-gray-700">{item.description}</p>
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        <button
+                            onClick={() => setModalType("rules")}
+                            className="mt-6 w-full bg-[#F1F5F9] py-3 rounded-md mb-10 text-[#94A3B8] font-semibold text-sm"
+                        >
+                            Add More
+                        </button>
+                    </Section>
+                </div>
             </div>
 
             {/* Save Button */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white p-4 border-t">
+            <div className="fixed z-50 mk:hidden bottom-0 left-0 right-0 bg-white p-4 border-t">
                 <button
                     disabled={!isFormValid || isLoading || !isChanged || Number(price) > 200}
                     onClick={handleSubmit}
@@ -724,7 +891,9 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
                     }
                     existing={
                         modalType === "amenities"
-                            ? visibleAmenities.map((a) => a.id)
+                            ? window.innerWidth > 850
+                                ? visibleAmenities2.map((a) => a.id)
+                                : visibleAmenities.map((a) => a.id)
                             : visibleRules.map((r) => r.id)
                     }
                     onClose={() => setModalType(null)}
@@ -869,7 +1038,7 @@ const GymTimings = ({
         <div className="space-y-3">
             <h2 className="text-lg font-semibold">Gym Timings</h2>
 
-            <div className="bg-blue-100 rounded-lg p-3 py-5">
+            <div className="bg-[#DBEAFE] mk:bg-[#BFDBFE] rounded-lg p-3 py-5">
                 <div className="flex items-center justify-between gap-1">
                     <div className="flex-">
                         <p className="text-sm mb-2 text-[#0F172A] font-medium">Start Time</p>
@@ -1010,7 +1179,7 @@ const PeakSection = ({
     //                 }
     //             }
 
-    //             return { ...item, [field]: value };
+    //             return {...item, [field]: value };
     //         })
     //     );
     // };
@@ -1024,7 +1193,7 @@ const PeakSection = ({
     };
 
     return (
-        <div className="bg-blue-100 rounded-lg p-3 py-5 space-y-5">
+        <div className="bg-[#DBEAFE] mk:bg-[#BFDBFE] rounded-lg p-3 py-5 space-y-5">
             <div className="flex items-center gap-2 text-gray-700 font-medium">
                 {icon} {title}
             </div>

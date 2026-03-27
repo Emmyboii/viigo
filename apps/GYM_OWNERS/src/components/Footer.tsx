@@ -11,7 +11,7 @@ export default function Footer() {
     const tabs = [
         { name: "Home", icon: AiFillHome, path: "/" },
         { name: "Gym", image: muscle, icon: '', path: "/gym", path2: "/gym/edit" },
-        { name: "Wallet", icon: IoWalletOutline, path: "/wallet", path2: "/wallet/edit" },
+        { name: "Wallet", icon: IoWalletOutline, path: "/wallet", path2: "/wallet/edit", path3:"/wallet/transactions" },
         { name: "Profile", icon: FaUser, path: "/profile", path2: "/notifications", path3: "/profile/edit", path4: "/faq", path5: "/support" },
     ];
 

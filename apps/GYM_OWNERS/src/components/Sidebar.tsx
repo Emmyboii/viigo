@@ -16,12 +16,12 @@ export default function Sidebar() {
     const tabs = [
         { name: "Dashboard", icon: AiFillHome, path: "/" },
         { name: "Manage Gym", image: muscle, path: "/gym", path2: "/gym/edit" },
-        { name: "Wallet", icon: IoWalletOutline, path: "/wallet", path2: "/wallet/edit" },
+        { name: "Wallet", icon: IoWalletOutline, path: "/wallet", path2: "/wallet/edit", path3: "/wallet/transactions" },
         { name: "Profile", icon: FaUser, path: "/profile", path2: "/notifications", path3: "/profile/edit", path4: "/faq", path5: "/support" },
     ];
 
     return (
-        <div className="hidden mk:flex fixed top-0 left-0 h-screen w-[270px] bg-white border-r border-[#F1F5F9] shadow-sm z-50 flex-col justify-between pt-6">
+        <div className="hidden mk:flex fixed top-0 left-0 h-screen lg:w-[270px] w-[220px] bg-white border-r border-[#F1F5F9] shadow-sm z-50 flex-col justify-between pt-6">
 
             <div className="space-y-6 flex flex-col justify-between h-screen">
 

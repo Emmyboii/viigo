@@ -138,7 +138,7 @@ export default function CreateWallet({ setDisplayWallet }: createWalletProps) {
     }, []);
 
     return (
-        <div className="min-h-screen bg-white px-5 py-6">
+        <div className="min-h-screen bg-white px-5 py-6 max-w-[800px] mx-auto">
             {/* Header */}
             <h1 className="text-[20px] font-semibold text-[#0F172A]">
                 {!wallet ? 'Setup Your Wallet' : !wallet.account_holder_name ? 'Setup Your Wallet' : wallet.account_holder_name && displayWallet === 'edit' ? 'Bank Details & G.S.T Details' : 'Setup Your Wallet'}

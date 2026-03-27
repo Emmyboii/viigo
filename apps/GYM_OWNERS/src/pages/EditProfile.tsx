@@ -8,7 +8,7 @@ import { FaUserCircle } from 'react-icons/fa'
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 type ToastType = "success" | "error" | null;
 
-const EditProfile = () => {
+const EditProfile = ({ setEdit }: { setEdit: (value: boolean) => void }) => {
 
     const navigate = useNavigate()
 
@@ -137,7 +137,7 @@ const EditProfile = () => {
     if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
-                <div className="flex flex-col items-center gap-3">
+                <div className="flex flex-col items-center gap-3 bg-white p-5 z-50">
                     <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
                     <p className="text-sm text-gray-500">Loading profile...</p>
                 </div>
@@ -146,11 +146,12 @@ const EditProfile = () => {
     }
 
     return (
-        <div className='p-5 '>
-            <div className="fixed top-0 left-0 right-0 z-40 bg-white flex items-center px-4 py-3" >
+        // <div className='p-5 '>
+        <div className={`fixed mk:flex flex-col justify-center z-50 bg-white overflow-y-auto inset-0 mk:inset-auto mk:right-0 mk:top-0 mk:min-h-screen mk:w-[480px] p-5 ${window.innerWidth >= 850 ? "animate-slideRight" : "animate-slideUp"}`}>
+            <div className="fixed mk:hidden top-0 left-0 right-0 z-40 bg-white flex items-center px-4 py-3" >
 
                 <button
-                    onClick={() => navigate(-1)}
+                    onClick={() => setEdit(false)}
                     aria-label="Go back"
                     className="p-1"
                 >
@@ -265,7 +266,7 @@ const EditProfile = () => {
 
             </form>
 
-            
+
         </div>
     )
 }
@@ -284,7 +285,7 @@ function Toast({ text, type, onClose }: { text: string; type: ToastType; onClose
 
     return (
         <div
-            className={`fixed w-[280px] bottom-20 z-50 left-1/2 justify-center -translate-x-1/2 
+            className={`fixed mk:absolute w-[280px] bottom-20 z-50 left-1/2 justify-center -translate-x-1/2 
       bg-white px-4 py-3 rounded-lg flex items-center gap-3
       shadow-[0_10px_40px_rgba(0,0,0,0.18)] animate-[fadeIn_0.2s_ease-out]`}
         >

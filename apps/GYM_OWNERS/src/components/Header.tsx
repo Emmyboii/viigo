@@ -11,7 +11,7 @@ export default function Header() {
     const navigate = useNavigate();
 
     return (
-        <div className="flex justify-between items-center mb-4 border-b border-[#E2E8F0] pb-6 pt-2 px-5">
+        <div className="flex justify-between items-center border-b border-[#E2E8F0] mk:pb-6 pb-2 pt-2 px-5">
             <div className="flex items-center gap-2">
                 <HiLocationMarker className="text-[#475569] text-xl" />
                 <div className="leading-tight">

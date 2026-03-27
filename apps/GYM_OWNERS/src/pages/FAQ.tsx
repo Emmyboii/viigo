@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { IoChevronDown, IoChevronUp } from "react-icons/io5";
 import { IoArrowBack } from "react-icons/io5";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import logoUrl from "../assets/icon2.png";
 // import * as htmlToImage from "html-to-image";
 import { HiShare } from "react-icons/hi";
@@ -31,8 +31,8 @@ const categoryLabels: Record<Category, string> = {
     ABOUT_US: "About Us",
 };
 
-export default function FAQ() {
-    const navigate = useNavigate();
+export default function FAQ({ setFaq }: { setFaq: (value: boolean) => void }) {
+    // const navigate = useNavigate();
     const [activeCategory, setActiveCategory] = useState<Category>("BOOKINGS");
     const [openIndex, setOpenIndex] = useState<number | null>(0);
 
@@ -185,7 +185,7 @@ export default function FAQ() {
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
-                <div className="flex flex-col items-center gap-3">
+                <div className="flex flex-col items-center gap-3 bg-white p-5 z-50">
                     <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
                     <p className="text-sm text-gray-500">Loading FAQs...</p>
                 </div>
@@ -194,23 +194,25 @@ export default function FAQ() {
     }
 
     return (
-        <div className="min-h-screen py-6">
+        // <div className="min-h-screen py-6">
+        <div className={`fixed mk:flex flex-col justify-center z-50 bg-white overflow-y-auto inset-0 mk:inset-auto mk:right-0 mk:top-0 mk:min-h-screen mk:w-[480px] mk:p-5 ${window.innerWidth >= 850 ? "animate-slideRight" : "animate-slideUp"}`}>
+
             {/* Header */}
-            <div className="flex items-center justify-between px-4">
+            <div className="flex mk:hidden items-center justify-between px-4 mt-4">
                 <div className="flex items-center gap-3">
                     <IoArrowBack
                         size={22}
                         className="cursor-pointer"
-                        onClick={() => navigate(-1)}
+                        onClick={() => setFaq(false)}
                     />
                     <h1 className="text-lg font-semibold">Support</h1>
                 </div>
                 <HiShare onClick={handleShare} size={20} className="cursor-pointer text-[#475569]" />
             </div>
 
-            <div id="share-area" className="min-h-screen bg-white px-4 pt-4">
+            <div id="share-area" className="min-h-screen bg-white px-4 mk:px-2 pt-4 mk:pt-32">
 
-                <p className="text-sm text-[#0F172A] text-nowrap mb-4">
+                <p className="text-sm mk:text-lg mk:font-semibold text-[#0F172A] text-nowrap mb-4">
                     Please find common FAQ’s here
                 </p>
 

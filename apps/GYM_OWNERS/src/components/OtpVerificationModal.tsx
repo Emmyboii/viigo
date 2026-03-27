@@ -143,7 +143,7 @@ export default function OtpVerificationModal({ user, onClose }: OtpVerificationM
     };
 
     return (
-        <div className="fixed z-50 bg-white overflow-y-auto inset-0 mk:inset-auto mk:right-0 mk:top-0 mk:min-h-screen mk:w-[480px] p-5 animate-slideUp mk:animate-slideRight">
+        <div className={`fixed z-50 bg-white overflow-y-auto inset-0 mk:inset-auto mk:right-0 mk:top-0 mk:min-h-screen mk:w-[480px] p-5 ${window.innerWidth >= 850? "animate-slideRight" : "animate-slideUp"}`}>
 
             <div className="relative bg-white mk:flex hidden items-center justify-between px-4 py-3" >
 
@@ -181,24 +181,24 @@ export default function OtpVerificationModal({ user, onClose }: OtpVerificationM
                             <FaTimesCircle className="text-red-500 text-[65px]" />
                         )}
 
-                        <h1 className="text-lg font-semibold text-[#0F172A]">{getStatusText()}</h1>
+                        <h1 className="text-lg font-semibold text-[#0F172A] text-nowrap">{getStatusText()}</h1>
                         <p className="text-[#475569] mt-1 text-sm text-center">
                             {bookingIdText()}
                         </p>
                     </div>
 
                     {/* User Details */}
-                    <div className='border border-[#DBEAFE] py-3 px-4 rounded-md space-y-4 mk:max-w-[320px] mk:mx-auto'>
+                    <div className='border border-[#DBEAFE] py-3 px-4 rounded-md space-y-4 mk:max-w-[320px] mk:mx-auto w-full'>
                         <div className="flex items-center justify-between mk:gap-5">
                             <div className="space-y-3">
                                 <p className="text-[#0F172A] font-semibold">Guest</p>
                                 <div className="flex items-center gap-2">
                                     <FaUser size={14} />
-                                    <p className="text-[#0F172A] font-normal text-sm">{user?.client_name}</p>
+                                    <p className="text-[#0F172A] font-normal text-sm text-nowrap">{user?.client_name}</p>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <FaRegClock size={14} />
-                                    <p className="text-[#0F172A] font-normal text-sm">{duration}</p>
+                                    <p className="text-[#0F172A] font-normal text-sm text-nowrap">{duration}</p>
                                     {user?.status === "ACTIVE" && (
                                         <p className='bg-[#22C55E] rounded-full text-white font-medium p-1 px-2 text-xs'>
                                             Active

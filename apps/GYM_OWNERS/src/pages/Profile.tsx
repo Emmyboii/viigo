@@ -1,9 +1,14 @@
 import { FaRegCircleQuestion, FaRegFaceSmile, FaUser } from 'react-icons/fa6'
 import icon from '../assets/profileIcon.png'
 import { useNavigate } from 'react-router'
-import { HiOutlineCurrencyRupee } from 'react-icons/hi'
+// import { HiOutlineCurrencyRupee } from 'react-icons/hi'
 import { useState } from 'react'
 import { FaUserCircle } from 'react-icons/fa'
+import Header from '../components/Header'
+import { motion, AnimatePresence } from "framer-motion";
+import EditProfile from './EditProfile'
+import FAQ from './FAQ'
+import Support from './Support'
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -25,6 +30,9 @@ const Profile = ({ user }: UserProps) => {
     const navigate = useNavigate()
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
+    const [edit, setEdit] = useState(false);
+    const [support, setSupport] = useState(false);
+    const [faq, setFaq] = useState(false);
 
     const handleLogout = async () => {
         setIsLoggingOut(true);
@@ -52,30 +60,36 @@ const Profile = ({ user }: UserProps) => {
     };
 
     return (
-        <div className='p-4 pt-10 '>
-            <div className='border border-[#DBEAFE] py-3 px-4 rounded-md space-y-4'>
-                <div onClick={() => navigate('/profile/edit')} className="flex items-center justify-between cursor-pointer">
-                    <div className="space-y-3">
-                        <div className="flex items-center gap-1">
-                            <p className="text-[#0F172A] font-semibold">Profile</p>
-                            <img src={icon} className="w-4 pt-1" alt="Profile Icon" />
-                        </div>
-                        <div className="flex items-center gap-1">
-                            <FaUser size={16} />
-                            <p className="text-[#0F172A] font-normal text-sm">{user?.full_name || "User"}</p>
-                        </div>
-                    </div>
+        <div>
+            <div className='mk:block hidden'>
+                <Header />
+            </div>
+            <div className='mk:p-4 pt-10 mk:bg-[#DBEAFE] min-h-[93.3vh] mk:flex justify-center flex-col'>
 
-                    <div className="w-[69px] h-[69px] rounded-full overflow-hidden flex items-center justify-center bg-gray-100">
-                        {user?.profile_image ? (
-                            <img src={user?.profile_image} className="w-full h-full object-cover" alt="Profile Image" />
-                        ) : (
-                            <FaUserCircle size={60} className="text-gray-400" />
-                        )}
-                    </div>
-                </div>
+                <div className='mk:border mk:flex flex-col gap-16 border-[#DBEAFE] w-full bg-white mk:py-6 mk:px-5 py-3 px-4 rounded-md space-y-4 mk:max-w-[400px] mk:mx-auto'>
+                    <div className='border border-[#DBEAFE] bg-white py-3 px-4 rounded-md space-y-4'>
+                        <div onClick={() => setEdit(true)} className="flex items-center justify-between cursor-pointer">
+                            <div className="space-y-3">
+                                <div className="flex items-center gap-1">
+                                    <p className="text-[#0F172A] font-semibold">Profile</p>
+                                    <img src={icon} className="w-4 pt-1" alt="Profile Icon" />
+                                </div>
+                                <div className="flex items-center gap-1">
+                                    <FaUser size={16} />
+                                    <p className="text-[#0F172A] font-normal text-sm">{user?.full_name || "User"}</p>
+                                </div>
+                            </div>
 
-                <div className="border border-[#F2F2F2] border-dotted"></div>
+                            <div className="w-[69px] h-[69px] rounded-full overflow-hidden flex items-center justify-center bg-gray-100">
+                                {user?.profile_image ? (
+                                    <img src={user?.profile_image} className="w-full h-full object-cover" alt="Profile Image" />
+                                ) : (
+                                    <FaUserCircle size={60} className="text-gray-400" />
+                                )}
+                            </div>
+                        </div>
+
+                        {/* <div className="border border-[#F2F2F2] border-dotted"></div>
 
                 <div onClick={() => navigate('/wallet/edit')} className="space-y-3 cursor-pointer">
                     <div className="flex items-center gap-1">
@@ -85,59 +99,108 @@ const Profile = ({ user }: UserProps) => {
                         <HiOutlineCurrencyRupee size={20} />
                         <p className="text-[#0F172A] font-normal text-sm">Edit Bank Details & G.S.T </p>
                     </div>
-                </div>
+                </div> */}
 
-                <div className="border border-[#F2F2F2] border-dotted"></div>
+                        <div className="border border-[#F2F2F2] border-dotted"></div>
 
-                <div className='space-y-3'>
-                    <p className="text-[#0F172A] font-semibold">Help</p>
-                    <div onClick={() => navigate('/faq')} className="flex items-center gap-1 cursor-pointer">
-                        <FaRegCircleQuestion size={16} />
-                        <p className="text-[#0F172A] font-normal text-sm">FAQ</p>
-                    </div>
-                    <div onClick={() => navigate('/support')} className="flex items-center gap-1 cursor-pointer">
-                        <FaRegFaceSmile size={16} />
-                        <p className="text-[#0F172A] font-normal text-sm">Support</p>
-                    </div>
-                </div>
-            </div>
-
-            <button onClick={() => setShowLogoutModal(true)} className="mt-16 bg-[#2563EB] w-full h-[50px] font-semibold text-sm text-white py-2 px-4 rounded-md">Log Out</button>
-
-            
-
-            {/* Logout Confirmation Modal */}
-            {showLogoutModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-                    <div className="bg-white rounded-lg p-6 w-[300px] space-y-4 animate-slideUp">
-                        <p className="text-[#0F172A] text-center font-semibold">
-                            Are you sure you want to log out?
-                        </p>
-
-                        <div className="flex justify-between gap-4">
-                            <button
-                                onClick={() => setShowLogoutModal(false)}
-                                className="flex-1 py-2 bg-gray-200 rounded-md text-gray-700"
-                                disabled={isLoggingOut}
-                            >
-                                Cancel
-                            </button>
-
-                            <button
-                                onClick={handleLogout}
-                                className={`flex-1 py-2 rounded-md text-white ${isLoggingOut ? "bg-gray-400" : "bg-[#2563EB]"} flex justify-center items-center gap-2`}
-                                disabled={isLoggingOut}
-                            >
-                                {isLoggingOut ? (
-                                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                ) : (
-                                    "Log Out"
-                                )}
-                            </button>
+                        <div className='space-y-3'>
+                            <p className="text-[#0F172A] font-semibold">Help</p>
+                            <div onClick={() => setFaq(true)} className="flex items-center gap-1 cursor-pointer">
+                                <FaRegCircleQuestion size={16} />
+                                <p className="text-[#0F172A] font-normal text-sm">FAQ</p>
+                            </div>
+                            <div onClick={() => setSupport(true)} className="flex items-center gap-1 cursor-pointer">
+                                <FaRegFaceSmile size={16} />
+                                <p className="text-[#0F172A] font-normal text-sm">Support</p>
+                            </div>
                         </div>
                     </div>
+
+                    <button onClick={() => setShowLogoutModal(true)} className="mt-16 bg-[#2563EB] w-full h-[50px] font-semibold text-sm text-white py-2 px-4 rounded-md">Log Out</button>
                 </div>
-            )}
+
+
+                {/* Logout Confirmation Modal */}
+                {showLogoutModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+                        <div className="bg-white rounded-lg p-6 w-[300px] space-y-4 animate-slideUp">
+                            <p className="text-[#0F172A] text-center font-semibold">
+                                Are you sure you want to log out?
+                            </p>
+
+                            <div className="flex justify-between gap-4">
+                                <button
+                                    onClick={() => setShowLogoutModal(false)}
+                                    className="flex-1 py-2 bg-gray-200 rounded-md text-gray-700"
+                                    disabled={isLoggingOut}
+                                >
+                                    Cancel
+                                </button>
+
+                                <button
+                                    onClick={handleLogout}
+                                    className={`flex-1 py-2 rounded-md text-white ${isLoggingOut ? "bg-gray-400" : "bg-[#2563EB]"} flex justify-center items-center gap-2`}
+                                    disabled={isLoggingOut}
+                                >
+                                    {isLoggingOut ? (
+                                        <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                    ) : (
+                                        "Log Out"
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            <AnimatePresence>
+                {edit && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex justify-center items-start mk:items-center"
+                    >
+                        {/* Overlay for desktop only */}
+                        <div className="hidde mk:block fixed inset-0 bg-[#0C0A0AC7]" onClick={() => setEdit(false)}></div>
+
+                        <EditProfile setEdit={setEdit} />
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            <AnimatePresence>
+                {support && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex justify-center items-start mk:items-center"
+                    >
+                        {/* Overlay for desktop only */}
+                        <div className="hidde mk:block fixed inset-0 bg-[#0C0A0AC7]" onClick={() => setSupport(false)}></div>
+
+                        <Support setSupport={setSupport} />
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            <AnimatePresence>
+                {faq && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex justify-center items-start mk:items-center"
+                    >
+                        {/* Overlay for desktop only */}
+                        <div className="hidde mk:block fixed inset-0 bg-[#0C0A0AC7]" onClick={() => setFaq(false)}></div>
+
+                        <FAQ  setFaq={setFaq}/>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     )
 }

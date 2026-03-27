@@ -1,11 +1,8 @@
 import { FaHashtag, FaRegClock, FaUser, FaUserCircle } from 'react-icons/fa';
 import { FiArrowLeft } from 'react-icons/fi';
 import { HiOutlineCalendar, HiShare } from 'react-icons/hi';
-import { useNavigate, useParams } from 'react-router-dom';
-import profile from '../assets/userProfileImg.png'
 import { HiMiniCurrencyRupee } from 'react-icons/hi2';
 import { TbDownload } from 'react-icons/tb';
-import NotFound from './NotFound';
 import { useAppContext } from '../context/AppContext';
 import { useEffect, useRef, useState } from 'react';
 // import * as htmlToImage from "html-to-image";
@@ -35,7 +32,7 @@ interface PaymentBreakdown {
     total_earnings: string;
 }
 
-interface WalletTransactionDetail {
+export interface WalletTransactionDetail {
     id: string;
     amount: string;
     status: 'PENDING' | 'SETTLED' | 'FAILED';
@@ -48,41 +45,78 @@ interface WalletTransactionDetail {
     payment_breakdown: PaymentBreakdown;
 }
 
-const TransactionDetails = () => {
+const dummyTransaction: WalletTransactionDetail = {
+    id: "1",
+    amount: "1500",
+    status: "SETTLED",
+    transaction_type: "EARNING",
+    is_credit: "true",
+    created_at: new Date().toISOString(),
 
-    const { request, loading } = useAppContext();
-    const { id } = useParams();
-    const navigate = useNavigate();
+    guest_details: {
+        name: "John Doe",
+        duration: "2 hours",
+        amount_paid: "1500",
+        avatar: null,
+    },
+
+    session_details: {
+        booking_id: "BK123456",
+        date: "Mar 27, 2026",
+        start_time: "10:00 AM",
+        end_time: "12:00 PM",
+    },
+
+    payment_breakdown: {
+        base_price: "1200",
+        platform_fee: "300",
+        total_earnings: "1500",
+    },
+};
+
+const TransactionDetails = ({ id, setSelectedTransactionId }: { id: number, setSelectedTransactionId: (id: null) => void }) => {
+
+
+    const { request } = useAppContext();
+
+    // const navigate = useNavigate();
     const captureRef = useRef<HTMLDivElement | null>(null);
 
     const [transaction, setTransaction] = useState<WalletTransactionDetail | null>(null);
     const [fetching, setFetching] = useState<boolean>(true);
 
-    const downloadPDF = async () => {
-        if (!captureRef.current) return;
+      const captureFullCanvas = async () => {
+        if (!captureRef.current) return null;
+
+        const originalOverflow = captureRef.current.style.overflow;
+        captureRef.current.style.overflow = "visible"; // temporarily expand scrollable content
 
         try {
             await document.fonts.ready;
 
-            // Use Snapdom instead of html-to-image
+            const scale = window.innerWidth < 850 ? 1 : 2; // lower scale on mobile
             const canvasEl = await snapdom.toCanvas(captureRef.current, {
-                scale: 2,
+                scale,
                 backgroundColor: "#ffffff",
             });
-
-            const dataUrl = canvasEl.toDataURL("image/png");
-
-            const pdf = new jsPDF("p", "mm", "a4");
-            const imgProps = pdf.getImageProperties(dataUrl);
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-            pdf.addImage(dataUrl, "PNG", 0, 0, pdfWidth, pdfHeight);
-
-            pdf.save(`transaction-${transaction?.id}.pdf`);
-        } catch (err) {
-            console.error("PDF generation failed:", err);
+            return canvasEl;
+        } finally {
+            captureRef.current.style.overflow = originalOverflow;
         }
+    };
+
+    const downloadPDF = async () => {
+        const canvasEl = await captureFullCanvas();
+        if (!canvasEl || !transaction) return;
+
+        const dataUrl = canvasEl.toDataURL("image/jpeg", 0.85); // compressed JPEG
+        const pdf = new jsPDF("p", "mm", "a4");
+        const imgProps = pdf.getImageProperties(dataUrl);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+        pdf.addImage(dataUrl, "JPEG", 0, 0, pdfWidth, pdfHeight);
+        pdf.save(`transaction-${transaction.id}.pdf`);
     };
 
     const sharePage = async () => {
@@ -135,7 +169,7 @@ const TransactionDetails = () => {
                 setTransaction(data);
             } catch (err) {
                 console.error(err);
-                setTransaction(null);
+                setTransaction(dummyTransaction);
             } finally {
                 setFetching(false);
             }
@@ -146,7 +180,7 @@ const TransactionDetails = () => {
 
     if (fetching) {
         return (
-            <div className="flex items-center justify-center min-h-screen">
+            <div className="flex items-center justify-center min-h-screen bg-[#0C0A0AC7] mk:bg-transparent">
                 <div className="flex flex-col items-center gap-4 p-8 bg-white animate-fadeIn">
                     <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
                     <p className="text-gray-700 text-lg font-medium">
@@ -160,15 +194,32 @@ const TransactionDetails = () => {
         );
     }
 
-    if (!transaction) return <NotFound Loading={loading} />;
+    // if (!transaction) return <NotFound Loading={loading} />;
 
-    const amountNum = parseFloat(transaction.amount) || 0;
+    // If API failed AND you later want real behavior
+    if (!transaction) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[60vh] gap-2 text-center">
+                <p className="text-sm font-semibold text-gray-700">
+                    Transaction not found
+                </p>
+                <p className="text-xs text-gray-500">
+                    We couldn’t retrieve this transaction. Please try again.
+                </p>
+            </div>
+        );
+    }
+
+    // Always fallback to dummy for now
+    const displayTransaction = transaction || dummyTransaction;
+
+    const amountNum = parseFloat(displayTransaction.amount) || 0;
 
     return (
-        <div className="space-y-4 py-4">
+        <div className={`fixed mk:flex flex-col justify-center z-50 bg-white overflow-y-auto inset-0 mk:inset-auto mk:right-0 mk:top-0 mk:min-h-screen mk:w-[480px] mk:p-5 ${window.innerWidth >= 850 ? "animate-slideRight" : "animate-slideUp"}`}>
             {/* Header */}
-            <div className="flex items-center px-4 gap-3">
-                <button onClick={() => navigate(-1)} title="Go back" aria-label="Go back">
+            <div className="flex mk:hidden items-center px-4 gap-3 pt-4">
+                <button onClick={() => setSelectedTransactionId(null)} title="Go back" aria-label="Go back">
                     <FiArrowLeft />
                 </button>
                 <h2 className="font-semibold text-lg">Transaction Details</h2>
@@ -180,50 +231,50 @@ const TransactionDetails = () => {
                     <h1 className="text-[28px] font-bold">
                         {formatAmount(amountNum)}
                     </h1>
-                    <p className={`text-white rounded-full py-1 px-3 my-3 w-fit mx-auto text-xs ${transaction.status === 'SETTLED'
+                    <p className={`text-white rounded-full py-1 px-3 my-3 w-fit mx-auto text-xs ${displayTransaction.status === 'SETTLED'
                         ? 'bg-[#22C55E]'
-                        : transaction.status === 'PENDING'
+                        : displayTransaction.status === 'PENDING'
                             ? 'bg-[#FACC15]'
                             : 'bg-[#EF4444]'
                         }`}>
-                        {transaction.status}
+                        {displayTransaction.status}
                     </p>
-                    <p className="text-xs text-[#0F172A] font-medium">{new Date(transaction.created_at).toLocaleString()}</p>
+                    <p className="text-xs text-[#0F172A] font-medium">{new Date(displayTransaction.created_at).toLocaleString()}</p>
                 </div>
 
                 <div className='border border-[#DBEAFE] py-3 px-4 rounded-md space-y-4'>
                     <div className="flex items-center justify-between">
                         <div className="space-y-3">
                             <p className="text-[#0F172A] font-semibold">Guest</p>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 text-nowrap">
                                 <FaUser size={14} />
                                 <p className="text-[#0F172A] font-normal text-sm">
-                                    {transaction.guest_details?.name || 'N/A'}
+                                    {displayTransaction.guest_details?.name || 'N/A'}
                                 </p>
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 text-nowrap">
                                 <FaRegClock size={14} />
                                 <p className="text-[#0F172A] font-normal text-sm">
-                                    {transaction.guest_details?.duration}
+                                    {displayTransaction.guest_details?.duration}
                                 </p>
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 text-nowrap">
                                 <HiMiniCurrencyRupee size={17} />
                                 <p className="text-[#0F172A] font-normal text-sm">Amount Paid : <span className='font-semibold'>₹{amountNum}</span></p>
                             </div>
                         </div>
 
-                        <img
-                            src={transaction.guest_details?.avatar || profile}
+                        {/* <img
+                            src={displayTransaction.guest_details?.avatar ? displayTransaction.guest_details?.avatar : profile}
                             className="w-[69px] h-[69px] rounded-full object-cover"
                             alt="Profile Image"
-                        />
+                        /> */}
 
                         <div className="w-[69px] h-[69px] rounded-full overflow-hidden flex items-center justify-center bg-gray-100">
-                            {transaction.guest_details?.avatar ? (
-                                <img src={transaction.guest_details?.avatar} className="w-full h-full object-cover" alt="Profile Image" />
+                            {displayTransaction.guest_details?.avatar ? (
+                                <img src={displayTransaction.guest_details?.avatar} className="w-full h-full object-cover" alt="Profile Image" />
                             ) : (
-                                <FaUserCircle size={60} className="text-gray-400" />
+                                <FaUserCircle size={80} className="text-gray-400" />
                             )}
                         </div>
                     </div>
@@ -232,32 +283,32 @@ const TransactionDetails = () => {
 
                     {/* ===== Status-specific Details ===== */}
                     <div className="space-y-3 mt-2">
-                        <p className="text-[#0F172A] font-semibold">Session Details</p>
+                        <p className="text-[#0F172A] text-nowrap font-semibold">Session Details</p>
 
                         <div className="space-y-3">
-                            <p className="text-[#0F172A] text-sm">
+                            <p className="text-[#0F172A] text-nowrap text-sm">
                                 <FaHashtag className="inline mr-1" />
-                                Booking ID : {transaction.session_details?.booking_id}
+                                Booking ID : {displayTransaction.session_details?.booking_id}
                             </p>
 
-                            <p className="text-[#0F172A] text-sm">
+                            <p className="text-[#0F172A] text-nowrap text-sm">
                                 <HiOutlineCalendar className="inline mr-1" />
-                                {transaction.session_details?.date}
+                                {displayTransaction.session_details?.date}
                             </p>
 
-                            <p className="text-[#0F172A] text-sm">
+                            <p className="text-[#0F172A] text-nowrap text-sm">
                                 <FaRegClock className='inline mr-1' />
                                 Start Time:
                                 <span className='font-semibold'>
-                                    {transaction.session_details?.start_time}
+                                    {displayTransaction.session_details?.start_time}
                                 </span>
                             </p>
 
-                            <p className="text-[#0F172A] text-sm">
+                            <p className="text-[#0F172A] text-nowrap text-sm">
                                 <FaRegClock className='inline mr-1' />
                                 End Time:
                                 <span className='font-semibold'>
-                                    {transaction.session_details?.end_time}
+                                    {displayTransaction.session_details?.end_time}
                                 </span>
                             </p>
                         </div>
@@ -265,32 +316,32 @@ const TransactionDetails = () => {
                     </div>
                 </div>
 
-                <div className='pt-5 space-y-3'>
-                    <p className="font-semibold text-base">Payment breakdown</p>
+                <div className='py-5 space-y-3 mk:px-5 block'>
+                    <p className="font-semibold text-base text-nowrap">Payment breakdown</p>
 
-                    <p className="text-xs text-[#0F172A] flex justify-between">
+                    <p className="text-xs text-[#0F172A] text-nowrap flex justify-between">
                         <span className='text-[#6A6A6A] text-xs'>Base Price</span>
-                        <span>₹{transaction.payment_breakdown?.base_price}</span>
+                        <span>₹{displayTransaction.payment_breakdown?.base_price}</span>
                     </p>
 
-                    <p className="text-xs text-[#0F172A] flex justify-between">
+                    <p className="text-xs text-[#0F172A] text-nowrap flex justify-between">
                         <span className='text-[#6A6A6A] text-xs'>Platform Fee</span>
-                        <span>₹{transaction.payment_breakdown?.platform_fee}</span>
+                        <span>₹{displayTransaction.payment_breakdown?.platform_fee}</span>
                     </p>
 
                     <div className="border border-[#F2F2F2] border-dotted"></div>
 
-                    <p className="text-sm flex justify-between">
+                    <p className="text-sm flex justify-between text-nowrap">
                         <span className='text-[#0F172A]'>Total Earnings</span>
                         <span className='text-[#22C55E] font-semibold text-base'>
-                            ₹{transaction.payment_breakdown?.total_earnings}
+                            ₹{displayTransaction.payment_breakdown?.total_earnings}
                         </span>
                     </p>
                 </div>
             </div>
 
             {/* Buttons */}
-            <div className="flex gap-3 py-5">
+            <div className="flex gap-3 py-5 px-4">
                 <button
                     type="button"
                     className="flex-1 bg-[#DBEAFE] text-[#2563EB] py-2 rounded-full font-medium text-xs"

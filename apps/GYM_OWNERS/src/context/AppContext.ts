@@ -71,13 +71,13 @@ export type Booking = {
 };
 
 export type NotificationTypeEnum =
-    | "BOOKING_CANCELLED"
-    | "PAYMENT_SUCCESS_CLIENT"
-    | "BOOKING_CREATED"
-    | "NEW_BOOKING_PAID_OWNER"
-    | "NEW_BOOKING_RECEIVED"
-    | "BOOKING_CREATED"
-    | "BOOKING_CANCELLED_OWNER";
+    | "SESSION"
+    | "PAYMENT"
+    | "SYSTEM"
+    | "PROMO"
+    | "BOOKING"
+    | "WALLET"
+    | "WITHDRAWAL";
 
 
 export interface NotificationType {
@@ -96,6 +96,8 @@ export interface WalletTransaction {
     transaction_type: "EARNING" | "REFUND" | "WITHDRAWAL";
     is_credit: string;
     date_formatted: string;
+    booking_hours: string;
+    transaction_id: string;
     created_at: string;
 }
 

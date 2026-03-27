@@ -13,6 +13,8 @@ import { useNavigate } from "react-router";
 import { FiBellOff } from "react-icons/fi";
 import { useAppContext, type NotificationTypeEnum } from "../context/AppContext";
 import { PiWarningCircleBold } from "react-icons/pi";
+import { RiCoupon2Line } from "react-icons/ri";
+import { FaWallet } from "react-icons/fa";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -127,25 +129,28 @@ export default function Notifications({ Loading = false }: { Loading?: boolean }
 
     const getIcon = (type: NotificationTypeEnum) => {
         switch (type) {
-            case "BOOKING_CREATED":
+            case "SESSION": // Booking started / in progress
                 return <FiCalendar size={18} />;
 
-            case "NEW_BOOKING_RECEIVED":
+            case "BOOKING": // General booking notifications
                 return <MdNotificationsActive size={18} />;
 
-            case "NEW_BOOKING_PAID_OWNER":
-                return <FiCreditCard size={18} />;
-
-            case "PAYMENT_SUCCESS_CLIENT":
+            case "PAYMENT":
                 return <MdPayments size={18} />;
 
-            case "BOOKING_CANCELLED":
+            case "SYSTEM": // System alerts / warnings
                 return <PiWarningCircleBold size={18} />;
 
-            case "BOOKING_CANCELLED_OWNER":
-                return <PiWarningCircleBold size={18} />;
+            case "PROMO": // Promotions / coupons
+                return <RiCoupon2Line size={18} />;
 
-            default:
+            case "WALLET": // Wallet updates
+                return <FaWallet size={18} />;
+
+            case "WITHDRAWAL": // Withdrawal notifications
+                return <FiCreditCard size={18} />;
+
+            default: // fallback
                 return <FiCalendar size={18} />;
         }
     };

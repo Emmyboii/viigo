@@ -162,7 +162,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setIsLoading(true);
         try {
             const data = await request("/wallet/dashboard/");
-            const dashboard: WalletDashboard = data[0];
+            const dashboard: WalletDashboard = data.data;
 
             setWalletDashboard(dashboard);
         } catch (err) {
@@ -187,7 +187,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             if (!res.ok) throw new Error("Failed to fetch wallet transactions");
 
             const data = await res.json();
-            setWalletTransactions(data || []);
+            setWalletTransactions(data.data || []);
         } catch (err) {
             console.error("Error fetching wallet transactions:", err);
             setWalletTransactions([]);

@@ -45,7 +45,7 @@ export default function GymDetails() {
         if (!element) return;
 
         // Save original styles
-     
+
         if (bottomBar) {
             bottomBar.style.position = "relative";
             bottomBar.style.bottom = "0px";
@@ -340,7 +340,7 @@ export default function GymDetails() {
                     {/* Gym Name */}
                     <div>
                         <div className="flex justify-between items-center gap-3 mt-1">
-                            <h1 className="text-xl font-bold">{gym.name}</h1>
+                            <h1 className="text-xl font-bold text-nowrap">{gym.name}</h1>
 
                             {/* Call & Map Buttons */}
                             <div className="flex gap-3">
@@ -377,10 +377,12 @@ export default function GymDetails() {
                             {tags.map((tag, i) => (
                                 <span
                                     key={i}
-                                    className="flex items-center gap-1 bg-[#DBEAFE] text-[#2563EB] text-xs px-3 py-2 rounded-full"
+                                    className="flex items-center gap-1 text-nowrap bg-[#DBEAFE] text-[#2563EB] text-xs px-3 py-2 rounded-full"
                                 >
                                     {tagIcons[tag]}
-                                    {tag}
+                                    <span className="text-nowrap">
+                                        {tag}
+                                    </span>
                                 </span>
                             ))}
                         </div>
@@ -453,7 +455,7 @@ export default function GymDetails() {
                         </p>
 
                         <div className="flex items-center gap-2 leading-none">
-                            <p className="text-[22px] font-semibold flex items-center text-[#0F172A]">
+                            <p className="text-[22px] font-semibold flex items-center text-nowrap text-[#0F172A]">
                                 ₹{Number(gym.hourly_rate) + 12 + 2.16}/Hr
                             </p>
 

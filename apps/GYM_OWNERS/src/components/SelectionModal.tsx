@@ -1,5 +1,6 @@
 import { useState } from "react";
 import BottomSheet from "./BottomSheet";
+import { useLocation } from "react-router-dom";
 
 interface OptionType {
     id: number;
@@ -25,7 +26,9 @@ export default function SelectionModal({
     onSave,
 }: SelectionModalProps) {
     // ✅ temp holds current selections (starts with existing)
-       const [temp, setTemp] = useState<number[]>(existing ?? []);
+    const [temp, setTemp] = useState<number[]>(existing ?? []);
+
+    const location = useLocation();
 
     // toggle item in temp
     const toggle = (id: number) => {
@@ -51,7 +54,12 @@ export default function SelectionModal({
                 </button>
             }
         >
-            <div className="divide-y max-h-[60vh] overflow-y-auto">
+            <div
+                className={`divide-y ${location.pathname === "/gym"
+                        ? ""               // no height control here
+                        : "max-h-[60vh] overflow-y-auto"
+                    }`}
+            >
                 {options.map((item) => {
                     const selected = temp.includes(item.id); // current selection
                     const alreadyAdded = existing.includes(item.id); // disable already saved items
@@ -61,8 +69,8 @@ export default function SelectionModal({
                             key={item.id}
                             onClick={() => !alreadyAdded && toggle(item.id)}
                             className={`flex items-center justify-between py-4 cursor-pointer ${alreadyAdded
-                                    ? "opacity-40 cursor-not-allowed"
-                                    : ""
+                                ? "opacity-40 cursor-not-allowed"
+                                : ""
                                 }`}
                         >
                             <div className="flex flex-1 items-center gap-3">
@@ -79,8 +87,8 @@ export default function SelectionModal({
                             {/* Radio indicator */}
                             <div
                                 className={`w-5 h-5 rounded-full border flex items-center justify-center ${selected
-                                        ? "border-blue-500"
-                                        : "border-gray-400"
+                                    ? "border-blue-500"
+                                    : "border-gray-400"
                                     }`}
                             >
                                 {selected && (

@@ -12,10 +12,10 @@ const UnverifiedWallet = ({ balance, isActive }: UnverifiedWalletProps) => {
     const navigate = useNavigate()
 
     return (
-        <div>
+        <div className='px-5 max-w-[800px] mx-auto'>
 
             <div className='flex items-center gap-3 bg-[#DBEAFE] rounded-lg text-[#2563EB] p-3 mt-8'>
-                <FiAlertCircle className='size-12' />
+                <FiAlertCircle className='text-[24px]' />
 
                 <p className='text-xs font-medium leading-4'>We're verifying your bank details. This usually takes 24-48 hours. You can still accept bookings in the meantime.</p>
             </div>
