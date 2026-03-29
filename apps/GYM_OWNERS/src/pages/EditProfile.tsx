@@ -1,4 +1,3 @@
-import { useNavigate } from 'react-router-dom'
 import { IoArrowBack } from 'react-icons/io5'
 import React, { useCallback, useEffect, useState } from 'react'
 import { FaCircleCheck } from 'react-icons/fa6'
@@ -10,7 +9,6 @@ type ToastType = "success" | "error" | null;
 
 const EditProfile = ({ setEdit }: { setEdit: (value: boolean) => void }) => {
 
-    const navigate = useNavigate()
 
     const [formData, setFormData] = useState({
         full_name: '',
@@ -85,6 +83,14 @@ const EditProfile = ({ setEdit }: { setEdit: (value: boolean) => void }) => {
     //     formData.email.trim() !== '' &&
     //     formData.phone_number.trim() !== '';
 
+    const closeModal = () => {
+        setEdit(false);
+
+        if (window.history.state?.modal === "edit") {
+            window.history.back();
+        }
+    };
+
     const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
@@ -117,7 +123,7 @@ const EditProfile = ({ setEdit }: { setEdit: (value: boolean) => void }) => {
             setToast({ type: "success", message: "Changes saved successfully!" });
 
             setTimeout(() => {
-                navigate("/profile");
+                closeModal();
                 window.location.reload();
             }, 1500);
 
@@ -128,7 +134,6 @@ const EditProfile = ({ setEdit }: { setEdit: (value: boolean) => void }) => {
             setSaving(false);
         }
     };
-
 
     const handleToastClose = useCallback(() => {
         setToast(null);
@@ -151,7 +156,7 @@ const EditProfile = ({ setEdit }: { setEdit: (value: boolean) => void }) => {
             <div className="fixed mk:hidden top-0 left-0 right-0 z-40 bg-white flex items-center px-4 py-3" >
 
                 <button
-                    onClick={() => setEdit(false)}
+                    onClick={closeModal}
                     aria-label="Go back"
                     className="p-1"
                 >

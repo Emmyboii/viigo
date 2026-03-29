@@ -69,6 +69,48 @@ export default function VerifiedWallet() {
 
     const hasTransactions = (walletDashboard?.recent_activity?.length ?? 0) > 0;
 
+    // ------------------ POPSTATE / HISTORY ------------------
+    useEffect(() => {
+        const handlePopState = (e: PopStateEvent) => {
+            // Default: close everything
+            setShowWithdrawalModal(false);
+            setSelectedTransactionId(null);
+
+            if (e.state?.modal === "withdrawal") setShowWithdrawalModal(true);
+            if (e.state?.modal === "transaction" && e.state?.transactionId) {
+                setSelectedTransactionId(e.state.transactionId);
+            }
+        };
+
+        window.addEventListener("popstate", handlePopState);
+        return () => window.removeEventListener("popstate", handlePopState);
+    }, []);
+
+    // Push history state when modals open
+    const openWithdrawalModal = () => {
+        setShowWithdrawalModal(true);
+        window.history.pushState({ modal: "withdrawal" }, "");
+    };
+
+    const openTransactionModal = (id: number) => {
+        setSelectedTransactionId(id);
+        window.history.pushState({ modal: "transaction", transactionId: id }, "");
+    };
+
+    const closeWithdrawalModal = () => {
+        setShowWithdrawalModal(false);
+        if (window.history.state?.modal === "withdrawal") {
+            window.history.back();
+        }
+    };
+
+    const closeTransactionModal = () => {
+        setSelectedTransactionId(null);
+        if (window.history.state?.modal === "transaction") {
+            window.history.back();
+        }
+    };
+
     const handleWithdrawal = async (amount: string) => {
         try {
             // Send withdrawal request
@@ -139,7 +181,7 @@ export default function VerifiedWallet() {
 
                         <button
                             disabled={isWithdrawDisabled}
-                            onClick={() => setShowWithdrawalModal(true)}
+                            onClick={openWithdrawalModal}
                             className={`mt-3 w-full max-w-[184px] mx-auto flex items-center justify-center px-4 py-2 rounded text-sm font-medium
                         ${isWithdrawDisabled
                                     ? "bg-gray-200 text-gray-400 cursor-not-allowed"
@@ -289,10 +331,7 @@ export default function VerifiedWallet() {
                                 {walletDashboard?.recent_activity.slice(0, 6).map((t) => (
                                     <div
                                         key={t.id}
-                                        onClick={() => {
-                                            if (t.transaction_type === "WITHDRAWAL") return
-                                            setSelectedTransactionId(t.id);
-                                        }}
+                                        onClick={() => t.transaction_type !== "WITHDRAWAL" && openTransactionModal(t.id)}
                                         className="flex justify-between bg-white py-2 rounded-xl cursor-pointer"
                                     >
                                         <div>
@@ -322,7 +361,7 @@ export default function VerifiedWallet() {
             <WithdrawalModal
                 open={showWithdrawalModal}
                 balance={balance}
-                onClose={() => setShowWithdrawalModal(false)}
+                onClose={closeWithdrawalModal}
                 onSubmit={handleWithdrawal}
             />
 
@@ -335,7 +374,7 @@ export default function VerifiedWallet() {
                         className="fixed inset-0 z-50 flex justify-center items-start mk:items-center"
                     >
                         {/* Overlay for desktop only */}
-                        <div className="hidden mk:block fixed inset-0 bg-[#0C0A0AC7]" onClick={() => setSelectedTransactionId(null)}></div>
+                        <div className="hidden mk:block fixed inset-0 bg-[#0C0A0AC7]" onClick={closeTransactionModal}></div>
 
                         <TransactionDetails id={selectedTransactionId} setSelectedTransactionId={setSelectedTransactionId} />
                     </motion.div>

@@ -11,6 +11,7 @@ import { IoArrowBack } from 'react-icons/io5';
 import { RiShareFill } from 'react-icons/ri';
 // import { toPng } from "html-to-image";
 import { snapdom } from '@zumer/snapdom';
+import Countdown from './Countdown';
 
 type OtpVerificationModalProps = {
     user?: Booking;
@@ -92,12 +93,13 @@ export default function OtpVerificationModal({ user, onClose }: OtpVerificationM
 
 
     const isActive = user?.status === "ACTIVE";
+    const isComplete = user?.status === "COMPLETED";
     const isUpcoming = user?.status === "CONFIRMED";
     const isCancelled = user?.status === "CANCELLED";
 
     // Determine dynamic status text
     const getStatusText = () => {
-        if (isActive) return "OTP Verified";
+        if (isActive || isComplete) return "OTP Verified";
         if (isUpcoming) return "OTP Verification Required";
         if (isCancelled) return "OTP Not Verified";
         return "";
@@ -127,6 +129,9 @@ export default function OtpVerificationModal({ user, onClose }: OtpVerificationM
         if (isActive)
             return `Booking ID #${user?.id} has been verified and the session has started`;
 
+        if (isComplete)
+            return `Booking ID #${user?.id} has been verified and the session has been completed`;
+
         if (isUpcoming)
             return `Booking ID #${user?.id} has to be verified before the session starts`;
 
@@ -143,7 +148,7 @@ export default function OtpVerificationModal({ user, onClose }: OtpVerificationM
     };
 
     return (
-        <div className={`fixed z-50 bg-white overflow-y-auto inset-0 mk:inset-auto mk:right-0 mk:top-0 mk:min-h-screen mk:w-[480px] p-5 ${window.innerWidth >= 850? "animate-slideRight" : "animate-slideUp"}`}>
+        <div className={`fixed z-50 bg-white overflow-y-auto inset-0 mk:inset-auto mk:right-0 mk:top-0 mk:min-h-screen mk:w-[480px] p-5 ${window.innerWidth >= 850 ? "animate-slideRight" : "animate-slideUp"}`}>
 
             <div className="relative bg-white mk:flex hidden items-center justify-between px-4 py-3" >
 
@@ -220,10 +225,18 @@ export default function OtpVerificationModal({ user, onClose }: OtpVerificationM
                                         </p>
                                     )}
                                 </div>
-                                <div className="flex items-center gap-2 text-nowrap">
-                                    <HiMiniCurrencyRupee size={17} />
-                                    <p className="text-[#0F172A] font-normal text-sm">Amount Paid : <span className='font-semibold'>₹390</span></p>
-                                </div>
+                                {user?.status === 'CANCELLED' ? (
+                                    <div className="flex items-center gap-2 text-nowrap">
+                                        <HiMiniCurrencyRupee size={17} />
+                                        <p className="text-[#0F172A] font-normal text-sm">Amount Refunded : <span className='font-semibold'>₹{user?.total_amount}</span></p>
+                                    </div>
+                                ) : (
+                                    <div className="flex items-center gap-2 text-nowrap">
+                                        <HiMiniCurrencyRupee size={17} />
+                                        <p className="text-[#0F172A] font-normal text-sm">Amount Paid : <span className='font-semibold'>₹{user?.total_amount}</span></p>
+                                    </div>
+                                )}
+
                             </div>
 
                             <div className="w-[66px] h-[66px] flex-shrink-0 rounded-full overflow-hidden flex items-center justify-center bg-gray-100">
@@ -267,6 +280,19 @@ export default function OtpVerificationModal({ user, onClose }: OtpVerificationM
                                 </>
                             )}
 
+                            {(user?.status === "ACTIVE") && (
+                                <>
+                                    <div className="space-y-1">
+                                        <p className="text-[#0F172A] font-semibold">Session Active</p>
+                                        <p className="text-[#0F172A] text-sm"><HiOutlineCalendar className="inline mr-1" /> {user.display_date}</p>
+                                        <p className="text-[#0F172A] text-sm"><FaRegClock className='inline mr-1' /> Start Time: <span className='font-semibold'> 10 AM</span></p>
+                                        <p className="text-[#0F172A] text-sm"><FaRegClock className='inline mr-1' /> End Time: <span className='font-semibold'> 12 PM</span></p>
+                                    </div>
+
+
+                                </>
+                            )}
+
                             {user?.status === "CONFIRMED" && (
                                 <div className="space-y-1">
                                     <p className="text-[#0F172A] font-semibold text-nowrap">Session Upcoming</p>
@@ -281,7 +307,14 @@ export default function OtpVerificationModal({ user, onClose }: OtpVerificationM
                                 <p className='text-[#475569] font-medium text-xs'>
                                     {user?.status === "ACTIVE" ? "Remaining Time" : user?.status === "CONFIRMED" ? "Last Entry is at" : ""}
                                 </p>
-                                <p className='text-[#1D4ED8] font-semibold text-base'>{getRemainingTime()}</p>
+                                <p className='text-[#1D4ED8] font-semibold text-base'>
+                                    {user?.status === "ACTIVE" && user.contextual_text && (
+                                        <>
+                                            <Countdown initialText={user.contextual_text} /> left
+                                        </>
+                                    )}
+                                    {user?.status !== "ACTIVE" && getRemainingTime()}
+                                </p>
                             </div>
                         )}
                     </div>

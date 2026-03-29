@@ -255,6 +255,37 @@ export default function GymDetails() {
         }
     }, [amenitiesOpen, rulesOpen, priceBreakdownOpen, open])
 
+    const openSheet = (sheet: "amenities" | "rules" | "price") => {
+        if (sheet === "amenities") setAmenitiesOpen(true);
+        if (sheet === "rules") setRulesOpen(true);
+        if (sheet === "price") setPriceBreakdownOpen(true);
+
+        // push state so back button closes sheet
+        window.history.pushState({ sheet }, "");
+    };
+
+    const closeSheet = (sheet: "amenities" | "rules" | "price") => {
+        if (sheet === "amenities") setAmenitiesOpen(false);
+        if (sheet === "rules") setRulesOpen(false);
+        if (sheet === "price") setPriceBreakdownOpen(false);
+
+        // go back in history if state was pushed
+        if (window.history.state?.sheet === sheet) {
+            window.history.back();
+        }
+    };
+
+    useEffect(() => {
+        const handlePopState = () => {
+            if (amenitiesOpen) setAmenitiesOpen(false);
+            else if (rulesOpen) setRulesOpen(false);
+            else if (priceBreakdownOpen) setPriceBreakdownOpen(false);
+        };
+
+        window.addEventListener("popstate", handlePopState);
+        return () => window.removeEventListener("popstate", handlePopState);
+    }, [amenitiesOpen, rulesOpen, priceBreakdownOpen]);
+
     const handlePhoneClick = () => {
         if (gym?.phone_number) {
             // Open the phone dialer
@@ -411,7 +442,7 @@ export default function GymDetails() {
 
                         {gym.amenities.length > 4 && (
                             <button
-                                onClick={() => setAmenitiesOpen(true)}
+                                onClick={() => openSheet("amenities")}
                                 className="flex items-center justify-center w-full h-12 mt-6 rounded-md bg-blue-100 text-blue-400 font-semibold text-sm"
                             >
                                 Show all {gym.amenities.length} amenities
@@ -438,7 +469,7 @@ export default function GymDetails() {
                         {gym.rules.length > 3 && (
                             <button
                                 className="flex items-center justify-center w-full h-12 mt-6 rounded-md bg-blue-100 text-blue-400 font-semibold text-sm"
-                                onClick={() => setRulesOpen(true)}
+                                onClick={() => openSheet("rules")}
                             >
                                 View all rules
                             </button>
@@ -448,7 +479,7 @@ export default function GymDetails() {
 
                 {/* ===== Sticky Bottom CTA ===== */}
 
-                <div id="share-bottom-bar" className="fixed bottom-14 left-0 right-0 bg-white border-t px-3 pb-4 pt-2.5 flex justify-between items-center">
+                <div id="share-bottom-bar" className="fixed bottom-14 left-0 right-0 bg-white border-t px-3 pb-6 pt-2.5 flex justify-between items-center">
                     <div className="space-y-2">
                         <p className="text-[11px] text-[#475569] font-medium">
                             Gym timings : {formatTime12Hour(gym.open_time)} - {formatTime12Hour(gym.close_time)}
@@ -456,12 +487,12 @@ export default function GymDetails() {
 
                         <div className="flex items-center gap-2 leading-none">
                             <p className="text-[22px] font-semibold flex items-center text-nowrap text-[#0F172A]">
-                                ₹{Number(gym.hourly_rate) + 12 + 2.16}/Hr
+                                ₹{Number(gym.hourly_rate) + 10 + 1.8}/Hr
                             </p>
 
                             <IoInformationCircleOutline
                                 size={20}
-                                onClick={() => setPriceBreakdownOpen(true)}
+                                onClick={() => openSheet("price")}
                                 className="text-[#94A3B8] flex-shrink-0"
                                 style={{ transform: "translateY(1px)" }}
                             />
@@ -484,7 +515,7 @@ export default function GymDetails() {
             {/* ===== Amenities Bottom Sheet ===== */}
             <BottomSheet
                 open={amenitiesOpen}
-                onClose={() => setAmenitiesOpen(false)}
+                onClose={() => closeSheet("amenities")}
                 title="What This Place Offers"
             >
                 {gym.amenities.map((item, i) => (
@@ -502,7 +533,7 @@ export default function GymDetails() {
             {/* ===== Rules Bottom Sheet ===== */}
             <BottomSheet
                 open={rulesOpen}
-                onClose={() => setRulesOpen(false)}
+                onClose={() => closeSheet("rules")}
                 title="Things to Know"
             >
                 {gym.rules.map((rule, i) => (
@@ -515,7 +546,7 @@ export default function GymDetails() {
             {/* ===== Price Breakdown Bottom Sheet ===== */}
             <BottomSheet
                 open={priceBreakdownOpen}
-                onClose={() => setPriceBreakdownOpen(false)}
+                onClose={() => closeSheet("price")}
                 title="Price Breakdown"
             >
                 <div className="border border-[#DBEAFE] py-3 px-4 rounded-md space-y-3">
@@ -526,19 +557,19 @@ export default function GymDetails() {
 
                     <div className="flex items-center justify-between">
                         <p className="text-sm font-medium text-[#6A6A6A]">Platform Fee</p>
-                        <p className="text-sm font-medium text-[#0F172A]">Rs. 12</p>
+                        <p className="text-sm font-medium text-[#0F172A]">Rs. 10</p>
                     </div>
 
                     <div className="flex items-center justify-between">
                         <p className="text-sm font-medium text-[#6A6A6A]">Gst Fee</p>
-                        <p className="text-sm font-medium text-[#0F172A]">Rs. 2.16</p>
+                        <p className="text-sm font-medium text-[#0F172A]">Rs. 1.8</p>
                     </div>
 
                     <div className="border border-dashed border-[#CBD5E1]"></div>
 
                     <div className="flex items-center justify-between">
                         <p className="text-sm font-medium text-[#6A6A6A]">Total</p>
-                        <p className="text-sm font-medium text-[#0F172A]">Rs. {Number(gym.hourly_rate) + 12 + 2.16}</p>
+                        <p className="text-sm font-medium text-[#0F172A]">Rs. {Number(gym.hourly_rate) + 10 + 1.8}</p>
                     </div>
                 </div>
             </BottomSheet>

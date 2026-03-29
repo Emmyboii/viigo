@@ -164,6 +164,7 @@ const AuthPage = () => {
           },
           body: JSON.stringify({
             access_token: tokenResponse.access_token,
+            user_type: "GYM_OWNER"
           }),
         });
 

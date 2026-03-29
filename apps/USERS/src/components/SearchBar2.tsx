@@ -13,7 +13,7 @@ export default function SearchBar2({ value, onChange }: Props) {
                 type="text"
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
-                placeholder="Search for Hourly Gyms"
+                placeholder="Search For Gyms"
                 className="outline-none w-full text-sm placeholder:text-[#0F172A] bg-transparent"
             />
         </div>

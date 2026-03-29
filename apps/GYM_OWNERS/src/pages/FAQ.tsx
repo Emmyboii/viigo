@@ -182,6 +182,14 @@ export default function FAQ({ setFaq }: { setFaq: (value: boolean) => void }) {
         }
     };
 
+    const closeModal = () => {
+        setFaq(false);
+
+        if (window.history.state?.modal === "faq") {
+            window.history.back();
+        }
+    };
+
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
@@ -203,7 +211,7 @@ export default function FAQ({ setFaq }: { setFaq: (value: boolean) => void }) {
                     <IoArrowBack
                         size={22}
                         className="cursor-pointer"
-                        onClick={() => setFaq(false)}
+                        onClick={closeModal}
                     />
                     <h1 className="text-lg font-semibold">Support</h1>
                 </div>

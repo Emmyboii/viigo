@@ -10,9 +10,10 @@ type Props = {
     from?: string;
     query?: string
     setQuery: React.Dispatch<React.SetStateAction<string>>
+    setCurrentSortLabel?: React.Dispatch<React.SetStateAction<string | null>>
 };
 
-export default function SearchModal({ onClose, from, query, setQuery }: Props) {
+export default function SearchModal({ onClose, from, query, setQuery, setCurrentSortLabel }: Props) {
     const navigate = useNavigate();
     const { searchGyms, searchResults, nearbyGyms } = useAppContext();
 
@@ -53,6 +54,7 @@ export default function SearchModal({ onClose, from, query, setQuery }: Props) {
         await searchGyms(value);
         saveRecent(value);
         onClose();
+        setCurrentSortLabel?.(null)
     };
 
     const handleCancel = () => {
@@ -65,6 +67,7 @@ export default function SearchModal({ onClose, from, query, setQuery }: Props) {
 
     const handleGymClick = (gym: any) => {
         onClose();
+        setCurrentSortLabel?.(null)
         navigate(`/gyms/${gym.slug}`);
     };
 
@@ -83,6 +86,7 @@ export default function SearchModal({ onClose, from, query, setQuery }: Props) {
                                 await searchGyms(query);
                                 saveRecent(query);
                                 onClose();
+                                setCurrentSortLabel?.(null)
 
                                 navigate("/explore", {
                                     state: { query },
@@ -108,7 +112,10 @@ export default function SearchModal({ onClose, from, query, setQuery }: Props) {
                     {searchResults.slice(0, 5).map((gym) => (
                         <div
                             key={gym.id}
-                            onClick={() => handleGymClick(gym)}
+                            onClick={() => {
+                                setCurrentSortLabel?.(null)
+                                handleGymClick(gym)
+                            }}
                             className="py-3 border-b cursor-pointer flex items-center justify-between"
                         >
                             <div className="flex items-center gap-2">

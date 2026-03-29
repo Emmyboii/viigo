@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import BottomSheet from "./BottomSheet";
 import { useLocation } from "react-router-dom";
 
@@ -11,6 +11,7 @@ interface OptionType {
 interface SelectionModalProps {
     open: boolean;
     title: string;
+    title2: string;
     options: OptionType[];
     existing: number[]; // IDs of already saved items
     onClose: () => void;
@@ -20,6 +21,7 @@ interface SelectionModalProps {
 export default function SelectionModal({
     open,
     title,
+    title2,
     options,
     existing,
     onClose,
@@ -39,6 +41,23 @@ export default function SelectionModal({
         );
     };
 
+    useEffect(() => {
+        if (!open) return;
+
+        // push modal state
+        window.history.pushState({ modal: title2 }, "");
+
+        const handlePopState = () => {
+            onClose(); // close modal on back
+        };
+
+        window.addEventListener("popstate", handlePopState);
+
+        return () => {
+            window.removeEventListener("popstate", handlePopState);
+        };
+    }, [open, onClose, title2]);
+
     return (
         <BottomSheet
             key={open ? "open" : "closed"}
@@ -56,8 +75,8 @@ export default function SelectionModal({
         >
             <div
                 className={`divide-y ${location.pathname === "/gym"
-                        ? ""               // no height control here
-                        : "max-h-[60vh] overflow-y-auto"
+                    ? ""               // no height control here
+                    : "max-h-[60vh] overflow-y-auto"
                     }`}
             >
                 {options.map((item) => {

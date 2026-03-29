@@ -54,8 +54,8 @@ interface GymType {
     rules: Rule[];
     images: { id: number; image: string }[];
 
-    peak_morning?: [string, string][];
-    peak_evening?: [string, string][];
+    peak_morning?: ([string, string] | { start: string; end: string })[];
+    peak_evening?: ([string, string] | { start: string; end: string })[];
     calendar_availability?: CalendarAvailability[]
 
     owner_email: string
@@ -333,8 +333,92 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
         setToast(null);
     }, []);
 
+    // Open Amenities Modal
+    const openAmenities = () => {
+        setAmenitiesOpen(true);
+        window.history.pushState({ modal: "amenities" }, "", window.location.pathname);
+    };
+
+    // Close Amenities Modal
+    const closeAmenities = () => {
+        setAmenitiesOpen(false);
+        if (window.history.state?.modal === "amenities") window.history.back();
+    };
+
+    // Open Rules Modal
+    const openRules = () => {
+        setRulesOpen(true);
+        window.history.pushState({ modal: "rules" }, "", window.location.pathname);
+    };
+
+    // Close Rules Modal
+    const closeRules = () => {
+        setRulesOpen(false);
+        if (window.history.state?.modal === "rules") window.history.back();
+    };
+
+    useEffect(() => {
+        const handlePopState = (e: PopStateEvent) => {
+            const modal = e.state?.modal;
+
+            // Close all modals by default
+            setAmenitiesOpen(false);
+            setRulesOpen(false);
+
+            // Open modal if state exists
+            if (modal === "amenities") setAmenitiesOpen(true);
+            if (modal === "rules") setRulesOpen(true);
+
+            // Restore display state if included
+            if (e.state?.display) {
+                setDisplay(e.state.display as "details" | "edit" | "create");
+            } else {
+                // default to details if no display state
+                setDisplay("details");
+            }
+        };
+
+        window.addEventListener("popstate", handlePopState);
+        return () => window.removeEventListener("popstate", handlePopState);
+    }, [setDisplay]);
+
     if (!gym) {
-        return <div className="p-4">Gym not found</div>;
+        return (
+            <div className="min-h-screen flex items-center justify-center px-4">
+                <div className="bg-white shadow-lg rounded-2xl p-8 max-w-md w-full text-center animate-fadeIn">
+
+                    {/* Icon */}
+                    <div className="text-3xl mb-3">⚠️</div>
+
+                    {/* Title */}
+                    <h2 className="text-xl font-semibold text-[#0F172A] mb-2">
+                        Gym not found
+                    </h2>
+
+                    {/* Description */}
+                    <p className="text-sm text-[#475569] mb-6">
+                        We couldn’t find the gym you’re looking for. It might have been removed or there was a temporary issue.
+                    </p>
+
+                    {/* Actions */}
+                    <div className="flex gap-3 justify-center">
+                        <button
+                            onClick={() => window.location.reload()}
+                            className="bg-blue-600 text-white px-5 py-2 rounded-lg font-medium hover:bg-blue-700 transition"
+                        >
+                            Refresh
+                        </button>
+
+                        {/* <button
+                            onClick={() => window.history.back()}
+                            className="border border-[#CBD5E1] text-[#475569] px-5 py-2 rounded-lg font-medium hover:bg-gray-100 transition"
+                        >
+                            Go Back
+                        </button> */}
+                    </div>
+                </div>
+            </div>
+        );
     }
 
     const visibleAmenities = gym?.amenities?.slice(0, 4);
@@ -358,6 +442,7 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
                     setDisplay("edit")
                     localStorage.setItem("gymDisplay", "edit");
                     // navigate('/gym/edit')
+                    window.history.pushState({ display: "edit" }, "", window.location.pathname);
                     window.scrollTo({ top: 0, behavior: "smooth" });
                 }} className="bg-blue-600 text-white px-5 text-sm font-semibold w-[150px] mr-14 py-2 rounded-md h-[50px] hidden mk:flex items-center justify-center gap-2">
                     <img src={edit} className="size-[16px]" alt="" />
@@ -453,7 +538,7 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
 
                             {gym.amenities.length > 4 && (
                                 <button
-                                    onClick={() => setAmenitiesOpen(true)}
+                                    onClick={openAmenities}
                                     className="mt-4 w-full bg-[#DBEAFE] py-3 rounded-xl text-[#2563EB] font-medium"
                                 >
                                     Show all {gym?.amenities.length} amenities
@@ -479,7 +564,7 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
 
                             {gym.rules.length > 3 && (
                                 <button
-                                    onClick={() => setRulesOpen(true)}
+                                    onClick={openRules}
                                     className="mt-4 w-full bg-[#DBEAFE] py-3 mb-2 rounded-xl text-[#2563EB] font-medium"
                                 >
                                     View all rules
@@ -590,7 +675,7 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
 
                         {gym.amenities.length > 4 && (
                             <button
-                                onClick={() => setAmenitiesOpen(true)}
+                                onClick={openAmenities}
                                 className="mt-4 w-full bg-[#DBEAFE] py-3 rounded-xl text-[#2563EB] font-medium"
                             >
                                 Show all {gym?.amenities.length} amenities
@@ -599,7 +684,7 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
 
                         <BottomSheet
                             open={amenitiesOpen}
-                            onClose={() => setAmenitiesOpen(false)}
+                            onClose={closeAmenities}
                             title="What This Place Offers"
                         >
                             {gym?.amenities.map((item) => (
@@ -631,7 +716,7 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
 
                         {gym.rules.length > 3 && (
                             <button
-                                onClick={() => setRulesOpen(true)}
+                                onClick={openRules}
                                 className="mt-4 w-full bg-[#DBEAFE] py-3 mb-2 rounded-xl text-[#2563EB] font-medium"
                             >
                                 View all rules
@@ -640,7 +725,7 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
 
                         <BottomSheet
                             open={rulesOpen}
-                            onClose={() => setRulesOpen(false)}
+                            onClose={closeRules}
                             title="Things to Know"
                         >
                             {gym?.rules.map((rule, i) => (
@@ -665,6 +750,7 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
                         setDisplay("edit")
                         localStorage.setItem("gymDisplay", "edit");
                         // navigate('/gym/edit')
+                        window.history.pushState({ display: "edit" }, "", window.location.pathname);
                         window.scrollTo({ top: 0, behavior: "smooth" });
                     }} className="bg-blue-600 text-white px-5 text-sm font-semibold w-[170px] py-2 rounded-md h-[50px]">
                         Edit Gym Details
@@ -680,7 +766,7 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
             <div className="mk:hidden">
                 <BottomSheet
                     open={amenitiesOpen}
-                    onClose={() => setAmenitiesOpen(false)}
+                    onClose={closeAmenities}
                     title="What This Place Offers"
                 >
                     {gym?.amenities.map((item) => (
@@ -699,7 +785,7 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
                 {/* ===== Rules Bottom Sheet ===== */}
                 <BottomSheet
                     open={rulesOpen}
-                    onClose={() => setRulesOpen(false)}
+                    onClose={closeRules}
                     title="Things to Know"
                 >
                     {gym?.rules.map((rule, i) => (

@@ -22,7 +22,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     const [userData, setUserData] = useState<UserType | null>(null);
     const [notifications, setNotifications] = useState<NotificationType[]>([]);
-    const [display, setDisplay] = useState<DisplayType>("details");
+    const [display, setDisplay] = useState<DisplayType>(
+        () => (localStorage.getItem("gymDisplay") as "details" | "edit" | "create") || "details"
+    );
+    const savedDisplay = localStorage.getItem("gymDisplay");
     const [displayWallet, setDisplayWallet] = useState<DisplayType>("details");
     const [walletDashboard, setWalletDashboard] = useState<WalletDashboard | null>(null);
     const [walletTransactions, setWalletTransactions] = useState<WalletTransaction[]>([]);
@@ -115,16 +118,20 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             if (!gym.images || gym.images.length === 0) {
                 setDisplay("edit");
             } else {
-                setDisplay("details");
+                if (savedDisplay === "edit") {
+                    setDisplay("edit");
+                } else {
+                    setDisplay("details");
+                }
             }
 
         } catch (err) {
             console.error(err);
-            setDisplay("create");
+            setDisplay("details");
         } finally {
             setIsLoading(false);
         }
-    }, [request]);
+    }, [request, savedDisplay]);
 
     const fetchWallet = useCallback(async () => {
         setIsLoading(true);
@@ -141,17 +148,19 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
             if (!wallet.account_holder_name) {
                 setDisplayWallet("edit");
-            } else if (wallet.account_holder_name && displayWallet === 'details') {
+                // } else if (wallet.account_holder_name && displayWallet === 'details') {
+            } else {
+
                 setDisplayWallet("details");
             }
 
         } catch (err) {
             console.error(err);
-            setDisplayWallet("create");
+            setDisplayWallet("details");
         } finally {
             setIsLoading(false);
         }
-    }, [request, displayWallet]);
+    }, [request]);
 
     const fetchWalletDashboard = useCallback(async () => {
 

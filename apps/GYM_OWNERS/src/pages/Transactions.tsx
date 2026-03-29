@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAppContext } from "../context/AppContext";
 import { FiArrowLeft, FiSearch } from "react-icons/fi";
 import { BiSort } from "react-icons/bi";
@@ -92,6 +92,33 @@ const Transactions = () => {
         return "No transactions found";
     }
   };
+
+  const openTransactionModal = (id: number) => {
+    setSelectedTransactionId(id);
+    // Push to history so back button can close modal
+    window.history.pushState({ modal: "transaction", transactionId: id }, "");
+  };
+
+  const closeTransactionModal = () => {
+    setSelectedTransactionId(null);
+    // Go back in history if modal was opened via push
+    if (window.history.state?.modal === "transaction") {
+      window.history.back();
+    }
+  };
+
+  useEffect(() => {
+    const handlePopState = (e: PopStateEvent) => {
+      if (e.state?.modal === "transaction") {
+        setSelectedTransactionId(e.state.transactionId);
+      } else {
+        setSelectedTransactionId(null);
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
 
   return (
     <div className="">
@@ -194,7 +221,7 @@ const Transactions = () => {
               key={t.id}
               onClick={() => {
                 if (t.transaction_type === "WITHDRAWAL") return
-                setSelectedTransactionId(t.id);
+                openTransactionModal(t.id);
               }}
               className="flex justify-between bg-white py-2 rounded-xl cursor-pointer"
             >
@@ -332,7 +359,7 @@ const Transactions = () => {
             className="fixed inset-0 z-50 flex justify-center items-start mk:items-center"
           >
             {/* Overlay for desktop only */}
-            <div className="hidden mk:block fixed inset-0 bg-[#0C0A0AC7]" onClick={() => setSelectedTransactionId(null)}></div>
+            <div className="hidden mk:block fixed inset-0 bg-[#0C0A0AC7]" onClick={closeTransactionModal}></div>
 
             <TransactionDetails id={selectedTransactionId} setSelectedTransactionId={setSelectedTransactionId} />
           </motion.div>

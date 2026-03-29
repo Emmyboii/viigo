@@ -1,6 +1,5 @@
 import FilterChips from "../components/FilterChips"
 import PageHeader from "../components/PageHeader"
-import SearchBar from "../components/SearchBar"
 import { HiLocationMarker } from "react-icons/hi"
 import { CiCalendar } from "react-icons/ci"
 import { FiClock } from "react-icons/fi"
@@ -11,6 +10,7 @@ import logoUrl from "../assets/icon2.png";
 // import * as htmlToImage from "html-to-image";
 import { normalizeImagePath, useAppContext } from "../context/AppContext"
 import { snapdom } from "@zumer/snapdom";
+import { IoSearchSharp } from "react-icons/io5"
 
 export type Booking = {
     id: number;
@@ -42,6 +42,33 @@ const Bookings = () => {
     const [activeFilter, setActiveFilter] = useState("all");
     const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
     const [showModal, setShowModal] = useState(false);
+    const [query, setQuery] = useState("");
+
+    useEffect(() => {
+        const handlePopState = () => {
+            if (showModal) {
+                setShowModal(false);
+            }
+        };
+
+        window.addEventListener("popstate", handlePopState);
+        return () => window.removeEventListener("popstate", handlePopState);
+    }, [showModal]);
+
+    const openBookingModal = (booking: Booking) => {
+        setSelectedBooking(booking);
+        setShowModal(true);
+
+        window.history.pushState({ modal: "booking" }, "");
+    };
+
+    const closeBookingModal = () => {
+        setShowModal(false);
+
+        if (window.history.state?.modal === "booking") {
+            window.history.back();
+        }
+    };
 
     const token = localStorage.getItem("token");
 
@@ -189,9 +216,16 @@ const Bookings = () => {
     };
 
     const filteredBookings = bookings.filter((b) => {
-
         if (b.status === "PENDING") return false;
 
+        // 🔍 SEARCH FILTER
+        const matchesSearch =
+            b.gym_name.toLowerCase().includes(query.toLowerCase()) ||
+            b.gym_location.toLowerCase().includes(query.toLowerCase());
+
+        if (!matchesSearch) return false;
+
+        // 🎯 STATUS FILTER
         switch (activeFilter) {
             case "upcoming":
                 return b.status === "CONFIRMED";
@@ -232,7 +266,16 @@ const Bookings = () => {
                     <div id="share-area" className="min-h-screen bg-white px-4 pt-4">
 
 
-                        <SearchBar />
+                        <div className="bg-white border rounded-lg flex items-center px-3 py-4">
+                            <IoSearchSharp className="text-[#475569] mr-2 text-xl" />
+                            <input
+                                type="text"
+                                value={query}
+                                onChange={(e) => setQuery(e.target.value)}
+                                placeholder="Search for bookings"
+                                className="outline-none w-full text-sm placeholder:text-[#0F172A] bg-transparent"
+                            />
+                        </div>
                         <FilterChips
                             items={chipData}
                             activeId={activeFilter}
@@ -241,7 +284,10 @@ const Bookings = () => {
                         <div className="space-y-4 mb-20 mt-8">
                             {filteredBookings.length == 0 ? (
                                 <div className="text-center text-gray-500 mt-10">
-                                    No bookings found for "{chipData.find(c => c.id === activeFilter)?.label}"
+                                    {query
+                                        ? `No bookings match "${query}"`
+                                        : `No bookings found for "${chipData.find(c => c.id === activeFilter)?.label}"`
+                                    }
                                 </div>
                             ) : (
                                 filteredBookings.map((gym, index) => (
@@ -250,8 +296,7 @@ const Bookings = () => {
                                         onClick={() => {
                                             if (gym.status === "CANCELLED") return;
 
-                                            setSelectedBooking(gym);
-                                            setShowModal(true);
+                                            openBookingModal(gym);
                                             localStorage.setItem("selectedBookingId", String(gym.id));
                                         }}
                                         className="bg-white rounded border border-[#E2E8F0] min-h-[140px] h-full flex gap-3"
@@ -299,7 +344,7 @@ const Bookings = () => {
             {showModal && selectedBooking && (
                 <BookingModal
                     booking={selectedBooking}
-                    onClose={() => setShowModal(false)}
+                    onClose={closeBookingModal}
                 />
             )}
         </div>

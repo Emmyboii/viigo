@@ -195,7 +195,7 @@ export default function Notifications({ Loading = false }: { Loading?: boolean }
     }
 
     return (
-        <div className="min-h-screen pb-24 relative">
+        <div className="min-h-screen pb-24 relative max-w-[1900px] mx-auto">
             {/* Header */}
             <div className="flex items-center justify-between p-4 bg-white">
                 <div onClick={() => navigate(-1)} className="flex items-center gap-3">

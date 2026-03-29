@@ -20,18 +20,12 @@ const hoursOptions = [
 
 const PlanYourWorkout = () => {
 
-    const location = useLocation()
+    const locations = useLocation()
 
     const { gyms, userData } = useAppContext()
     const navigate = useNavigate()
 
     const { slug } = useParams();
-
-    useEffect(() => {
-        if (location.state?.reopenSheet) {
-            setFriendsModalOpen(true);
-        }
-    }, [location.state]);
 
     const [gym, setGym] = useState<GymCard | null>(null);
     const [loading, setLoading] = useState(true);
@@ -48,6 +42,44 @@ const PlanYourWorkout = () => {
         }
     });
     const [friendsModalOpen, setFriendsModalOpen] = useState(false);
+
+    // --- Open modal function ---
+    const openFriendsModal = () => {
+        setFriendsModalOpen(true);
+
+        // Push a fake state so back button can close modal
+        window.history.pushState({ modal: true }, "");
+    };
+
+    // --- Close modal function ---
+    const closeFriendsModal = () => {
+        setFriendsModalOpen(false);
+
+        // Only go back if we pushed a modal state
+        if (window.history.state?.modal) {
+            window.history.back();
+        }
+    };
+
+    // --- Back button handler ---
+    useEffect(() => {
+        const handlePopState = () => {
+            if (friendsModalOpen) {
+                // Close the modal instead of navigating back
+                setFriendsModalOpen(false);
+            }
+        };
+
+        window.addEventListener("popstate", handlePopState);
+        return () => window.removeEventListener("popstate", handlePopState);
+    }, [friendsModalOpen]);
+
+    // --- Handle route reopenSheet state ---
+    useEffect(() => {
+        if (locations.state?.reopenSheet) {
+            openFriendsModal();
+        }
+    }, [locations.state]);
 
     const storedBooking = localStorage.getItem("bookingData");
 
@@ -166,7 +198,7 @@ const PlanYourWorkout = () => {
     const dates = useMemo(() => {
         const today = new Date();
 
-        return Array.from({ length: 90 }).map((_, index) => {
+        return Array.from({ length: 7 }).map((_, index) => {
             const date = new Date();
             date.setDate(today.getDate() + index);
 
@@ -262,9 +294,24 @@ const PlanYourWorkout = () => {
         window.scrollTo(0, 0);
     };
 
-    const allPeaks = [
-        ...(Array.isArray(gym?.peak_morning) ? gym.peak_morning : []),
-        ...(Array.isArray(gym?.peak_evening) ? gym.peak_evening : []),
+    function normalizePeak(p: [string, string] | { start: string, end: string } | any): [string, string] {
+        if (Array.isArray(p) && p.length === 2) return [p[0], p[1]];
+        if (p?.start && p?.end) return [p.start, p.end];
+        return ["00:00", "00:00"];
+    }
+
+    // Ensure peak_morning and peak_evening are arrays
+    const morningPeaks = Array.isArray(gym?.peak_morning)
+        ? gym.peak_morning
+        : gym?.peak_morning ? [gym.peak_morning] : [];
+
+    const eveningPeaks = Array.isArray(gym?.peak_evening)
+        ? gym.peak_evening
+        : gym?.peak_evening ? [gym.peak_evening] : [];
+
+    const allPeaks: [string, string][] = [
+        ...morningPeaks.map(normalizePeak),
+        ...eveningPeaks.map(normalizePeak),
     ];
 
     if (loading) {
@@ -344,7 +391,7 @@ const PlanYourWorkout = () => {
                                 <p className="break-all font-semibold">{userData?.full_name.split(" ")[0] || userData?.email}</p>
 
                                 <button
-                                    onClick={() => setFriendsModalOpen(true)}
+                                    onClick={openFriendsModal}
                                     className="bg-[#DBEAFE] text-[#2563EB] px-2 py-2 rounded-lg text-sm font-medium ml-3"
                                 >
                                     + Add Friends
@@ -357,7 +404,7 @@ const PlanYourWorkout = () => {
                                 </span>
 
                                 <button
-                                    onClick={() => setFriendsModalOpen(true)}
+                                    onClick={openFriendsModal}
                                     className="bg-[#DBEAFE] text-[#2563EB] px-2 py-2 rounded-lg text-sm font-medium ml-3"
                                 >
                                     Edit
@@ -495,7 +542,7 @@ const PlanYourWorkout = () => {
                         <button
                             disabled={allHoursDisabled}
                             onClick={handleApply}
-                            className={`w-[146px] text-white px-6 py-3 rounded-md font-semibold text-sm ${allHoursDisabled ? "bg-[#a6a7a8] cursor-not-allowed" : "bg-blue-600 cursor-pointer"}`}
+                            className={`w-[130px] text-white px-6 py-3 rounded-md font-semibold text-sm ${allHoursDisabled ? "bg-[#a6a7a8] cursor-not-allowed" : "bg-blue-600 cursor-pointer"}`}
                         >
                             Apply
                         </button>
@@ -505,7 +552,7 @@ const PlanYourWorkout = () => {
 
             <FriendsModal
                 open={friendsModalOpen}
-                onClose={() => setFriendsModalOpen(false)}
+                onClose={closeFriendsModal}
                 value={peopleCount}
                 onApply={(val) => setPeopleCount(val)}
             />

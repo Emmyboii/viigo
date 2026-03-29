@@ -42,6 +42,34 @@ export default function ImageCarousel({
         };
     }, [isFullscreen]);
 
+    const openFullscreen = (index: number) => {
+        setStartIndex(index);
+        setIsFullscreen(true);
+
+        // Push history state
+        window.history.pushState({ fullscreen: true }, "");
+    };
+
+    const closeFullscreen = () => {
+        setIsFullscreen(false);
+
+        // Go back only if we pushed state
+        if (window.history.state?.fullscreen) {
+            window.history.back();
+        }
+    };
+
+    useEffect(() => {
+        const handlePopState = () => {
+            if (isFullscreen) {
+                setIsFullscreen(false);
+            }
+        };
+
+        window.addEventListener("popstate", handlePopState);
+        return () => window.removeEventListener("popstate", handlePopState);
+    }, [isFullscreen]);
+
     const [emblaRef, emblaApi] = useEmblaCarousel(
         { loop: true },
         [autoplay.current]
@@ -92,12 +120,10 @@ export default function ImageCarousel({
                                 src={getFullImageUrl(img.image)}
                                 className="w-full h-full object-cover cursor-pointer"
                                 draggable={false}
-                                title="imagess"
+                                title="Gym_images"
                                 onClick={() => {
                                     if (!enableFullscreen) return;
-
-                                    setStartIndex(index);
-                                    setIsFullscreen(true);
+                                    openFullscreen(index);
                                 }}
                             />
                         </div>
@@ -109,7 +135,7 @@ export default function ImageCarousel({
                 <FullscreenCarousel
                     images={images}
                     startIndex={startIndex}
-                    onClose={() => setIsFullscreen(false)}
+                    onClose={closeFullscreen}
                 />
             )}
         </div>

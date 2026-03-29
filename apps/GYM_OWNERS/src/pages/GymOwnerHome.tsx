@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Header from "../components/Header";
 import { MdError } from "react-icons/md";
 import { FaCircleCheck } from "react-icons/fa6";
-import { useNavigate } from "react-router-dom";
 import { FaCheckCircle } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import OtpVerificationModal from "../components/OtpVerificationModal";
@@ -29,7 +28,6 @@ const chipData = [
 
 const GymOwnerHome = () => {
 
-  const navigate = useNavigate();
 
   const { bookings, isLoading } = useAppContext()
 
@@ -52,7 +50,7 @@ const GymOwnerHome = () => {
       case "cancelled":
         return b.status === "CANCELLED";
       case "completed":
-        return false;
+        return b.status === "COMPLETED";
       case "all":
       default:
         return true;
@@ -77,6 +75,29 @@ const GymOwnerHome = () => {
     // Allow only numbers and max 4 digits
     value = value.replace(/\D/g, "").slice(0, 4);
     setOtp(value);
+  };
+
+  type ModalType = "user" | "success";
+
+  const openModal = (type: ModalType, booking?: Booking) => {
+    if (type === "user" && booking) {
+      setSelectedUser(booking);
+    }
+
+    if (type === "success") {
+      setStatus("success");
+    }
+
+    window.history.pushState({ modal: type }, "");
+  };
+
+  const closeModal = (type: ModalType) => {
+    if (type === "user") setSelectedUser(null);
+    if (type === "success") setStatus("idle");
+
+    if (window.history.state?.modal === type) {
+      window.history.back();
+    }
   };
 
   /* ---------------- Submit ---------------- */
@@ -117,16 +138,29 @@ const GymOwnerHome = () => {
       }
 
       // ✅ SUCCESS
-      setStatus("success");
+      openModal("success");
       setOtp("");
 
       // Optional: show success toast
       setToast({ type: "success", message: "Check-in successful!" });
 
       // 👉 If API returns booking/user, use it
-      if (data?.data) {
-        setSelectedUser(data.data);
+      if (data?.data?.id) {
+        const bookingId = data.data.id;
+
+        const matchedBooking = bookings.find(
+          (b) => b.id === bookingId
+        );
+
+        if (matchedBooking) {
+          setSelectedUser(matchedBooking);
+        }
       }
+
+      // ✅ auto close success modal after 2 seconds
+      setTimeout(() => {
+        closeModal("success");
+      }, 2000);
 
       // Scroll to top
       window.scrollTo(0, 0);
@@ -151,8 +185,8 @@ const GymOwnerHome = () => {
 
   const handleClose = () => {
     localStorage.removeItem("paymentSuccess");
-    setSelectedUser(null)
-    navigate("/");
+    closeModal("success");
+    closeModal("user");
   };
 
   /* ---------------- Toast Close ---------------- */
@@ -174,6 +208,19 @@ const GymOwnerHome = () => {
       : status === "error"
         ? "text-red-500"
         : "text-[#CBD5E1]";
+
+  useEffect(() => {
+    const handlePopState = () => {
+      if (window.history.state?.modal === "success") {
+        setStatus("idle");
+      } else if (window.history.state?.modal === "user") {
+        setSelectedUser(null);
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [status, selectedUser]);
 
   if (isLoading) {
     return (
@@ -250,7 +297,7 @@ const GymOwnerHome = () => {
                 <UserCard
                   key={book.id}
                   booking={book}
-                  onClick={() => setSelectedUser(book)}
+                  onClick={() => openModal("user", book)}
                 />
               ))}
             </div>
@@ -259,10 +306,10 @@ const GymOwnerHome = () => {
         </div>
 
         {status === 'success' && (
-          <div className="hidden mk:block fixed inset-0 z-[90] bg-[#0C0A0AC7]" onClick={handleClose}></div>
+          <div className="hidden mk:block fixed inset-0 z-[90] bg-[#0C0A0AC7]"></div>
         )}
 
-        
+
 
         {/* Success Modal */}
         <AnimatePresence>
@@ -285,7 +332,7 @@ const GymOwnerHome = () => {
                   OTP Verified
                 </h2>
                 <p className="text-sm font-normal text-[#475569]">
-                  Booking ID #37272 has been verified and the session has started
+                  Booking ID #{selectedUser?.id} has been verified and the session has started
                 </p>
               </motion.div>
             </motion.div>
@@ -305,7 +352,10 @@ const GymOwnerHome = () => {
             {/* Overlay for desktop only */}
             <div className="hidden mk:block fixed inset-0 bg-[#0C0A0AC7]" onClick={handleClose}></div>
 
-            <OtpVerificationModal user={selectedUser} onClose={handleClose} />
+            <OtpVerificationModal
+              user={selectedUser}
+              onClose={() => closeModal("user")}
+            />
           </motion.div>
         )}
       </AnimatePresence>

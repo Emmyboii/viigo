@@ -42,10 +42,10 @@ export default function CancelSuccessModal({
                             <span className="text-black">Rs. {price}</span>
                         </div>
 
-                        <div className="flex justify-between text-sm text-[#6A6A6A] mt-1">
+                        {/* <div className="flex justify-between text-sm text-[#6A6A6A] mt-1">
                             <span>Cancellation Fee</span>
                             <span className="text-black">Rs. 10</span>
-                        </div>
+                        </div> */}
 
                         <div className="flex justify-between text-sm font-normal mt-5">
                             <span>Total Refund Amount</span>

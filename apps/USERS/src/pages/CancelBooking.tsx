@@ -37,7 +37,47 @@ export default function CancelBooking() {
 
     const hours = hoursPart.trim().toLowerCase();
 
-    const totalRefund = price - 10
+    const totalRefund = price
+
+    const openModal = () => {
+        setShowSuccess(true);
+        localStorage.setItem("cancelSuccess", "true");
+
+        // Push a new history entry so back button can close modal
+        window.history.pushState({ modal: "cancelSuccess" }, "");
+    };
+
+    const closeModal = (type: "cancelSuccess") => {
+        if (type === "cancelSuccess") {
+            setShowSuccess(false);
+            localStorage.removeItem("cancelSuccess");
+            localStorage.removeItem("selectedBookingId");
+        }
+
+        // Only go back if the current history state matches the modal
+        if (window.history.state?.modal === type) {
+            window.history.back();
+        }
+    };
+
+    useEffect(() => {
+        const handlePopState = () => {
+            if (showSuccess) {
+                closeModal("cancelSuccess");
+            }
+        };
+
+        window.addEventListener("popstate", handlePopState);
+
+        return () => window.removeEventListener("popstate", handlePopState);
+    }, [showSuccess]);
+
+    const handleClose = () => {
+        closeModal("cancelSuccess");
+
+        navigate("/");
+        window.scrollTo(0, 0);
+    };
 
 
     const token = localStorage.getItem("token");
@@ -193,22 +233,13 @@ export default function CancelBooking() {
             }
 
             // persist modal for refresh
-            localStorage.setItem("cancelSuccess", "true");
-            setShowSuccess(true);
+            openModal();
         } catch (err: any) {
             console.error(err);
             setError(err.message || "Something went wrong");
         } finally {
             setIsCancelling(false);
         }
-    };
-
-    const handleClose = () => {
-        localStorage.removeItem("cancelSuccess");
-        localStorage.removeItem("selectedBookingId");
-        setShowSuccess(false);
-        navigate("/");
-        window.scrollTo(0, 0);
     };
 
     if (loading) {
@@ -278,12 +309,12 @@ export default function CancelBooking() {
                     </span>
                 </div>
 
-                <div className="flex justify-between text-sm text-[#6A6A6A] mb-3">
+                {/* <div className="flex justify-between text-sm text-[#6A6A6A] mb-3">
                     <span>Cancellation Fee</span>
                     <span className="text-black font-medium">
                         Rs. 10
                     </span>
-                </div>
+                </div> */}
 
                 <div className="border border-[#F2F2F2] border-dotted"></div>
 

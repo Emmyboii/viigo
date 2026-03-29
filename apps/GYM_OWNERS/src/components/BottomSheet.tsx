@@ -52,7 +52,7 @@ export default function BottomSheet({
         className={`${location.pathname === "/gym" && details !== "details"
           ? `absolute top-0 right-0 h-full w-full mk:w-[490px] bg-white flex flex-col ${animation}`
           : location.pathname === "/"
-            ? `absolute bottom-0 right-0 left-0 mk:left-auto bg-white rounded-t-3xl flex flex-col max-h-[85vh] ${animation} mk:w-[480px] mk:rounded-l-3xl`
+            ? `absolute bottom-0 right-0 left-0 mk:left-auto bg-white rounded-t-3xl flex flex-col max-h-[85vh] ${animation} mk:w-[480px] mk:rounded-l-3x`
             : `absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl flex flex-col max-h-[85vh] ${animation}`
           }`}
       >

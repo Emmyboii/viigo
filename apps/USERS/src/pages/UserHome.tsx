@@ -9,7 +9,7 @@ import useEmblaCarousel from "embla-carousel-react";
 import Footer from "../components/Footer";
 import { useAppContext } from "../context/AppContext";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SortModal from "../components/SortModal";
 import { FaFilter } from "react-icons/fa";
 import { BiSortAlt2 } from "react-icons/bi";
@@ -36,6 +36,37 @@ export default function UserHome() {
         // { id: "women", label: "Women" },
         // { id: "top_rated", label: "Top Rated" },
     ];
+
+
+    // --- Open modal function ---
+    const openSortModal = () => {
+        setShowSortModal(true);
+
+        // Push fake state so back button can close modal
+        window.history.pushState({ modal: "sort" }, "");
+    };
+
+    // --- Close modal function ---
+    const closeSortModal = () => {
+        setShowSortModal(false);
+
+        // Only go back if modal state was pushed
+        if (window.history.state?.modal === "sort") {
+            window.history.back();
+        }
+    };
+
+    // --- Back button handler ---
+    useEffect(() => {
+        const handlePopState = () => {
+            if (showSortModal) {
+                setShowSortModal(false);
+            }
+        };
+
+        window.addEventListener("popstate", handlePopState);
+        return () => window.removeEventListener("popstate", handlePopState);
+    }, [showSortModal]);
 
     if (loading2) {
         return (
@@ -64,11 +95,11 @@ export default function UserHome() {
                     setActiveId(id);
 
                     if (id === "filters") {
-                        navigate("/explore", { state: { openFilter: true } });
+                        navigate("/explore", { state: { openFilter: true, from: location.pathname } });
                     }
 
                     if (id === "sort") {
-                        setShowSortModal(true);
+                        openSortModal();
                     }
                 }}
             />
@@ -108,15 +139,16 @@ export default function UserHome() {
 
             {showSortModal && (
                 <SortModal
-                    onClose={() => setShowSortModal(false)}
+                    onClose={closeSortModal}
                     onSelect={(value, label) => {
-                        setShowSortModal(false);
+                        closeSortModal()
 
                         navigate("/explore", {
                             state: {
                                 sort: value,
                                 sortLabel: label,
                             },
+                            replace: true,
                         });
                     }}
                 />

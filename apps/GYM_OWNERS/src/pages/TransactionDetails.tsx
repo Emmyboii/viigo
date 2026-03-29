@@ -85,7 +85,7 @@ const TransactionDetails = ({ id, setSelectedTransactionId }: { id: number, setS
     const [transaction, setTransaction] = useState<WalletTransactionDetail | null>(null);
     const [fetching, setFetching] = useState<boolean>(true);
 
-      const captureFullCanvas = async () => {
+    const captureFullCanvas = async () => {
         if (!captureRef.current) return null;
 
         const originalOverflow = captureRef.current.style.overflow;
@@ -219,7 +219,12 @@ const TransactionDetails = ({ id, setSelectedTransactionId }: { id: number, setS
         <div className={`fixed mk:flex flex-col justify-center z-50 bg-white overflow-y-auto inset-0 mk:inset-auto mk:right-0 mk:top-0 mk:min-h-screen mk:w-[480px] mk:p-5 ${window.innerWidth >= 850 ? "animate-slideRight" : "animate-slideUp"}`}>
             {/* Header */}
             <div className="flex mk:hidden items-center px-4 gap-3 pt-4">
-                <button onClick={() => setSelectedTransactionId(null)} title="Go back" aria-label="Go back">
+                <button onClick={() => {
+                    setSelectedTransactionId(null)
+                    if (window.history.state?.modal === "transaction") {
+                        window.history.back();
+                    }
+                }} title="Go back" aria-label="Go back">
                     <FiArrowLeft />
                 </button>
                 <h2 className="font-semibold text-lg">Transaction Details</h2>

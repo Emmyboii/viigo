@@ -1,6 +1,7 @@
 import { FaRegClock, FaUserCircle } from "react-icons/fa";
 import { HiOutlineCalendar } from "react-icons/hi2";
 import type { Booking } from "../context/AppContext";
+import Countdown from "./Countdown";
 
 interface UserCardProps {
     booking: Booking;
@@ -87,7 +88,12 @@ export default function UserCard({ booking, onClick }: UserCardProps) {
 
                 {/* Context */}
                 <p className="text-[12px] mk:text-lg mk:font-semibold text-[#475569] font-medium mt-1">
-                    {statusText}
+                    {isActive && (
+                        <>
+                            Remaining time left <Countdown initialText={booking.contextual_text} />
+                        </>
+                    )}
+                    {!isActive && statusText}
                 </p>
             </div>
         </div>

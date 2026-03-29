@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react";
 import { IoArrowBack } from "react-icons/io5";
 import { useAppContext } from "../context/AppContext";
+import { useNavigate } from "react-router-dom";
 
 
 type Props = {
     filters: any;
+    from?: string;
     onClose: () => void;
     onApply: (filters: any) => void;
 };
 
-export default function FilterModal({ filters, onClose, onApply }: Props) {
+export default function FilterModal({ filters, from, onClose, onApply }: Props) {
 
     const {
         searchLoading,
@@ -21,6 +23,15 @@ export default function FilterModal({ filters, onClose, onApply }: Props) {
     const [sort, setSort] = useState(filters.sort);
     const [radius, setRadius] = useState(filters.radius);
     const [amenitiesSelected, setAmenitiesSelected] = useState<string[]>(filters.amenities);
+    const navigate = useNavigate();
+
+    const handleCancel = () => {
+        if (from === "/") {
+            navigate("/");
+        } else {
+            onClose();
+        }
+    };
 
     const buildFilters = () => {
         let min_price = "";
@@ -107,7 +118,7 @@ export default function FilterModal({ filters, onClose, onApply }: Props) {
                         <IoArrowBack
                             size={20}
                             className="cursor-pointer"
-                            onClick={onClose}
+                            onClick={handleCancel}
                         />
                         <h2 className="text-lg font-semibold">Filter</h2>
                     </div>

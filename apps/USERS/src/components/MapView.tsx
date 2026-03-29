@@ -2,7 +2,7 @@ import { GoogleMap, OverlayView, useJsApiLoader } from "@react-google-maps/api";
 import { useEffect, useState } from "react";
 import { useAppContext } from "../context/AppContext";
 import { HiLocationMarker } from "react-icons/hi";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const containerStyle = {
     width: "100%",
@@ -11,21 +11,82 @@ const containerStyle = {
 
 
 export default function MapView({ selectedGymFromDetails }: any) {
-    const { nearbyGyms, latitude, longitude } = useAppContext();
-    const [selectedGym, setSelectedGym] = useState<any>(null);
+
+    const locationState = useLocation().state as any;
+
+    const { nearbyGyms, gyms } = useAppContext();
+    const [selectedGym, setSelectedGym] = useState<any>(locationState?.gym || null);
     const navigate = useNavigate()
     const [map, setMap] = useState<google.maps.Map | null>(null);
+    const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
 
-    const center = selectedGymFromDetails
-        ? {
-            lat: parseFloat(selectedGymFromDetails.latitude),
-            lng: parseFloat(selectedGymFromDetails.longitude),
+
+    // Fit map bounds to all nearbyGyms
+    useEffect(() => {
+        if (map && nearbyGyms?.length) {
+            const bounds = new google.maps.LatLngBounds();
+
+            nearbyGyms.forEach((gym: any) => {
+                bounds.extend({
+                    lat: parseFloat(gym.latitude),
+                    lng: parseFloat(gym.longitude),
+                });
+            });
+
+            if (userLocation) bounds.extend(userLocation); // include user location
+
+            map.fitBounds(bounds);
         }
-        : {
-            lat: Number(latitude),
-            lng: Number(longitude),
-        };
+    }, [map, nearbyGyms, userLocation]);
 
+    // const center = selectedGymFromDetails
+    //     ? {
+    //         lat: parseFloat(selectedGymFromDetails.latitude),
+    //         lng: parseFloat(selectedGymFromDetails.longitude),
+    //     }
+    //     : {
+    //         lat: Number(latitude),
+    //         lng: Number(longitude),
+    //     };
+
+    const getValidLatLng = (lat: any, lng: any) => {
+        const parsedLat = parseFloat(lat);
+        const parsedLng = parseFloat(lng);
+
+        if (!isFinite(parsedLat) || !isFinite(parsedLng)) {
+            return null; // invalid coordinates
+        }
+
+        return { lat: parsedLat, lng: parsedLng };
+    };
+
+    const center = selectedGym
+        ? getValidLatLng(selectedGym.latitude, selectedGym.longitude) || { lat: 28.6139, lng: 77.2090 }
+        : userLocation || { lat: 28.6139, lng: 77.2090 };
+
+    // When panTo
+    useEffect(() => {
+        if (selectedGym && map) {
+            const coords = getValidLatLng(selectedGym.latitude, selectedGym.longitude);
+            if (coords) map.panTo(coords);
+        }
+    }, [selectedGym, map]);
+
+    // Fetch user location on mount
+    useEffect(() => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    setUserLocation({
+                        lat: pos.coords.latitude,
+                        lng: pos.coords.longitude,
+                    });
+                },
+                (err) => console.warn("Geolocation error:", err),
+                { enableHighAccuracy: true }
+            );
+        }
+    }, []);
 
     useEffect(() => {
         if (nearbyGyms?.length) {
@@ -79,15 +140,33 @@ export default function MapView({ selectedGymFromDetails }: any) {
                 options={{
                     disableDefaultUI: false,
                     clickableIcons: true,
-                    // styles: [
-                    //     {
-                    //         featureType: "poi",
-                    //         stylers: [{ visibility: "off" }],
-                    //     },
-                    // ],
                 }}
             >
-                {nearbyGyms?.map((gym: any) => {
+
+                {/* User Location Marker */}
+                {userLocation && (
+                    <OverlayView
+                        position={userLocation}
+                        mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+                    >
+                        <div
+                            style={{
+                                transform: "translate(-50%, -50%)",
+                                position: "relative",
+                                width: "24px",
+                                height: "24px",
+                            }}
+                        >
+                            <div
+                                className="absolute w-24 h-24 rounded-full bg-blue-300 animate-ping"
+                                style={{ top: "-50%", left: "-50%" }}
+                            />
+                            <div className="absolute w-10 h-10 top-1/2 left-1/2 rounded-full bg-white border-[12px] border-blue-500" />
+                        </div>
+                    </OverlayView>
+                )}
+
+                {gyms?.map((gym: any) => {
                     // const offset = index * 0.00005;
 
                     return (
@@ -110,17 +189,24 @@ export default function MapView({ selectedGymFromDetails }: any) {
                                 className="relative flex flex-col items-center cursor-pointer"
                             >
                                 {/* Top Circle Pin */}
-                                <div className="relative">
+                                {/* <div className="relative">
                                     {/* Outer ring */}
-                                    <div
+                                {/* <div
                                         className={`
                                 w-6 h-6 rounded-full flex items-center justify-center
                                 ${selectedGym?.id === gym.id ? "bg-[#2563EB]" : "bg-[#CBD5E1]"}
                                 `}
                                     >
                                         {/* Inner white circle */}
-                                        <div className="w-3 h-3 bg-white rounded-full" />
+                                {/* <div className="w-3 h-3 bg-white rounded-full" />
                                     </div>
+                                </div> */}
+
+                                <div className="relative">
+                                    <HiLocationMarker
+                                        size={34}
+                                        className={selectedGym?.id === gym.id ? "text-[#2563EB]" : "text-[#CBD5E1]"}
+                                    />
                                 </div>
 
                                 {/* Price Bubble */}
@@ -144,41 +230,45 @@ export default function MapView({ selectedGymFromDetails }: any) {
 
             {/* Bottom Floating Card */}
             {nearbyGyms?.length > 0 && (
-                <div className="absolute bottom-6 left-0 right-0 px-4 mb-10">
+                <div className="absolute bottom-14 left-0 right-0 px-4 mb-10">
                     <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
                         {nearbyGyms.map((gym: any) => (
                             <div
                                 key={gym.id}
                                 onClick={() => setSelectedGym(gym)}
                                 className={`
-                                    min-w-[280px] bg-white rounded shadow-xl
-                                    transition-all duration-200 cursor-pointer flex gap-3 items-center
+                                    min-w-[300px] bg-white rounded shadow-xl
+                                    transition-all duration-200 cursor-pointer h-[94px] flex items-center gap-3
                                     ${selectedGym?.id === gym.id ? "ring-2 ring-blue-600" : ""}
                                 `}
                             >
-                                <img
-                                    src={gym?.images[0]?.image}
-                                    alt={gym.name}
-                                    className="w-[71px] h-[106px] object-cover rounded-tl rounded-bl"
-                                />
+                                {/* Image container */}
+                                <div className="w-[71px] h-[94px] flex-shrink-0">
+                                    <img
+                                        src={gym?.images[0]?.image}
+                                        alt={gym.name}
+                                        className="w-full h-full object-cover rounded-tl rounded-bl"
+                                    />
+                                </div>
 
+                                {/* Content */}
                                 <div className="p-2 pl-0">
-                                    <h3 className="font-semibold text-base">
-                                        {gym.name}
-                                    </h3>
+                                    <div>
+                                        <h3 className="font-semibold text-[#0F172A] text-base">{gym.name}</h3>
 
-                                    <p className="text-sm text-gray-500 flex items-center gap-1 mt-2">
-                                        <HiLocationMarker size={16} className="mt-" />
-                                        {gym.distance} • {gym.open_status}
-                                    </p>
-
-                                    <div className="flex items-center justify-between gap-2 mt-2">
-
-                                        <p className="text-lg font-semibold">
-                                            ₹{Number(gym.hourly_rate)}/Hr
+                                        <p className="text-[11.3px] text-[#475569] flex items-center gap-1 mt-1">
+                                            <HiLocationMarker size={16} /> {gym.distance},{gym.area} • {gym.open_status}
                                         </p>
+                                    </div>
 
-                                        <p onClick={() => navigate(`/gyms/${gym?.slug}`)} className="text-sm font-semibold text-[#2563EB]">Details</p>
+                                    <div className="flex items-center justify-between gap-2 mt-1">
+                                        <p className="text-lg font-semibold">₹{Number(gym.hourly_rate)}/Hr</p>
+                                        <p
+                                            onClick={() => navigate(`/gyms/${gym?.slug}`)}
+                                            className="text-sm font-semibold text-[#2563EB]"
+                                        >
+                                            Details
+                                        </p>
                                     </div>
                                 </div>
                             </div>

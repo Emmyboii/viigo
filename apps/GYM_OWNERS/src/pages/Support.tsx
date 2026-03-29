@@ -126,13 +126,21 @@ const Support = ({ setSupport }: { setSupport: (value: boolean) => void }) => {
         }
     };
 
+    const closeModal = () => {
+        setSupport(false);
+
+        if (window.history.state?.modal === "support") {
+            window.history.back();
+        }
+    };
+
     return (
         // <div className="py-4">
         <div className={`fixed mk:flex flex-col justify-center z-50 bg-white overflow-y-auto inset-0 mk:inset-auto mk:right-0 mk:top-0 mk:min-h-screen mk:w-[480px] mk:p-5 ${window.innerWidth >= 850 ? "animate-slideRight" : "animate-slideUp"}`}>
 
             <div className="flex items-center justify-between bg-white px-4 mt-4 mk:pt-32">
                 <div className="flex items-center gap-2">
-                    <FiArrowLeft onClick={() => setSupport(false)} size={20} className="mk:hidden " />
+                    <FiArrowLeft onClick={closeModal} size={20} className="mk:hidden " />
                     <p className="font-semibold text-lg">Support</p>
                 </div>
                 <HiShare onClick={handleShare} size={20} className="text-[#475569] mk:hidden" />

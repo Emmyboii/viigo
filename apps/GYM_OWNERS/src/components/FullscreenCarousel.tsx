@@ -1,6 +1,7 @@
 import useEmblaCarousel from "embla-carousel-react";
 import { useEffect, useState } from "react";
 import { IoClose, IoChevronBack, IoChevronForward } from "react-icons/io5";
+import { getFullImageUrl } from "../context/AppContext";
 
 export interface Image {
     id: number;
@@ -64,7 +65,7 @@ export function FullscreenCarousel({
                         >
                             <img
                                 title="imgs"
-                                src={img.image}
+                                src={getFullImageUrl(img.image)}
                                 className="max-h-full max-w-full object-contain select-none"
                                 draggable={false}
                             />

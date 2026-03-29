@@ -30,6 +30,27 @@ export default function Explore() {
 
     const [query, setQuery] = useState("");
 
+
+    type ModalType = "search" | "filter" | "sort";
+
+    const openModal = (type: ModalType) => {
+        if (type === "search") setShowSearch(true);
+        if (type === "filter") setShowFilter(true);
+        if (type === "sort") setShowSortModal(true);
+
+        window.history.pushState({ modal: type }, "");
+    };
+
+    const closeModal = (type: ModalType) => {
+        if (type === "search") setShowSearch(false);
+        if (type === "filter") setShowFilter(false);
+        if (type === "sort") setShowSortModal(false);
+
+        if (window.history.state?.modal === type) {
+            window.history.back();
+        }
+    };
+
     const [filters, setFilters] = useState({
         sort: "price_high",
         radius: 5,
@@ -43,7 +64,12 @@ export default function Explore() {
     const [view, setView] = useState<"map" | "list">("map");
     const [showSortModal, setShowSortModal] = useState(false);
     const [activeId, setActiveId] = useState("");
-    const [currentSortLabel, setCurrentSortLabel] = useState<string | null>(null);
+    const [currentSortLabel, setCurrentSortLabel] = useState<string | null>(() => {
+        return location.state?.sortLabel || null;
+    });
+    const [currentSort, setCurrentSort] = useState<string>(() => {
+        return location.state?.sort || "";
+    });
     const chipData = [
         { id: "filters", label: "Filters", icon: <FaFilter /> },
         { id: "sort", label: "Sort By", icon: <BiSortAlt2 className="text-xl" /> },
@@ -63,22 +89,13 @@ export default function Explore() {
 
     useEffect(() => {
         if (location.state?.openFilter) {
-            setShowFilter(true);
+            openModal("filter");
         }
     }, [location.state]);
 
     useEffect(() => {
         if (location.state?.openSearch) {
-            setShowSearch(true);
-        }
-    }, [location.state]);
-
-    useEffect(() => {
-        if (location.state?.sort) {
-            fetchSortedGyms(
-                location.state.sort,
-                location.state.sortLabel
-            );
+            openModal("search");
         }
     }, [location.state]);
 
@@ -91,7 +108,7 @@ export default function Explore() {
 
     const handleApplyFilter = async (newFilters: any) => {
         setFilters(newFilters);   // store them
-        setShowFilter(false);
+        closeModal("filter");
         await fetchFilteredGyms(newFilters);
         setView("list");
         setCurrentSortLabel(null);
@@ -99,24 +116,42 @@ export default function Explore() {
 
     useEffect(() => {
         if (location.state?.sort) {
-            fetchSortedGyms(
-                location.state.sort,
-                location.state.sortLabel
-            );
+            const { sort, sortLabel } = location.state;
+
+            setCurrentSort(sort);
+            setCurrentSortLabel(sortLabel);
+
+            fetchSortedGyms(sort, sortLabel);
+
+            localStorage.setItem("gymSort", JSON.stringify({ sort, sortLabel }));
+
+            // ✅ clear state
+            navigate(location.pathname, { replace: true, state: {} });
         }
     }, [location.state]);
 
     useEffect(() => {
-        if (location.state?.sort) {
-            fetchSortedGyms(location.state.sort, location.state.sortLabel);
-            setCurrentSortLabel(location.state.sortLabel);
-            // setActiveId("sort");
+        const saved = localStorage.getItem("gymSort");
+
+        if (saved) {
+            const { sort, sortLabel } = JSON.parse(saved);
+            fetchSortedGyms(sort, sortLabel);
+            setCurrentSort(sort);
+            setCurrentSortLabel(sortLabel);
         }
-    }, [location.state]);
+    }, []);
+
+    useEffect(() => {
+        return () => {
+            if (!window.location.pathname.startsWith("/explore")) {
+                localStorage.removeItem("gymSort");
+            }
+        };
+    }, []);
 
     useEffect(() => {
         if (view === "map") {
-            setCurrentSortLabel(null);
+            // setCurrentSortLabel(null);
             setActiveId("");
             setQuery("")
 
@@ -253,6 +288,17 @@ export default function Explore() {
         }
     };
 
+    useEffect(() => {
+        const handlePopState = () => {
+            if (showSearch) setShowSearch(false);
+            else if (showFilter) setShowFilter(false);
+            else if (showSortModal) setShowSortModal(false);
+        };
+
+        window.addEventListener("popstate", handlePopState);
+        return () => window.removeEventListener("popstate", handlePopState);
+    }, [showSearch, showFilter, showSortModal]);
+
     return (
         <div className="relative h-screen bg-white">
             {/* MAP VIEW */}
@@ -263,7 +309,10 @@ export default function Explore() {
 
                     {/* Search Bar */}
                     <div
-                        onClick={() => setShowSearch(true)}
+                        onClick={() => {
+                            setCurrentSortLabel(null);
+                            openModal("search");
+                        }}
                         className="absolute top-6 left-4 right-16 mr-2 border-[#94A3B8] border bg-white rounded-2xl px-4 py-4 flex items-center shadow-md cursor-pointer"
                     >
                         <IoSearchSharp className="mr-3 text-xl text-gray-500" />
@@ -275,7 +324,10 @@ export default function Explore() {
                     {/* Filter Button */}
                     <button
                         title="filter"
-                        onClick={() => setShowFilter(true)}
+                        onClick={() => {
+                            setCurrentSortLabel(null);
+                            openModal("filter");
+                        }}
                         className="absolute top-6 right-4 bg-[#F1F5F9] w-12 h-12 rounded-full text-[#94A3B8] border border-[#CBD5E1] shadow-md flex items-center justify-center"
                     >
                         <HiFilter />
@@ -293,7 +345,17 @@ export default function Explore() {
                         {/* HEADER (OUTSIDE MAP) */}
                         <div className="fixed top-0 left-0 right-0 z-40 bg-white flex items-center justify-between px-4 py-3">
                             <div className="flex items-center gap-2">
-                                <button title="back" onClick={() => setView("map")} className="p-1">
+                                <button title="back" onClick={() => {
+                                    setCurrentSortLabel(null);
+
+                                    if (window.history.state?.modal) {
+                                        window.history.back();
+                                        return;
+                                    }
+
+                                    setView("map")
+                                }}
+                                    className="p-1">
                                     <IoArrowBack size={20} />
                                 </button>
 
@@ -310,7 +372,7 @@ export default function Explore() {
                         {/* Search + Filters */}
                         <div className="flex items-center gap-3 mb-">
                             <div
-                                onClick={() => setShowSearch(true)}
+                                onClick={() => openModal("search")}
                                 className="flex items-center flex-1 border rounded-xl px-3 py-3 cursor-pointer"
                             >
                                 <IoSearchSharp className="mr-2 text-xl text-gray-500" />
@@ -328,11 +390,11 @@ export default function Explore() {
                                     setActiveId(id);
 
                                     if (id === "filters") {
-                                        setShowFilter(true);
+                                        openModal("filter")
                                     }
 
                                     if (id === "sort") {
-                                        setShowSortModal(true);
+                                        openModal("sort")
                                     }
                                 }}
                             />
@@ -340,7 +402,7 @@ export default function Explore() {
                             {currentSortLabel && (
                                 <div className="mt-4 w-full">
                                     <button
-                                        onClick={() => setShowSortModal(true)}
+                                        onClick={() => openModal("sort")}
                                         className="inline-flex items-center text-nowrap gap-2 bg-[#DBEAFE] border border-[#2563EB] text-[#2563EB] px-3 py-1.5 rounded-lg text-sm w-full justify-center"
                                     >
                                         <BiSortAlt2 className="text-xl" /> Sort By : {currentSortLabel}
@@ -375,26 +437,28 @@ export default function Explore() {
             {/* SEARCH MODAL */}
             {showSearch && (
                 <SearchModal
-                    onClose={() => setShowSearch(false)}
+                    onClose={() => closeModal("search")}
                     from={location.state?.from}
                     setQuery={setQuery}
                     query={query}
+                    setCurrentSortLabel={setCurrentSortLabel}
                 />
             )}
 
             {showFilter && (
                 <FilterModal
                     filters={filters}
-                    onClose={() => setShowFilter(false)}
+                    from={location.state?.from}
+                    onClose={() => closeModal("filter")}
                     onApply={handleApplyFilter}
                 />
             )}
 
             {showSortModal && (
                 <SortModal
-                    onClose={() => setShowSortModal(false)}
+                    onClose={() => closeModal("sort")}
                     onSelect={(value, label) => {
-                        setShowSortModal(false);
+                        closeModal("sort");
 
                         navigate("/explore", {
                             state: {
@@ -404,7 +468,7 @@ export default function Explore() {
                         });
                     }}
 
-                    currentSort={currentSortLabel ? location.state?.sort || "" : ""} />
+                    currentSort={currentSort} />
             )}
 
             <Footer />

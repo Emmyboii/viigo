@@ -10,6 +10,10 @@ import {
 import { FiSun, FiMoon } from "react-icons/fi";
 import { FaCircleCheck, FaPlus } from "react-icons/fa6";
 import { useNavigate } from "react-router";
+import { useRef } from "react";
+import SelectionModal from "../components/SelectionModal";
+import { MdError } from "react-icons/md";
+import { RiArrowRightSLine } from "react-icons/ri";
 
 interface PeakHour {
     id: string;
@@ -56,8 +60,8 @@ interface GymType {
     rules: Rule[];
     images: { id: number; image: string }[];
 
-    peak_morning?: [string, string][];
-    peak_evening?: [string, string][];
+    peak_morning?: ([string, string] | { start: string; end: string })[];
+    peak_evening?: ([string, string] | { start: string; end: string })[];
     calendar_availability?: []
 
     owner_email: string
@@ -127,11 +131,16 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
 
     const [morningPeak, setMorningPeak] = useState<PeakHour[]>(() => {
         if (gym?.peak_morning && gym.peak_morning.length > 0) {
-            return gym.peak_morning.map(([start, end]) => ({
-                id: crypto.randomUUID(),
-                start,
-                end,
-            }));
+            return gym.peak_morning.map((item) => {
+                if (Array.isArray(item)) {
+                    // It's a [start, end] tuple
+                    const [start, end] = item;
+                    return { id: crypto.randomUUID(), start, end };
+                } else {
+                    // It's already an object { start, end }
+                    return { id: crypto.randomUUID(), start: item.start, end: item.end };
+                }
+            });
         }
 
         return [{ id: crypto.randomUUID(), start: "00:00", end: "00:01" }];
@@ -139,19 +148,35 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
 
     const [eveningPeak, setEveningPeak] = useState<PeakHour[]>(() => {
         if (gym?.peak_evening && gym.peak_evening.length > 0) {
-            return gym.peak_evening.map(([start, end]) => ({
-                id: crypto.randomUUID(),
-                start,
-                end,
-            }));
+            return gym.peak_evening.map((item) => {
+                if (Array.isArray(item)) {
+                    const [start, end] = item;
+                    return { id: crypto.randomUUID(), start, end };
+                } else {
+                    return { id: crypto.randomUUID(), start: item.start, end: item.end };
+                }
+            });
         }
 
-        return [{
-            id: crypto.randomUUID(),
-            start: "16:00",
-            end: gym?.close_time || "00:01",
-        }];
+        return [
+            {
+                id: crypto.randomUUID(),
+                start: "16:00",
+                end: gym?.close_time || "00:01",
+            },
+        ];
     });
+
+    useEffect(() => {
+        const handlePopState = (e: PopStateEvent) => {
+            if (e.state?.display) {
+                setDisplay(e.state.display as "details" | "edit" | "create");
+            }
+        };
+
+        window.addEventListener("popstate", handlePopState);
+        return () => window.removeEventListener("popstate", handlePopState);
+    }, [setDisplay]);
 
     const [photos, setPhotos] = useState<PhotoType[]>(
         gym?.images?.map(img => ({
@@ -181,12 +206,12 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
     const [modalType, setModalType] = useState<"amenities" | "rules" | null>(null);
 
     useEffect(() => {
-        if (modalType === "amenities" || modalType === "rules") {
+        if (modalType === "amenities" || modalType === "rules" || locationModal) {
             document.body.style.overflow = "hidden";
         } else {
             document.body.style.overflow = "auto";
         }
-    }, [modalType]);
+    }, [modalType, locationModal]);
 
     // If gym closes before evening peak start, automatically limit evening start
     useEffect(() => {
@@ -217,7 +242,7 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
         const res = await fetch(
             `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
                 address
-            )}&components=country:NG&key=${apiKey}`
+            )}&components=country:IN&key=${apiKey}`
         );
 
         const data = await res.json();
@@ -438,6 +463,9 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
             setTimeout(() => {
                 setDisplay("details");
                 localStorage.setItem("gymDisplay", "details");
+                if (window.history.state?.display === "edit") {
+                    window.history.back();
+                }
             }, 1500);
 
             const message =
@@ -463,6 +491,35 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
         setToast(null);
     }, []);
 
+    const MORNING_END_LIMIT = "11:59";
+    const EVENING_START_LIMIT = "16:00";
+
+    const isMorningValid = (p: PeakHour, gymStartTime: string) => {
+        if (!p.start || !p.end) return false;
+
+        const start = timeToMinutes(p.start);
+        const end = timeToMinutes(p.end);
+
+        return (
+            start >= timeToMinutes(gymStartTime) &&
+            end <= timeToMinutes(MORNING_END_LIMIT) &&
+            end > start
+        );
+    };
+
+    const isEveningValid = (p: PeakHour, gymEndTime: string) => {
+        if (!p.start || !p.end) return false;
+
+        const start = timeToMinutes(p.start);
+        const end = timeToMinutes(p.end);
+
+        return (
+            start >= timeToMinutes(EVENING_START_LIMIT) &&
+            end <= timeToMinutes(gymEndTime) &&
+            end > start
+        );
+    };
+
 
     const isFormValid =
         gymName.trim() &&
@@ -475,12 +532,8 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
         selectedAmenities.length > 0 &&
         selectedRules.length > 0 &&
         photos.length > 0 &&
-        morningPeak.every(
-            (p) => p.start && p.end && isEndTimeValid(p.start, p.end)
-        ) &&
-        eveningPeak.every(
-            (p) => p.start && p.end && isEndTimeValid(p.start, p.end)
-        );
+        morningPeak.every((p) => isMorningValid(p, startTime)) &&
+        eveningPeak.every((p) => isEveningValid(p, endTime));
 
     return (
         <div className="min-h-screen pb-32 mk:bg-[#CBD5E1] max-w-[1900px] mx-auto">
@@ -492,6 +545,9 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
                             if (display === "edit" && gym?.images.length !== 0) {
                                 setDisplay("details");
                                 localStorage.setItem("gymDisplay", "details");
+                                if (window.history.state?.display === "edit") {
+                                    window.history.back();
+                                }
                             } else if (display === "create") {
                                 navigate(-1)
                             } else {
@@ -508,6 +564,9 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
                             if (display === "edit" && gym?.images.length !== 0) {
                                 setDisplay("details");
                                 localStorage.setItem("gymDisplay", "details");
+                                if (window.history.state?.display === "edit") {
+                                    window.history.back();
+                                }
                             } else if (display === "create") {
                                 navigate(-1)
                             } else {
@@ -618,15 +677,18 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
                                 <p className="text-base mb-1 text-[#0F172A] font-semibold">Location</p>
 
                                 <div
-                                    onClick={() => setLocationModal(true)}
-                                    className="flex items-center justify-between border border-[#475569] h-[50px] rounded-lg px-3 py-2 bg-white cursor-pointer"
+                                    onClick={() => {
+                                        setLocationModal(true)
+                                        window.history.pushState({ modal: "location" }, "");
+                                    }}
+                                    className="flex items-center justify-between gap-3 border border-[#475569] h-[50px] rounded-lg px-3 py-2 bg-white cursor-pointer"
                                 >
                                     <div className="flex items-center gap-2 text-sm text-[#0F172A] truncate">
                                         <FiMapPin className="text-[#475569]" />
                                         {location || "Select Gym Location"}
                                     </div>
 
-                                    <RiArrowRightSLine className="text-[#475569]" />
+                                    <RiArrowRightSLine className="text-[#475569] text-[24px]" />
                                 </div>
                             </div>
                         </div>
@@ -683,6 +745,7 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
                                 setMorning={setMorningPeak}
                                 setEvening={setEveningPeak}
                                 gymEndTime={endTime}
+                                gymStartTime={startTime}
                             />
 
                         </div>
@@ -719,7 +782,10 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
                                 </div>
 
                                 <button
-                                    onClick={() => setModalType("amenities")}
+                                    onClick={() => {
+                                        setModalType("amenities")
+                                        window.history.pushState({ modal: "amenities" }, "");
+                                    }}
                                     className="mt-6 w-full bg-[#F1F5F9] py-3 rounded-md mb-10 text-[#94A3B8] font-semibold text-sm"
                                 >
                                     Add More
@@ -796,7 +862,10 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
                         </div>
 
                         <button
-                            onClick={() => setModalType("amenities")}
+                            onClick={() => {
+                                setModalType("amenities")
+                                window.history.pushState({ modal: "amenities" }, "");
+                            }}
                             className="mt-6 w-full bg-[#F1F5F9] py-3 rounded-md mb-10 text-[#94A3B8] font-semibold text-sm"
                         >
                             Add More
@@ -842,7 +911,10 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
                         </div>
 
                         <button
-                            onClick={() => setModalType("rules")}
+                            onClick={() => {
+                                setModalType("rules")
+                                window.history.pushState({ modal: "rules" }, "");
+                            }}
                             className="mt-6 w-full bg-[#F1F5F9] py-3 rounded-md mb-10 text-[#94A3B8] font-semibold text-sm"
                         >
                             Add More
@@ -877,6 +949,7 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
                 <SelectionModal
                     open={true}
                     title={modalType === "amenities" ? `Amenities (${amenitiesCount})` : `Select Rules (${rulesCount})`}
+                    title2={modalType === "amenities" ? `amenities` : `rules`}
                     options={
                         modalType === "amenities"
                             ? amenities.map((a) => ({
@@ -896,7 +969,10 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
                                 : visibleAmenities.map((a) => a.id)
                             : visibleRules.map((r) => r.id)
                     }
-                    onClose={() => setModalType(null)}
+                    onClose={() => {
+                        setModalType(null)
+                        window.history.back();
+                    }}
                     onSave={(items: number[]) => {
                         if (modalType === "amenities") {
                             const selected = amenities.filter(a => items.includes(a.id));
@@ -916,13 +992,19 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
                         }
 
                         setModalType(null);
+                        window.history.back();
                     }}
                 />
             )}
 
+
+
             <LocationModal
                 open={locationModal}
-                onClose={() => setLocationModal(false)}
+                onClose={() => {
+                    setLocationModal(false)
+                    window.history.back();
+                }}
                 addressLine1={addressLine1}
                 area={area}
                 city={city}
@@ -988,11 +1070,6 @@ const Input2 = ({ label, value, onChange, placeholder, icon, error }: InputProps
         </div>
     );
 };
-
-import { useRef } from "react";
-import SelectionModal from "../components/SelectionModal";
-import { MdError } from "react-icons/md";
-import { RiArrowRightSLine } from "react-icons/ri";
 
 const TimeInput = ({ value, onChange }: TimeInputProps) => {
     const inputRef = useRef<HTMLInputElement>(null);
@@ -1068,13 +1145,15 @@ const GymPeakHours = ({
     evening,
     setMorning,
     setEvening,
-    gymEndTime
+    gymEndTime,
+    gymStartTime
 }: {
     morning: PeakHour[];
     evening: PeakHour[];
     setMorning: React.Dispatch<React.SetStateAction<PeakHour[]>>;
     setEvening: React.Dispatch<React.SetStateAction<PeakHour[]>>;
     gymEndTime: string
+    gymStartTime: string
 }) => {
     return (
         <div className="space-y-4">
@@ -1085,6 +1164,7 @@ const GymPeakHours = ({
                 data={morning}
                 setData={setMorning}
                 icon={<FiSun size={16} />}
+                gymStartTime={gymStartTime}
             />
 
             <PeakSection
@@ -1121,12 +1201,14 @@ const PeakSection = ({
     data,
     setData,
     gymEndTime,
+    gymStartTime
 }: {
     title: string;
     icon: React.ReactNode;
     data: PeakHour[];
     setData: React.Dispatch<React.SetStateAction<PeakHour[]>>;
     gymEndTime?: string;
+    gymStartTime?: string;
 }) => {
     const addMore = () => {
         setData((prev) => [
@@ -1159,30 +1241,26 @@ const PeakSection = ({
         );
     }, [gymEndTime, setData]);
 
-    // const updateTime = (id: string, field: "start" | "end", value: string) => {
-    //     setData((prev) =>
-    //         prev.map((item) => {
-    //             if (item.id !== id) return item;
+    useEffect(() => {
+        if (title !== "Morning" || !gymStartTime) return;
 
-    //             // Evening peak restriction
-    //             if (title === "Evening" && gymEndTime) {
-    //                 const minStart = timeToMinutes("16:00");
-    //                 const endLimit = timeToMinutes(gymEndTime);
-    //                 const newValue = timeToMinutes(value);
+        setData((prev) =>
+            prev.map((p) => {
+                let start = p.start;
+                let end = p.end;
 
-    //                 if (field === "start" && newValue < minStart) {
-    //                     value = "16:00";
-    //                 }
+                if (timeToMinutes(start) < timeToMinutes(gymStartTime)) {
+                    start = gymStartTime;
+                }
 
-    //                 if (field === "end" && newValue > endLimit) {
-    //                     value = gymEndTime;
-    //                 }
-    //             }
+                if (timeToMinutes(end) > timeToMinutes("11:59")) {
+                    end = "11:59";
+                }
 
-    //             return {...item, [field]: value };
-    //         })
-    //     );
-    // };
+                return { ...p, start, end };
+            })
+        );
+    }, [gymStartTime, title, setData]);
 
     const updateTime = (id: string, field: "start" | "end", value: string) => {
         setData((prev) =>
@@ -1227,10 +1305,36 @@ const PeakSection = ({
                         <p className="text-red-500 text-xs mt-1">End time must be later than start time</p>
                     )}
 
-                    {timeToMinutes(item.end) > timeToMinutes(gymEndTime || "23:59") && (
-                        <p className="text-red-500 text-xs mt-1">
-                            End time cannot exceed gym closing time
-                        </p>
+                    {title === "Morning" && (
+                        <>
+                            {timeToMinutes(item.start) < timeToMinutes(gymStartTime || "00:00") && (
+                                <p className="text-red-500 text-xs">
+                                    Morning peak must start after gym opening time
+                                </p>
+                            )}
+
+                            {timeToMinutes(item.end) > timeToMinutes("11:59") && (
+                                <p className="text-red-500 text-xs">
+                                    Morning peak must end before 11:59 AM
+                                </p>
+                            )}
+                        </>
+                    )}
+
+                    {title === "Evening" && (
+                        <>
+                            {timeToMinutes(item.start) < timeToMinutes("16:00") && (
+                                <p className="text-red-500 text-xs">
+                                    Evening peak must start from 4:00 PM
+                                </p>
+                            )}
+
+                            {timeToMinutes(item.end) > timeToMinutes(gymEndTime || "23:59") && (
+                                <p className="text-red-500 text-xs">
+                                    Evening peak cannot exceed gym closing time
+                                </p>
+                            )}
+                        </>
                     )}
 
                     {(index === data.length - 1 && title === "Morning") && (
@@ -1315,6 +1419,23 @@ function LocationModal({
     const [stateValue, setState] = useState(state);
     const [zip, setZip] = useState(postalCode);
 
+
+    useEffect(() => {
+        if (!open) return;
+
+        window.history.pushState({ modal: "location" }, "");
+
+        const handlePopState = () => {
+            onClose();
+        };
+
+        window.addEventListener("popstate", handlePopState);
+
+        return () => {
+            window.removeEventListener("popstate", handlePopState);
+        };
+    }, [open, onClose]);
+
     if (!open) return null;
 
     const handleSubmit = () => {
@@ -1332,39 +1453,47 @@ function LocationModal({
     };
 
     return (
-        <div className="fixed inset-0 bg-black/40 z-50 flex">
-            <div className="bg-white w-full p-5 h-screen flex flex-col">
+        <>
+            {window.innerWidth >= 850 && (
+                <div
+                    onClick={onClose}
+                    className="fixed inset-0 bg-black/40 z-50"
+                />
+            )}
+            <div className={`fixed z-50 bg-white overflow-y-auto inset-0 mk:inset-auto mk:right-0 mk:top-0 mk:min-h-screen mk:w-[480px] ${window.innerWidth >= 850 ? "animate-slideRight" : "animate-slideUp"}`}>
+                <div className="bg-white w-full p-5 h-screen flex flex-col">
 
-                <div className="flex-1 space-y-4 overflow-y-auto">
-                    <div className="flex items-center gap-3 mb-2">
-                        <FiArrowLeft onClick={onClose} className="cursor-pointer" />
-                        <h2 className="font-semibold text-lg">Add Gym Location</h2>
+
+                    <div className="flex-1 space-y-4 overflow-y-auto">
+                        <div className="flex items-center gap-3 mb-2">
+                            <FiArrowLeft onClick={onClose} className="cursor-pointer" />
+                            <h2 className="font-semibold text-lg">Add Gym Location</h2>
+                        </div>
+
+                        <LocationInput label="Address" value={line1} onChange={setLine1} />
+                        <LocationInput label="Area" value={line2} onChange={setLine2} />
+                        <LocationInput label="City" value={cityValue} onChange={setCity} />
+                        <LocationInput label="State" value={stateValue} onChange={setState} />
+                        <div className='mt-4'>
+                            <p className="text-sm text-[#0F172A] mb-1">ZIP / Postal Code</p>
+                            <input
+                                value={zip}
+                                title="zip"
+                                onChange={(e) => setZip(e.target.value)}
+                                className="border border-[#475569] w-1/2 rounded-lg px-3 py-3 outline-none placeholder:text-sm"
+                            />
+                        </div>
                     </div>
 
-                    <LocationInput label="Address" value={line1} onChange={setLine1} />
-                    <LocationInput label="Area" value={line2} onChange={setLine2} />
-                    <LocationInput label="City" value={cityValue} onChange={setCity} />
-                    <LocationInput label="State" value={stateValue} onChange={setState} />
-                    <div className='mt-4'>
-                        <p className="text-sm text-[#0F172A] mb-1">ZIP / Postal Code</p>
-                        <input
-                            value={zip}
-                            title="zip"
-                            onChange={(e) => setZip(e.target.value)}
-                            className="border border-[#475569] w-1/2 rounded-lg px-3 py-3 outline-none placeholder:text-sm"
-                        />
-                    </div>
+                    <button
+                        onClick={handleSubmit}
+                        className="w-full bg-blue-600 text-white py-3 rounded-xl font-medium mt-4"
+                    >
+                        Submit
+                    </button>
                 </div>
-
-                <button
-                    onClick={handleSubmit}
-                    className="w-full bg-blue-600 text-white py-3 rounded-xl font-medium mt-4"
-                >
-                    Submit
-                </button>
-
             </div>
-        </div>
+        </>
     );
 }
 

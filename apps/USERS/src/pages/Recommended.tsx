@@ -5,42 +5,24 @@ import SearchBar2 from '../components/SearchBar2';
 import { useState } from 'react';
 import { IoArrowBack } from 'react-icons/io5';
 import { useNavigate } from 'react-router-dom';
+import Footer from '../components/Footer';
 
 const Recommended = () => {
 
     const navigate = useNavigate();
 
     const { recommendedGyms, loading2 } = useAppContext()
-    // const [activeId, setActiveId] = useState("");
-    // const [showSortModal, setShowSortModal] = useState(false);
-    // const [showFilterModal, setShowFilterModal] = useState(false);
 
     const [query, setQuery] = useState("");
-    // const [sort, setSort] = useState("");
-    // const [filters, setFilters] = useState<any>({});
 
-    // const chipData = [
-    //     { id: "filters", label: "Filters" },
-    //     { id: "sort", label: "Sort By" },
-    //     // { id: "near", label: "Near Me" },
-    //     // { id: "women", label: "Women" },
-    //     // { id: "top_rated", label: "Top Rated" },
-    // ];
+    const filteredGyms = recommendedGyms.filter((gym) => {
+        if (!query) return true;
 
-    // const fetchData = () => {
-    //     if (sort) {
-    //         fetchSortedGyms(sort, "");
-    //     } else {
-    //         fetchFilteredGyms({
-    //             ...filters,
-    //             query,
-    //         });
-    //     }
-    // };
-
-    // useEffect(() => {
-    //     fetchData();
-    // }, [sort, filters, query]);
+        return (
+            gym.name?.toLowerCase().includes(query.toLowerCase()) ||
+            gym.area?.toLowerCase().includes(query.toLowerCase())
+        );
+    });
 
     if (loading2) {
         return (
@@ -82,58 +64,21 @@ const Recommended = () => {
                     onChange={(val: string) => setQuery(val)}
                 />
             </div>
-            {/* <FilterChips
-                items={chipData}
-                activeId={activeId}
-                onChange={(id) => {
-                    setActiveId(id);
 
-                    if (id === "filters") setShowFilterModal(true);
-                    if (id === "sort") setShowSortModal(true);
-
-                    if (id === "near") setSort("nearest");
-                    if (id === "top_rated") setSort("top_rated");
-
-                    if (id === "women") {
-                        setFilters((prev: any) => ({
-                            ...prev,
-                            women_only: true,
-                        }));
-                    }
-                }}
-            /> */}
-            {recommendedGyms.length === 0 ? (
+            {filteredGyms.length === 0 ? (
                 <p className="text-center text-gray-400 py-6">
-                    No recommended gyms available
+                    {query ? "No gyms match your search" : "No recommended gyms available"}
                 </p>
             ) : (
                 <div className="space-y-4 mb-20 mt-7">
-                    {recommendedGyms.map((gym, index) => (
+                    {filteredGyms.map((gym, index) => (
                         <GymHorizontalCard key={index} gym={gym} />
                     ))}
                 </div>
             )}
 
-            {/* {showSortModal && (
-                <SortModal
-                    onClose={() => setShowSortModal(false)}
-                    onSelect={(value) => {
-                        setShowSortModal(false);
-                        setSort(value);
-                    }}
-                />
-            )} */}
+            <Footer />
 
-            {/* 🎛 FILTER MODAL */}
-            {/* {showFilterModal && (
-                <FilterModal
-                    onClose={() => setShowFilterModal(false)}
-                    onApply={(selectedFilters: any) => {
-                        setShowFilterModal(false);
-                        setFilters(selectedFilters);
-                    }}
-                />
-            )} */}
         </Container>
     )
 }

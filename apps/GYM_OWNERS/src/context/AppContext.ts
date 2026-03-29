@@ -40,8 +40,8 @@ export interface GymType {
     rules: Rule[];
     images: { id: number; image: string }[];
 
-    peak_morning?: [string, string][];
-    peak_evening?: [string, string][];
+    peak_morning?: ([string, string] | { start: string; end: string })[];
+    peak_evening?: ([string, string] | { start: string; end: string })[];
     calendar_availability?: []
 
     owner_email: string
@@ -66,6 +66,8 @@ export type Booking = {
     display_status: string;
     duration_text: string;
     contextual_text: string;
+    total_amount: string;
+    formatted_amount: string;
     display_date: string;
     status: "PENDING" | "CONFIRMED" | "CANCELLED" | "ACTIVE" | "COMPLETED";
 };

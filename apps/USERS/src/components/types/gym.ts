@@ -36,7 +36,7 @@ export interface Gym {
     images: Image[];
     amenities: Amenity[];
     rules: Rule[];
-    peak_morning?: [string, string][];
-    peak_evening?: [string, string][];
+    peak_morning?: ([string, string] | { start: string; end: string })[];
+    peak_evening?: ([string, string] | { start: string; end: string })[];
     calendar_availability?: any[];
 }

@@ -136,9 +136,24 @@ export default function PickHoursSheet({ open, onClose, defaultDate, defaultHour
         return `${hour}:${minute} ${ampm}`;
     }
 
-    const allPeaks = [
-        ...(Array.isArray(gym?.peak_morning) ? gym.peak_morning : []),
-        ...(Array.isArray(gym?.peak_evening) ? gym.peak_evening : []),
+    function normalizePeak(p: [string, string] | { start: string, end: string } | any): [string, string] {
+        if (Array.isArray(p) && p.length === 2) return [p[0], p[1]];
+        if (p?.start && p?.end) return [p.start, p.end];
+        return ["00:00", "00:00"];
+    }
+
+    // Ensure peak_morning and peak_evening are arrays
+    const morningPeaks = Array.isArray(gym?.peak_morning)
+        ? gym.peak_morning
+        : gym?.peak_morning ? [gym.peak_morning] : [];
+
+    const eveningPeaks = Array.isArray(gym?.peak_evening)
+        ? gym.peak_evening
+        : gym?.peak_evening ? [gym.peak_evening] : [];
+
+    const allPeaks: [string, string][] = [
+        ...morningPeaks.map(normalizePeak),
+        ...eveningPeaks.map(normalizePeak),
     ];
 
     return (

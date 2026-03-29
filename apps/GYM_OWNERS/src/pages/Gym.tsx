@@ -32,8 +32,8 @@ interface GymType {
     rules: Rule[];
     images: { id: number; image: string }[];
 
-    peak_morning?: [string, string][];
-    peak_evening?: [string, string][];
+    peak_morning?: ([string, string] | { start: string; end: string })[];
+    peak_evening?: ([string, string] | { start: string; end: string })[];
     calendar_availability?: []
 
     owner_email: string
