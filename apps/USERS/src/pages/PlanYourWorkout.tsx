@@ -420,7 +420,7 @@ const PlanYourWorkout = () => {
             </h4>
 
             {/* Date Selector */}
-            <div className="flex gap-3 overflow-x-auto pb-2">
+            <div className="flex gap-3 overflow-x-auto sm:justify-center pb-2">
                 {dates.map((item, index) => (
                     <div
                         key={index}

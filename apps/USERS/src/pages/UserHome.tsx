@@ -141,8 +141,7 @@ export default function UserHome() {
                 <SortModal
                     onClose={closeSortModal}
                     onSelect={(value, label) => {
-                        closeSortModal()
-
+                        // Step 1: Navigate first
                         navigate("/explore", {
                             state: {
                                 sort: value,
@@ -150,7 +149,11 @@ export default function UserHome() {
                             },
                             replace: true,
                         });
+
+                        // Step 2: Close modal locally
+                        setShowSortModal(false);
                     }}
+                    currentSort=""
                 />
             )}
 

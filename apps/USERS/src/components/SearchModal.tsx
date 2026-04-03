@@ -7,13 +7,14 @@ import { FiClock } from "react-icons/fi";
 
 type Props = {
     onClose: () => void;
+    onClose2: () => void;
     from?: string;
     query?: string
     setQuery: React.Dispatch<React.SetStateAction<string>>
     setCurrentSortLabel?: React.Dispatch<React.SetStateAction<string | null>>
 };
 
-export default function SearchModal({ onClose, from, query, setQuery, setCurrentSortLabel }: Props) {
+export default function SearchModal({ onClose, onClose2, from, query, setQuery, setCurrentSortLabel }: Props) {
     const navigate = useNavigate();
     const { searchGyms, searchResults, nearbyGyms } = useAppContext();
 
@@ -53,7 +54,11 @@ export default function SearchModal({ onClose, from, query, setQuery, setCurrent
         setQuery(value);
         await searchGyms(value);
         saveRecent(value);
-        onClose();
+        if (from === "/") {
+            onClose2();
+        } else {
+            onClose();
+        }
         setCurrentSortLabel?.(null)
     };
 
@@ -66,7 +71,11 @@ export default function SearchModal({ onClose, from, query, setQuery, setCurrent
     };
 
     const handleGymClick = (gym: any) => {
-        onClose();
+        if (from === "/") {
+            onClose2();
+        } else {
+            onClose();
+        }
         setCurrentSortLabel?.(null)
         navigate(`/gyms/${gym.slug}`);
     };
@@ -85,7 +94,11 @@ export default function SearchModal({ onClose, from, query, setQuery, setCurrent
                             if (e.key === "Enter" && query?.trim()) {
                                 await searchGyms(query);
                                 saveRecent(query);
-                                onClose();
+                                if (from === "/") {
+                                    onClose2();
+                                } else {
+                                    onClose();
+                                }
                                 setCurrentSortLabel?.(null)
 
                                 navigate("/explore", {
@@ -113,7 +126,7 @@ export default function SearchModal({ onClose, from, query, setQuery, setCurrent
                         <div
                             key={gym.id}
                             onClick={() => {
-                                setCurrentSortLabel?.(null)
+                                // setCurrentSortLabel?.(null)
                                 handleGymClick(gym)
                             }}
                             className="py-3 border-b cursor-pointer flex items-center justify-between"

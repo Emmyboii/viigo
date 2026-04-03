@@ -295,6 +295,7 @@ const Bookings = () => {
                                         key={index}
                                         onClick={() => {
                                             if (gym.status === "CANCELLED") return;
+                                            if (gym.status === "COMPLETED") return;
 
                                             openBookingModal(gym);
                                             localStorage.setItem("selectedBookingId", String(gym.id));

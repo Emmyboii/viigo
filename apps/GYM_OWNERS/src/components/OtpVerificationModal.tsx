@@ -1,5 +1,5 @@
 import { FaCheckCircle, FaTimesCircle, FaUserCircle } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 import { FaUser, FaRegClock } from "react-icons/fa6";
 import { HiMiniCurrencyRupee } from 'react-icons/hi2';
 import { HiOutlineCalendar } from 'react-icons/hi';
@@ -22,7 +22,7 @@ export default function OtpVerificationModal({ user, onClose }: OtpVerificationM
 
     const shareRef = useRef<HTMLDivElement>(null);
 
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
     const [priceBreakdownOpen, setPriceBreakdownOpen] = useState(false);
 
     const handleShare = async () => {
@@ -268,8 +268,8 @@ export default function OtpVerificationModal({ user, onClose }: OtpVerificationM
                                     <div className="space-y-1">
                                         <p className="text-[#0F172A] font-semibold">Session Completed</p>
                                         <p className="text-[#0F172A] text-sm"><HiOutlineCalendar className="inline mr-1" /> {user.display_date}</p>
-                                        <p className="text-[#0F172A] text-sm"><FaRegClock className='inline mr-1' /> Start Time: <span className='font-semibold'> 10 AM</span></p>
-                                        <p className="text-[#0F172A] text-sm"><FaRegClock className='inline mr-1' /> End Time: <span className='font-semibold'> 12 PM</span></p>
+                                        <p className="text-[#0F172A] text-sm"><FaRegClock className='inline mr-1' /> Start Time: <span className='font-semibold'> {user.start_time}</span></p>
+                                        <p className="text-[#0F172A] text-sm"><FaRegClock className='inline mr-1' /> End Time: <span className='font-semibold'> {user.end_time}</span></p>
                                     </div>
 
                                     <div className="border border-[#F2F2F2] border-dotted"></div>
@@ -285,8 +285,8 @@ export default function OtpVerificationModal({ user, onClose }: OtpVerificationM
                                     <div className="space-y-1">
                                         <p className="text-[#0F172A] font-semibold">Session Active</p>
                                         <p className="text-[#0F172A] text-sm"><HiOutlineCalendar className="inline mr-1" /> {user.display_date}</p>
-                                        <p className="text-[#0F172A] text-sm"><FaRegClock className='inline mr-1' /> Start Time: <span className='font-semibold'> 10 AM</span></p>
-                                        <p className="text-[#0F172A] text-sm"><FaRegClock className='inline mr-1' /> End Time: <span className='font-semibold'> 12 PM</span></p>
+                                        <p className="text-[#0F172A] text-sm"><FaRegClock className='inline mr-1' /> Start Time: <span className='font-semibold'> {user.start_time}</span></p>
+                                        <p className="text-[#0F172A] text-sm"><FaRegClock className='inline mr-1' /> End Time: <span className='font-semibold'> {user.end_time}</span></p>
                                     </div>
 
 
@@ -330,7 +330,7 @@ export default function OtpVerificationModal({ user, onClose }: OtpVerificationM
 
                         <button onClick={() => {
                             onClose();
-                            navigate('/')
+                            // navigate('/')
                         }}
                             className="bg-[#2563EB] text-white py-3 text-sm rounded-md min-w-[140px] mk:hidden"
                         >
@@ -360,7 +360,7 @@ export default function OtpVerificationModal({ user, onClose }: OtpVerificationM
                     {user?.status === "CANCELLED" && (
                         <div className="flex items-center justify-between text-nowrap">
                             <p className="text-sm font-medium text-[#6A6A6A]">Amount Paid</p>
-                            <p className="text-sm font-medium text-[#0F172A]">Rs. 420</p>
+                            <p className="text-sm font-medium text-[#0F172A]">Rs. 410</p>
                         </div>
                     )}
 
@@ -375,7 +375,7 @@ export default function OtpVerificationModal({ user, onClose }: OtpVerificationM
                     ) : (
                         <div className="flex items-center justify-between text-nowrap">
                             <p className="text-sm font-medium text-[#6A6A6A]">Total</p>
-                            <p className="text-sm font-medium text-[#0F172A]">Rs. 420</p>
+                            <p className="text-sm font-medium text-[#0F172A]">Rs. 410</p>
                         </div>
                     )}
                 </div>

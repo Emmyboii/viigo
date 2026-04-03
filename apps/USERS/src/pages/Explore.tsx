@@ -41,12 +41,12 @@ export default function Explore() {
         window.history.pushState({ modal: type }, "");
     };
 
-    const closeModal = (type: ModalType) => {
+    const closeModal = (type: ModalType, skipHistory = false) => {
         if (type === "search") setShowSearch(false);
         if (type === "filter") setShowFilter(false);
         if (type === "sort") setShowSortModal(false);
 
-        if (window.history.state?.modal === type) {
+        if (!skipHistory && window.history.state?.modal === type) {
             window.history.back();
         }
     };
@@ -82,8 +82,12 @@ export default function Explore() {
 
     useEffect(() => {
         if (!location.pathname.startsWith("/explore")) {
-            // user left /explore
             setView("map");
+            setShowSearch(false);
+            setShowFilter(false);
+            setShowSortModal(false);
+            setActiveId("");
+            setQuery("");
         }
     }, [location.pathname]);
 
@@ -437,7 +441,8 @@ export default function Explore() {
             {/* SEARCH MODAL */}
             {showSearch && (
                 <SearchModal
-                    onClose={() => closeModal("search")}
+                    onClose={() => closeModal("search", true)}
+                    onClose2={() => setShowSearch(false)}
                     from={location.state?.from}
                     setQuery={setQuery}
                     query={query}
@@ -458,14 +463,18 @@ export default function Explore() {
                 <SortModal
                     onClose={() => closeModal("sort")}
                     onSelect={(value, label) => {
-                        closeModal("sort");
+                        // 1️⃣ Update state immediately
+                        setCurrentSort(value);
+                        setCurrentSortLabel(label);
 
-                        navigate("/explore", {
-                            state: {
-                                sort: value,
-                                sortLabel: label,
-                            },
-                        });
+                        // 2️⃣ Fetch sorted gyms immediately
+                        fetchSortedGyms(value, label);
+
+                        // 3️⃣ Persist for reloads
+                        localStorage.setItem("gymSort", JSON.stringify({ sort: value, sortLabel: label }));
+
+                        // 4️⃣ Close the modal
+                        closeModal("sort");
                     }}
 
                     currentSort={currentSort} />

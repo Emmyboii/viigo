@@ -26,12 +26,19 @@ export default function Countdown({ initialText }: CountdownProps) {
 
   // Format as HH:MM for display
   const formatTime = (totalSeconds: number) => {
-    const totalMinutes = Math.ceil(totalSeconds / 60); // round up to next minute
+    const totalMinutes = Math.ceil(totalSeconds / 60);
     const hrs = Math.floor(totalMinutes / 60);
     const mins = totalMinutes % 60;
-    return `${hrs.toString().padStart(2, "0")}:${mins
-      .toString()
-      .padStart(2, "0")} min`;
+
+    // If there are hours → show "1hr : 30 mins"
+    if (hrs > 0) {
+      return `${hrs}hr${hrs > 1 ? "s" : ""} : ${mins
+        .toString()
+        .padStart(2, "0")} mins`;
+    }
+
+    // If no hours → show "00:30 mins"
+    return `${mins.toString().padStart(2, "0")} mins`;
   };
 
   return <span>{formatTime(secondsLeft)}</span>;

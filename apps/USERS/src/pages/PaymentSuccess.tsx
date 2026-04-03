@@ -91,14 +91,51 @@ export default function PaymentSuccess({ onClose }: PaymentSuccessProps) {
     };
 
     useEffect(() => {
-        const fetchPass = async () => {
-            if (!booking?.id) return;
-
+        const fetchData = async () => {
             setLoading(true);
 
             try {
-                const res = await fetch(
-                    `${backendUrl}/client/booking/${booking.id}/pass/`,
+                // 1️⃣ Fetch bookings FIRST
+                const bookingsRes = await fetch(
+                    `${backendUrl}/client/bookings/my-bookings/`,
+                    {
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: localStorage.getItem("token")
+                                ? `Bearer ${localStorage.getItem("token")}`
+                                : "",
+                        },
+                    }
+                );
+
+                // const bookingsData = await bookingsRes.json();
+                // const firstBooking = bookingsData.data?.[0];
+
+                // if (!firstBooking) {
+                //     setBooking(null);
+                //     setPass(null);
+                //     return;
+                // }
+
+                // setBooking(firstBooking);
+
+                const bookingsData = await bookingsRes.json();
+
+                const bookingsArray = bookingsData.data ?? [];
+                const lastBooking = bookingsArray.at(-1);
+
+                if (!lastBooking) {
+                    setBooking(null);
+                    setPass(null);
+                    return;
+                }
+
+                setBooking(lastBooking);
+                localStorage.setItem("selectedBookingId", String(lastBooking.id));
+
+                // 2️⃣ THEN fetch pass using the booking ID
+                const passRes = await fetch(
+                    `${backendUrl}/client/booking/${lastBooking.id}/pass/`,
                     {
                         headers: {
                             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -106,47 +143,18 @@ export default function PaymentSuccess({ onClose }: PaymentSuccessProps) {
                     }
                 );
 
-                const data = await res.json();
-                setPass(data.data);
+                const passData = await passRes.json();
+                setPass(passData.data);
+
             } catch (err) {
-                console.error("Error fetching booking pass", err);
+                console.error("Error fetching data", err);
                 setPass(null);
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchPass();
-    }, [booking?.id]);
-
-    useEffect(() => {
-        const fetchBookings = async () => {
-            setLoading(true);
-            try {
-                const res = await fetch(`${backendUrl}/client/bookings/my-bookings/`, {
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: localStorage.getItem("token")
-                            ? `Bearer ${localStorage.getItem("token")}`
-                            : "",
-                    },
-                });
-                const data = await res.json();
-
-                const firstBooking = data.data[0];
-
-                localStorage.setItem("selectedBookingId", String(firstBooking.id));
-
-                setBooking(firstBooking);
-
-            } catch (err) {
-                console.log(err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchBookings();
+        fetchData();
     }, []);
 
     // const handlePhoneClick = () => {
@@ -294,7 +302,7 @@ export default function PaymentSuccess({ onClose }: PaymentSuccessProps) {
                             Gym timings : <span>{pass.gym_timings} </span>
                         </div>
 
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center justify-center gap-2">
                             <img src={three} alt="Three" className="mt-1 w-6" />
                             <div>
                                 <div className="flex gap-2 flex-wrap">
@@ -367,7 +375,7 @@ export default function PaymentSuccess({ onClose }: PaymentSuccessProps) {
             </div>
 
             {/* Bottom Buttons */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white p-4 border-t border-[#F1F5F9] flex gap-4 items-center justify-center">
+            <div className="fixed bottom-0 left-0 right-0 bg-white p-4 border-t border-[#F1F5F9] flex gap-4 items-center justify-between">
                 <button onClick={() => {
                     onClose();
                     navigate('/')
@@ -383,7 +391,7 @@ export default function PaymentSuccess({ onClose }: PaymentSuccessProps) {
                     navigate('/bookings')
                     localStorage.removeItem("selectedBookingId");
                 }}
-                    className="bg-blue-600 text-white py-3 rounded-md w-[209px]"
+                    className="bg-blue-600 text-white py-3 rounded-md w-[200px]"
                 >
                     View Bookings
                 </button>

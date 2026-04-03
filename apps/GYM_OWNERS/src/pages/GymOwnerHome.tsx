@@ -58,6 +58,7 @@ const GymOwnerHome = () => {
   });
 
   const [otp, setOtp] = useState("");
+  const [checked, setChecked] = useState(false);
   const [status, setStatus] = useState<Status>("idle");
   const [toast, setToast] = useState<{ type: ToastType; message: string } | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -145,8 +146,8 @@ const GymOwnerHome = () => {
       setToast({ type: "success", message: "Check-in successful!" });
 
       // 👉 If API returns booking/user, use it
-      if (data?.data?.id) {
-        const bookingId = data.data.id;
+      if (data?.data?.user_id) {
+        const bookingId = data.data.user_id;
 
         const matchedBooking = bookings.find(
           (b) => b.id === bookingId
@@ -164,6 +165,7 @@ const GymOwnerHome = () => {
 
       // Scroll to top
       window.scrollTo(0, 0);
+      setChecked(true);
 
     } catch (err: unknown) {
       console.error(err);
@@ -187,6 +189,10 @@ const GymOwnerHome = () => {
     localStorage.removeItem("paymentSuccess");
     closeModal("success");
     closeModal("user");
+
+    if (checked) {
+      window.location.reload();
+    }
   };
 
   /* ---------------- Toast Close ---------------- */
@@ -241,7 +247,7 @@ const GymOwnerHome = () => {
   return (
     <>
       {/* {!selectedUser && ( */}
-      <div className={`min-h-screen py-4 relative max-w-[1900px] mx-auto ${!selectedUser && "mk:block"}`}>
+      <div className={`min-h-screen py-4 relative mk:max-w-[1900px] w-screen mk:w-full mk:mx-auto ${!selectedUser && "mk:block"}`}>
         <Header />
 
         {toast && <Toast type={toast.type} text={toast.message} onClose={handleToastClose} />}
@@ -354,7 +360,10 @@ const GymOwnerHome = () => {
 
             <OtpVerificationModal
               user={selectedUser}
-              onClose={() => closeModal("user")}
+              onClose={() => {
+                closeModal("user")
+                window.location.reload()
+              }}
             />
           </motion.div>
         )}

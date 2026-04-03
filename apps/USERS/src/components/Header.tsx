@@ -1,5 +1,5 @@
 import { HiLocationMarker, HiOutlineBell } from "react-icons/hi"
-import { IoChevronDown } from "react-icons/io5";
+// import { IoChevronDown } from "react-icons/io5";
 import { useNavigate } from "react-router";
 import { useAppContext } from "../context/AppContext";
 
@@ -19,7 +19,7 @@ export default function Header() {
                     <div className="font-medium text-sm">{city.trim()}</div>
                     <div className="text-sm font-medium">{state.trim()}</div>
                 </div>
-                <IoChevronDown className="text-[#475569]" />
+                {/* <IoChevronDown className="text-[#475569]" /> */}
             </div>
 
             <div className="relative">

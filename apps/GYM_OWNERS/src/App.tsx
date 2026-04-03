@@ -19,6 +19,7 @@ import { useAppContext } from "./context/AppContext";
 import OnboardingGuard from "./components/OnboardingGuard";
 import EditWallet from "./pages/EditWallet";
 import AppLayout from "./components/AppLayout";
+import WalletGuard from "./components/WalletGuard";
 
 function App() {
 
@@ -128,9 +129,11 @@ function App() {
             element={
               <ProtectedRoute>
                 <OnboardingGuard>
-                  <AppLayout>
-                    <Transactions />
-                  </AppLayout>
+                  <WalletGuard>
+                    <AppLayout>
+                      <Transactions />
+                    </AppLayout>
+                  </WalletGuard>
                 </OnboardingGuard>
               </ProtectedRoute>
             }

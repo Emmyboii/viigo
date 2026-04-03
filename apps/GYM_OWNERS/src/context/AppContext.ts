@@ -26,6 +26,7 @@ export interface GymType {
     hourly_rate: string;
     phone_number: string;
     location: string;
+    gender_preference: "EVERYONE" | "WOMEN_ONLY" | "MEN_ONLY"
     address_line_1: string,
     distance: string;
     area: string,
@@ -66,6 +67,8 @@ export type Booking = {
     display_status: string;
     duration_text: string;
     contextual_text: string;
+    start_time: string;
+    end_time: string;
     total_amount: string;
     formatted_amount: string;
     display_date: string;

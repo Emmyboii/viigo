@@ -48,6 +48,7 @@ interface GymType {
     location: string;
     distance: string;
     address_line_1: string,
+    gender_preference: "EVERYONE" | "WOMEN_ONLY" | "MEN_ONLY",
     area: string,
     city: string,
     state: string,
@@ -104,7 +105,7 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
     const [toast, setToast] = useState<{ type: ToastType; message: string } | null>(null);
 
     const [gymName, setGymName] = useState(gym?.name || "");
-    const [bookingFor, setBookingFor] = useState<"everyone" | "women">("everyone");
+    const [bookingFor, setBookingFor] = useState(gym?.gender_preference);
     const [price, setPrice] = useState(gym?.hourly_rate || "");
     const [phone, setPhone] = useState(gym?.phone_number || "+91 ");
     const [location, setLocation] = useState(gym?.location || "");
@@ -265,6 +266,7 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
 
         const formatted = JSON.stringify({
             name: gym?.name,
+            gender_preference: gym?.gender_preference,
             price: gym?.hourly_rate,
             phone: gym?.phone_number,
             location: gym?.location,
@@ -283,6 +285,7 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
     const currentData = useMemo(() => {
         return JSON.stringify({
             name: gymName,
+            gender_preference: bookingFor,
             price,
             phone,
             location,
@@ -296,6 +299,7 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
         });
     }, [
         gymName,
+        bookingFor,
         price,
         phone,
         location,
@@ -389,6 +393,7 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
         try {
             const formData = new FormData();
             formData.append("name", gymName);
+            formData.append("gender_preference", bookingFor);
             formData.append("hourly_rate", price);
             formData.append("phone_number", phone);
             formData.append("location", location);
@@ -460,13 +465,6 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
             setGym(newGym);
 
 
-            setTimeout(() => {
-                setDisplay("details");
-                localStorage.setItem("gymDisplay", "details");
-                if (window.history.state?.display === "edit") {
-                    window.history.back();
-                }
-            }, 1500);
 
             const message =
                 display === "edit"
@@ -475,8 +473,12 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
             setToast({ type: "success", message });
 
             setTimeout(() => {
-                window.location.reload()
-            }, 1000);
+                setDisplay("details");
+                localStorage.setItem("gymDisplay", "details");
+                if (window.history.state?.display === "edit") {
+                    window.history.back();
+                }
+            }, 1500);
 
             window.scrollTo(0, 0)
         } catch (err) {
@@ -522,6 +524,7 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
 
 
     const isFormValid =
+        bookingFor &&
         gymName.trim() &&
         price.trim() &&
         phone.replace("+91 ", "").length === 10 &&
@@ -536,7 +539,7 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
         eveningPeak.every((p) => isEveningValid(p, endTime));
 
     return (
-        <div className="min-h-screen pb-32 mk:bg-[#CBD5E1] max-w-[1900px] mx-auto">
+        <div className="min-h-screen pb-32 mk:bg-[#CBD5E1] max-w-[1900px] mk:mx-auto w-screen mk:w-full">
             {/* Header */}
             <div className="flex items-center justify-between mk:p-4 bg-white">
                 <div className="flex items-center gap-3 p-4 bg-white cursor-pointer">
@@ -616,10 +619,10 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
                                         <input
                                             type="radio"
                                             name="bookingFor"
-                                            value="everyone"
-                                            checked={bookingFor === "everyone"}
-                                            onChange={() => setBookingFor("everyone")}
-                                            className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                                            value="EVERYONE"
+                                            checked={bookingFor === "EVERYONE"}
+                                            onChange={() => setBookingFor("EVERYONE")}
+                                            className="w-4 h-4 accent-blue-600 border-gray-300 focus:ring-blue-500"
                                         />
                                         <span className="ml-2 text-sm text-[#0F172A]">Everyone</span>
                                     </label>
@@ -627,10 +630,10 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
                                         <input
                                             type="radio"
                                             name="bookingFor"
-                                            value="women"
-                                            checked={bookingFor === "women"}
-                                            onChange={() => setBookingFor("women")}
-                                            className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                                            value="WOMEN_ONLY"
+                                            checked={bookingFor === "WOMEN_ONLY"}
+                                            onChange={() => setBookingFor("WOMEN_ONLY")}
+                                            className="w-4 h-4 accent-blue-600 border-gray-300 focus:ring-blue-500"
                                         />
                                         <span className="ml-2 text-sm text-[#0F172A]">Women Only</span>
                                     </label>

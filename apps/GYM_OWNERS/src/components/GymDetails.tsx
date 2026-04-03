@@ -40,6 +40,7 @@ interface GymType {
     hourly_rate: string;
     phone_number: string;
     location: string;
+    gender_preference: "EVERYONE" | "WOMEN_ONLY" | "MEN_ONLY"
     distance: string;
     address_line_1: string,
     area: string,

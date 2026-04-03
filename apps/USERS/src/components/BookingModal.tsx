@@ -184,6 +184,10 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
             case "PENDING":
                 return <MdPending className="text-yellow-500 text-[65px]" />;
             case "CONFIRMED":
+                return <MdPending className="text-yellow-500 text-[65px]" />;
+                case "ACTIVE":
+                return <FaCheckCircle className="text-green-500 text-[65px]" />;
+                case "COMPLETED":
                 return <FaCheckCircle className="text-green-500 text-[65px]" />;
             case "CANCELLED":
                 return <FaTimesCircle className="text-red-500 text-[65px]" />;
@@ -223,8 +227,8 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
 
                 <div className="relative bg-gradient-to-b from-blue-600 to-blue-500 text-white rounded-2xl p-4 shadow-xl">
 
-                    <img src={halfCircle} alt="Half Circle" className="absolute bottom-[200px] left-[-13px] w-[48px] h-[55px]" />
-                    <img src={halfCircle} alt="Half Circle" className="absolute bottom-[200px] right-[-13px] rotate-180 w-[48px] h-[55px]" />
+                    <img src={halfCircle} alt="Half Circle" className="absolute bottom-[155px] left-[-13px] w-[48px] h-[55px]" />
+                    <img src={halfCircle} alt="Half Circle" className="absolute bottom-[155px] right-[-13px] rotate-180 w-[48px] h-[55px]" />
 
                     {/* Gym Header */}
                     <div className="flex gap-3">
@@ -308,7 +312,7 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
                             Gym timings : <span>{pass.gym_timings} </span>
                         </div>
 
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center justify-center gap-2">
                             <img src={three} alt="Three" className="mt-1 w-6" />
                             <div>
                                 <div className="flex gap-2 flex-wrap">
@@ -381,9 +385,9 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
             </div>
 
             {/* Bottom Buttons */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white p-4 border-t border-[#F1F5F9] flex gap-4 items-center justify-center">
+            <div className="fixed bottom-0 left-0 right-0 bg-white p-4 border-t border-[#F1F5F9] flex gap-4 items-center justify-between">
                 <button onClick={() => {
-                    onClose();
+                    // onClose();
                     navigate('/')
                     localStorage.removeItem("selectedBookingId");
                 }}
@@ -397,7 +401,7 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
                     navigate('/bookings')
                     localStorage.removeItem("selectedBookingId");
                 }}
-                    className="bg-blue-600 text-white py-3 rounded-md w-[209px]"
+                    className="bg-blue-600 text-white py-3 rounded-md w-[200px]"
                 >
                     View Bookings
                 </button>
