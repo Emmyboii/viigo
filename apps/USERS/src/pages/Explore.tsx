@@ -81,14 +81,24 @@ export default function Explore() {
 
 
     useEffect(() => {
-        if (!location.pathname.startsWith("/explore")) {
+        const unlisten = () => {
             setView("map");
             setShowSearch(false);
             setShowFilter(false);
             setShowSortModal(false);
             setActiveId("");
             setQuery("");
+        };
+
+        // If user is not on explore, reset
+        if (!location.pathname.startsWith("/explore")) {
+            unlisten();
         }
+
+        return () => {
+            // Clean up if component unmounts
+            unlisten();
+        };
     }, [location.pathname]);
 
     useEffect(() => {

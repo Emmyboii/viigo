@@ -20,6 +20,7 @@ interface GymType {
     distance: string;
     location: string;
     address_line_1: string,
+    gender_preference: "EVERYONE" | "WOMEN_ONLY" | "MEN_ONLY"
     area: string,
     city: string,
     state: string,
