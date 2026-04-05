@@ -6,7 +6,6 @@ import type { Gym } from "../components/types/gym";
 import { HiLocationMarker } from "react-icons/hi";
 import { FriendsModal } from "../components/FriendsModal";
 import { IoArrowBack } from "react-icons/io5";
-import { FaCheckCircle } from "react-icons/fa";
 import red from '../assets/red_peak.png'
 import check from '../assets/circle_check.png'
 import { GoDotFill } from "react-icons/go";
