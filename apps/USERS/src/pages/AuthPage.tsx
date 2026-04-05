@@ -16,7 +16,7 @@ declare global {
 }
 
 const slides = [
-  { text: <>Workout on your time</>, size: "text-6xl" },
+  { text: <>Workout on your Hour</>, size: "text-6xl" },
   {
     text: (
       <>
@@ -234,7 +234,7 @@ const AuthPage = () => {
 
   return (
     <div className="bg-[#2563EB] overflow-x-hidden">
-      <div className="relative h-[50vh] bg-[#2563EB] text-white overflow-hidden">
+      <div className="relative h-[50vh] bg-[#2563EB] max-w-[1300px] mx-auto text-white overflow-hidden">
         {/* Slides */}
         <div ref={emblaRef} className="h-full">
           <div className="flex h-full">
@@ -243,7 +243,7 @@ const AuthPage = () => {
                 key={index}
                 className="flex-[0_0_100%] flex items-center justify-center px-6 text-center"
               >
-                <p className={`${slide.size} font-extrabold font-sans leading-tight`}>
+                <p className={`${slide.size} font-black font-heading leading-tight`}>
                   {slide.text}
                 </p>
               </div>
@@ -268,10 +268,10 @@ const AuthPage = () => {
       <div className="bg-white rounded-t-3xl h-1/2 p-5 space-y-6">
         {toast && <Toast type={toast.type} text={toast.message} onClose={handleToastClose} />}
 
-        <p className="font-semibold text-lg">Login or signup Viigo to Book <br /> Workouts on hourly basis </p>
+        <p className="font-semibold text-lg max-w-[1300px] mx-auto">Login or signup Viigo to Book <br /> Workouts on hourly basis </p>
 
         {!useEmail ? (
-          <form onSubmit={handleContinue}>
+          <form onSubmit={handleContinue} className='max-w-[1300px] mx-auto'>
             <div className="relative">
               <input
                 type="text"
@@ -297,7 +297,7 @@ const AuthPage = () => {
             </button>
           </form>
         ) : (
-          <form onSubmit={handleContinue}>
+          <form onSubmit={handleContinue} className='max-w-[1300px] mx-auto'>
             <div className="relative">
               <input
                 type="email"

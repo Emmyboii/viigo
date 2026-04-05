@@ -51,9 +51,9 @@ const Profile = ({ user }: UserProps) => {
     };
 
     return (
-        <div className='p-4 pt-10'>
+        <div className='p-4 pt-10 max-w-[1300px] mx-auto'>
             <div className='border border-[#DBEAFE] py-3 px-4 rounded-md space-y-4'>
-                <div onClick={() => navigate('/profile/edit')} className="flex items-center justify-between">
+                <div onClick={() => navigate('/profile/edit')} className="flex cursor-pointer items-center justify-between">
                     <div className="space-y-3">
                         <div className="flex items-center gap-1">
                             <p className="text-[#0F172A] font-semibold">Profile</p>
@@ -78,11 +78,11 @@ const Profile = ({ user }: UserProps) => {
 
                 <div className='space-y-3'>
                     <p className="text-[#0F172A] font-semibold">Help</p>
-                    <div onClick={() => navigate('/faq')} className="flex items-center gap-1">
+                    <div onClick={() => navigate('/faq')} className="flex cursor-pointer items-center gap-1">
                         <FaClock size={16} />
                         <p className="text-[#0F172A] font-normal text-sm">FAQ</p>
                     </div>
-                    <div onClick={() => navigate('/support')} className="flex items-center gap-1">
+                    <div onClick={() => navigate('/support')} className="flex cursor-pointer items-center gap-1">
                         <FaClock size={16} />
                         <p className="text-[#0F172A] font-normal text-sm">Support</p>
                     </div>

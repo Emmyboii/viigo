@@ -256,7 +256,7 @@ export default function CancelBooking() {
     }
 
     return (
-        <div className="min-h-screen p-4 max-w-md mx-auto relative">
+        <div className="min-h-screen p-4 max-w-[1300px] mx-auto relative">
             {/* Header */}
             <div className="flex items-center gap-3 mb-4">
                 <FiArrowLeft onClick={() => navigate(-1)} className="text-xl cursor-pointer" />
@@ -381,7 +381,7 @@ export default function CancelBooking() {
 
             {/* Bottom */}
             <div className="fixed bottom-0 left-0 w-full bg-white p-4 border-t border-[#F1F5F9]">
-                <div className="max-w-md mx-auto flex items-center justify-center gap-4">
+                <div className="max-w-[1300px] mx-auto flex items-center justify-between gap-4">
                     <button onClick={() => navigate(-1)} className="text-[#2563EB] text-sm font-semibold">
                         Don’t Cancel
                     </button>

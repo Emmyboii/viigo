@@ -1,12 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
-import { FaUser } from "react-icons/fa6";
+import { FaRegClock, FaUser } from "react-icons/fa6";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useAppContext, type GymCard } from "../context/AppContext";
 import type { Gym } from "../components/types/gym";
 import { HiLocationMarker } from "react-icons/hi";
 import { FriendsModal } from "../components/FriendsModal";
 import { IoArrowBack } from "react-icons/io5";
-import { FiUsers } from "react-icons/fi";
+import { FaCheckCircle } from "react-icons/fa";
+import red from '../assets/red_peak.png'
+import check from '../assets/circle_check.png'
+import { GoDotFill } from "react-icons/go";
+import { CiCircleInfo } from "react-icons/ci";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -294,25 +298,25 @@ const PlanYourWorkout = () => {
         window.scrollTo(0, 0);
     };
 
-    function normalizePeak(p: [string, string] | { start: string, end: string } | any): [string, string] {
-        if (Array.isArray(p) && p.length === 2) return [p[0], p[1]];
-        if (p?.start && p?.end) return [p.start, p.end];
-        return ["00:00", "00:00"];
-    }
+    // function normalizePeak(p: [string, string] | { start: string, end: string } | any): [string, string] {
+    //     if (Array.isArray(p) && p.length === 2) return [p[0], p[1]];
+    //     if (p?.start && p?.end) return [p.start, p.end];
+    //     return ["00:00", "00:00"];
+    // }
 
     // Ensure peak_morning and peak_evening are arrays
-    const morningPeaks = Array.isArray(gym?.peak_morning)
-        ? gym.peak_morning
-        : gym?.peak_morning ? [gym.peak_morning] : [];
+    // const morningPeaks = Array.isArray(gym?.peak_morning)
+    //     ? gym.peak_morning
+    //     : gym?.peak_morning ? [gym.peak_morning] : [];
 
-    const eveningPeaks = Array.isArray(gym?.peak_evening)
-        ? gym.peak_evening
-        : gym?.peak_evening ? [gym.peak_evening] : [];
+    // const eveningPeaks = Array.isArray(gym?.peak_evening)
+    //     ? gym.peak_evening
+    //     : gym?.peak_evening ? [gym.peak_evening] : [];
 
-    const allPeaks: [string, string][] = [
-        ...morningPeaks.map(normalizePeak),
-        ...eveningPeaks.map(normalizePeak),
-    ];
+    // const allPeaks: [string, string][] = [
+    //     ...morningPeaks.map(normalizePeak),
+    //     ...eveningPeaks.map(normalizePeak),
+    // ];
 
     if (loading) {
         return (
@@ -331,11 +335,11 @@ const PlanYourWorkout = () => {
     }
 
     return (
-        <div className="pb-40 min-h-screen px-5">
+        <div className="pb-40 min-h-screen px-5 max-w-[1300px] mx-auto">
 
             {/* ===== Header ===== */}
 
-            <div className="fixed top-0 left-0 right-0 z-40 bg-white flex items-center justify-between px-4 py-3" >
+            <div className="fixed max-w-[1300px] mx-auto top-0 left-0 right-0 z-40 bg-white flex items-center justify-between px-4 py-3" >
 
                 <div className='flex items-center gap-2'>
                     <button
@@ -450,7 +454,7 @@ const PlanYourWorkout = () => {
             {/* Hours Selection */}
             <div className="mt-6">
                 <h4 className="font-semibold mb-3">
-                    How many hours do you want to workout
+                    How long do you want to work out?
                 </h4>
 
                 <div className="flex flex-wrap gap-2">
@@ -489,7 +493,7 @@ const PlanYourWorkout = () => {
                 )}
             </div>
 
-            <div className="mt-6 bg-[#F1F5F9] border border-[#DBEAFE] py-2.5 px-[17px] rounded-lg space-y-3 text-sm">
+            {/* <div className="mt-6 bg-[#F1F5F9] border border-[#DBEAFE] py-2.5 px-[17px] rounded-lg space-y-3 text-sm">
 
                 <div className="flex items-start gap-2 text-gray-600">
                     <FiUsers size={16} className="mt-1" />
@@ -511,10 +515,58 @@ const PlanYourWorkout = () => {
                         </p>
                     </div>
                 </div>
+            </div> */}
+
+            <div className="mt-6">
+                <h4 className="font-semibold mb-3">
+                    Recommended workout timings
+                </h4>
+
+                <div className={`px-4 py-4 space-y-4 rounded-lg text-sm border transition border-[#DBEAFE] text-[#0F172A]`}>
+                    <div className="flex items-center gap-2">
+                        <img src={check} alt="Red Peak" width={35} />
+                        <div className="space-y-2">
+                            <p className="text-sm text-[#0F7D37]">Less crowded hours</p>
+                            <span className="text-xs text-[#0F172A]">{gym?.recommended_workout_timings?.less_crowded_hours}</span>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        <img src={red} alt="Red Peak" width={35} />
+                        <div className="space-y-2">
+                            <p className="text-sm text-[#D32F2F]">Peak hours</p>
+                            <span className="text-xs text-[#0F172A] flex items-center">Morning <GoDotFill className="text-[#CBD5E1]" /> {gym?.recommended_workout_timings?.peak_hours.morning}</span>
+                            <span className="text-xs text-[#0F172A] flex items-center">Evening <GoDotFill className="text-[#CBD5E1]" /> {gym?.recommended_workout_timings?.peak_hours.evening}</span>
+                        </div>
+                    </div>
+
+
+                    <div className="space-y-1">
+                        <div className="border border-[#CBD5E1] border-dotted"></div>
+
+                        <p className="text-[11px] text-[#475569] pt-1 flex items-center gap-1"><CiCircleInfo /> Workouts during peak hours may use more minutes</p>
+                        <p className="text-[11px] text-[#475569] flex items-center gap-1"><CiCircleInfo /> Based on gym input • Crowd may vary</p>
+                    </div>
+                </div>
+            </div>
+
+            <div className="mt-6 mb-10">
+                <h4 className="font-semibold mb-3">
+                    Flexible Entry
+                </h4>
+
+                <div className={`px-4 py-4 flex items-center gap-3 rounded-lg text-sm border transition border-[#DBEAFE] text-[#0F172A]`}>
+                    <FaRegClock className="text-[30px] text-[#93C5FD]" />
+
+                    <div className="space-y-0.5">
+                        <p className="text-sm font-semibold text-[#262A33]">No Fixed Slot</p>
+                        <p className="text-sm font-medium text-[#262A33]">Come Anytime</p>
+                    </div>
+                </div>
             </div>
 
             {/* ===== Sticky Bottom Pay Bar ===== */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white">
+            <div className="fixed max-w-[1300px] mx-auto bottom-0 left-0 right-0 bg-white">
                 <div className="bg-blue-50 text-blue-700 text-sm px-4 py-3 font-medium text-center">
                     Last entry for selected duration: {lastEntryTime}
                 </div>

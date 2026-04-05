@@ -30,6 +30,8 @@ export default {
         anton: ['Anton', 'sans-serif'],
         manrope: ['Manrope', 'sans-serif'],
         redhat: ["'Red Hat Text'", "sans-serif"],
+        monument: ['"Bebas Neue"', 'sans-serif'],
+        display: ['"Syne"', 'sans-serif'],
       },
     },
   },

@@ -194,7 +194,7 @@ export default function FAQ() {
     }
 
     return (
-        <div className="min-h-screen py-6">
+        <div className="min-h-screen py-6 max-w-[1300px] mx-auto">
             {/* Header */}
             <div className="flex items-center justify-between px-4">
                 <div className="flex items-center gap-3">
@@ -210,12 +210,12 @@ export default function FAQ() {
 
             <div id="share-area" className="min-h-screen bg-white px-4 pt-4">
 
-                <p className="text-sm text-[#0F172A] text-nowrap mb-4">
+                <p className="text-sm text-[#0F172A] md:text-center text-nowrap mb-4">
                     Please find common FAQ’s here
                 </p>
 
                 {/* Category Tabs */}
-                <div className="flex gap-3 overflow-x-auto no-scrollbar mb-6">
+                <div className="flex gap-3 overflow-x-auto no-scrollbar md:justify-center mb-6">
                     {(Object.keys(categoryLabels) as Category[]).map((category) => (
                         <button
                             key={category}

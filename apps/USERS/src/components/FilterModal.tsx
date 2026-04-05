@@ -104,7 +104,7 @@ export default function FilterModal({ filters, from, onClose, onApply }: Props) 
         amenitiesSelected.length;
 
     return (
-        <div className="fixed inset-0 z-[100] bg-gray-50"
+        <div className="fixed inset-0 z-[100] bg-gray-50 max-w-[1300px] mx-auto"
             onClick={onClose}
         >
             <div
@@ -229,7 +229,7 @@ export default function FilterModal({ filters, from, onClose, onApply }: Props) 
                 </div>
 
                 {/* Bottom Section */}
-                <div className="fixed bottom-0 left-0 right-0 bg-white px-4 pt-3 pb-3 border-t">
+                <div className="fixed max-w-[1300px] mx-auto bottom-0 left-0 right-0 bg-white px-4 pt-3 pb-3 border-t">
                     <p className="text-center text-sm text-gray-500 mb-3">
                         {filtersApplied} Filters applied
                     </p>

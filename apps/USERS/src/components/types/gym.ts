@@ -14,6 +14,14 @@ export interface Image {
     image: string;
 }
 
+export interface RecommendedWorkoutTimings {
+    less_crowded_hours: string;
+    peak_hours: {
+        morning: string;
+        evening: string;
+    };
+}
+
 export interface Gym {
     id: number;
     name: string;
@@ -27,6 +35,7 @@ export interface Gym {
     state: string,
     postal_code: string,
     latitude: string;
+    recommended_workout_timings?: RecommendedWorkoutTimings;
     longitude: string;
     open_time: string;
     close_time: string;

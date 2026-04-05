@@ -127,7 +127,7 @@ const Support = () => {
     };
 
     return (
-        <div className="py-4">
+        <div className="py-4 max-w-[1300px] mx-auto">
             <div className="flex items-center justify-between bg-white px-4">
                 <div className="flex items-center gap-2">
                     <FiArrowLeft onClick={() => navigate(-1)} size={20} />

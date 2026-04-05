@@ -562,7 +562,7 @@ Hours: ${selectedHours?.label}
     }
 
     return (
-        <div className="pb-36 min-h-screen">
+        <div className="pb-36 min-h-screen max-w-[1300px] mx-auto">
             {!showSecondSuccess && (
 
                 <div>
@@ -709,7 +709,7 @@ Hours: ${selectedHours?.label}
                         </div>
 
                         {/* ===== Sticky Bottom Pay Bar ===== */}
-                        <div id="share-bottom-bar" className="fixed bottom-0 left-0 right-0 bg-white">
+                        <div id="share-bottom-bar" className="fixed max-w-[1300px] mx-auto bottom-0 left-0 right-0 bg-white">
                             <div className="bg-[#DBEAFE] text-[#2563EB] text-sm px-4 py-3 font-medium text-center">
                                 Last entry for selected duration: {lastEntryTime}
                             </div>

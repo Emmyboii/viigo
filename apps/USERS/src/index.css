@@ -25,6 +25,17 @@
   display: block;
 }
 
+.my-container {
+  overflow: auto;
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+.my-container::-webkit-scrollbar {
+  display: none;
+  /* Chrome */
+}
+
 /* Active dot */
 .slick-dots li.slick-active button::before {
   background-color: #ffffff;
@@ -75,13 +86,13 @@
 }
 
 .no-scrollbar::-webkit-scrollbar {
-    display: none;
-    /* Chrome, Safari */
+  display: none;
+  /* Chrome, Safari */
 }
 
 .no-scrollbar {
-    -ms-overflow-style: none;
-    /* IE, Edge */
-    scrollbar-width: none;
-    /* Firefox */
+  -ms-overflow-style: none;
+  /* IE, Edge */
+  scrollbar-width: none;
+  /* Firefox */
 }

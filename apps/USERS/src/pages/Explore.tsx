@@ -352,12 +352,12 @@ export default function Explore() {
 
             {/* LIST VIEW */}
             {view === "list" && (
-                <div className="h-full overflow-y-auto pb-28">
+                <div className="h-full overflow-y-auto my-container pb-28 max-w-[1300px] mx-auto">
 
                     <div id="share-area" className="min-h-screen bg-white p-4">
 
                         {/* HEADER (OUTSIDE MAP) */}
-                        <div className="fixed top-0 left-0 right-0 z-40 bg-white flex items-center justify-between px-4 py-3">
+                        <div className="fixed max-w-[1300px] mx-auto top-0 left-0 right-0 z-40 bg-white flex items-center justify-between px-4 py-3">
                             <div className="flex items-center gap-2">
                                 <button title="back" onClick={() => {
                                     setCurrentSortLabel(null);

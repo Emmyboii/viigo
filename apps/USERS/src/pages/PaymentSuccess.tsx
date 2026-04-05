@@ -188,7 +188,7 @@ export default function PaymentSuccess({ onClose }: PaymentSuccessProps) {
     }
 
     return (
-        <div className="min-h-screen pb- overflow-x-hidden">
+        <div className="min-h-screen pb- overflow-x-hidden max-w-[400px] mx-auto">
 
             <div ref={shareRef} className="px-1 pb-5">
 
@@ -311,7 +311,7 @@ export default function PaymentSuccess({ onClose }: PaymentSuccessProps) {
                                         {pass.peak_hours}
                                     </div>
                                 </div>
-                                <p className="text-[11px] text-[#BFDBFE] text-center">
+                                <p className="text-[11px] text-[#BFDBFE] text-cente">
                                     (Workouts during peak hours may use more minutes)
                                 </p>
                             </div>
@@ -375,7 +375,7 @@ export default function PaymentSuccess({ onClose }: PaymentSuccessProps) {
             </div>
 
             {/* Bottom Buttons */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white p-4 border-t border-[#F1F5F9] flex gap-4 items-center justify-between">
+            <div className="fixed max-w-[400px] mx-auto bottom-0 left-0 right-0 bg-white p-4 border-t border-[#F1F5F9] flex gap-4 items-center justify-between">
                 <button onClick={() => {
                     onClose();
                     navigate('/')

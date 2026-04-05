@@ -346,7 +346,7 @@ export default function GymDetails() {
     const visibleRules = gym.rules.slice(0, 3);
 
     return (
-        <div className="pb-32 bg-white min-h-screen">
+        <div className="pb-32 bg-white min-h-screen max-w-[1300px] mx-auto">
 
             {/* ===== Header ===== */}
             <PageHeader text="Details" onShare={handleShare} />
@@ -479,7 +479,7 @@ export default function GymDetails() {
 
                 {/* ===== Sticky Bottom CTA ===== */}
 
-                <div id="share-bottom-bar" className="fixed bottom-14 left-0 right-0 bg-white border-t px-3 pb-6 pt-2.5 flex justify-between items-center">
+                <div id="share-bottom-bar" className="fixed max-w-[1300px] mx-auto bottom-14 left-0 right-0 bg-white border-t px-3 pb-6 pt-2.5 flex justify-between items-center">
                     <div className="space-y-2">
                         <p className="text-[11px] text-[#475569] font-medium">
                             Gym timings : {formatTime12Hour(gym.open_time)} - {formatTime12Hour(gym.close_time)}

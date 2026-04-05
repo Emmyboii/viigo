@@ -256,7 +256,7 @@ const Bookings = () => {
         <div>
 
             {!showModal && (
-                <div className="min-h-screen py-4">
+                <div className="min-h-screen py-4 max-w-[1300px] mx-auto">
 
 
                     <PageHeader text="Bookings" onShare={handleShare} />

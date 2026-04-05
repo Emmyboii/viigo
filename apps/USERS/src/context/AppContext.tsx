@@ -25,6 +25,14 @@ interface Rule {
     description: string;
 }
 
+export interface RecommendedWorkoutTimings {
+    less_crowded_hours: string;
+    peak_hours: {
+        morning: string;
+        evening: string;
+    };
+}
+
 export interface GymType {
     id: number;
     name: string;
@@ -38,6 +46,7 @@ export interface GymType {
     state: string,
     postal_code: string,
     latitude: string;
+    recommended_workout_timings?: RecommendedWorkoutTimings;
     longitude: string;
     open_time: string;
     close_time: string;
@@ -70,6 +79,7 @@ export interface GymCard {
     state: string,
     postal_code: string,
     latitude: string;
+    recommended_workout_timings?: RecommendedWorkoutTimings;
     longitude: string;
     open_time: string;
     close_time: string;
@@ -164,7 +174,7 @@ type AppContextType = {
     fetchUser: () => Promise<void>;
     fetchNotifications: () => Promise<void>;
     searchGyms: (query: string) => Promise<void>;
-    fetchGyms: () => Promise<void>;
+    fetchGyms: (lat: number, long: number) => Promise<void>;
     fetchRecommendedGyms: (lat: number, long: number) => Promise<void>;
     fetchFilteredGyms: (filters: any) => Promise<void>;
     fetchSortedGyms: (sort: string, label: string) => Promise<void>;
@@ -278,10 +288,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
-    const fetchGyms = async () => {
+    const fetchGyms = async (lat: number, long: number) => {
         setIsLoading(true);
         try {
-            const data = await request("/gymowner/gyms/all/");
+            const data = await request(`/gymowner/gyms/all/?lat=${lat}&long=${long}`);
             setGyms(data?.data || []);
         } catch (err) {
             console.error(err);
@@ -508,10 +518,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }, []);
 
     useEffect(() => {
-        if (userData) {
-            fetchGyms();
+        if (userData && latitude && longitude) {
+            fetchGyms(Number(latitude), Number(longitude));
         }
-    }, [userData]);
+    }, [userData, latitude, longitude]);
 
     useEffect(() => {
         if (userData && latitude && longitude) {

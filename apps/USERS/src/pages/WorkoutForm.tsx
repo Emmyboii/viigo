@@ -184,7 +184,7 @@ export default function WorkoutForm() {
     }
 
     return (
-        <div className="p-5 space-y-4 flex flex-col h-screen pt-5">
+        <div className="p-5 space-y-4 flex flex-col h-screen pt-5 max-w-[1300px] mx-auto">
             {/* Toast */}
             {toast && <Toast type={toast.type} text={toast.message} />}
 

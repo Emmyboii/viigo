@@ -41,7 +41,7 @@ const NearBy = () => {
 
     return (
         <Container>
-            <div className="fixed top-0 left-0 right-0 z-40 bg-white flex items-center justify-between px-4 py-3" >
+            <div className="fixed max-w-[1300px] mx-auto top-0 left-0 right-0 z-40 bg-white flex items-center justify-between px-4 py-3" >
 
                 <div className='flex items-center gap-2'>
                     <button

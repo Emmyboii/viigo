@@ -150,8 +150,8 @@ const EditProfile = () => {
         );
     }
     return (
-        <div className='p-5'>
-            <div className="fixed top-0 left-0 right-0 z-40 bg-white flex items-center px-4 py-3" >
+        <div className='p-5 max-w-[1300px] mx-auto'>
+            <div className="fixed max-w-[1300px] mx-auto top-0 left-0 right-0 z-40 bg-white flex items-center px-4 py-3" >
 
                 <button
                     onClick={() => navigate(-1)}

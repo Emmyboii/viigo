@@ -247,7 +247,7 @@ export default function OTPVerification() {
         status === "success" ? lockChecked : status === "error" ? lockWrong : lock;
 
     return (
-        <div>
+        <div className="max-w-[1300px] mx-auto">
             {/* 🔄 Center Modal */}
             {(status === "verifying" || status === "resending") && (
                 <CenterModal
@@ -262,9 +262,9 @@ export default function OTPVerification() {
                 <div className="w-full max-w-s px-6">
                     <img src={lockImage} title="img" className="mx-auto size-[120px]" />
 
-                    <h2 className="text-3xl font-bold mt-4">OTP Verification</h2>
+                    <h2 className="text-3xl font-bold md:text-center mt-4">OTP Verification</h2>
 
-                    <p className="text-base font-semibold text-[#4A4A4A] mt-2">
+                    <p className="text-base font-semibold md:text-center text-[#4A4A4A] mt-2">
                         Please enter the verification code sent to {identifierText}.
                         <span
                             className="ml-1 cursor-pointer text-[#2563EB] inline-flex items-center"
@@ -282,7 +282,7 @@ export default function OTPVerification() {
                         :{(time % 60).toString().padStart(2, "0")}
                     </div>
 
-                    <div className="flex justify-between gap-3 mt-6">
+                    <div className="flex justify-between gap-3 mt-6 max-w-[700px] mx-auto">
                         {otp.map((digit, index) => (
                             <input
                                 title="otp"
