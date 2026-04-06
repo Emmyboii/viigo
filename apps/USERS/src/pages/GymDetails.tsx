@@ -25,7 +25,7 @@ const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 export default function GymDetails() {
 
-    const { gyms } = useAppContext()
+    const { gyms, bookingConfig } = useAppContext()
 
     const navigate = useNavigate();
 
@@ -557,12 +557,12 @@ export default function GymDetails() {
 
                     <div className="flex items-center justify-between">
                         <p className="text-sm font-medium text-[#6A6A6A]">Platform Fee</p>
-                        <p className="text-sm font-medium text-[#0F172A]">Rs. 10</p>
+                        <p className="text-sm font-medium text-[#0F172A]">Rs. {bookingConfig.platform_fee}</p>
                     </div>
 
                     <div className="flex items-center justify-between">
                         <p className="text-sm font-medium text-[#6A6A6A]">Gst Fee</p>
-                        <p className="text-sm font-medium text-[#0F172A]">Rs. 1.8</p>
+                        <p className="text-sm font-medium text-[#0F172A]">Rs. {bookingConfig.gst_percentage}</p>
                     </div>
 
                     <div className="border border-dashed border-[#CBD5E1]"></div>

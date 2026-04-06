@@ -96,14 +96,14 @@ export interface NotificationType {
 
 export interface WalletTransaction {
     id: number;
-    guest_name: string;
-    amount: string;
+    customer_name: string;
+    duration_text: string;
+    transaction_reference: string;
+    formatted_amount: string;
     transaction_type: "EARNING" | "REFUND" | "WITHDRAWAL";
-    is_credit: string;
     date_formatted: string;
-    booking_hours: string;
-    transaction_id: string;
-    created_at: string;
+    time_formatted: string;
+    ui_status: string;
 }
 
 export interface WalletChartPoint {
@@ -117,16 +117,6 @@ export interface WalletDashboard {
     todays_bookings: number;
     chart_data: WalletChartPoint[];
     recent_activity: WalletTransaction[];
-}
-
-export interface WalletTransaction {
-    id: number;
-    guest_name: string;
-    amount: string;
-    transaction_type: "EARNING" | "REFUND" | "WITHDRAWAL";
-    is_credit: string;
-    date_formatted: string;
-    created_at: string;
 }
 
 export type DisplayType = "details" | "edit" | "create";

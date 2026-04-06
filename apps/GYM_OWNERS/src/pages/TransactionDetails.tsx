@@ -35,7 +35,7 @@ interface PaymentBreakdown {
 export interface WalletTransactionDetail {
     id: string;
     amount: string;
-    status: 'PENDING' | 'SETTLED' | 'FAILED';
+    status: 'PENDING' | 'COMPLETED' | 'FAILED';
     transaction_type: 'EARNING' | 'REFUND' | 'WITHDRAWAL';
     is_credit: string;
     created_at: string;
@@ -44,35 +44,6 @@ export interface WalletTransactionDetail {
     session_details: SessionDetails;
     payment_breakdown: PaymentBreakdown;
 }
-
-const dummyTransaction: WalletTransactionDetail = {
-    id: "1",
-    amount: "1500",
-    status: "SETTLED",
-    transaction_type: "EARNING",
-    is_credit: "true",
-    created_at: new Date().toISOString(),
-
-    guest_details: {
-        name: "John Doe",
-        duration: "2 hours",
-        amount_paid: "1500",
-        avatar: null,
-    },
-
-    session_details: {
-        booking_id: "BK123456",
-        date: "Mar 27, 2026",
-        start_time: "10:00 AM",
-        end_time: "12:00 PM",
-    },
-
-    payment_breakdown: {
-        base_price: "1200",
-        platform_fee: "300",
-        total_earnings: "1500",
-    },
-};
 
 const TransactionDetails = ({ id, setSelectedTransactionId }: { id: number, setSelectedTransactionId: (id: null) => void }) => {
 
@@ -165,11 +136,10 @@ const TransactionDetails = ({ id, setSelectedTransactionId }: { id: number, setS
         const fetchTransaction = async () => {
             try {
                 setFetching(true);
-                const data = await request<WalletTransactionDetail>(`/wallet/transactions/${id}/`);
-                setTransaction(data);
+                const data = await request(`/wallet/transactions/${id}/`) as { data: WalletTransactionDetail };
+                setTransaction(data?.data);
             } catch (err) {
                 console.error(err);
-                setTransaction(dummyTransaction);
             } finally {
                 setFetching(false);
             }
@@ -211,9 +181,9 @@ const TransactionDetails = ({ id, setSelectedTransactionId }: { id: number, setS
     }
 
     // Always fallback to dummy for now
-    const displayTransaction = transaction || dummyTransaction;
+    const displayTransaction = transaction;
 
-    const amountNum = parseFloat(displayTransaction.amount) || 0;
+    const amountNum = parseFloat(displayTransaction.guest_details.amount_paid) || 0;
 
     return (
         <div className={`fixed mk:flex flex-col justify-center z-50 bg-white overflow-y-auto inset-0 mk:inset-auto mk:right-0 mk:top-0 mk:min-h-screen mk:w-[480px] mk:p-5 ${window.innerWidth >= 850 ? "animate-slideRight" : "animate-slideUp"}`}>
@@ -236,7 +206,7 @@ const TransactionDetails = ({ id, setSelectedTransactionId }: { id: number, setS
                     <h1 className="text-[28px] font-bold">
                         {formatAmount(amountNum)}
                     </h1>
-                    <p className={`text-white rounded-full py-1 px-3 my-3 w-fit mx-auto text-xs ${displayTransaction.status === 'SETTLED'
+                    <p className={`text-white rounded-full py-1 px-3 my-3 w-fit mx-auto text-xs ${displayTransaction.status === 'COMPLETED'
                         ? 'bg-[#22C55E]'
                         : displayTransaction.status === 'PENDING'
                             ? 'bg-[#FACC15]'

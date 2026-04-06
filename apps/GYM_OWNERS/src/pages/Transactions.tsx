@@ -21,19 +21,19 @@ const Transactions = () => {
 
   const filters: FilterType[] = ["all", "booking", "refund"];
 
-  const formatAmount = (
-    amount: number | string,
-    type?: "EARNING" | "REFUND" | "WITHDRAWAL"
-  ) => {
-    const amt = typeof amount === "string" ? Number(amount) : amount;
+  // const formatAmount = (
+  //   amount: number | string,
+  //   type?: "EARNING" | "REFUND" | "WITHDRAWAL"
+  // ) => {
+  //   const amt = typeof amount === "string" ? Number(amount) : amount;
 
-    // Force withdrawal to always be negative
-    if (type === "WITHDRAWAL" || type === "REFUND") {
-      return `-₹${Math.abs(amt)}`;
-    }
+  //   // Force withdrawal to always be negative
+  //   if (type === "WITHDRAWAL" || type === "REFUND") {
+  //     return `-₹${Math.abs(amt)}`;
+  //   }
 
-    return `${amt > 0 ? "+" : "-"}₹${Math.abs(amt)}`;
-  };
+  //   return `${amt > 0 ? "+" : "-"}₹${Math.abs(amt)}`;
+  // };
 
   const getVisiblePages = () => {
     const pages = [];
@@ -68,7 +68,7 @@ const Transactions = () => {
 
   // Filter by search term
   const searchedTransactions = filteredTransactions.filter((t) =>
-    t.guest_name.toLowerCase().includes(searchTerm.toLowerCase())
+    t.customer_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const totalEntries = searchedTransactions.length;
@@ -226,14 +226,14 @@ const Transactions = () => {
               className="flex justify-between bg-white py-2 rounded-xl cursor-pointer"
             >
               <div>
-                <p className="font-medium text-sm">{t.guest_name}</p>
+                <p className="font-medium text-sm">{t.customer_name}</p>
                 <p className="text-xs text-[#475569]">{t.date_formatted}</p>
               </div>
               <p
-                className={`text-sm font-semibold ${t.transaction_type === "EARNING" ? "text-green-600" : "text-gray-600"
+                className={`text-sm font-semibold ${t.ui_status === "Completed" ? "text-green-600" : "text-gray-600"
                   }`}
               >
-                {formatAmount(t.amount, t.transaction_type)}
+                {t.formatted_amount}
               </p>
             </div>
           ))
@@ -278,25 +278,25 @@ const Transactions = () => {
                   }}
                 >
                   <td className="space-y-1 lg:px-8 px-4 pt-8 pb-2">
-                    <p className="">{t.guest_name}</p>
-                    <p className="">{t.booking_hours}</p>
+                    <p className="">{t.customer_name}</p>
+                    <p className="">{t.duration_text}</p>
                   </td>
-                  <td className="lg:px-8 px-4 pt-8 pb-2">{t.transaction_id}</td>
+                  <td className="lg:px-8 px-4 pt-8 pb-2">{t.transaction_reference}</td>
                   <td className="space-y-0.5 lg:px-8 px-4 pt-8 pb-2 ">
-                    <p className="">{t.date_formatted.split(" • ")[0]}</p>
-                    <p className="">{t.date_formatted.split(" • ")[1]}</p>
+                    <p className="">{t.date_formatted}</p>
+                    <p className="">{t.time_formatted}</p>
                   </td>
                   <td className="lg:px-8 px-4 pt-8 pb-2">
                     <p
-                      className={`px-2 py-2 rounded-full w-[110px] text-center text-xs font-semibold ${t.transaction_type === "EARNING"
+                      className={`px-2 py-2 rounded-full w-[110px] text-center text-xs font-semibold ${t.ui_status === "Completed"
                         ? "bg-[#22C55E] text-[#ffffff]"
                         : "bg-gray-100 text-gray-600"
                         }`}
                     >
-                      {t.transaction_type}
+                      {t.ui_status}
                     </p>
                   </td>
-                  <td className="lg:px-8 px-4 pt-8 pb-2 text-right font-semibold">{formatAmount(t.amount, t.transaction_type)}</td>
+                  <td className="lg:px-8 px-4 pt-8 pb-2 text-right font-semibold">{t.formatted_amount}</td>
                 </tr>
               ))
             )}

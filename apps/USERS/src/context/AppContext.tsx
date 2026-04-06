@@ -114,6 +114,12 @@ export interface NotificationType {
     created_at: string;
 }
 
+export interface BookingConfigType {
+    platform_fee: string;
+    gst_percentage: string;
+    cancellation_fee: string;
+}
+
 const BASE_URL = "http://api.viigo.in";
 
 export const normalizeImagePath = (url?: string) => {
@@ -152,6 +158,9 @@ type AppContextType = {
     location: string;
     setLocation: React.Dispatch<React.SetStateAction<string>>;
 
+    bookingConfig: BookingConfigType;
+    setBookingConfig: React.Dispatch<React.SetStateAction<BookingConfigType>>;
+
     recommendedGyms: GymCard[];
     setRecommendedGyms: React.Dispatch<React.SetStateAction<GymCard[]>>;
 
@@ -173,6 +182,7 @@ type AppContextType = {
     // API FUNCTIONS 🔥
     fetchUser: () => Promise<void>;
     fetchNotifications: () => Promise<void>;
+    fetchBookingConfig: () => Promise<void>;
     searchGyms: (query: string) => Promise<void>;
     fetchGyms: (lat: number, long: number) => Promise<void>;
     fetchRecommendedGyms: (lat: number, long: number) => Promise<void>;
@@ -194,6 +204,11 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     const [userData, setUserData] = useState<UserType | null>(null);
     const [location, setLocation] = useState<string>("");
+    const [bookingConfig, setBookingConfig] = useState<BookingConfigType>({
+        platform_fee: "",
+        gst_percentage: "",
+        cancellation_fee: ""
+    });
     const [latitude, setLatitude] = useState<string>("");
     const [longitude, setLongitude] = useState<string>("");
     const [searchResults, setSearchResults] = useState<GymCard[]>([]);
@@ -307,6 +322,18 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             setRecommendedGyms(data?.data || []);
         } catch (err) {
             console.error("Failed to fetch recommended gyms", err);
+        } finally {
+            setLoading2(false);
+        }
+    };
+
+    const fetchBookingConfig = async () => {
+        setLoading2(true);
+        try {
+            const data = await request(`/booking-config/`);
+            setBookingConfig(data?.data || []);
+        } catch (err) {
+            console.error("Failed to fetch booking config", err);
         } finally {
             setLoading2(false);
         }
@@ -529,6 +556,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [userData, latitude, longitude]);
 
+     useEffect(() => {
+        if (userData) {
+            fetchBookingConfig();
+        }
+    }, [userData]);
+
     useEffect(() => {
         if (userData && latitude && longitude) {
             fetchNearbyGyms(Number(latitude), Number(longitude));
@@ -599,6 +632,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                 hasUnread,
                 recommendedGyms,
                 setRecommendedGyms,
+                bookingConfig,
+                setBookingConfig,
                 nearbyGyms,
                 setNearbyGyms,
                 fetchNearbyGyms,
@@ -612,6 +647,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                 amenities,
 
                 fetchRecommendedGyms,
+                fetchBookingConfig,
                 fetchNotifications,
                 fetchUser,
                 fetchGyms,
