@@ -39,7 +39,6 @@ export default function ReviewPay() {
     const navigate = useNavigate();
     const [showSuccess, setShowSuccess] = useState(false);
     const [showSecondSuccess, setShowSecondSuccess] = useState(false);
-    const [showErrorModal, setShowErrorModal] = useState(false);
     const [gym, setGym] = useState<GymCard | null>(null);
     const [loading, setLoading] = useState(false);
     const [toast, setToast] = useState<{ type: ToastType; message: string } | null>(null);
