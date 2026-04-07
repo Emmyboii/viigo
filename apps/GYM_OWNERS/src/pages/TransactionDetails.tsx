@@ -3,7 +3,7 @@ import { FiArrowLeft } from 'react-icons/fi';
 import { HiOutlineCalendar, HiShare } from 'react-icons/hi';
 import { HiMiniCurrencyRupee } from 'react-icons/hi2';
 import { TbDownload } from 'react-icons/tb';
-import { useAppContext } from '../context/AppContext';
+import { normalizeImagePath, useAppContext } from '../context/AppContext';
 import { useEffect, useRef, useState } from 'react';
 // import * as htmlToImage from "html-to-image";
 import jsPDF from "jspdf";
@@ -62,20 +62,25 @@ const TransactionDetails = ({ id, setSelectedTransactionId }: { id: number, setS
     const captureFullCanvas = async () => {
         if (!captureRef.current) return null;
 
-        const originalOverflow = captureRef.current.style.overflow;
-        captureRef.current.style.overflow = "visible"; // temporarily expand scrollable content
+        const el = captureRef.current;
+
+        const originalOverflow = el.style.overflow;
+        const originalHeight = el.style.height;
+        el.style.overflow = "visible";
+        el.style.height = "auto"; // ensure full height is rendered
 
         try {
             await document.fonts.ready;
 
-            const scale = window.innerWidth < 850 ? 1 : 2; // lower scale on mobile
-            const canvasEl = await snapdom.toCanvas(captureRef.current, {
+            const scale = window.innerWidth < 850 ? 1 : 2;
+            const canvasEl = await snapdom.toCanvas(el, {
                 scale,
                 backgroundColor: "#ffffff",
             });
             return canvasEl;
         } finally {
-            captureRef.current.style.overflow = originalOverflow;
+            el.style.overflow = originalOverflow;
+            el.style.height = originalHeight; // restore original
         }
     };
 
@@ -83,13 +88,35 @@ const TransactionDetails = ({ id, setSelectedTransactionId }: { id: number, setS
         const canvasEl = await captureFullCanvas();
         if (!canvasEl || !transaction) return;
 
-        const dataUrl = canvasEl.toDataURL("image/jpeg", 0.85); // compressed JPEG
         const pdf = new jsPDF("p", "mm", "a4");
-        const imgProps = pdf.getImageProperties(dataUrl);
         const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+        const pdfHeight = pdf.internal.pageSize.getHeight();
 
-        pdf.addImage(dataUrl, "JPEG", 0, 0, pdfWidth, pdfHeight);
+        const canvasWidth = canvasEl.width;
+        const canvasHeight = canvasEl.height;
+
+        const imgData = canvasEl.toDataURL("image/jpeg", 0.85);
+
+        // Calculate height of canvas per PDF page
+        const ratio = canvasWidth / pdfWidth;
+        const pageHeight = pdfHeight * ratio;
+        let position = 0;
+
+        while (position < canvasHeight) {
+            pdf.addImage(
+                imgData,
+                "JPEG",
+                0,
+                -position / ratio,
+                pdfWidth,
+                canvasHeight / ratio
+            );
+
+            position += pageHeight;
+
+            if (position < canvasHeight) pdf.addPage();
+        }
+
         pdf.save(`transaction-${transaction.id}.pdf`);
     };
 
@@ -250,7 +277,7 @@ const TransactionDetails = ({ id, setSelectedTransactionId }: { id: number, setS
 
                         <div className="w-[69px] h-[69px] rounded-full overflow-hidden flex items-center justify-center bg-gray-100">
                             {displayTransaction.guest_details?.avatar ? (
-                                <img src={displayTransaction.guest_details?.avatar} className="w-full h-full object-cover" alt="Profile Image" />
+                                <img src={`https://api.viigo.in/${normalizeImagePath(displayTransaction.guest_details?.avatar)}`} className="w-full h-full object-cover" alt="Profile Image" />
                             ) : (
                                 <FaUserCircle size={80} className="text-gray-400" />
                             )}

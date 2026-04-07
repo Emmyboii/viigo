@@ -300,7 +300,7 @@ const Bookings = () => {
                                             openBookingModal(gym);
                                             localStorage.setItem("selectedBookingId", String(gym.id));
                                         }}
-                                        className="bg-white rounded border border-[#E2E8F0] min-h-[140px] h-full flex gap-3"
+                                        className={`bg-white rounded border border-[#E2E8F0] min-h-[140px] h-full flex gap-3 ${gym.status === "CANCELLED" || gym.status === "COMPLETED" ? "cursor-not-allowed" : "cursor-pointer"} `}
                                     >
                                         <img crossOrigin="anonymous" src={`https://api.viigo.in/${normalizeImagePath(gym.gym_image)}`} title="gym" className="w-20 min-h-full rounded-tl rounded-bl object-cover" />
 

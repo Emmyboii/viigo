@@ -116,7 +116,7 @@ export interface NotificationType {
 
 export interface BookingConfigType {
     platform_fee: string;
-    gst_percentage: string;
+    gst_fee: string;
     cancellation_fee: string;
 }
 
@@ -206,7 +206,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [location, setLocation] = useState<string>("");
     const [bookingConfig, setBookingConfig] = useState<BookingConfigType>({
         platform_fee: "",
-        gst_percentage: "",
+        gst_fee: "",
         cancellation_fee: ""
     });
     const [latitude, setLatitude] = useState<string>("");

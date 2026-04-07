@@ -709,7 +709,7 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
                                             <button
                                                 onClick={() => removePhoto(photo.url)}
                                                 title="remove"
-                                                className="absolute -top-2 -right-2 bg-white p-1 rounded-full shadow"
+                                                className="absolute -top-2 -right-2 cursor-pointer bg-white p-1 rounded-full shadow"
                                             >
                                                 <FiX size={14} />
                                             </button>
@@ -770,7 +770,7 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
                                                             : [...prev, item.id]
                                                     )
                                                 }
-                                                className={`flex items-center gap-2 px-3 py-2 rounded-full text-xs font-medium transition
+                                                className={`flex items-center gap-2 px-3 py-2 rounded-full text-xs font-medium transition cursor-pointer
                                         ${active
                                                         ? "bg-blue-100 border-blue-500 text-blue-600"
                                                         : "bg-[#F1F5F9] text-[#0F172A]"
@@ -812,7 +812,7 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
                                     <button
                                         onClick={() => removePhoto(photo.url)}
                                         title="remove"
-                                        className="absolute -top-2 -right-2 bg-white p-1 rounded-full shadow"
+                                        className="absolute -top-2 -right-2 bg-white p-1 rounded-full shadow cursor-pointer"
                                     >
                                         <FiX size={14} />
                                     </button>
@@ -850,7 +850,7 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
                                                     : [...prev, item.id]
                                             )
                                         }
-                                        className={`flex items-center gap-2 px-3 py-2 rounded-full text-xs font-medium transition
+                                        className={`flex items-center gap-2 px-3 py-2 rounded-full cursor-pointer text-xs font-medium transition
                                         ${active
                                                 ? "bg-blue-100 border-blue-500 text-blue-600"
                                                 : "bg-[#F1F5F9] text-[#0F172A]"
@@ -869,7 +869,7 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
                                 setModalType("amenities")
                                 window.history.pushState({ modal: "amenities" }, "");
                             }}
-                            className="mt-6 w-full bg-[#F1F5F9] py-3 rounded-md mb-10 text-[#94A3B8] font-semibold text-sm"
+                            className="mt-6 w-full bg-[#F1F5F9] cursor-pointer py-3 rounded-md mb-10 text-[#94A3B8] font-semibold text-sm"
                         >
                             Add More
                         </button>
@@ -918,7 +918,7 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
                                 setModalType("rules")
                                 window.history.pushState({ modal: "rules" }, "");
                             }}
-                            className="mt-6 w-full bg-[#F1F5F9] py-3 rounded-md mb-10 text-[#94A3B8] font-semibold text-sm"
+                            className="mt-6 w-full bg-[#F1F5F9] cursor-pointer py-3 rounded-md mb-10 text-[#94A3B8] font-semibold text-sm"
                         >
                             Add More
                         </button>
@@ -932,8 +932,8 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
                     disabled={!isFormValid || isLoading || !isChanged || Number(price) > 200}
                     onClick={handleSubmit}
                     className={`w-full py-4 rounded-md text-sm font-semibold flex items-center justify-center gap-2 transition ${isFormValid && !isLoading && isChanged && Number(price) <= 200
-                        ? "bg-[#2563EB] text-white"
-                        : "bg-[#CBD5E1] text-[#FFFFFF]"
+                        ? "bg-[#2563EB] text-white cursor-pointer"
+                        : "bg-[#CBD5E1] text-[#FFFFFF] cursor-not-allowed"
                         }`}
                 >
                     {isLoading ? (
@@ -1298,7 +1298,7 @@ const PeakSection = ({
                     {data.length > 1 && (
                         <button
                             onClick={() => setData((prev) => prev.filter((p) => p.id !== item.id))}
-                            className="mt-6 text-red-500 hover:text-red-600 text-sm font-medium"
+                            className="mt-6 text-red-500 cursor-pointer hover:text-red-600 text-sm font-medium"
                         >
                             Delete
                         </button>
@@ -1343,7 +1343,7 @@ const PeakSection = ({
                     {(index === data.length - 1 && title === "Morning") && (
                         <button
                             onClick={addMore}
-                            className="w-full bg-[#F1F5F9] text-[#94A3B8] py-2 rounded-md text-xs font-medium hover:bg-blue-300 transition"
+                            className="w-full bg-[#F1F5F9] cursor-pointer text-[#94A3B8] py-2 rounded-md text-xs font-medium hover:bg-blue-300 transition"
                         >
                             Add More
                         </button>
@@ -1490,7 +1490,7 @@ function LocationModal({
 
                     <button
                         onClick={handleSubmit}
-                        className="w-full bg-blue-600 text-white py-3 rounded-xl font-medium mt-4"
+                        className="w-full bg-blue-600 cursor-pointer text-white py-3 rounded-xl font-medium mt-4"
                     >
                         Submit
                     </button>

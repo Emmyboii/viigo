@@ -24,6 +24,7 @@ type BookingPass = {
     otp: string;
     gym_name: string;
     gym_location: string;
+    gym_owner_phone: string;
     gym_image: string;
     gym_open_till: string;
     guest_name: string;
@@ -157,25 +158,29 @@ export default function PaymentSuccess({ onClose }: PaymentSuccessProps) {
         fetchData();
     }, []);
 
-    // const handlePhoneClick = () => {
-    //     if (gym?.phone_number) {
-    //         // Open the phone dialer
-    //         window.location.href = `tel:${gym.phone_number}`;
-    //     }
-    // };
+    const handlePhoneClick = () => {
+        if (!pass?.gym_owner_phone) return;
 
-    // const handleLocationClick = () => {
-    //     if (!gym) return;
+        const phone = pass.gym_owner_phone.replace(/\s+/g, "");
 
-    //     // Navigate to /explore with coordinates and gym info
-    //     navigate("/explore", {
-    //         state: {
-    //             gym,
-    //             latitude: gym.latitude,
-    //             longitude: gym.longitude,
-    //         }
-    //     });
-    // };
+
+        const link = document.createElement("a");
+        link.href = `tel:${phone}`;
+        link.click();
+    };
+
+    const handleLocationClick = () => {
+        if (!pass) return;
+
+        // Navigate to /explore with coordinates and gym info
+        navigate("/explore", {
+            state: {
+                pass,
+                latitude: pass.latitude,
+                longitude: pass.longitude,
+            }
+        });
+    };
 
     if (loading || !pass || !booking) {
         return (
@@ -237,7 +242,7 @@ export default function PaymentSuccess({ onClose }: PaymentSuccessProps) {
                                 <div className="flex gap-3">
                                     {/* Phone */}
                                     <div
-                                        // onClick={handlePhoneClick}
+                                        onClick={handlePhoneClick}
                                         className="bg-[#BFDBFE] text-[#2563EB] p-1 rounded-lg cursor-pointer hover:bg-gray-200 transition"
                                     >
                                         <MdPhone size={16} />
@@ -245,7 +250,7 @@ export default function PaymentSuccess({ onClose }: PaymentSuccessProps) {
 
                                     {/* Location */}
                                     <div
-                                        // onClick={handleLocationClick}
+                                        onClick={handleLocationClick}
                                         className="bg-[#BFDBFE] text-[#2563EB] p-1 rounded-lg cursor-pointer hover:bg-gray-200 transition"
                                     >
                                         <TiLocation size={16} />

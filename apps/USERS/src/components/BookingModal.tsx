@@ -27,6 +27,7 @@ type BookingPass = {
     gym_name: string;
     gym_location: string;
     gym_image: string;
+    gym_owner_phone: string;
     gym_open_till: string;
     guest_name: string;
     duration_in_hours: string;
@@ -157,25 +158,29 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
         }
     };
 
-    // const handlePhoneClick = () => {
-    //     if (pass?.phone_number) {
-    //         // Open the phone dialer
-    //         window.location.href = `tel:${pass.phone_number}`;
-    //     }
-    // };
+    const handlePhoneClick = () => {
+        if (!pass?.gym_owner_phone) return;
 
-    // const handleLocationClick = () => {
-    //     if (!pass) return;
+        const phone = pass.gym_owner_phone.replace(/\s+/g, "");
+        
 
-    //     // Navigate to /explore with coordinates and gym info
-    //     navigate("/explore", {
-    //         state: {
-    //             pass,
-    //             latitude: pass.latitude,
-    //             longitude: pass.longitude,
-    //         }
-    //     });
-    // };
+        const link = document.createElement("a");
+        link.href = `tel:${phone}`;
+        link.click();
+    };
+
+    const handleLocationClick = () => {
+        if (!pass) return;
+
+        // Navigate to /explore with coordinates and gym info
+        navigate("/explore", {
+            state: {
+                pass,
+                latitude: pass.latitude,
+                longitude: pass.longitude,
+            }
+        });
+    };
 
     const statusConfig = getStatusConfig(booking?.status || "PENDING");
 
@@ -185,9 +190,9 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
                 return <MdPending className="text-yellow-500 text-[65px]" />;
             case "CONFIRMED":
                 return <MdPending className="text-yellow-500 text-[65px]" />;
-                case "ACTIVE":
+            case "ACTIVE":
                 return <FaCheckCircle className="text-green-500 text-[65px]" />;
-                case "COMPLETED":
+            case "COMPLETED":
                 return <FaCheckCircle className="text-green-500 text-[65px]" />;
             case "CANCELLED":
                 return <FaTimesCircle className="text-red-500 text-[65px]" />;
@@ -247,7 +252,7 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
                                 <div className="flex gap-3">
                                     {/* Phone */}
                                     <div
-                                        // onClick={handlePhoneClick}
+                                        onClick={handlePhoneClick}
                                         className="bg-[#BFDBFE] text-[#2563EB] p-1 rounded-lg cursor-pointer hover:bg-gray-200 transition"
                                     >
                                         <MdPhone size={16} />
@@ -255,7 +260,7 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
 
                                     {/* Location */}
                                     <div
-                                        // onClick={handleLocationClick}
+                                        onClick={handleLocationClick}
                                         className="bg-[#BFDBFE] text-[#2563EB] p-1 rounded-lg cursor-pointer hover:bg-gray-200 transition"
                                     >
                                         <TiLocation size={16} />

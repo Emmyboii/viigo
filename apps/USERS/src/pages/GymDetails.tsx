@@ -8,17 +8,14 @@ import {
     IoWarningOutline,
 } from "react-icons/io5";
 import { HiLocationMarker, HiOutlineLocationMarker, HiUserAdd } from "react-icons/hi";
-// import { FaRegClock } from "react-icons/fa6";
-// import { PiUserGearFill } from "react-icons/pi";
 import Footer from "../components/Footer";
-import { MdPhone } from "react-icons/md";
-// import PickHoursSheet from "../components/PickHoursSheet";
+// import { MdPhone } from "react-icons/md";
 import PageHeader from "../components/PageHeader";
-// import { FaRegEdit } from "react-icons/fa";
 import { normalizeImagePath, useAppContext, type GymCard } from "../context/AppContext";
 import type { Gym } from "../components/types/gym";
-// import * as htmlToImage from "html-to-image";
 import { FaRegClock } from "react-icons/fa";
+import red from '../assets/red.png'
+import chart from '../assets/chart-bar.png'
 import { snapdom } from "@zumer/snapdom";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -286,12 +283,12 @@ export default function GymDetails() {
         return () => window.removeEventListener("popstate", handlePopState);
     }, [amenitiesOpen, rulesOpen, priceBreakdownOpen]);
 
-    const handlePhoneClick = () => {
-        if (gym?.phone_number) {
-            // Open the phone dialer
-            window.location.href = `tel:${gym.phone_number}`;
-        }
-    };
+    // const handlePhoneClick = () => {
+    //     if (gym?.phone_number) {
+    //         // Open the phone dialer
+    //         window.location.href = `tel:${gym.phone_number}`;
+    //     }
+    // };
 
     const handleLocationClick = () => {
         if (!gym) return;
@@ -305,6 +302,49 @@ export default function GymDetails() {
             }
         });
     };
+
+    const isCurrentTimeInRange = (range?: string) => {
+        if (!range || !range.includes(" - ")) return false;
+
+        const parts = range.split(" - ");
+        if (parts.length !== 2) return false;
+
+        const [start, end] = parts;
+
+        const now = new Date();
+
+        const parseTime = (timeStr?: string) => {
+            if (!timeStr) return null;
+
+            const parts = timeStr.trim().split(" ");
+            if (parts.length < 2) return null;
+
+            const [time, modifier] = parts;
+
+            let [hours, minutes] = time.split(":").map(Number);
+
+            if (isNaN(hours)) return null;
+            if (!minutes) minutes = 0;
+
+            if (modifier === "PM" && hours !== 12) hours += 12;
+            if (modifier === "AM" && hours === 12) hours = 0;
+
+            const date = new Date();
+            date.setHours(hours, minutes, 0, 0);
+            return date;
+        };
+
+        const startTime = parseTime(start);
+        const endTime = parseTime(end);
+
+        if (!startTime || !endTime) return false;
+
+        return now >= startTime && now <= endTime;
+    };
+
+    const isPeakNow =
+        isCurrentTimeInRange(gym?.recommended_workout_timings?.peak_hours?.morning || "") ||
+        isCurrentTimeInRange(gym?.recommended_workout_timings?.peak_hours?.evening || "");
 
     if (loading) {
         return (
@@ -376,12 +416,12 @@ export default function GymDetails() {
                             {/* Call & Map Buttons */}
                             <div className="flex gap-3">
                                 {/* Phone */}
-                                <div
+                                {/* <div
                                     onClick={handlePhoneClick}
                                     className="bg-[#DBEAFE] text-[#2563EB] p-2 rounded cursor-pointer transition"
                                 >
                                     <MdPhone size={16} />
-                                </div>
+                                </div> */}
 
                                 {/* Location */}
                                 <div
@@ -420,6 +460,34 @@ export default function GymDetails() {
                     </div>
 
                     <div className="border border-dashed border-[#CBD5E1]"></div>
+
+                    {isPeakNow && (
+                        <div className="flex items-center justify-between gap-2 px-4 py-4 rounded-lg text-sm border transition border-[#DBEAFE] text-[#0F172A]">
+                            <img src={red} alt="Crowded" className="w-11" />
+                            <div className="space-y-1">
+                                <span className="text-sm text-nowrap font-semibold text-[#475569]">
+                                    Live Tracking
+                                </span>
+                                <p className="text-sm text-nowrap text-[#F43F5E] font-semibold">
+                                    Crowded at the moment
+                                </p>
+                            </div>
+                            <img src={chart} alt="Crowded" className="w-8" />
+                        </div>
+                    )}
+                    {/* : (
+                        <div className="flex items-center gap-2">
+                            <img src={green} alt="Less crowded" width={35} />
+                            <div className="space-y-1">
+                                <p className="text-sm text-[#16A34A] font-semibold">
+                                    Not crowded now
+                                </p>
+                                <span className="text-xs text-[#0F172A]">
+                                    Best time to workout 💪
+                                </span>
+                            </div>
+                        </div>
+                    )} */}
 
                     {/* ===== Amenities ===== */}
                     <div>
@@ -562,7 +630,7 @@ export default function GymDetails() {
 
                     <div className="flex items-center justify-between">
                         <p className="text-sm font-medium text-[#6A6A6A]">Gst Fee</p>
-                        <p className="text-sm font-medium text-[#0F172A]">Rs. {bookingConfig.gst_percentage}</p>
+                        <p className="text-sm font-medium text-[#0F172A]">Rs. {bookingConfig.gst_fee}</p>
                     </div>
 
                     <div className="border border-dashed border-[#CBD5E1]"></div>

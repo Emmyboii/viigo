@@ -193,8 +193,8 @@ export default function CreateWallet({ setDisplayWallet }: createWalletProps) {
                     disabled={!isValid || isLoading || !isChanged}
                     type="submit"
                     className={`mt-8 w-full py-3 rounded-md font-medium transition ${isValid && !isLoading && isChanged
-                        ? "bg-[#2563EB] text-white"
-                        : "bg-[#94A3B8] text-white"
+                        ? "bg-[#2563EB] text-white cursor-pointer"
+                        : "bg-[#94A3B8] text-white cursor-not-allowed"
                         }`}
                 >
                     {isLoading ? (

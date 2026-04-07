@@ -62,7 +62,7 @@ export default function BottomSheet({
         {/* Header */}
         <div className="flex justify-between items-center px-5 mb-3 mk:mt-10 mk:px-10">
           <h3 className="font-semibold text-lg">{title}</h3>
-          <button title="close" onClick={onClose}>
+          <button title="close" onClick={onClose} className="cursor-pointer">
             <FiX size={20} />
           </button>
         </div>

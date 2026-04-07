@@ -382,11 +382,11 @@ const PlanYourWorkout = () => {
                 </div>
 
                 <div className="pt-1 space-y-4">
-                    <h4 className="text-base font-semibold text-black">
+                    <h4 className="text-base font-semibold sm:text-center text-black">
                         How many people are working out?
                     </h4>
 
-                    <div className="flex items-center gap-1.5 pb-7">
+                    <div className="flex items-center sm:justify-center gap-1.5 pb-7">
                         <FaUser className="text-[#475569] size-3" />
 
                         {peopleCount === 0 ? (
@@ -418,7 +418,7 @@ const PlanYourWorkout = () => {
                 </div>
             </div>
 
-            <h4 className="text-lg font-semibold text-black mb-3">
+            <h4 className="text-lg font-semibold sm:text-center text-black mb-3">
                 Select the Date
             </h4>
 
@@ -452,11 +452,11 @@ const PlanYourWorkout = () => {
 
             {/* Hours Selection */}
             <div className="mt-6">
-                <h4 className="font-semibold mb-3">
+                <h4 className="font-semibold sm:text-center mb-3">
                     How long do you want to work out?
                 </h4>
 
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap sm:justify-center gap-2">
                     {hoursOptions.map((hour, index) => {
                         const disabled = isDurationInvalid(hour.value);
 
@@ -593,7 +593,7 @@ const PlanYourWorkout = () => {
                         <button
                             disabled={allHoursDisabled}
                             onClick={handleApply}
-                            className={`w-[130px] text-white px-6 py-3 rounded-md font-semibold text-sm ${allHoursDisabled ? "bg-[#a6a7a8] cursor-not-allowed" : "bg-blue-600 cursor-pointer"}`}
+                            className={`w-[130px] text-white px-6 py-3 rounded-md font-semibold cursor-pointer text-sm ${allHoursDisabled ? "bg-[#a6a7a8] cursor-not-allowed" : "bg-blue-600 cursor-pointer"}`}
                         >
                             Apply
                         </button>
