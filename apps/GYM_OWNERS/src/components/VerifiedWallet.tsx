@@ -335,7 +335,7 @@ export default function VerifiedWallet() {
                                         className="flex justify-between bg-white py-2 rounded-xl cursor-pointer"
                                     >
                                         <div>
-                                            <p className="font-medium text-sm">{t.customer_name}</p>
+                                            <p className="font-medium text-sm">{t.guest_name}</p>
                                             <p className="text-xs text-[#475569]">
                                                 {t.date_formatted}
                                             </p>
@@ -347,7 +347,7 @@ export default function VerifiedWallet() {
                                                 : "text-gray-600"
                                                 }`}
                                         >
-                                            {t.transaction_type === "EARNING" ? "+" : "-"}₹{t.formatted_amount}
+                                            {t.transaction_type === "EARNING" ? "+" : "-"}₹{t.amount}
                                         </p>
                                     </div>
                                 ))}

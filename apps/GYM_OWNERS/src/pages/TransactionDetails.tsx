@@ -30,6 +30,9 @@ interface PaymentBreakdown {
     base_price: string;
     platform_fee: string;
     total_earnings: string;
+    booking_fee: string;
+    gst_fee: string;
+    number_of_friends: number;
 }
 
 export interface WalletTransactionDetail {
@@ -295,13 +298,23 @@ const TransactionDetails = ({ id, setSelectedTransactionId }: { id: number, setS
                     <p className="font-semibold text-base text-nowrap">Payment breakdown</p>
 
                     <p className="text-xs text-[#0F172A] text-nowrap flex justify-between">
-                        <span className='text-[#6A6A6A] text-xs'>Base Price</span>
+                        <span className='text-[#6A6A6A] text-xs'>Booking Fee</span>
+                        <span>₹{displayTransaction.payment_breakdown?.booking_fee}</span>
+                    </p>
+
+                    <p className="text-xs text-[#0F172A] text-nowrap flex justify-between">
+                        <span className='text-[#6A6A6A] text-xs'>Base Price x {displayTransaction.payment_breakdown?.number_of_friends === 0 ? "1" : displayTransaction.payment_breakdown?.number_of_friends + 1}</span>
                         <span>₹{displayTransaction.payment_breakdown?.base_price}</span>
                     </p>
 
                     <p className="text-xs text-[#0F172A] text-nowrap flex justify-between">
                         <span className='text-[#6A6A6A] text-xs'>Platform Fee</span>
                         <span>₹{displayTransaction.payment_breakdown?.platform_fee}</span>
+                    </p>
+
+                    <p className="text-xs text-[#0F172A] text-nowrap flex justify-between">
+                        <span className='text-[#6A6A6A] text-xs'>GST Fee</span>
+                        <span>₹{displayTransaction.payment_breakdown?.gst_fee}</span>
                     </p>
 
                     <div className="border border-[#F2F2F2] border-dotted"></div>

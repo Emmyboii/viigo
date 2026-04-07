@@ -60,6 +60,14 @@ export interface WalletType {
     is_locked: string;
 }
 
+type payment_breakdownType = {
+    booking_hours: number;
+    base_price: string;
+    tax_amount: string;
+    platform_fee: string;
+    total_amount: string;
+}
+
 export type Booking = {
     id: number;
     client_name: string;
@@ -71,6 +79,7 @@ export type Booking = {
     end_time: string;
     total_amount: string;
     formatted_amount: string;
+    payment_breakdown: payment_breakdownType;
     display_date: string;
     status: "PENDING" | "CONFIRMED" | "CANCELLED" | "ACTIVE" | "COMPLETED";
 };
@@ -97,9 +106,11 @@ export interface NotificationType {
 export interface WalletTransaction {
     id: number;
     customer_name: string;
+    guest_name: string;
     duration_text: string;
     transaction_reference: string;
     formatted_amount: string;
+    amount: string;
     transaction_type: "EARNING" | "REFUND" | "WITHDRAWAL";
     date_formatted: string;
     time_formatted: string;

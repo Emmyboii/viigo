@@ -276,7 +276,7 @@ const GymOwnerHome = () => {
               className={`${otp.length === 4
                 ? "bg-white text-[#2563EB]"
                 : "bg-[#F1F5F9] text-[#94A3B8]"
-                } w-[35%] rounded-full px-4 py-2 font-semibold text-[14px] h-[45px]`}
+                } w-[40%] rounded-full px-4 py-2 font-semibold text-[14px] h-[45px]`}
               disabled={otp.length !== 4 || status === "verifying"}
               type="submit">
               {status === "verifying" ? "Checking..." : "Verify"}
@@ -324,7 +324,7 @@ const GymOwnerHome = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed z-[99] flex items-center justify-center bg-white overflow-y-auto inset-0 mk:inset-auto mk:right-0 mk:top-0 mk:min-h-screen mk:w-[480px] p-5 animate-slideUp mk:animate-slideRight"
+              className={`fixed z-[99] flex items-center justify-center bg-white overflow-y-auto inset-0 mk:inset-auto mk:right-0 mk:top-0 mk:min-h-screen mk:w-[480px] p-5 ${window.innerWidth >= 850 ? "animate-slideRight" : "animate-slideUp"}`}
             >
 
               <motion.div
