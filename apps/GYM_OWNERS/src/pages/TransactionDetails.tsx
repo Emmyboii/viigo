@@ -180,7 +180,7 @@ const TransactionDetails = ({ id, setSelectedTransactionId }: { id: number, setS
 
     if (fetching) {
         return (
-            <div className="flex items-center justify-center min-h-screen bg-[#0C0A0AC7] mk:bg-transparent">
+            <div className="flex items-center justify-center min-h-screen bg-[#0C0A0AC7] w-full mk:bg-transparent">
                 <div className="flex flex-col items-center gap-4 p-8 bg-white animate-fadeIn">
                     <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
                     <p className="text-gray-700 text-lg font-medium">
@@ -213,7 +213,7 @@ const TransactionDetails = ({ id, setSelectedTransactionId }: { id: number, setS
     // Always fallback to dummy for now
     const displayTransaction = transaction;
 
-    const amountNum = parseFloat(displayTransaction.guest_details.amount_paid) || 0;
+    const amountNum = parseFloat(displayTransaction.amount) || 0;
 
     return (
         <div className={`fixed mk:flex flex-col justify-center z-50 bg-white overflow-y-auto inset-0 mk:inset-auto mk:right-0 mk:top-0 mk:min-h-screen mk:w-[480px] mk:p-5 ${window.innerWidth >= 850 ? "animate-slideRight" : "animate-slideUp"}`}>
@@ -265,7 +265,7 @@ const TransactionDetails = ({ id, setSelectedTransactionId }: { id: number, setS
                             </div>
                             <div className="flex items-center gap-2 text-nowrap">
                                 <HiMiniCurrencyRupee size={17} />
-                                <p className="text-[#0F172A] font-normal text-sm">Amount Paid : <span className='font-semibold'>₹{amountNum}</span></p>
+                                <p className="text-[#0F172A] font-normal text-sm">Amount Paid : <span className='font-semibold'>₹{displayTransaction.guest_details.amount_paid}</span></p>
                             </div>
                         </div>
 

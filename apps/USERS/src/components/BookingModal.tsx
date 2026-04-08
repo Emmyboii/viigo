@@ -37,6 +37,7 @@ type BookingPass = {
     last_entry_time: string;
     base_price: string;
     platform_fee: string;
+    gst_fee: string;
     total_amount: string;
     latitude: string;
     longitude: string;
@@ -162,7 +163,7 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
         if (!pass?.gym_owner_phone) return;
 
         const phone = pass.gym_owner_phone.replace(/\s+/g, "");
-        
+
 
         const link = document.createElement("a");
         link.href = `tel:${phone}`;
@@ -368,6 +369,11 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
                 <div className="flex justify-between">
                     <span className="text-[#6A6A6A] font-medium">Platform Fee</span>
                     <span className="font-medium">Rs. {pass.platform_fee}</span>
+                </div>
+
+                <div className="flex justify-between">
+                    <span className="text-[#6A6A6A] font-medium">GST Fee</span>
+                    <span className="font-medium">Rs. {pass.gst_fee}</span>
                 </div>
 
                 <div className="flex justify-between pt-3">
