@@ -22,7 +22,7 @@ const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 export default function GymDetails() {
 
-    const { gyms, bookingConfig } = useAppContext()
+    const { gyms, bookingConfig, latitude, longitude } = useAppContext()
 
     const navigate = useNavigate();
 
@@ -192,7 +192,7 @@ export default function GymDetails() {
                     gymId = localGym.id;
                 } else {
                     // If not found locally, fetch all gyms to find the ID
-                    const res = await fetch(`${backendUrl}/gymowner/gyms/all/`, {
+                    const res = await fetch(`${backendUrl}/gymowner/gyms/all/?lat=${latitude}&long=${longitude}`, {
                         headers: {
                             "Content-Type": "application/json",
                             Authorization: localStorage.getItem("token")
@@ -216,7 +216,7 @@ export default function GymDetails() {
                 }
 
                 // Now fetch gym details by ID
-                const detailRes = await fetch(`${backendUrl}/gymowner/gym/${gymId}/`, {
+                const detailRes = await fetch(`${backendUrl}/gymowner/gym/${gymId}/?lat=${latitude}&long=${longitude}`, {
                     headers: {
                         "Content-Type": "application/json",
                         Authorization: localStorage.getItem("token")

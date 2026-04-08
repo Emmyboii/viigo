@@ -16,7 +16,7 @@ export default function Footer() {
     ];
 
     return (
-        <div className="fixed  bottom-0 left-0 w-full bg-white border-t border-[#F1F5F9] shadow-sm z-50">
+        <div className="fixed bottom-0 left-0 w-full bg-white border-t border-[#F1F5F9] shadow-sm z-50">
             <div className="flex justify-between items-center px-4 py-3.5 max-w-[1300px] mx-auto">
                 {tabs.map((tab) => {
                     const isActive = location.pathname === tab.path || location.pathname === tab.path2 || location.pathname === tab.path3 || location.pathname === tab.path4 || location.pathname === tab.path5;

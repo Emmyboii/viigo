@@ -39,7 +39,7 @@ export function FullscreenCarousel({
     const scrollNext = () => emblaApi?.scrollNext();
 
     return (
-        <div className="fixed inset-0 z-50 bg-black/95 flex flex-col">
+        <div className="fixed inset-0 z-[99] bg-black/95 flex flex-col">
             {/* Top bar */}
             <div className="flex items-center justify-between px-4 pt-3 text-white">
                 <p className="text-sm">
