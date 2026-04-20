@@ -62,6 +62,8 @@ const GymOwnerHome = () => {
   const [status, setStatus] = useState<Status>("idle");
   const [toast, setToast] = useState<{ type: ToastType; message: string } | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const [verifiedBookingId, setVerifiedBookingId] = useState<number | null>(null);
+  const isDesktop = window.innerWidth >= 850;
 
 
   /* ---------------- Handle Input ---------------- */
@@ -138,32 +140,30 @@ const GymOwnerHome = () => {
 
       // ✅ SUCCESS
       openModal("success");
+      if (data?.data?.user_id) setVerifiedBookingId(data.data.user_id);
       setOtp("");
-
-      // Optional: show success toast
       setToast({ type: "success", message: "Check-in successful!" });
-
-      // 👉 If API returns booking/user, use it
-      if (data?.data?.user_id) {
-        const bookingId = data.data.user_id;
-
-        const matchedBooking = bookings.find(
-          (b) => b.id === bookingId
-        );
-
-        if (matchedBooking) {
-          setSelectedUser(matchedBooking);
-        }
-      }
+      setChecked(true);
+      window.scrollTo(0, 0);
 
       // ✅ auto close success modal after 2 seconds
       setTimeout(() => {
-        closeModal("success");
-      }, 2000);
+        setStatus("idle");
 
-      // Scroll to top
-      window.scrollTo(0, 0);
-      setChecked(true);
+        // 👉 If API returns booking/user, use it
+        if (data?.data?.user_id) {
+          const bookingId = data.data.user_id;
+
+          const matchedBooking = bookings.find(
+            (b) => b.id === bookingId
+          );
+
+          if (matchedBooking) {
+            setSelectedUser(matchedBooking);
+            openModal("user", matchedBooking);
+          }
+        }
+      }, 2400);
 
     } catch (err: unknown) {
       console.error(err);
@@ -185,12 +185,9 @@ const GymOwnerHome = () => {
 
   const handleClose = () => {
     localStorage.removeItem("paymentSuccess");
-    closeModal("success");
-    closeModal("user");
-
-    if (checked) {
-      window.location.reload();
-    }
+    setSelectedUser(null);
+    setStatus("idle");
+    if (checked) window.location.reload();
   };
 
   /* ---------------- Toast Close ---------------- */
@@ -237,6 +234,8 @@ const GymOwnerHome = () => {
       window.history.replaceState({ modal: null }, "");
     }
   }, []);
+
+
 
   if (isLoading) {
     return (
@@ -334,7 +333,7 @@ const GymOwnerHome = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className={`fixed z-[99] flex items-center justify-center bg-white overflow-y-auto inset-0 mk:inset-auto mk:right-0 mk:top-0 mk:min-h-screen mk:w-[480px] p-5 ${window.innerWidth >= 850 ? "animate-slideRight" : "animate-slideUp"}`}
+              className={`fixed z-[99] flex items-center justify-center bg-white overflow-y-auto inset-0 mk:inset-auto mk:right-0 mk:top-0 mk:min-h-screen mk:w-[480px] p-5 ${isDesktop ? "animate-slideRight" : "animate-slideUp"}`}
             >
 
               <motion.div
@@ -348,7 +347,7 @@ const GymOwnerHome = () => {
                   OTP Verified
                 </h2>
                 <p className="text-sm font-normal text-[#475569]">
-                  Booking ID #{selectedUser?.id} has been verified and the session has started
+                  Booking ID #{verifiedBookingId} has been verified and the session has started
                 </p>
               </motion.div>
             </motion.div>
