@@ -231,10 +231,10 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
                     </p>
                 </div>
 
-                <div className="relative bg-gradient-to-b from-blue-600 to-blue-500 text-white rounded-2xl p-4 shadow-xl">
+                <div className="relative bg-gradient-to-b from-blue-600 to-blue-500 text-white rounded-3xl p-4 shadow-xl">
 
-                    <img src={halfCircle} alt="Half Circle" className="absolute bottom-[155px] left-[-13px] w-[48px] h-[55px]" />
-                    <img src={halfCircle} alt="Half Circle" className="absolute bottom-[155px] right-[-13px] rotate-180 w-[48px] h-[55px]" />
+                    <img src={halfCircle} alt="Half Circle" className="absolute bottom-[190px] left-[-13px] w-[48px] h-[55px]" />
+                    <img src={halfCircle} alt="Half Circle" className="absolute bottom-[190px] right-[-13px] rotate-180 w-[48px] h-[55px]" />
 
                     {/* Gym Header */}
                     <div className="flex gap-3">
@@ -323,7 +323,7 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
                             <div>
                                 <div className="flex gap-2 flex-wrap">
                                     Peak hours :
-                                    <div className="flex gap-2 flex-wrap text-nowrap">
+                                    <div className="flex gap-2 flex-wrap">
                                         {pass.peak_hours}
                                     </div>
                                 </div>

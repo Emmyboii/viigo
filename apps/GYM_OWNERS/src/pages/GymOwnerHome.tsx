@@ -80,25 +80,23 @@ const GymOwnerHome = () => {
 
   type ModalType = "user" | "success";
 
-  const openModal = (type: ModalType, booking?: Booking) => {
-    if (type === "user" && booking) {
-      setSelectedUser(booking);
+  const openModal = (type: ModalType, book?: Booking) => {
+    if (type === "user" && book) {
+      setSelectedUser(book);
     }
 
     if (type === "success") {
       setStatus("success");
     }
 
-    window.history.pushState({ modal: type }, "");
+    window.history.pushState({ modal: type }, "", window.location.pathname);
   };
 
   const closeModal = (type: ModalType) => {
     if (type === "user") setSelectedUser(null);
     if (type === "success") setStatus("idle");
 
-    if (window.history.state?.modal === type) {
-      window.history.back();
-    }
+    window.history.back();
   };
 
   /* ---------------- Submit ---------------- */
@@ -216,17 +214,29 @@ const GymOwnerHome = () => {
         : "text-[#CBD5E1]";
 
   useEffect(() => {
-    const handlePopState = () => {
-      if (window.history.state?.modal === "success") {
+    const handlePopState = (event: PopStateEvent) => {
+      const modal = event.state?.modal;
+
+      if (!modal) {
+        // No modal in history → close everything
+        setSelectedUser(null);
         setStatus("idle");
-      } else if (window.history.state?.modal === "user") {
+      } else if (modal === "user") {
+        setStatus("idle");
+      } else if (modal === "success") {
         setSelectedUser(null);
       }
     };
 
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
-  }, [status, selectedUser]);
+  }, []);
+
+  useEffect(() => {
+    if (!window.history.state) {
+      window.history.replaceState({ modal: null }, "");
+    }
+  }, []);
 
   if (isLoading) {
     return (
@@ -268,7 +278,7 @@ const GymOwnerHome = () => {
               autoComplete="one-time-code"
               value={otp}
               onChange={handleChange}
-              className={`mt-2 w-[65%] bg-transparent rounded-lg px-4 border ${borderColor} outline-none h-[45px] ${textColor} font-bold text-2xl`}
+              className={`mt-2 w-full bg-transparent rounded-lg px-4 border ${borderColor} outline-none h-[45px] ${textColor} font-bold text-2xl`}
               placeholder="OTP"
             />
 
@@ -276,7 +286,7 @@ const GymOwnerHome = () => {
               className={`${otp.length === 4
                 ? "bg-white text-[#2563EB]"
                 : "bg-[#F1F5F9] text-[#94A3B8]"
-                } w-[40%] rounded-full px-4 py-2 font-semibold text-[14px] h-[45px]`}
+                } w-[150px] rounded-full px-4 py-2 font-semibold text-[14px] h-[45px]`}
               disabled={otp.length !== 4 || status === "verifying"}
               type="submit">
               {status === "verifying" ? "Checking..." : "Verify"}
@@ -362,7 +372,9 @@ const GymOwnerHome = () => {
               user={selectedUser}
               onClose={() => {
                 closeModal("user")
-                window.location.reload()
+                if (checked) {
+                  window.location.reload();
+                }
               }}
             />
           </motion.div>

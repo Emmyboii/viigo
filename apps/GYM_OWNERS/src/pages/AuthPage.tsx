@@ -207,10 +207,12 @@ const AuthPage = () => {
         <img src={login} alt="Login background" className="w-full h-full object-cover" />
       </div>
 
-      <div className='bg-[#2563EB] text-white space-y-5 h-screen mk:flex flex-col justify-center pt-[340px] p-7 lg:p-16 w-1/2 hidden'>
-        <img src={logo} alt="" className='lg:w-40 w-24' />
-        <p className='lg:text-[55px] lf:text-[60px] text-[30px] font-semibold'>Manage your gym efficiently</p>
-        <p className='lg:text-2xl text-lg font-medium max-w-[590px]'>Join thousands of gym owners who use Viigo to streamline bookings, manage memberships, and grow their fitness business.</p>
+      <div className='bg-[#2563EB] text-white space-y-5 h-screen mk:flex flex-col justify-center items-center pt-[340px] p-7 lg:p-16 w-1/2 hidden'>
+        <div className='flex flex-col items-start space-y-5'>
+          <img src={logo} alt="" className='lg:w-40 w-24' />
+          <p className='lg:text-[55px] lf:text-[60px] text-[30px] font-semibold'>Manage your gym efficiently</p>
+          <p className='lg:text-2xl text-lg font-medium max-w-[590px]'>Join thousands of gym owners who use Viigo to streamline bookings, manage memberships, and grow their fitness business.</p>
+        </div>
       </div>
 
       <div className="bg-white relative rounded-t-3xl mk:h-screen h-1/2 mk:flex flex-col justify-center p-5 mk:p-7 space-y-6 mk:w-1/2 mk:max-w-[450px] mk:mx-auto">

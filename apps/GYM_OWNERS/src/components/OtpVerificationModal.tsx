@@ -320,7 +320,7 @@ export default function OtpVerificationModal({ user, onClose }: OtpVerificationM
                     </div>
 
                     {/* Bottom Buttons */}
-                    <div className="fixed mk:relative bottom-0 left-0 right-0 p-4 mk:border-t-0 border-t border-[#F1F5F9] flex gap-4 items-center justify-between mk:justify-center px-7 mk:mt-3 mt-0">
+                    <div className="fixed mk:relative bg-white bottom-0 left-0 right-0 p-4 mk:border-t-0 border-t border-[#F1F5F9] flex gap-4 items-center justify-between mk:justify-center px-7 mk:mt-3 mt-0">
                         <button
                             onClick={() => setPriceBreakdownOpen(true)}
                             className="text-[#2563EB] text-sm font-semibold text-nowrap"

@@ -743,8 +743,6 @@ Hours: ${selectedHours?.label}
                         </div>
                     </div>
 
-
-                    {/* Success Modal */}
                     <AnimatePresence>
                         {showSuccess && (
                             <motion.div
@@ -753,25 +751,54 @@ Hours: ${selectedHours?.label}
                                 exit={{ opacity: 0 }}
                                 className="fixed inset-0 bg-blue-500 z-50 flex items-center justify-center"
                             >
+                                {/* Bounce + squash wrapper */}
                                 <motion.div
-                                    initial={{ y: -300 }}       // Start above the viewport
-                                    animate={{ y: 0 }}          // Drop to center
-                                    exit={{ y: -300, opacity: 0 }}
-                                    transition={{
-                                        type: "spring",
-                                        stiffness: 400,           // Spring stiffness
-                                        damping: 25,              // Less damping = more bounce
-                                        mass: 1.5
+                                    initial={{ y: "-60vh", opacity: 0 }}
+                                    animate={{
+                                        y: ["-60vh", "0vh", "-5vh", "0vh", "-2vh", "0vh"],
+                                        opacity: [0, 1, 1, 1, 1, 1],
+                                        scaleX: [1, 1.3, 0.9, 1.1, 0.95, 1],
+                                        scaleY: [1, 0.6, 1.1, 0.9, 1.05, 1],
                                     }}
-                                    className="text-white p-8 w-80 text-center"
+                                    transition={{
+                                        duration: 1.2,
+                                        times: [0, 0.45, 0.65, 0.78, 0.9, 1],
+                                        ease: "easeIn"
+                                    }}
                                 >
-                                    <FaCheckCircle className="text-green-500 text-[85px] mx-auto mb-3" />
-                                    <h2 className="text-lg font-semibold mb-2">
-                                        Payment Successful
-                                    </h2>
-                                    <p className="text-sm font-normal text-[#EBEBEB]">
-                                        You will be redirected to the booking confirmation page.
-                                    </p>
+                                    {/* Counter-scale so content stays undistorted */}
+                                    <motion.div
+                                        animate={{
+                                            scaleX: [1, 1 / 1.3, 1 / 0.9, 1 / 1.1, 1 / 0.95, 1],
+                                            scaleY: [1, 1 / 0.6, 1 / 1.1, 1 / 0.9, 1 / 1.05, 1],
+                                        }}
+                                        transition={{
+                                            duration: 1.2,
+                                            times: [0, 0.45, 0.65, 0.78, 0.9, 1],
+                                            ease: "easeIn"
+                                        }}
+                                    >
+                                        {/* Impact tremble — fires after first bounce hit */}
+                                        <motion.div
+                                            animate={{
+                                                y: [0, -6, 5, -4, 3, -2, 1, 0],
+                                            }}
+                                            transition={{
+                                                delay: 0.54,
+                                                duration: 0.5,
+                                                ease: "easeOut"
+                                            }}
+                                            className="text-white p-8 w-80 text-center"
+                                        >
+                                            <FaCheckCircle className="text-green-500 bg-white rounded-full text-[85px] mx-auto mb-3" />
+                                            <h2 className="text-lg font-semibold mb-2">
+                                                Payment Successful
+                                            </h2>
+                                            <p className="text-sm font-normal text-[#EBEBEB]">
+                                                You will be redirected to the booking confirmation page.
+                                            </p>
+                                        </motion.div>
+                                    </motion.div>
                                 </motion.div>
                             </motion.div>
                         )}

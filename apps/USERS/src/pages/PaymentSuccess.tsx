@@ -110,34 +110,34 @@ export default function PaymentSuccess({ onClose }: PaymentSuccessProps) {
                     }
                 );
 
-                // const bookingsData = await bookingsRes.json();
-                // const firstBooking = bookingsData.data?.[0];
-
-                // if (!firstBooking) {
-                //     setBooking(null);
-                //     setPass(null);
-                //     return;
-                // }
-
-                // setBooking(firstBooking);
-
                 const bookingsData = await bookingsRes.json();
+                const firstBooking = bookingsData.data?.[0];
 
-                const bookingsArray = bookingsData.data ?? [];
-                const lastBooking = bookingsArray.at(-1);
-
-                if (!lastBooking) {
+                if (!firstBooking) {
                     setBooking(null);
                     setPass(null);
                     return;
                 }
 
-                setBooking(lastBooking);
-                localStorage.setItem("selectedBookingId", String(lastBooking.id));
+                setBooking(firstBooking);
+
+                // const bookingsData = await bookingsRes.json();
+
+                // const bookingsArray = bookingsData.data ?? [];
+                // const lastBooking = bookingsArray.at(-1);
+
+                if (!firstBooking) {
+                    setBooking(null);
+                    setPass(null);
+                    return;
+                }
+
+                setBooking(firstBooking);
+                localStorage.setItem("selectedBookingId", String(firstBooking.id));
 
                 // 2️⃣ THEN fetch pass using the booking ID
                 const passRes = await fetch(
-                    `${backendUrl}/client/booking/${lastBooking.id}/pass/`,
+                    `${backendUrl}/client/booking/${firstBooking.id}/pass/`,
                     {
                         headers: {
                             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -212,19 +212,29 @@ export default function PaymentSuccess({ onClose }: PaymentSuccessProps) {
 
                 {/* 🎯 Animated Blue Card */}
                 <motion.div
-                    initial={{ scale: 0.2, rotate: -180, opacity: 0 }}
-                    animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                    initial={{
+                        scale: 0,
+                        rotate: -90,
+                        opacity: 0
+                    }}
+                    animate={{
+                        scale: 1,
+                        rotate: 0,
+                        opacity: 1
+                    }}
                     transition={{
                         type: "spring",
-                        stiffness: 20,
-                        damping: 11,
-                        mass: 1.2,
+                        stiffness: 60,
+                        damping: 20,
+                        mass: 0.8,
+                        duration: 0.8,
+                        ease: "easeOut"
                     }}
-                    className="relative bg-gradient-to-b from-blue-600 to-blue-500 text-white rounded-2xl mx-2 p-4 shadow-xl"
+                    className="relative bg-gradient-to-b from-blue-600 to-blue-500 text-white rounded-3xl mx-2 p-4 shadow-xl"
                 >
 
-                    <img src={halfCircle} alt="Half Circle" className="absolute bottom-[200px] left-[-13px] w-[48px] h-[55px]" />
-                    <img src={halfCircle} alt="Half Circle" className="absolute bottom-[200px] right-[-13px] rotate-180 w-[48px] h-[55px]" />
+                    <img src={halfCircle} alt="Half Circle" className="absolute bottom-[160px] left-[-13px] w-[48px] h-[55px]" />
+                    <img src={halfCircle} alt="Half Circle" className="absolute bottom-[160px] right-[-13px] rotate-180 w-[48px] h-[55px]" />
 
                     {/* Gym Header */}
                     <div className="flex gap-3">
@@ -308,16 +318,16 @@ export default function PaymentSuccess({ onClose }: PaymentSuccessProps) {
                             Gym timings : <span>{pass.gym_timings} </span>
                         </div>
 
-                        <div className="flex items-center justify-center gap-2">
+                        <div className="flex items-center justify-center gap-2 w-full">
                             <img src={three} alt="Three" className="mt-1 w-6" />
                             <div>
-                                <div className="flex gap-2 flex-wrap">
+                                <div className="flex gap-1 flex-wrap">
                                     Peak hours :
-                                    <div className="flex gap-2 flex-wrap text-nowrap">
+                                    <div className="flex gap-2 flex-wrap">
                                         {pass.peak_hours}
                                     </div>
                                 </div>
-                                <p className="text-[11px] text-[#BFDBFE] text-cente">
+                                <p className="text-[11px] text-[#BFDBFE] text-center">
                                     (Workouts during peak hours may use more minutes)
                                 </p>
                             </div>

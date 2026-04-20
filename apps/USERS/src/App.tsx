@@ -23,6 +23,7 @@ import Recommended from "./pages/Recommended";
 import NearBy from "./pages/NearBy";
 import { useEffect } from "react";
 import PlanYourWorkout from "./pages/PlanYourWorkout";
+import WorkoutRatingModal from "./components/Workoutratingmodal";
 
 function App() {
 
@@ -232,6 +233,8 @@ function App() {
           <Route path="*" element={<NotFound Loading={loading} />} />
 
         </Routes>
+
+        <WorkoutRatingModal />
 
       </div>
     </div>

@@ -9,6 +9,25 @@ const containerStyle = {
     height: "100%",
 };
 
+const mapStyles = [
+    { elementType: "geometry", stylers: [{ color: "#f5f5f5" }] },
+    { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
+    { elementType: "labels.text.fill", stylers: [{ color: "#9ca3af" }] },
+    { elementType: "labels.text.stroke", stylers: [{ color: "#ffffff" }] },
+    {
+        featureType: "road",
+        elementType: "geometry",
+        stylers: [{ color: "#e5e7eb" }],
+    },
+    {
+        featureType: "poi",
+        stylers: [{ visibility: "off" }],
+    },
+    {
+        featureType: "transit",
+        stylers: [{ visibility: "off" }],
+    },
+];
 
 export default function MapView({ selectedGymFromDetails }: any) {
 
@@ -138,8 +157,10 @@ export default function MapView({ selectedGymFromDetails }: any) {
                 zoom={14}
                 onLoad={(mapInstance) => setMap(mapInstance)}
                 options={{
-                    disableDefaultUI: false,
-                    clickableIcons: true,
+                    disableDefaultUI: true,
+                    zoomControl: true,
+                    clickableIcons: false,
+                    styles: mapStyles,
                 }}
             >
 
@@ -172,11 +193,6 @@ export default function MapView({ selectedGymFromDetails }: any) {
                     return (
                         <OverlayView
                             key={gym.id}
-                            // position={{
-                            //     lat: Number(gym.latitude),
-                            //     lng: Number(gym.longitude),
-                            // }}
-
                             position={{
                                 lat: parseFloat(gym.latitude),
                                 lng: parseFloat(gym.longitude),
@@ -188,19 +204,6 @@ export default function MapView({ selectedGymFromDetails }: any) {
                                 style={{ transform: "translate(-50%, -100%)" }}
                                 className="relative flex flex-col items-center cursor-pointer"
                             >
-                                {/* Top Circle Pin */}
-                                {/* <div className="relative">
-                                    {/* Outer ring */}
-                                {/* <div
-                                        className={`
-                                w-6 h-6 rounded-full flex items-center justify-center
-                                ${selectedGym?.id === gym.id ? "bg-[#2563EB]" : "bg-[#CBD5E1]"}
-                                `}
-                                    >
-                                        {/* Inner white circle */}
-                                {/* <div className="w-3 h-3 bg-white rounded-full" />
-                                    </div>
-                                </div> */}
 
                                 <div className="relative">
                                     <HiLocationMarker

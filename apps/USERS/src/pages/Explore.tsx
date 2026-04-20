@@ -103,7 +103,8 @@ export default function Explore() {
 
     useEffect(() => {
         if (location.state?.openFilter) {
-            openModal("filter");
+            // Open WITHOUT pushing history
+            setShowFilter(true);
         }
     }, [location.state]);
 
@@ -303,15 +304,25 @@ export default function Explore() {
     };
 
     useEffect(() => {
-        const handlePopState = () => {
-            if (showSearch) setShowSearch(false);
-            else if (showFilter) setShowFilter(false);
-            else if (showSortModal) setShowSortModal(false);
+        const handlePopState = (event: PopStateEvent) => {
+            const modal = event.state?.modal;
+
+            // If there's no modal in state → close everything
+            if (!modal) {
+                setShowSearch(false);
+                setShowFilter(false);
+                setShowSortModal(false);
+            } else {
+                // Restore specific modal if needed
+                setShowSearch(modal === "search");
+                setShowFilter(modal === "filter");
+                setShowSortModal(modal === "sort");
+            }
         };
 
         window.addEventListener("popstate", handlePopState);
         return () => window.removeEventListener("popstate", handlePopState);
-    }, [showSearch, showFilter, showSortModal]);
+    }, []);
 
     return (
         <div className="relative h-screen bg-white">

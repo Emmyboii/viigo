@@ -59,6 +59,20 @@ export default function OTPVerification() {
     }, [time]);
 
     const handleChange = (value: string, index: number) => {
+        // Allow only numbers
+        const cleaned = value.replace(/\D/g, "");
+
+        // 🚀 If user pastes or autofills full OTP
+        if (cleaned.length > 1) {
+            const newOtp = cleaned.slice(0, 6).split("");
+            setOtp(newOtp);
+
+            inputsRef.current[5]?.blur();
+            verifyOtp(newOtp.join(""));
+            return;
+        }
+
+        // Normal single digit flow
         if (!/^\d?$/.test(value)) return;
 
         if (status === "error" || status === "success") {
@@ -73,9 +87,8 @@ export default function OTPVerification() {
             inputsRef.current[index + 1]?.focus();
         }
 
-        // ✅ when last digit is entered
         if (updated.every(Boolean)) {
-            inputsRef.current[index]?.blur(); // 👈 dismiss keyboard
+            inputsRef.current[index]?.blur();
             verifyOtp(updated.join(""));
         }
     };
@@ -289,6 +302,11 @@ export default function OTPVerification() {
                                 key={index}
                                 value={digit}
                                 maxLength={1}
+                                inputMode="numeric"
+                                autoComplete="one-time-code"
+                                pattern="\d*"
+                                autoFocus={index === 0}
+                                enterKeyHint={index === 5 ? "done" : "next"}
                                 ref={(el) => {
                                     inputsRef.current[index] = el;
                                 }}
