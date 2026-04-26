@@ -89,17 +89,23 @@ const GymOwnerHome = () => {
 
     if (type === "success") {
       setStatus("success");
+      window.history.replaceState({ modal: type }, "", window.location.pathname); // 👈 replace, not push
+      return; // don't push history for success
     }
 
-    window.history.pushState({ modal: type }, "", window.location.pathname);
+    window.history.pushState({ modal: type }, "", window.location.pathname); // only push for "user"
   };
 
   const closeModal = (type: ModalType) => {
     if (type === "user") setSelectedUser(null);
     if (type === "success") setStatus("idle");
 
+    setChecked(false);
+
     window.history.back();
   };
+
+  const isAutoTransitioning = useRef(false);
 
   /* ---------------- Submit ---------------- */
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -140,29 +146,31 @@ const GymOwnerHome = () => {
 
       // ✅ SUCCESS
       openModal("success");
-      if (data?.data?.user_id) setVerifiedBookingId(data.data.user_id);
+      if (data?.data?.user_id) setVerifiedBookingId(data.data.booking_reference);
       setOtp("");
-      setToast({ type: "success", message: "Check-in successful!" });
+      // setToast({ type: "success", message: "Check-in successful!" });
       setChecked(true);
       window.scrollTo(0, 0);
 
+      const matchedBooking = bookings.find(b => b.id === data.data.booking_id);
+
+      if (data?.data?.user_id) {
+        if (matchedBooking) {
+          setSelectedUser(matchedBooking);
+          console.log("selectedUer", selectedUser);
+
+        }
+      }
+
       // ✅ auto close success modal after 2 seconds
       setTimeout(() => {
+        isAutoTransitioning.current = true;
         setStatus("idle");
 
-        // 👉 If API returns booking/user, use it
-        if (data?.data?.user_id) {
-          const bookingId = data.data.user_id;
+        openModal("user", matchedBooking)
 
-          const matchedBooking = bookings.find(
-            (b) => b.id === bookingId
-          );
-
-          if (matchedBooking) {
-            setSelectedUser(matchedBooking);
-            openModal("user", matchedBooking);
-          }
-        }
+        // re-enable after state settles
+        setTimeout(() => { isAutoTransitioning.current = false; }, 100);
       }, 2400);
 
     } catch (err: unknown) {
@@ -185,8 +193,7 @@ const GymOwnerHome = () => {
 
   const handleClose = () => {
     localStorage.removeItem("paymentSuccess");
-    setSelectedUser(null);
-    setStatus("idle");
+    closeModal("user");
     if (checked) window.location.reload();
   };
 
@@ -212,10 +219,10 @@ const GymOwnerHome = () => {
 
   useEffect(() => {
     const handlePopState = (event: PopStateEvent) => {
-      const modal = event.state?.modal;
+      if (isAutoTransitioning.current) return; // 👈 guard
 
+      const modal = event.state?.modal;
       if (!modal) {
-        // No modal in history → close everything
         setSelectedUser(null);
         setStatus("idle");
       } else if (modal === "user") {
@@ -369,12 +376,7 @@ const GymOwnerHome = () => {
 
             <OtpVerificationModal
               user={selectedUser}
-              onClose={() => {
-                closeModal("user")
-                if (checked) {
-                  window.location.reload();
-                }
-              }}
+              onClose={() => handleClose()}
             />
           </motion.div>
         )}

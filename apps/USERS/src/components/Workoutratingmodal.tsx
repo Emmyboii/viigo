@@ -6,56 +6,15 @@ import { useAppContext } from "../context/AppContext";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-// ─── Types ───────────────────────────────────────────────────────────────────
-
-type BookingForRating = {
-    id: number;
-    booking_reference: string;
-    gym_name: string;
-    gym_image: string;
-    formatted_date: string;
-    duration_in_hours: string;
-    base_price: string;
-    status: string;       // "COMPLETED"
-    is_rated: boolean;    // key field
-};
-
 const TAGS = ["Cleanliness", "Equipment", "Crowd", "Vibe", "Spacious", "Friendly"];
 
-// ─── Simulated GET (replace with real fetch when ready) ──────────────────────
-
-async function fetchUnratedBooking(): Promise<BookingForRating | null> {
-    // 🔧 SIMULATED — replace body with real API call:
-    // const res = await fetch(`${backendUrl}/client/bookings/my-bookings/`, {
-    //     headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-    // });
-    // const data = await res.json();
-    // const bookings: BookingForRating[] = data.data ?? [];
-    // return bookings.find(b => b.status === "COMPLETED" && !b.is_rated) ?? null;
-
-    // Simulated response:
-    return {
-        id: 42,
-        booking_reference: "VGO-2024-0042",
-        gym_name: "Fight To Fitness",
-        gym_image: "media/gyms/fight-to-fitness.jpg",
-        formatted_date: "05 Dec",
-        duration_in_hours: "1.5",
-        base_price: "280",
-        status: "COMPLETED",
-        is_rated: true,
-    };
-}
-
-// ─── POST rating ─────────────────────────────────────────────────────────────
-
 async function submitRating(
-    bookingId: number,
+    pendingRatingsCardId: number,
     rating: number,
     tags: string[]
 ): Promise<boolean> {
     try {
-        const res = await fetch(`${backendUrl}/client/bookings/${bookingId}/rate/`, {
+        const res = await fetch(`${backendUrl}/client/bookings/${pendingRatingsCardId}/rate/`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -63,38 +22,27 @@ async function submitRating(
             },
             body: JSON.stringify({ rating, tags }),
         });
-        return res.ok;
-    } catch {
-        // Fallback: log and treat as success so UX isn't blocked
-        console.error("Rating submission failed, using fallback.");
+
+        if (!res.ok) return false;
+
         return true;
+    } catch (err) {
+        console.error("Rating submission failed:", err);
+        return false;
     }
 }
 
-// ─── Component ───────────────────────────────────────────────────────────────
 
 export default function WorkoutRatingModal() {
-    const { userData } = useAppContext();
+    const { pendingRatings, pendingRatingsCard } = useAppContext();
 
-    const [booking, setBooking] = useState<BookingForRating | null>(null);
     const [open, setOpen] = useState(false);
     const [rating, setRating] = useState(0);
     const [hovered, setHovered] = useState(0);
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
     const [submitting, setSubmitting] = useState(false);
     const [submitted, setSubmitted] = useState(false);
-
-    useEffect(() => {
-        if (!userData) return; // 👈 skip entirely if not logged in
-
-        (async () => {
-            const unrated = await fetchUnratedBooking();
-            if (unrated && !unrated.is_rated) {
-                setBooking(unrated);
-                setOpen(true);
-            }
-        })();
-    }, [userData]);
+    const [error, setError] = useState<string | null>(null);
 
     const toggleTag = (tag: string) => {
         setSelectedTags(prev =>
@@ -103,17 +51,30 @@ export default function WorkoutRatingModal() {
     };
 
     const handleSubmit = async () => {
-        if (!booking || rating === 0) return;
+        if (!pendingRatings || !pendingRatingsCard || rating === 0) return;
+
         setSubmitting(true);
-        const ok = await submitRating(booking.id, rating, selectedTags);
+        setError(null);
+
+        const ok = await submitRating(pendingRatingsCard.id, rating, selectedTags);
+
         setSubmitting(false);
+
         if (ok) {
             setSubmitted(true);
             setTimeout(() => setOpen(false), 1200);
+        } else {
+            setError("Failed to submit rating. Please try again.");
         }
     };
 
-    if (!booking) return null;
+    useEffect(() => {
+        if (pendingRatings && pendingRatingsCard) {
+            setOpen(true);
+        }
+    }, [pendingRatings, pendingRatingsCard]);
+
+    if (!pendingRatings || !pendingRatingsCard) return null;
 
     return (
         <BottomSheet
@@ -139,8 +100,8 @@ export default function WorkoutRatingModal() {
             {/* ── Gym Card ── */}
             <div className="flex gap-3 border border-[#E2E8F0] rounded-lg  mb-6 shadow-sm">
                 <img
-                    src={`https://api.viigo.in/${booking.gym_image}`}
-                    alt={booking.gym_name}
+                    src={`${pendingRatingsCard.gym_image}`}
+                    alt={pendingRatingsCard.gym_name}
                     className="w-[90px] h-[90px] rounded-tl-lg rounded-bl-lg object-cover flex-shrink-0"
                     onError={e => {
                         (e.target as HTMLImageElement).src =
@@ -148,14 +109,14 @@ export default function WorkoutRatingModal() {
                     }}
                 />
                 <div className="flex flex-col justify-center gap-1">
-                    <p className="font-semibold text-gray-900">{booking.gym_name}</p>
+                    <p className="font-semibold text-gray-900">{pendingRatingsCard.gym_name}</p>
                     <div className="flex items-center gap-1 text-[#0F172A] text-sm">
                         <BsCalendar2 size={11} />
-                        <span>{booking.formatted_date} • {booking.duration_in_hours} hrs</span>
+                        <span>{pendingRatingsCard.booking_date} • {pendingRatingsCard.duration_in_hours} hrs</span>
                     </div>
                     <div className="flex items-center gap-2 mt-1">
                         <span className="text-[#0F172A] text-base font-semibold">
-                            ₹{booking.base_price}/Hr
+                            ₹{pendingRatingsCard.gym_hourly_rate}/Hr
                         </span>
                         <span className="bg-[#CBD5E1] text-[#475569] text-xs px-2 py-0.5 rounded-full">
                             Completed
@@ -208,6 +169,12 @@ export default function WorkoutRatingModal() {
                     );
                 })}
             </div>
+
+            {error && (
+                <p className="text-red-500 text-sm text-center mt-3">
+                    {error}
+                </p>
+            )}
         </BottomSheet>
     );
 }

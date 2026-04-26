@@ -120,6 +120,25 @@ export interface BookingConfigType {
     cancellation_fee: string;
 }
 
+export interface PendingRating {
+    id: number;
+    booking_reference: string;
+    gym_name: string;
+    booking_date: string;
+    check_out_time: string;
+}
+
+export interface PendingRatingCard {
+    id: number;
+    booking_reference: string;
+    gym_name: string;
+    booking_date: string;
+    gym_image: string;
+    gym_hourly_rate: string;
+    duration_in_hours: string;
+    status: string;
+}
+
 const BASE_URL = "http://api.viigo.in";
 
 export const normalizeImagePath = (url?: string) => {
@@ -166,6 +185,12 @@ type AppContextType = {
 
     notifications: NotificationType[];
     setNotifications: React.Dispatch<React.SetStateAction<NotificationType[]>>;
+
+    pendingRatings: PendingRating | null;
+    setPendingRatings: React.Dispatch<React.SetStateAction<PendingRating | null>>;
+
+    pendingRatingsCard: PendingRatingCard | null;
+    setPendingRatingsCard: React.Dispatch<React.SetStateAction<PendingRatingCard | null>>;
 
     searchResults: GymCard[];
 
@@ -220,6 +245,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [nearbyGyms, setNearbyGyms] = useState<GymCard[]>([]);
     const [sortLabel, setSortLabel] = useState("");
     const [amenities, setAmenities] = useState<Amenity[]>([]);
+    const [pendingRatings, setPendingRatings] = useState<PendingRating | null>(null);
+    const [pendingRatingsCard, setPendingRatingsCard] = useState<PendingRatingCard | null>(null);
 
     const hasUnread = notifications.some(n => !n.is_read);
 
@@ -291,6 +318,46 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             }
         };
         fetchAmenities();
+    }, []);
+
+    useEffect(() => {
+        const fetchPendingRatingCard = async () => {
+            const token = localStorage.getItem("token");
+
+            if (!token) return
+
+            try {
+                const res = await fetch(`${backendUrl}/client/sessions/pending-ratings-card/`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error("Failed to fetch pending rating card");
+                setPendingRatingsCard(data.data?.length ? data.data[0] : null);
+            } catch (err) {
+                console.error(err);
+            }
+        };
+        fetchPendingRatingCard();
+    }, []);
+
+    useEffect(() => {
+        const fetchPendingRatings = async () => {
+            const token = localStorage.getItem("token");
+
+            if (!token) return
+
+            try {
+                const res = await fetch(`${backendUrl}/client/sessions/pending-ratings/`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error("Failed to fetch pending ratings");
+                setPendingRatings(data.data?.length ? data.data[0] : null);
+            } catch (err) {
+                console.error(err);
+            }
+        };
+        fetchPendingRatings();
     }, []);
 
 
@@ -556,7 +623,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [userData, latitude, longitude]);
 
-     useEffect(() => {
+    useEffect(() => {
         if (userData) {
             fetchBookingConfig();
         }
@@ -645,6 +712,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                 sortLabel,
                 setSortLabel,
                 amenities,
+                pendingRatings,
+                setPendingRatings,
+                pendingRatingsCard,
+                setPendingRatingsCard,
 
                 fetchRecommendedGyms,
                 fetchBookingConfig,

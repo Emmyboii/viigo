@@ -48,6 +48,29 @@ function App() {
     }
   }, [location.pathname]);
 
+  const knownRoutes = [
+    "/",
+    "/login",
+    "/signup",
+    "/validateotp",
+    "/onboarding",
+    "/gyms/recommended",
+    "/gyms/nearby",
+    "/explore",
+    "/reviewpay",
+    "/notifications",
+    "/bookings",
+    "/profile",
+    "/profile/edit",
+    "/support",
+    "/faq"
+  ];
+
+  const isKnownRoute =
+    knownRoutes.includes(location.pathname) ||
+    location.pathname.startsWith("/gyms/") ||
+    location.pathname.startsWith("/cancelbooking/");
+
   return (
     <div className="font-manrope relative">
       {/* Loader */}
@@ -234,8 +257,8 @@ function App() {
 
         </Routes>
 
-        <WorkoutRatingModal />
-
+        {isKnownRoute && <WorkoutRatingModal />}
+        
       </div>
     </div>
   )
