@@ -232,6 +232,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     const fetchBookings = useCallback(async () => {
         setIsLoading(true);
+        const token = localStorage.getItem("token");
+
+        if (!token) return
+
         try {
             const data = await request("/gymowner/owner/bookings/");
             const bookings = data?.data || [];

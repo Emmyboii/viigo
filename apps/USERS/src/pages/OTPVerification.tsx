@@ -187,8 +187,8 @@ export default function OTPVerification() {
             setToast({ type: "success", message: "OTP verified successfully" });
 
             // Navigate after toast
-            setTimeout(() => {
-                checkOnboardingAndRedirect();
+            setTimeout(async () => {
+               await checkOnboardingAndRedirect();
                 setToast(null);
             }, 3000);
         } catch (err: any) {

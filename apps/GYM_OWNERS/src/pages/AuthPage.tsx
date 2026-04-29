@@ -3,7 +3,7 @@ import login from '../assets/loginIng.png'
 import logo from '../assets/icon2.png'
 import lock from '../assets/lock.png'
 // import { FcGoogle } from "react-icons/fc";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaPhoneAlt } from 'react-icons/fa';
 import { MdError } from 'react-icons/md';
@@ -11,7 +11,7 @@ import { FaCircleCheck } from 'react-icons/fa6';
 import { FcGoogle } from 'react-icons/fc';
 import { useGoogleLogin } from '@react-oauth/google';
 
-type ToastType = "success" | "error" | null;
+type ToastType = "success" | "error" | "validating" | null;
 
 const AuthPage = () => {
 
@@ -101,6 +101,8 @@ const AuthPage = () => {
 
     setIsLoading(true);
 
+    setToast({ type: "validating", message: "Validating credentials..." });
+
     try {
       const payload = { identifier: useEmail ? emailAddress : phoneNumber };
 
@@ -156,6 +158,8 @@ const AuthPage = () => {
 
   const loginWithGoogle = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
+      setToast({ type: "validating", message: "Validating credentials..." });
+
       try {
         const response = await fetch(`${backendUrl}/auth/google/`, {
           method: "POST",
@@ -172,25 +176,23 @@ const AuthPage = () => {
 
         if (!response.ok) {
           setToast({ type: "error", message: data.message || "Google login failed" });
+          setTimeout(() => setToast(null), 2000);
           return;
         }
 
         localStorage.setItem("token", data.data?.access);
         localStorage.setItem("tokenTimestamp", Date.now().toString());
 
+        // Only now swap to success — stays until checkOnboardingAndRedirect completes
         setToast({ type: "success", message: "Login successful" });
 
-        setTimeout(() => {
-          checkOnboardingAndRedirect();
+        setTimeout(async () => {
+          await checkOnboardingAndRedirect(); // await so toast stays until redirect
           setToast(null);
-        }, 3000);
+        }, 1500);
 
       } catch (error: unknown) {
-        const message =
-          error instanceof Error
-            ? error.message
-            : "Something went wrong during Google login";
-
+        const message = error instanceof Error ? error.message : "Something went wrong during Google login";
         setToast({ type: "error", message });
         setTimeout(() => setToast(null), 2000);
       }
@@ -200,6 +202,10 @@ const AuthPage = () => {
       setTimeout(() => setToast(null), 2000);
     },
   });
+
+  const handleToastClose = useCallback(() => {
+    setToast(null);
+  }, []);
 
   return (
     <div className="bg-[#ffffff] overflow-x-hidden flex mk:flex-row flex-col w-full">
@@ -216,7 +222,14 @@ const AuthPage = () => {
       </div>
 
       <div className="bg-white relative rounded-t-3xl mk:h-screen h-1/2 mk:flex flex-col justify-center p-5 mk:p-7 space-y-6 mk:w-1/2 mk:max-w-[450px] mk:mx-auto">
-        {toast && <Toast type={toast.type} text={toast.message} />}
+        {toast && (
+          <>
+            {toast.type === "validating" && (
+              <div className="fixed inset-0 bg-black/50 z-40" />
+            )}
+            <Toast type={toast.type} text={toast.message} onClose={handleToastClose} />
+          </>
+        )}
 
         <p className="font-semibold text-lg block mk:hidden">Login or signup Viigo to Book <br /> Workouts on hourly basis </p>
 
@@ -306,7 +319,10 @@ const AuthPage = () => {
             </div>
           )}
           <div
-            onClick={() => loginWithGoogle()}
+            onClick={() => {
+              loginWithGoogle()
+              setToast({ type: "validating", message: "Validating credentials..." });
+            }}
             className="rounded-full border border-[#E2E8F0] p-2.5 cursor-pointer hover:shadow-md transition"
           >
             <FcGoogle className="size-6" />
@@ -324,11 +340,34 @@ const AuthPage = () => {
 
 export default AuthPage
 
-function Toast({ text, type }: { text: string; type: ToastType }) {
+function Toast({ text, type, onClose }: { text: string; type: ToastType; onClose: () => void }) {
+  useEffect(() => {
+    if (type === "validating") return;
+
+    const timer = setTimeout(() => {
+      onClose();
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [onClose, type]);
 
   if (!type) return null;
 
   const isSuccess = type === "success";
+  const isValidating = type === "validating";
+
+  if (isValidating) {
+    return (
+      <div
+        role="alert"
+        className="mk:absolute fixed inset-0 z-50 flex items-center justify-center"
+      >
+        <div className="bg-white px-6 py-5 rounded-xl flex items-center gap-3 shadow-xl animate-[fadeIn_0.2s_ease-out]">
+          <span className="w-5 h-5 border-2 border-gray-200 border-t-blue-500 rounded-full animate-spin flex-shrink-0" />
+          <p className="text-sm font-medium">{text}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
