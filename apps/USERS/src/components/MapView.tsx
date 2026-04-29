@@ -162,7 +162,7 @@ export default function MapView({ selectedGymFromDetails }: any) {
     if (!isLoaded) return <div className="h-full w-full" />;
 
     return (
-        <div className="relative h-full w-full">
+        <div className="relative h-screen w-full">
             <GoogleMap
                 mapContainerStyle={containerStyle}
                 center={userLocation || { lat: 6.5244, lng: 3.3792 }} // fallback = Lagos
@@ -250,7 +250,7 @@ export default function MapView({ selectedGymFromDetails }: any) {
 
             {/* Bottom Floating Card */}
             {nearbyGyms?.length > 0 && (
-                <div className="absolute bottom-14 left-0 right-0 px-4 mb-10">
+                <div className="absolute bottom-16 left-0 right-0 px-4 mb-10">
                     <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
                         {nearbyGyms.map((gym: any) => (
                             <div
@@ -260,7 +260,7 @@ export default function MapView({ selectedGymFromDetails }: any) {
                                     panToGym(gym)
                                 }}
                                 className={`
-                                    min-w-[300px] bg-white rounded shadow-xl
+                                    min-w-[300px] bg-white rounded
                                     transition-all duration-200 cursor-pointer h-[94px] flex items-center gap-3
                                     ${selectedGym?.id === gym.id ? "ring-2 ring-blue-600" : ""}
                                 `}
