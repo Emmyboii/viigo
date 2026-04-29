@@ -162,7 +162,7 @@ export default function MapView({ selectedGymFromDetails }: any) {
     if (!isLoaded) return <div className="h-full w-full" />;
 
     return (
-        <div className="relative h-screen w-full">
+        <div className="relative h-screen w-full overflow-y-hidden">
             <GoogleMap
                 mapContainerStyle={containerStyle}
                 center={userLocation || { lat: 6.5244, lng: 3.3792 }} // fallback = Lagos
