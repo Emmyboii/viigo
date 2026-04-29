@@ -242,7 +242,7 @@ export default function MapView({ selectedGymFromDetails }: any) {
             {/* Reset to my location button */}
             <button
                 onClick={resetToMyLocation}
-                className="absolute bottom-52 right-4 bg-white rounded-full shadow-lg p-2.5 z-10 border border-gray-100 active:scale-95 transition-transform"
+                className="absolute bottom-64 right-4 bg-white rounded-full shadow-lg p-2.5 z-10 border border-gray-100 active:scale-95 transition-transform"
                 title="Back to my location"
             >
                 <HiOutlineLocationMarker size={22} className="text-[#2563EB]" />
@@ -250,7 +250,7 @@ export default function MapView({ selectedGymFromDetails }: any) {
 
             {/* Bottom Floating Card */}
             {nearbyGyms?.length > 0 && (
-                <div className="absolute bottom-16 left-0 right-0 px-4 mb-10">
+                <div className="absolute bottom-24 left-0 right-0 px-4 mb-10">
                     <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
                         {nearbyGyms.map((gym: any) => (
                             <div
