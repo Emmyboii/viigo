@@ -1,8 +1,9 @@
 import { GoogleMap, OverlayView, useJsApiLoader } from "@react-google-maps/api";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAppContext } from "../context/AppContext";
 import { HiLocationMarker } from "react-icons/hi";
 import { useLocation, useNavigate } from "react-router-dom";
+import { HiOutlineLocationMarker } from "react-icons/hi";
 
 const containerStyle = {
     width: "100%",
@@ -14,101 +15,66 @@ const mapStyles = [
     { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
     { elementType: "labels.text.fill", stylers: [{ color: "#9ca3af" }] },
     { elementType: "labels.text.stroke", stylers: [{ color: "#ffffff" }] },
-    {
-        featureType: "road",
-        elementType: "geometry",
-        stylers: [{ color: "#e5e7eb" }],
-    },
-    {
-        featureType: "poi",
-        stylers: [{ visibility: "off" }],
-    },
-    {
-        featureType: "transit",
-        stylers: [{ visibility: "off" }],
-    },
+    { featureType: "road", elementType: "geometry", stylers: [{ color: "#e5e7eb" }] },
+    { featureType: "poi", stylers: [{ visibility: "off" }] },
+    { featureType: "transit", stylers: [{ visibility: "off" }] },
 ];
 
+const getValidLatLng = (lat: any, lng: any) => {
+    const parsedLat = parseFloat(lat);
+    const parsedLng = parseFloat(lng);
+    if (!isFinite(parsedLat) || !isFinite(parsedLng)) return null;
+    return { lat: parsedLat, lng: parsedLng };
+};
+
 export default function MapView({ selectedGymFromDetails }: any) {
-
     const locationState = useLocation().state as any;
+    const { nearbyGyms, gyms, latitude, longitude } = useAppContext();
+    const navigate = useNavigate();
 
-    const { nearbyGyms, gyms } = useAppContext();
-    const [selectedGym, setSelectedGym] = useState<any>(locationState?.gym || null);
-    const navigate = useNavigate()
+    const initialGym = locationState?.gym || selectedGymFromDetails || null;
+
+    const [selectedGym, setSelectedGym] = useState<any>(initialGym);
     const [map, setMap] = useState<google.maps.Map | null>(null);
     const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
 
+    const userLocationRef = useRef<{ lat: number; lng: number } | null>(null);
+    const nearbyGymsRef = useRef<any[]>([]);
+    const hasInitializedView = useRef(false);
+    const lockedToGym = useRef<boolean>(!!initialGym);
+    // Store initialGym in a ref so onLoad closure always has it
+    const initialGymRef = useRef<any>(initialGym);
 
-    // Fit map bounds to all nearbyGyms
+    const { isLoaded } = useJsApiLoader({
+        googleMapsApiKey: import.meta.env.VITE_GOOGLE_API_KEY,
+    });
+
     useEffect(() => {
-        if (map && nearbyGyms?.length) {
-            const bounds = new google.maps.LatLngBounds();
-
-            nearbyGyms.forEach((gym: any) => {
-                bounds.extend({
-                    lat: parseFloat(gym.latitude),
-                    lng: parseFloat(gym.longitude),
-                });
-            });
-
-            if (userLocation) bounds.extend(userLocation); // include user location
-
-            map.fitBounds(bounds);
+        if (latitude && longitude) {
+            const loc = { lat: Number(latitude), lng: Number(longitude) };
+            setUserLocation(loc);
+            userLocationRef.current = loc;
         }
-    }, [map, nearbyGyms, userLocation]);
-
-    // const center = selectedGymFromDetails
-    //     ? {
-    //         lat: parseFloat(selectedGymFromDetails.latitude),
-    //         lng: parseFloat(selectedGymFromDetails.longitude),
-    //     }
-    //     : {
-    //         lat: Number(latitude),
-    //         lng: Number(longitude),
-    //     };
-
-    const getValidLatLng = (lat: any, lng: any) => {
-        const parsedLat = parseFloat(lat);
-        const parsedLng = parseFloat(lng);
-
-        if (!isFinite(parsedLat) || !isFinite(parsedLng)) {
-            return null; // invalid coordinates
-        }
-
-        return { lat: parsedLat, lng: parsedLng };
-    };
-
-    const center = selectedGym
-        ? getValidLatLng(selectedGym.latitude, selectedGym.longitude) || { lat: 28.6139, lng: 77.2090 }
-        : userLocation || { lat: 28.6139, lng: 77.2090 };
-
-    // When panTo
-    useEffect(() => {
-        if (selectedGym && map) {
-            const coords = getValidLatLng(selectedGym.latitude, selectedGym.longitude);
-            if (coords) map.panTo(coords);
-        }
-    }, [selectedGym, map]);
-
-    // Fetch user location on mount
-    useEffect(() => {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 (pos) => {
-                    setUserLocation({
-                        lat: pos.coords.latitude,
-                        lng: pos.coords.longitude,
-                    });
+                    const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+                    setUserLocation(loc);
+                    userLocationRef.current = loc;
                 },
                 (err) => console.warn("Geolocation error:", err),
-                { enableHighAccuracy: true }
+                { enableHighAccuracy: false, timeout: 5000 }
             );
         }
     }, []);
 
+    // Keep nearbyGymsRef in sync
     useEffect(() => {
-        if (nearbyGyms?.length) {
+        nearbyGymsRef.current = nearbyGyms || [];
+    }, [nearbyGyms]);
+
+    useEffect(() => {
+        if (!lockedToGym.current && nearbyGyms?.length) {
             setSelectedGym(nearbyGyms[0]);
         }
     }, [nearbyGyms]);
@@ -116,36 +82,82 @@ export default function MapView({ selectedGymFromDetails }: any) {
     useEffect(() => {
         if (selectedGymFromDetails) {
             setSelectedGym(selectedGymFromDetails);
+            lockedToGym.current = true;
+            initialGymRef.current = selectedGymFromDetails;
         }
     }, [selectedGymFromDetails]);
 
+    // Only runs when nearbyGyms arrives AND we are NOT locked to a gym
+    // Locked gym view is handled entirely in onLoad — no effect needed
     useEffect(() => {
-        if (map && nearbyGyms?.length) {
-            const bounds = new google.maps.LatLngBounds();
+        if (!map || hasInitializedView.current || lockedToGym.current) return;
+        if (!nearbyGyms?.length) return;
 
-            nearbyGyms.forEach((gym: any) => {
-                bounds.extend({
-                    lat: parseFloat(gym.latitude),
-                    lng: parseFloat(gym.longitude),
-                });
-            });
+        const bounds = new google.maps.LatLngBounds();
 
-            map.fitBounds(bounds);
+        nearbyGyms.forEach((gym: any) => {
+            const coords = getValidLatLng(gym.latitude, gym.longitude);
+            if (coords) bounds.extend(coords);
+        });
+
+        if (userLocationRef.current) bounds.extend(userLocationRef.current);
+
+        map.fitBounds(bounds);
+
+        // ✅ KEEP USER VISIBLE AFTER ZOOM
+        if (userLocationRef.current) {
+            setTimeout(() => {
+                map.panTo(userLocationRef.current!);
+            }, 100);
         }
+
+        hasInitializedView.current = true;
     }, [map, nearbyGyms]);
 
-    const { isLoaded } = useJsApiLoader({
-        googleMapsApiKey: import.meta.env.VITE_GOOGLE_API_KEY,
-    });
+    const handleMapLoad = (mapInstance: google.maps.Map) => {
+        setMap(mapInstance);
+
+        // If coming from gym details — pan immediately inside onLoad
+        // This runs ONCE, synchronously, before any effect or state update can interfere
+        if (lockedToGym.current && initialGymRef.current) {
+            const coords = getValidLatLng(
+                initialGymRef.current.latitude,
+                initialGymRef.current.longitude
+            );
+            if (coords) {
+                mapInstance.panTo(coords);
+                mapInstance.setZoom(15);
+            }
+            hasInitializedView.current = true;
+        }
+    };
+
+    const panToGym = (gym: any) => {
+        setSelectedGym(gym);
+        if (!map) return;
+        const coords = getValidLatLng(gym.latitude, gym.longitude);
+        if (!coords) return;
+        map.panTo(coords);
+        setTimeout(() => map.setZoom(15), 250);
+    };
+
+    const resetToMyLocation = () => {
+        if (!map || !userLocationRef.current) return;
+
+        setSelectedGym(null);
+
+        map.panTo(userLocationRef.current);
+        map.setZoom(13); // clean reset
+    };
 
     useEffect(() => {
-        if (selectedGym && map) {
-            map.panTo({
-                lat: Number(selectedGym.latitude),
-                lng: Number(selectedGym.longitude),
-            });
+        if (!map || !userLocation || lockedToGym.current || hasInitializedView.current) return;
+        // Only center on user if gyms haven't loaded yet (fitBounds will handle it otherwise)
+        if (!nearbyGymsRef.current?.length) {
+            map.panTo(userLocation);
+            map.setZoom(13);
         }
-    }, [selectedGym, map]);
+    }, [map, userLocation]);
 
     if (!isLoaded) return <div className="h-full w-full" />;
 
@@ -153,17 +165,17 @@ export default function MapView({ selectedGymFromDetails }: any) {
         <div className="relative h-full w-full">
             <GoogleMap
                 mapContainerStyle={containerStyle}
-                center={center}
-                zoom={14}
-                onLoad={(mapInstance) => setMap(mapInstance)}
+                center={userLocation || { lat: 6.5244, lng: 3.3792 }} // fallback = Lagos
+                zoom={13}
+                onLoad={handleMapLoad}
                 options={{
                     disableDefaultUI: true,
                     zoomControl: true,
                     clickableIcons: false,
                     styles: mapStyles,
+                    minZoom: 3,
                 }}
             >
-
                 {/* User Location Marker */}
                 {userLocation && (
                     <OverlayView
@@ -188,8 +200,7 @@ export default function MapView({ selectedGymFromDetails }: any) {
                 )}
 
                 {gyms?.map((gym: any) => {
-                    // const offset = index * 0.00005;
-
+                    const isSelected = selectedGym?.id === gym.id;
                     return (
                         <OverlayView
                             key={gym.id}
@@ -200,36 +211,42 @@ export default function MapView({ selectedGymFromDetails }: any) {
                             mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
                         >
                             <div
-                                onClick={() => setSelectedGym(gym)}
+                                onClick={() => panToGym(gym)}
                                 style={{ transform: "translate(-50%, -100%)" }}
                                 className="relative flex flex-col items-center cursor-pointer"
                             >
-
                                 <div className="relative">
                                     <HiLocationMarker
                                         size={34}
-                                        className={selectedGym?.id === gym.id ? "text-[#2563EB]" : "text-[#CBD5E1]"}
+                                        className={isSelected ? "text-[#2563EB]" : "text-[#CBD5E1]"}
                                     />
                                 </div>
-
-                                {/* Price Bubble */}
                                 <div
                                     className={`
-                                mt-2 px-4 py-1 rounded-full text-sm font-semibold shadow-md
-                                transition-all duration-200
-                                ${selectedGym?.id === gym.id
+                                        mt-2 px-4 py-1 rounded-full text-sm font-semibold shadow-md
+                                        transition-all duration-200
+                                        ${isSelected
                                             ? "bg-[#2563EB] text-white scale-105"
                                             : "bg-[#CBD5E1] text-[#0F172A]"
                                         }
-                            `}
+                                    `}
                                 >
                                     {Number(gym.hourly_rate)}/Hr
                                 </div>
                             </div>
                         </OverlayView>
-                    )
+                    );
                 })}
             </GoogleMap>
+
+            {/* Reset to my location button */}
+            <button
+                onClick={resetToMyLocation}
+                className="absolute bottom-52 right-4 bg-white rounded-full shadow-lg p-2.5 z-10 border border-gray-100 active:scale-95 transition-transform"
+                title="Back to my location"
+            >
+                <HiOutlineLocationMarker size={22} className="text-[#2563EB]" />
+            </button>
 
             {/* Bottom Floating Card */}
             {nearbyGyms?.length > 0 && (
@@ -238,14 +255,16 @@ export default function MapView({ selectedGymFromDetails }: any) {
                         {nearbyGyms.map((gym: any) => (
                             <div
                                 key={gym.id}
-                                onClick={() => setSelectedGym(gym)}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    panToGym(gym)
+                                }}
                                 className={`
                                     min-w-[300px] bg-white rounded shadow-xl
                                     transition-all duration-200 cursor-pointer h-[94px] flex items-center gap-3
                                     ${selectedGym?.id === gym.id ? "ring-2 ring-blue-600" : ""}
                                 `}
                             >
-                                {/* Image container */}
                                 <div className="w-[71px] h-[94px] flex-shrink-0">
                                     <img
                                         src={gym?.images[0]?.image}
@@ -253,21 +272,20 @@ export default function MapView({ selectedGymFromDetails }: any) {
                                         className="w-full h-full object-cover rounded-tl rounded-bl"
                                     />
                                 </div>
-
-                                {/* Content */}
                                 <div className="p-2 pl-0">
                                     <div>
                                         <h3 className="font-semibold text-[#0F172A] text-base">{gym.name}</h3>
-
                                         <p className="text-[11.3px] text-[#475569] flex items-center gap-1 mt-1">
                                             <HiLocationMarker size={16} /> {gym.distance},{gym.area} • {gym.open_status}
                                         </p>
                                     </div>
-
                                     <div className="flex items-center justify-between gap-2 mt-1">
                                         <p className="text-lg font-semibold">₹{Number(gym.hourly_rate)}/Hr</p>
                                         <p
-                                            onClick={() => navigate(`/gyms/${gym?.slug}`)}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                navigate(`/gyms/${gym?.slug}`);
+                                            }}
                                             className="text-sm font-semibold text-[#2563EB]"
                                         >
                                             Details

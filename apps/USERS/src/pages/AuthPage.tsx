@@ -29,7 +29,7 @@ const slides = [
   { text: <>Pay Only for What You Use</>, size: "text-6xl" },
 ];
 
-type ToastType = "success" | "error" | null;
+type ToastType = "success" | "error" | "validating" | null;
 
 const AuthPage = () => {
 
@@ -133,14 +133,14 @@ const AuthPage = () => {
     if (useEmail && !isValidEmail(emailAddress)) return;
 
     setIsLoading(true);
+    // Show "validating credentials" while OTP request is running
+    setToast({ type: "validating", message: "Validating credentials..." });
 
     try {
       const payload = { identifier: useEmail ? emailAddress : phoneNumber };
 
-      // Retrieve existing storage or start fresh
       const tempData = JSON.parse(localStorage.getItem("tempIdentifier") || "{}");
 
-      // Set new value dynamically
       if (useEmail) {
         tempData["Email"] = payload.identifier;
       } else {
@@ -156,23 +156,17 @@ const AuthPage = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        // Get backend error message
         const message =
           data?.data?.identifier?.[0] || data?.message || "Something went wrong";
 
-        // Show toast for 3 seconds
         setToast({ type: "error", message });
-
-        // Auto-hide toast after 3 seconds
         setTimeout(() => setToast(null), 2000);
         return;
       }
 
-      // Success: show toast first
       setToast({ type: "success", message: data.message || "OTP sent successfully" });
       localStorage.setItem("tempIdentifier", JSON.stringify(tempData));
 
-      // Wait 3 seconds before navigating
       setTimeout(() => {
         setToast(null);
         navigate("/validateotp");
@@ -188,6 +182,9 @@ const AuthPage = () => {
 
   const loginWithGoogle = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
+      // Show immediately when user returns from Google account picker
+      setToast({ type: "validating", message: "Validating credentials..." });
+
       try {
         const response = await fetch(`${backendUrl}/auth/google/`, {
           method: "POST",
@@ -203,18 +200,20 @@ const AuthPage = () => {
 
         if (!response.ok) {
           setToast({ type: "error", message: data.message || "Google login failed" });
+          setTimeout(() => setToast(null), 2000);
           return;
         }
 
         localStorage.setItem("token", data.data?.access);
         localStorage.setItem("tokenTimestamp", Date.now().toString());
 
+        // Only now swap to success — stays until checkOnboardingAndRedirect completes
         setToast({ type: "success", message: "Login successful" });
 
-        setTimeout(() => {
-          checkOnboardingAndRedirect();
+        setTimeout(async () => {
+          await checkOnboardingAndRedirect(); // await so toast stays until redirect
           setToast(null);
-        }, 3000);
+        }, 1500);
 
       } catch (error: any) {
         setToast({ type: "error", message: error.message });
@@ -266,8 +265,14 @@ const AuthPage = () => {
       </div>
 
       <div className="bg-white rounded-t-3xl h-1/2 p-5 space-y-6">
-        {toast && <Toast type={toast.type} text={toast.message} onClose={handleToastClose} />}
-
+        {toast && (
+          <>
+            {toast.type === "validating" && (
+              <div className="fixed inset-0 bg-black/50 z-40" />
+            )}
+            <Toast type={toast.type} text={toast.message} onClose={handleToastClose} />
+          </>
+        )}
         <p className="font-semibold text-lg max-w-[1300px] mx-auto">Login or signup Viigo to Book <br /> Workouts on hourly basis </p>
 
         {!useEmail ? (
@@ -347,7 +352,10 @@ const AuthPage = () => {
             </div>
           )}
           <div
-            onClick={() => loginWithGoogle()}
+            onClick={() => {
+              loginWithGoogle()
+              setToast({ type: "validating", message: "Validating credentials..." });
+            }}
             className="rounded-full border border-[#E2E8F0] p-2.5 cursor-pointer hover:shadow-md transition"
           >
             <FcGoogle className="size-6" />
@@ -367,24 +375,41 @@ export default AuthPage
 
 function Toast({ text, type, onClose }: { text: string; type: ToastType; onClose: () => void }) {
   useEffect(() => {
+    if (type === "validating") return;
+
     const timer = setTimeout(() => {
       onClose();
     }, 2000);
     return () => clearTimeout(timer);
-  }, [onClose]);
+  }, [onClose, type]);
 
   if (!type) return null;
 
   const isSuccess = type === "success";
+  const isValidating = type === "validating";
+
+  if (isValidating) {
+    return (
+      <div
+        role="alert"
+        className="fixed inset-0 z-50 flex items-center justify-center"
+      >
+        <div className="bg-white px-6 py-5 rounded-xl flex items-center gap-3 shadow-xl animate-[fadeIn_0.2s_ease-out]">
+          <span className="w-5 h-5 border-2 border-gray-200 border-t-blue-500 rounded-full animate-spin flex-shrink-0" />
+          <p className="text-sm font-medium">{text}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
       role="alert"
-      className={`fixed w-[280px] bottom-10 z-50 left-1/2 -translate-x-1/2 
+      className="fixed w-[280px] bottom-10 z-50 left-1/2 -translate-x-1/2 
       bg-white px-4 py-3 rounded-lg flex items-center gap-3
-      shadow-[0_10px_40px_rgba(0,0,0,0.18)] animate-[fadeIn_0.2s_ease-out]`}
+      shadow-[0_10px_40px_rgba(0,0,0,0.18)] animate-[fadeIn_0.2s_ease-out]"
     >
-      <span className={`text-xl ${isSuccess ? "text-green-500" : "text-red-500"}`}>
+      <span className={`text-xl flex-shrink-0 ${isSuccess ? "text-green-500" : "text-red-500"}`}>
         {isSuccess ? <FaCircleCheck /> : <MdError />}
       </span>
       <p className="text-sm font-medium">{text}</p>

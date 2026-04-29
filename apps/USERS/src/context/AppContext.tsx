@@ -280,149 +280,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         return res.json();
     };
 
-    const searchGyms = async (query: string) => {
-        if (!query) return;
-
-        try {
-            setSearchLoading(true);
-
-            const res = await fetch(
-                `${backendUrl}/client/gyms/search/?search=${query}`
-            );
-
-            const data = await res.json();
-
-            setSearchResults(data.data);
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setSearchLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        const fetchAmenities = async () => {
-            const token = localStorage.getItem("token");
-
-            if (!token) return
-
-            try {
-                const res = await fetch(`${backendUrl}/gymowner/amenities/`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                const data = await res.json();
-                if (!res.ok) throw new Error("Failed to fetch amenities");
-                setAmenities(data.data);
-            } catch (err) {
-                console.error(err);
-            }
-        };
-        fetchAmenities();
-    }, []);
-
-    useEffect(() => {
-        const fetchPendingRatingCard = async () => {
-            const token = localStorage.getItem("token");
-
-            if (!token) return
-
-            try {
-                const res = await fetch(`${backendUrl}/client/sessions/pending-ratings-card/`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                const data = await res.json();
-                if (!res.ok) throw new Error("Failed to fetch pending rating card");
-                setPendingRatingsCard(data.data?.length ? data.data[0] : null);
-            } catch (err) {
-                console.error(err);
-            }
-        };
-        fetchPendingRatingCard();
-    }, []);
-
-    useEffect(() => {
-        const fetchPendingRatings = async () => {
-            const token = localStorage.getItem("token");
-
-            if (!token) return
-
-            try {
-                const res = await fetch(`${backendUrl}/client/sessions/pending-ratings/`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                const data = await res.json();
-                if (!res.ok) throw new Error("Failed to fetch pending ratings");
-                setPendingRatings(data.data?.length ? data.data[0] : null);
-            } catch (err) {
-                console.error(err);
-            }
-        };
-        fetchPendingRatings();
-    }, []);
-
-
-    const fetchUser = async () => {
-        try {
-            const data = await request("/api/user/profile/");
-            setUserData(data?.data);
-        } catch (err) {
-            console.error(err);
-        }
-    };
-
-    const fetchGyms = async (lat: number, long: number) => {
-        setIsLoading(true);
-        try {
-            const data = await request(`/gymowner/gyms/all/?lat=${lat}&long=${long}`);
-            setGyms(data?.data || []);
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const fetchRecommendedGyms = async (lat: number, long: number) => {
-        setLoading2(true);
-        try {
-            const data = await request(`/client/gyms/recommended/?lat=${lat}&long=${long}`);
-            setRecommendedGyms(data?.data || []);
-        } catch (err) {
-            console.error("Failed to fetch recommended gyms", err);
-        } finally {
-            setLoading2(false);
-        }
-    };
-
-    const fetchBookingConfig = async () => {
-        setLoading2(true);
-        try {
-            const data = await request(`/booking-config/`);
-            setBookingConfig(data?.data || []);
-        } catch (err) {
-            console.error("Failed to fetch booking config", err);
-        } finally {
-            setLoading2(false);
-        }
-    };
-
-    const fetchNearbyGyms = async (lat: number, long: number) => {
-        setLoading2(true);
-        try {
-            const data = await request(
-                `/client/gyms/nearby/?lat=${lat}&long=${long}`
-            );
-
-            setNearbyGyms(data?.data || []);
-        } catch (err) {
-            console.error("Failed to fetch nearby gyms", err);
-        } finally {
-            setLoading2(false);
-        }
-    };
-
     const fetchLocation = async () => {
         if (!token) return;
+
+        setIsLoading(true);
 
         try {
             const data = await request("/api/user/location/");
@@ -481,6 +342,81 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             });
         } catch (err) {
             console.error(err);
+        }
+    };
+
+    const searchGyms = async (query: string) => {
+        if (!query) return;
+
+        try {
+            setSearchLoading(true);
+
+            const res = await fetch(
+                `${backendUrl}/client/gyms/search/?search=${query}`
+            );
+
+            const data = await res.json();
+
+            setSearchResults(data.data);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setSearchLoading(false);
+        }
+    };
+
+
+    const fetchUser = async () => {
+        ;
+        try {
+            const data = await request("/api/user/profile/");
+            setUserData(data?.data);
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const fetchGyms = async (lat: number, long: number) => {
+        ;
+        try {
+            const data = await request(`/gymowner/gyms/all/?lat=${lat}&long=${long}`);
+            setGyms(data?.data || []);
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const fetchRecommendedGyms = async (lat: number, long: number) => {
+        ;
+        try {
+            const data = await request(`/client/gyms/recommended/?lat=${lat}&long=${long}`);
+            setRecommendedGyms(data?.data || []);
+        } catch (err) {
+            console.error("Failed to fetch recommended gyms", err);
+        }
+    };
+
+    const fetchBookingConfig = async () => {
+        try {
+            const data = await request(`/booking-config/`);
+            setBookingConfig(data?.data || []);
+        } catch (err) {
+            console.error("Failed to fetch booking config", err);
+        }
+    };
+
+    const fetchNearbyGyms = async (lat: number, long: number) => {
+        ;
+        try {
+            const data = await request(
+                `/client/gyms/nearby/?lat=${lat}&long=${long}`
+            );
+
+            setNearbyGyms(data?.data || []);
+        } catch (err) {
+            console.error("Failed to fetch nearby gyms", err);
+        } finally {
+            setLoading2(false);
         }
     };
 
@@ -608,6 +544,14 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     };
 
     useEffect(() => {
+        fetchLocation();
+    }, []);
+
+    useEffect(() => {
+        fetchCurrentLocation();
+    }, []);
+
+    useEffect(() => {
         fetchUser();
     }, []);
 
@@ -624,20 +568,75 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }, [userData, latitude, longitude]);
 
     useEffect(() => {
-        if (userData) {
-            fetchBookingConfig();
-        }
-    }, [userData]);
-
-    useEffect(() => {
         if (userData && latitude && longitude) {
             fetchNearbyGyms(Number(latitude), Number(longitude));
         }
     }, [userData, latitude, longitude]);
 
     useEffect(() => {
-        fetchLocation();
-        fetchCurrentLocation();
+        if (userData) {
+            fetchBookingConfig();
+        }
+    }, [userData]);
+
+    useEffect(() => {
+        const fetchAmenities = async () => {
+            const token = localStorage.getItem("token");
+
+            if (!token) return
+
+            try {
+                const res = await fetch(`${backendUrl}/gymowner/amenities/`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error("Failed to fetch amenities");
+                setAmenities(data.data);
+            } catch (err) {
+                console.error(err);
+            }
+        };
+        fetchAmenities();
+    }, []);
+
+    useEffect(() => {
+        const fetchPendingRatingCard = async () => {
+            const token = localStorage.getItem("token");
+
+            if (!token) return
+
+            try {
+                const res = await fetch(`${backendUrl}/client/sessions/pending-ratings-card/`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error("Failed to fetch pending rating card");
+                setPendingRatingsCard(data.data?.length ? data.data[0] : null);
+            } catch (err) {
+                console.error(err);
+            }
+        };
+        fetchPendingRatingCard();
+    }, []);
+
+    useEffect(() => {
+        const fetchPendingRatings = async () => {
+            const token = localStorage.getItem("token");
+
+            if (!token) return
+
+            try {
+                const res = await fetch(`${backendUrl}/client/sessions/pending-ratings/`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error("Failed to fetch pending ratings");
+                setPendingRatings(data.data?.length ? data.data[0] : null);
+            } catch (err) {
+                console.error(err);
+            }
+        };
+        fetchPendingRatings();
     }, []);
 
     useEffect(() => {
