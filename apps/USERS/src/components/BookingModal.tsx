@@ -4,7 +4,7 @@ import {
 } from "react-icons/fi";
 import { HiShare } from "react-icons/hi";
 import { TiLocation } from "react-icons/ti";
-import three from "../assets/three.png";
+// import three from "../assets/three.png";
 import halfCircle from "../assets/paymentWhiteImg.png";
 import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import { useEffect, useRef, useState } from "react";
