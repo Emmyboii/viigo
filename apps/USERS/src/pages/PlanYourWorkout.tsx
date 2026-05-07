@@ -1,15 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
-import { FaRegClock, FaUser } from "react-icons/fa6";
+import { FaUser } from "react-icons/fa6";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useAppContext, type GymCard } from "../context/AppContext";
 import type { Gym } from "../components/types/gym";
-import { HiLocationMarker } from "react-icons/hi";
+import { HiLocationMarker, HiThumbUp } from "react-icons/hi";
 import { FriendsModal } from "../components/FriendsModal";
 import { IoArrowBack } from "react-icons/io5";
-import red from '../assets/red_peak.png'
-import check from '../assets/circle_check.png'
-import { GoDotFill } from "react-icons/go";
-import { CiCircleInfo } from "react-icons/ci";
+import fire from '../assets/fire.png'
+// import check from '../assets/circle_check.png'
+// import { GoDotFill } from "react-icons/go";
+// import { CiCircleInfo } from "react-icons/ci";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -25,7 +25,7 @@ const PlanYourWorkout = () => {
 
     const locations = useLocation()
 
-    const { gyms, userData } = useAppContext()
+    const { gyms, userData, latitude, longitude } = useAppContext()
     const navigate = useNavigate()
 
     const { slug } = useParams();
@@ -45,6 +45,13 @@ const PlanYourWorkout = () => {
         }
     });
     const [friendsModalOpen, setFriendsModalOpen] = useState(false);
+    const [selectedSlot, setSelectedSlot] = useState<'NON_PEAK' | 'PEAK' | null>(() => {
+        const stored = localStorage.getItem("bookingData");
+        if (!stored) return null;
+        try {
+            return JSON.parse(stored)?.slot_type ?? null;
+        } catch { return null; }
+    });
 
     // --- Open modal function ---
     const openFriendsModal = () => {
@@ -113,9 +120,13 @@ const PlanYourWorkout = () => {
 
     const editSelectedHr = selectedHours.value === 1 ? "Hr" : selectedHours.label
 
+    const peakMultiplier = selectedSlot === 'PEAK' ? 1.5 : 1;
+
     const totalWithHr = selectedHours && gym?.hourly_rate && peopleCount > 0
-        ? gym?.hourly_rate * selectedHours.value * (peopleCount + 1)
-        : gym?.hourly_rate;
+        ? gym?.hourly_rate * peakMultiplier * selectedHours.value * (peopleCount + 1)
+        : gym?.hourly_rate
+            ? Math.round(Number(gym.hourly_rate) * peakMultiplier)
+            : 0;
 
     const id = gym?.id
 
@@ -161,7 +172,7 @@ const PlanYourWorkout = () => {
                 }
 
                 // Now fetch gym details by ID
-                const detailRes = await fetch(`${backendUrl}/gymowner/gym/${gymId}/`, {
+                const detailRes = await fetch(`${backendUrl}/gymowner/gym/${gymId}/?lat=${latitude}&long=${longitude}`, {
                     headers: {
                         "Content-Type": "application/json",
                         Authorization: localStorage.getItem("token")
@@ -264,8 +275,8 @@ const PlanYourWorkout = () => {
     const lastEntryTime = calculateLastEntry();
 
     const handleApply = () => {
-        if (selectedDate === null && !selectedHours) {
-            setError({ type: "general", message: "Please select a workout date and duration to continue." });
+        if (selectedDate === null && !selectedHours && !selectedSlot) {
+            setError({ type: "general", message: "Please complete all selections to continue." });
             return;
         }
 
@@ -279,21 +290,22 @@ const PlanYourWorkout = () => {
             return;
         }
 
-        // ✅ Save booking data to localStorage
+        if (!selectedSlot) {
+            setError({ type: "slot", message: "Please choose your workout timing (Peak or Non-Peak) to continue." });
+            return;
+        }
+
         const bookingData = {
             selectedDate,
             selectedHours,
             peopleCount,
-            id
-            // reopenSheet: true
+            id,
+            slot_type: selectedSlot,
         };
         localStorage.setItem("bookingData", JSON.stringify(bookingData));
 
-        navigate("/reviewpay")
-
+        navigate("/reviewpay");
         setError({ type: "", message: "" });
-
-
         window.scrollTo(0, 0);
     };
 
@@ -370,7 +382,7 @@ const PlanYourWorkout = () => {
 
                         <div className="flex items-center text-xs text-[#475569] gap-1 mt-2 flex-wrap">
                             <HiLocationMarker size={12} />
-                            <span>{gym?.distance} {gym?.area}</span>
+                            <span>{gym?.distance}, {gym?.area}</span>
                             <span>•</span>
                             <span>{gym?.open_status || `Open Till ${formatTime12Hour(gym?.close_time)}`}</span>
                         </div>
@@ -383,7 +395,7 @@ const PlanYourWorkout = () => {
 
                 <div className="pt-1 space-y-4">
                     <h4 className="text-base font-semibold sm:text-center text-black">
-                        How many people are working out?
+                        Who's joining?
                     </h4>
 
                     <div className="flex items-center sm:justify-center gap-1.5 pb-7">
@@ -492,31 +504,7 @@ const PlanYourWorkout = () => {
                 )}
             </div>
 
-            {/* <div className="mt-6 bg-[#F1F5F9] border border-[#DBEAFE] py-2.5 px-[17px] rounded-lg space-y-3 text-sm">
-
-                <div className="flex items-start gap-2 text-gray-600">
-                    <FiUsers size={16} className="mt-1" />
-                    <div>
-                        <div>
-                            <strong>Peak Hours :</strong>
-
-                            <div className="flex gap-2 flex-wrap">
-                                {allPeaks.map(([start, end], i) => (
-                                    <span key={i}>
-                                        {formatTime12Hour(start)} - {formatTime12Hour(end)}
-                                        {i !== allPeaks.length - 1 && ","}
-                                    </span>
-                                ))}
-                            </div>
-                        </div>
-                        <p className="text-xs text-gray-500 mt-1">
-                            (Workouts during peak hours may use more minutes)
-                        </p>
-                    </div>
-                </div>
-            </div> */}
-
-            <div className="mt-6">
+            {/* <div className="mt-6">
                 <h4 className="font-semibold mb-3">
                     Recommended workout timings
                 </h4>
@@ -547,9 +535,98 @@ const PlanYourWorkout = () => {
                         <p className="text-[11px] text-[#475569] flex items-center gap-1"><CiCircleInfo /> Based on gym input • Crowd may vary</p>
                     </div>
                 </div>
+            </div> */}
+
+            <div className="mt-6">
+                <h4 className="font-semibold mb-1">
+                    Choose your workout timings
+                </h4>
+                <p className="text-xs text-[#000000] mb-3">
+                    Your selection determines pricing. Entry should be within selected timing.
+                </p>
+
+                <div className="space-y-3">
+                    {/* Non-Peak Option */}
+                    <div
+                        onClick={() => setSelectedSlot('NON_PEAK')}
+                        className={`px-4 py-4 rounded-lg border-2 cursor-pointer transition ${selectedSlot === 'NON_PEAK'
+                            ? 'border-[#2563EB] bg-white'
+                            : 'border-[#E2E8F0] bg-white'
+                            }`}
+                    >
+                        <div className="flex items-start justify-between">
+                            <div className="flex items-start gap-3">
+                                <div className={`mt-1 w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${selectedSlot === 'NON_PEAK' ? 'border-[#2563EB]' : 'border-[#CBD5E1]'
+                                    }`}>
+                                    {selectedSlot === 'NON_PEAK' && (
+                                        <div className="w-2 h-2 rounded-full bg-[#2563EB]" />
+                                    )}
+                                </div>
+                                <div>
+                                    <p className="text-[12px] font-medium text-[#0F7D37] flex items-center gap-1 mb-0.5">
+                                        <HiThumbUp /> RECOMMENDED / BEST VALUE
+                                    </p>
+                                    <p className="font-semibold text-[#101828] text-base">Non-Peak Hours</p>
+                                    <p className="text-sm text-[#4A5565] mt-1">
+                                        Timings : {gym?.recommended_workout_timings?.less_crowded_hours}
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="text-right flex-shrink-0">
+                                <p className="text-lg font-semibold text-[#0F172A]">₹{Number(gym?.hourly_rate)}</p>
+                                <p className="text-xs text-[#94A3B8] font-medium">/session</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Peak Option */}
+                    <div
+                        onClick={() => setSelectedSlot('PEAK')}
+                        className={`px-4 py-4 rounded-lg border-2 cursor-pointer transition ${selectedSlot === 'PEAK'
+                            ? 'border-[#2563EB] bg-white'
+                            : 'border-[#E2E8F0] bg-white'
+                            }`}
+                    >
+                        <div className="flex items-start justify-between">
+                            <div className="flex items-start gap-3">
+                                <div className={`mt-1 w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${selectedSlot === 'PEAK' ? 'border-[#2563EB]' : 'border-[#CBD5E1]'
+                                    }`}>
+                                    {selectedSlot === 'PEAK' && (
+                                        <div className="w-2 h-2 rounded-full bg-[#2563EB]" />
+                                    )}
+                                </div>
+                                <div>
+                                    <p className="text-[12px] font-medium text-[#DC2626] flex items-center gap-1 mb-0.5">
+                                        <img src={fire} className="w-[10px]" alt="" /> HIGH DEMAND
+                                    </p>
+                                    <div className="flex items-center gap-2">
+                                        <p className="font-semibold text-[#101828] text-base">Peak Hours</p>
+                                        <span className="text-[10px] bg-[#FEE2E2] text-[#DC2626] px-1.5 py-0.5 rounded font-medium">
+                                            Surge Fee 50%
+                                        </span>
+                                    </div>
+                                    <p className="text-xs text-[#4A5565] mt-1">
+                                        Morning: {gym?.recommended_workout_timings?.peak_hours?.morning}
+                                    </p>
+                                    <p className="text-xs text-[#4A5565]">
+                                        Evening: {gym?.recommended_workout_timings?.peak_hours?.evening}
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="text-right flex-shrink-0">
+                                <p className="text-lg font-semibold text-[#0F172A]">₹{Math.round(Number(gym?.hourly_rate) * 1.5)}</p>
+                                <p className="text-xs text-[#94A3B8] font-medium">/session</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {error.type === 'slot' && (
+                    <p className="text-red-500 text-sm mt-2">{error.message}</p>
+                )}
             </div>
 
-            <div className="mt-6 mb-10">
+            {/* <div className="mt-6 mb-10">
                 <h4 className="font-semibold mb-3">
                     Flexible Entry
                 </h4>
@@ -562,7 +639,7 @@ const PlanYourWorkout = () => {
                         <p className="text-sm font-medium text-[#262A33]">Come Anytime</p>
                     </div>
                 </div>
-            </div>
+            </div> */}
 
             {/* ===== Sticky Bottom Pay Bar ===== */}
             <div className="fixed max-w-[1300px] mx-auto bottom-0 left-0 right-0 bg-white">
@@ -576,14 +653,18 @@ const PlanYourWorkout = () => {
                         <p className="text-red-500 text-sm mb-2">{error.message}</p>
                     )}
                     <div className="flex items-center justify-between">
-                        {/* <p className="font-semibold text-2xl">
-                            ₹{total || 425}{selectedHours?.label ? `/${selectedHours.label}` : ""}
-                        </p> */}
 
-                        <div className="space-y-2">
-                            <p className="text-xs text-[#475569] font-medium">
+                        <div className="space-y-1.5">
+                            {/* <p className="text-xs text-[#475569] font-medium">
                                 Gym timings : {formatTime12Hour(gym?.open_time)} - {formatTime12Hour(gym?.close_time)}
-                            </p>
+                            </p> */}
+
+                            {selectedSlot && (
+                                <p className={`text-sm font-normal ${selectedSlot === 'NON_PEAK' ? 'text-[#0F7D37]' : 'text-[#DC2626]'
+                                    }`}>
+                                    {selectedSlot === 'NON_PEAK' ? 'Non-Peak Hours' : 'Peak Hours'}
+                                </p>
+                            )}
 
                             <p className="text-[22px] font-semibold">
                                 ₹{totalWithHr}{selectedHours?.label ? `/${editSelectedHr}` : ""}

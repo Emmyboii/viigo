@@ -74,6 +74,7 @@ export type Booking = {
     client_image: string;
     display_status: string;
     duration_text: string;
+    slot_type: string;
     contextual_text: string;
     start_time: string;
     end_time: string;

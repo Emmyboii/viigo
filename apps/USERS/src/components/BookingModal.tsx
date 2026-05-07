@@ -13,6 +13,7 @@ import type { Booking } from "../pages/Bookings";
 import { MdPending, MdPhone } from "react-icons/md";
 // import { toPng } from "html-to-image";
 import { snapdom } from "@zumer/snapdom";
+import { PiWarningCircle } from "react-icons/pi";
 
 type PaymentSuccessProps = {
     onClose: () => void;
@@ -38,6 +39,7 @@ type BookingPass = {
     base_price: string;
     platform_fee: string;
     gst_fee: string;
+    tax_amount: string;
     total_amount: string;
     latitude: string;
     longitude: string;
@@ -311,14 +313,29 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
                     {/* Divider */}
                     <div className="border-t border-dashed border-white/40 my-6" />
 
+                    {/* {slotType && (
+                        <p className={`text-sm font-normal ${slotType === 'NON_PEAK' ? 'text-[#0F7D37]' : 'text-[#DC2626]'
+                            }`}>
+                            {slotType === 'NON_PEAK' ? (
+                                <div className="flex items-center gap-1 rounded-full justify-center bg-white">
+                                    <HiThumbUp /> Non-Peak Hours
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-1 rounded-full justify-center bg-white">
+                                    <img src={fire} className="w-[10px]" alt="" /> Peak Hours
+                                </div>
+                            )}
+                        </p>
+                    )} */}
+
                     {/* Timings */}
                     <div className="space-y-3 text-sm">
                         <div className="flex items-center text-nowrap text-[#DBEAFE] justify-center gap-2">
                             <FiClock className="w-4 h-4" />
-                            Gym timings : <span>{pass.gym_timings} </span>
+                            Timings : <span>{pass.gym_timings} </span>
                         </div>
 
-                        <div className="flex items-center justify-center gap-2">
+                        {/* <div className="flex items-center justify-center gap-2">
                             <img src={three} alt="Three" className="mt-1 w-6" />
                             <div>
                                 <div className="flex gap-2 flex-wrap">
@@ -331,11 +348,16 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
                                     (Workouts during peak hours may use more minutes)
                                 </p>
                             </div>
-                        </div>
+                        </div> */}
 
-                        <p className="text-xs text-[#BFDBFE] font-medium text-center pt-2">
+                        {/* <p className="text-xs text-[#BFDBFE] font-medium text-center pt-2">
                             Last entry for selected duration: {pass.last_entry_time}
-                        </p>
+                        </p> */}
+
+                        <div className="flex items-center gap-1 text-[11px] text-[#475569] mt-2">
+                            <PiWarningCircle className="rotate-180" size={14} />
+                            <span>Entry should be within selected timing.</span>
+                        </div>
                     </div>
                 </div>
 
@@ -373,7 +395,7 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
 
                 <div className="flex justify-between">
                     <span className="text-[#6A6A6A] font-medium">GST Fee</span>
-                    <span className="font-medium">Rs. {pass.gst_fee}</span>
+                    <span className="font-medium">Rs. {pass.tax_amount}</span>
                 </div>
 
                 <div className="flex justify-between pt-3">

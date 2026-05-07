@@ -6,7 +6,8 @@ import lockWrong from "../assets/lockWrong.png";
 import { MdError } from "react-icons/md";
 import { FaCircleCheck } from "react-icons/fa6";
 import { FaRegEdit } from "react-icons/fa";
-import logo from '../assets/icon2.png'
+import login2 from '../assets/login2.png'
+// import logo from '../assets/icon2.png'
 
 type Status =
     | "idle"
@@ -255,18 +256,22 @@ export default function OTPVerification() {
         status === "success" ? lockChecked : status === "error" ? lockWrong : lock;
 
     return (
-        <div className="bg-[#ffffff] overflow-x-hidden flex mk:flex-row flex-col w-full">
+        <div className="bg-[#ffffff] overflow-x-hidden flex lg:flex-row flex-col w-full">
 
-            <div className='bg-[#2563EB] text-white space-y-5 h-screen mk:flex flex-col justify-center pt-[340px] p-7 lg:p-16 w-1/2 hidden'>
+            <div className='bg-[#2563EB] text-white space-y-5 h-screen lg:flex flex-col justify-center items-center w-[50%] hidden'>
+                {/* <div className='flex flex-col items-start space-y-5'>
                 <img src={logo} alt="" className='lg:w-40 w-24' />
                 <p className='lg:text-[55px] lf:text-[60px] text-[30px] font-semibold'>Manage your gym efficiently</p>
                 <p className='lg:text-2xl text-lg font-medium max-w-[590px]'>Join thousands of gym owners who use Viigo to streamline bookings, manage memberships, and grow their fitness business.</p>
-            </div>            {/* 🔄 Center Modal */}
+                </div> */}
+                <img src={login2} alt="Login background" className="w-full h-full object-cove" />
+            </div>
+            {/* 🔄 Center Modal */}
 
 
             {/* ❌ Bottom Toast */}
 
-            <div className="h-screen relative py-10 bg-white flex justify-center max-w-[400px] mx-auto mk:w-1/2 w-full">
+            <div className="h-screen relative py-10 bg-white flex justify-center max-w-[400px] mx-auto lg:w-1/2 w-full">
                 {(status === "verifying" || status === "resending") && (
                     <CenterModal
                         text={status === "verifying" ? "Validating credentials" : "Resending OTP"}

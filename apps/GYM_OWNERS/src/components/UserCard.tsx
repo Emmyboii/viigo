@@ -14,6 +14,7 @@ export default function UserCard({ booking, onClick }: UserCardProps) {
         client_image,
         display_status,
         duration_text,
+        slot_type,
         contextual_text,
         display_date,
         status,
@@ -71,7 +72,7 @@ export default function UserCard({ booking, onClick }: UserCardProps) {
                         </span>
                     </div>
 
-                    <div className="mk:flex items-center gap-1 mk:mt-1 mt-0">
+                    <div className="mk:flex items-center flex-wrap gap-1 mk:mt-1 mt-0">
                         {/* Date */}
                         <p className="text-xs text-[#475569] mk:mt-0 mt-1 flex items-center gap-1">
                             <HiOutlineCalendar className="inline mr-" />
@@ -79,15 +80,21 @@ export default function UserCard({ booking, onClick }: UserCardProps) {
                         </p>
 
                         {/* Duration */}
-                        <p className="text-[12px] text-[#475569] flex items-center gap-1">
+                        <p className="text-[12px] text-[#475569] flex items-center flex-wrap gap-1">
                             <FaRegClock className="" />
                             {duration_text}
+                            {slot_type && (
+                                <span className={`text-xs font-medium ${slot_type === 'NON_PEAK' ? 'text-[#22C55E]' : 'text-[#D32F2F]'
+                                    }`}>
+                                    {slot_type === 'NON_PEAK' ? '• Non-peak Hour' : '• Peak Hour'}
+                                </span>
+                            )}
                         </p>
                     </div>
                 </div>
 
                 {/* Context */}
-                <p className="text-[12px] mk:text-lg mk:font-semibold text-[#475569] font-medium mt-1">
+                <p className="text-[12px] mk:text-lg mk:font-semibold text-right text-[#475569] font-medium mt-1">
                     {isActive && (
                         <>
                             Remaining time left <Countdown initialText={booking.contextual_text} />

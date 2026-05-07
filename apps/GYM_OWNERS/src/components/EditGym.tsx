@@ -731,7 +731,7 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
                         </div>
                     </div>
 
-                    <div className="lg::space-y-6 mk:space-y-4">
+                    <div className="lg:space-y-6 mk:space-y-4">
                         <div className="lg:p-6 mk:p-4 space-y-6 bg-white mk:border border-[#CBD5E1] mk:rounded-lg">
                             {/* Gym Timings */}
                             <GymTimings
@@ -742,14 +742,16 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
                             />
 
                             {/* Peak Hours */}
-                            <GymPeakHours
-                                morning={morningPeak}
-                                evening={eveningPeak}
-                                setMorning={setMorningPeak}
-                                setEvening={setEveningPeak}
-                                gymEndTime={endTime}
-                                gymStartTime={startTime}
-                            />
+                            {display === "edit" && (
+                                <GymPeakHours
+                                    morning={morningPeak}
+                                    evening={eveningPeak}
+                                    setMorning={setMorningPeak}
+                                    setEvening={setEveningPeak}
+                                    gymEndTime={endTime}
+                                    gymStartTime={startTime}
+                                />
+                            )}
 
                         </div>
 

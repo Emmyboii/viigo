@@ -2,7 +2,7 @@ import { FaCheckCircle, FaTimesCircle, FaUserCircle } from 'react-icons/fa';
 // import { useNavigate } from 'react-router-dom';
 import { FaUser, FaRegClock } from "react-icons/fa6";
 import { HiMiniCurrencyRupee } from 'react-icons/hi2';
-import { HiOutlineCalendar } from 'react-icons/hi';
+import { HiOutlineCalendar, HiThumbUp } from 'react-icons/hi';
 import BottomSheet from './BottomSheet';
 import { useEffect, useRef, useState } from 'react';
 import upcoming from '../assets/otpChecking.png'
@@ -12,6 +12,7 @@ import { RiShareFill } from 'react-icons/ri';
 // import { toPng } from "html-to-image";
 import { snapdom } from '@zumer/snapdom';
 import Countdown from './Countdown';
+import fire from '../assets/fire.png'
 
 type OtpVerificationModalProps = {
     user?: Booking;
@@ -225,6 +226,20 @@ export default function OtpVerificationModal({ user, onClose }: OtpVerificationM
                                         </p>
                                     )}
                                 </div>
+                                {user?.slot_type && (
+                                    <p className={`text-sm font-normal ${user.slot_type === 'NON_PEAK' ? 'text-[#0F7D37]' : 'text-[#DC2626]'
+                                        }`}>
+                                        {user.slot_type === 'NON_PEAK' ? (
+                                            <div className="flex items-center gap-1">
+                                                <HiThumbUp /> Non-Peak Hours
+                                            </div>
+                                        ) : (
+                                            <div className="flex items-center gap-1">
+                                                <img src={fire} className="w-[10px]" alt="" /> Peak Hours
+                                            </div>
+                                        )}
+                                    </p>
+                                )}
                                 {user?.status === 'CANCELLED' ? (
                                     <div className="flex items-center gap-2 text-nowrap">
                                         <HiMiniCurrencyRupee size={17} />

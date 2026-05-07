@@ -11,8 +11,8 @@ import { FaCheckCircle } from "react-icons/fa";
 import PageHeader from "../components/PageHeader";
 import { normalizeImagePath, useAppContext, type GymCard } from "../context/AppContext";
 import FacilityTag from "../components/FacilityTag";
-import { HiLocationMarker, HiOutlineCalendar } from "react-icons/hi";
-import { PiIdentificationCardBold } from "react-icons/pi";
+import { HiLocationMarker, HiOutlineCalendar, HiThumbUp } from "react-icons/hi";
+import { PiWarningCircle } from "react-icons/pi";
 import { FaCircleCheck } from "react-icons/fa6";
 import { MdError } from "react-icons/md";
 import PaymentSuccess from "./PaymentSuccess";
@@ -20,6 +20,7 @@ import three2 from "../assets/three2.png";
 import logoUrl from "../assets/icon2.png";
 // import * as htmlToImage from "html-to-image";
 import { snapdom } from "@zumer/snapdom";
+import fire from '../assets/fire.png'
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 type ToastType = "success" | "error" | null;
@@ -27,6 +28,7 @@ type ToastType = "success" | "error" | null;
 export interface PreviewData {
     base_price: string
     platform_fee: string
+    surge_fee: string
     gst_fee: string
     total_payable: string
     duration: string
@@ -199,6 +201,7 @@ Hours: ${selectedHours?.label}
     const selectedDate = initialState?.selectedDate
     const selectedHours = initialState?.selectedHours
     const peopleCount = initialState?.peopleCount
+    const slotType = initialState?.slot_type || "NON_PEAK"
     const id = initialState?.id
 
     useEffect(() => {
@@ -269,7 +272,8 @@ Hours: ${selectedHours?.label}
                     gym_id: id,
                     date: formatDateForAPI(selectedDate),
                     duration: String(selectedHours.value),
-                    number_of_friends: peopleCount
+                    number_of_friends: peopleCount,
+                    slot_type: slotType
                 };
 
                 const headers = {
@@ -430,7 +434,8 @@ Hours: ${selectedHours?.label}
                 gym: id,
                 booking_date: formatDateForAPI(selectedDate),
                 duration_in_hours: String(selectedHours.value),
-                number_of_friends: peopleCount
+                number_of_friends: peopleCount,
+                slot_type: slotType
             };
 
             const headers = {
@@ -592,7 +597,8 @@ Hours: ${selectedHours?.label}
 
                                     <div className="flex items-center text-nowrap text-xs text-[#475569] gap-1 mt-2 flex-wrap">
                                         <HiLocationMarker size={12} />
-                                        <span>{gym?.distance} {gym?.area}</span>
+                                        <span>{gym?.distance}, {gym?.area}</span>
+                                        {/* <span>{gym?.location?.split(",")[0]}</span> */}
                                         <span>•</span>
                                         <span>{gym?.open_status || `Open Till ${formatTime12Hour(gym?.close_time)}`}</span>
                                     </div>
@@ -647,9 +653,29 @@ Hours: ${selectedHours?.label}
                                                 <span>{selectedHours?.label}</span>
                                             </div>
 
-                                            <div className="flex items-center gap-2 text-sm text-[#0F172A] mt-2">
-                                                <PiIdentificationCardBold size={14} />
-                                                <span>Enter anytime during the day</span>
+                                            {slotType && (
+                                                <p className={`text-sm font-normal ${slotType === 'NON_PEAK' ? 'text-[#0F7D37]' : 'text-[#DC2626]'
+                                                    }`}>
+                                                    {slotType === 'NON_PEAK' ? (
+                                                        <div className="flex items-center gap-1">
+                                                            <HiThumbUp /> Non-Peak Hours
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex items-center gap-1">
+                                                            <img src={fire} className="w-[10px]" alt="" /> Peak Hours
+                                                        </div>
+                                                    )}
+                                                </p>
+                                            )}
+
+                                            <div className="flex items-center gap-2 text-nowrap text-sm text-[#0F172A] mt-2">
+                                                <IoTimeOutline size={14} />
+                                                <span>{formatTime12Hour(gym?.open_time)} – {formatTime12Hour(gym?.close_time)} </span>
+                                            </div>
+
+                                            <div className="flex items-center gap-1 text-[11px] text-[#475569] mt-2">
+                                                <PiWarningCircle className="rotate-180" size={14} />
+                                                <span>Entry should be within selected timing.</span>
                                             </div>
                                         </div>
 
@@ -664,17 +690,14 @@ Hours: ${selectedHours?.label}
                                     </div>
                                 </div>
 
-                                <hr />
+                                {/* <hr /> */}
 
                                 {/* Gym timings */}
-                                <div>
+                                {/* <div>
                                     <h4 className="font-medium">Gym timings</h4>
 
-                                    <div className="flex items-center gap-2 text-nowrap text-sm text-[#0F172A] mt-2">
-                                        <IoTimeOutline size={14} />
-                                        <span>{formatTime12Hour(gym?.open_time)} – {formatTime12Hour(gym?.close_time)} </span>
-                                    </div>
-                                </div>
+                                   
+                                </div> */}
                             </div>
 
                             {/* ===== Price Breakdown ===== */}
@@ -687,6 +710,11 @@ Hours: ${selectedHours?.label}
                                     {/* <span>{previewData?.duration ?? "N/A"} Hours</span> */}
                                     <span>{selectedHours?.label}</span>
                                     <span className="font-medium text-[#0F172A]">Rs. {previewData?.base_price ?? "N/A"}</span>
+                                </div>
+
+                                <div className="flex justify-between text-nowrap">
+                                    <span>Surge Fee</span>
+                                    <span className="font-medium text-[#0F172A]">Rs. {previewData?.surge_fee ?? "N/A"}</span>
                                 </div>
 
                                 <div className="flex justify-between text-nowrap">
@@ -706,6 +734,13 @@ Hours: ${selectedHours?.label}
                                     <span className="text-sm text-black">Rs. {previewData?.total_payable ?? "N/A"}</span>
                                 </div>
                             </div>
+
+                            <div className="pt-4">
+                                <div className="flex items-center gap-2 bg-[#F1F5F9] py-1 px-2 rounded text-wrap">
+                                    <PiWarningCircle className="rotate-180" size={14} />
+                                    <p className="text-xs text-[#0F172A]">After 4 pm passes will be cancelled automatically with some Cancellation charges</p>
+                                </div>
+                            </div>
                         </div>
 
                         {/* ===== Sticky Bottom Pay Bar ===== */}
@@ -716,9 +751,16 @@ Hours: ${selectedHours?.label}
 
                             <div className="flex justify-between items-center px-4 py-5">
                                 <div>
-                                    <p className="text-xs text-[#475569] text-nowrap font-medium mb-1">
+                                    {/* <p className="text-xs text-[#475569] text-nowrap font-medium mb-1">
                                         Valid on {formattedLongDate}
-                                    </p>
+                                    </p> */}
+
+                                    {slotType && (
+                                        <p className={`text-sm font-normal ${slotType === 'NON_PEAK' ? 'text-[#0F7D37]' : 'text-[#DC2626]'
+                                            }`}>
+                                            {slotType === 'NON_PEAK' ? 'Non-Peak Hours' : 'Peak Hours'}
+                                        </p>
+                                    )}
 
                                     <p className="text-[22px] font-semibold text-nowrap">
                                         ₹{previewData?.total_payable ?? "N/A"}/{selectedHours?.label}
@@ -728,7 +770,7 @@ Hours: ${selectedHours?.label}
                                 <button
                                     onClick={handlePayment}
                                     disabled={payLoading}
-                                    className="bg-[#2563EB] text-white px-6 py-4 w-[163px] text-xs rounded-md font-medium flex items-center justify-center gap-2 disabled:opacity-60"
+                                    className="bg-[#2563EB] text-white px-4 py-4 w-[150px] text-xs rounded-md font-medium flex items-center justify-center gap-2 disabled:opacity-60"
                                 >
                                     {payLoading ? (
                                         <>

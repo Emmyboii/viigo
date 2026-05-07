@@ -1,6 +1,7 @@
 import email from '../assets/loginEmail.png'
-import login from '../assets/loginIng.png'
-import logo from '../assets/icon2.png'
+import login from '../assets/login.png'
+import login2 from '../assets/login2.png'
+// import logo from '../assets/icon2.png'
 import lock from '../assets/lock.png'
 // import { FcGoogle } from "react-icons/fc";
 import { useCallback, useEffect, useState } from "react";
@@ -208,20 +209,21 @@ const AuthPage = () => {
   }, []);
 
   return (
-    <div className="bg-[#ffffff] overflow-x-hidden flex mk:flex-row flex-col w-full">
-      <div className="relative mk:h-screen h-[50vh] bg-[#ffffff] text-white overflow-hidden block mk:hidden">
+    <div className="bg-[#ffffff] overflow-x-hidden flex lg:flex-row flex-col w-full">
+      <div className="relative lg:h-screen h-[50vh] bg-[#ffffff] text-white overflow-hidden block lg:hidden">
         <img src={login} alt="Login background" className="w-full h-full object-cover" />
       </div>
 
-      <div className='bg-[#2563EB] text-white space-y-5 h-screen mk:flex flex-col justify-center items-center pt-[340px] p-7 lg:p-16 w-1/2 hidden'>
-        <div className='flex flex-col items-start space-y-5'>
+      <div className='bg-[#2563EB] text-white space-y-5 h-screen lg:flex flex-col justify-center items-center w-[63%] hidden'>
+        {/* <div className='flex flex-col items-start space-y-5'>
           <img src={logo} alt="" className='lg:w-40 w-24' />
           <p className='lg:text-[55px] lf:text-[60px] text-[30px] font-semibold'>Manage your gym efficiently</p>
           <p className='lg:text-2xl text-lg font-medium max-w-[590px]'>Join thousands of gym owners who use Viigo to streamline bookings, manage memberships, and grow their fitness business.</p>
-        </div>
+        </div> */}
+        <img src={login2} alt="Login background" className="w-full h-full object-cove" />
       </div>
 
-      <div className="bg-white relative rounded-t-3xl mk:h-screen h-1/2 mk:flex flex-col justify-center p-5 mk:p-7 space-y-6 mk:w-1/2 mk:max-w-[450px] mk:mx-auto">
+      <div className="bg-white relative rounded-t-3xl lg:h-screen h-1/2 lg:flex flex-col justify-center p-5 lg:p-7 space-y-6 lg:w-[37%] lg:max-w-[450px] lg:mx-auto">
         {toast && (
           <>
             {toast.type === "validating" && (

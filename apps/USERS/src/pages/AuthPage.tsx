@@ -1,4 +1,7 @@
 import email from '../assets/loginEmail.png'
+import carousel1 from '../assets/carousel1.png'
+import carousel2 from '../assets/carousel2.png'
+import carousel3 from '../assets/carousel3.png'
 import { FcGoogle } from "react-icons/fc";
 import Autoplay from "embla-carousel-autoplay";
 import useEmblaCarousel from "embla-carousel-react";
@@ -16,18 +19,11 @@ declare global {
 }
 
 const slides = [
-  { text: <>Workout on your Hour</>, size: "text-6xl" },
-  {
-    text: (
-      <>
-        Pick a Gym. Choose Hours.<br />
-        Start Training
-      </>
-    ),
-    size: "text-5xl"
-  },
-  { text: <>Pay Only for What You Use</>, size: "text-6xl" },
+  carousel1,
+  carousel2,
+  carousel3
 ];
+
 
 type ToastType = "success" | "error" | "validating" | null;
 
@@ -233,38 +229,36 @@ const AuthPage = () => {
 
   return (
     <div className="bg-[#2563EB] overflow-x-hidden">
-      <div className="relative h-[50vh] bg-[#2563EB] max-w-[1300px] mx-auto text-white overflow-hidden">
+      <div className="relative h-[50vh] bg-white mx-auto text-white overflow-hidden">
         {/* Slides */}
         <div ref={emblaRef} className="h-full">
           <div className="flex h-full">
             {slides.map((slide, index) => (
               <div
                 key={index}
-                className="flex-[0_0_100%] flex items-center justify-center px-6 text-center"
+                className="flex-[0_0_100%] flex items-center justify-center px- text-center"
               >
-                <p className={`${slide.size} font-black font-heading leading-tight`}>
-                  {slide.text}
-                </p>
+                <img src={slide} alt={`Carousel image ${index + 1}`} className="w-full h-full object-cover" />
               </div>
             ))}
           </div>
         </div>
 
         {/* Dots */}
-        <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-3">
+        <div className="absolute bottom-1 left-1/2 flex -translate-x-1/2 gap-3">
           {slides.map((_, i) => (
             <button
               title={`dot-${i}`}
               key={i}
               onClick={() => emblaApi?.scrollTo(i)}
-              className={`h-3 w-3 rounded-full transition ${i === selectedIndex ? "bg-white" : "bg-slate-400"
+              className={`h-3 w-3 rounded-full transition ${i === selectedIndex ? "bg-slate-200" : "bg-slate-400"
                 }`}
             />
           ))}
         </div>
       </div>
 
-      <div className="bg-white rounded-t-3xl h-1/2 p-5 space-y-6">
+      <div className="bg-white -1/2 p-5 space-y-6">
         {toast && (
           <>
             {toast.type === "validating" && (
