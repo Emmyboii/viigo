@@ -7,16 +7,19 @@ import {
     IoInformationCircleOutline,
     IoWarningOutline,
 } from "react-icons/io5";
-import { HiLocationMarker, HiOutlineLocationMarker, HiUserAdd } from "react-icons/hi";
+import { HiLocationMarker, HiOutlineLocationMarker, HiUserAdd, HiUsers } from "react-icons/hi";
 import Footer from "../components/Footer";
 // import { MdPhone } from "react-icons/md";
 import PageHeader from "../components/PageHeader";
 import { normalizeImagePath, useAppContext, type GymCard } from "../context/AppContext";
 import type { Gym } from "../components/types/gym";
-import { FaRegClock } from "react-icons/fa";
 import red from '../assets/red.png'
 import chart from '../assets/chart-bar.png'
 import { snapdom } from "@zumer/snapdom";
+import { generateGymTags } from "../utils/generateGymTags";
+import { FaRegClock, FaRestroom, FaLock } from "react-icons/fa";
+import { MdVerified } from "react-icons/md";
+import { RiWomenLine } from "react-icons/ri";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -170,9 +173,22 @@ export default function GymDetails() {
         return `${hour}:${minute} ${ampm}`;
     }
 
-    const tags = ["Hourly Access", "Beginner Friendly"];
+    // const tags = ["Hourly Access", "Beginner Friendly"];
+    const tags = gym ? generateGymTags(gym) : [];
+
+    // const tagIcons: Record<string, JSX.Element> = {
+    //     "Hourly Access": <FaRegClock size={14} />,
+    //     "Beginner Friendly": <HiUserAdd size={14} />,
+    // };
 
     const tagIcons: Record<string, JSX.Element> = {
+        "Unisex": <HiUsers size={14} />,
+        "Women Friendly": <RiWomenLine size={14} />,
+        "Trainer Available": <HiUserAdd size={14} />,
+        "Locker Facility": <FaLock size={12} />,
+        "Washroom Available": <FaRestroom size={13} />,
+        "Verified Photos": <MdVerified size={14} />,
+        // legacy — safe to keep
         "Hourly Access": <FaRegClock size={14} />,
         "Beginner Friendly": <HiUserAdd size={14} />,
     };
@@ -237,8 +253,10 @@ export default function GymDetails() {
             }
         };
 
-        fetchGymById();
-    }, [slug, gyms]);
+        if (latitude && longitude) {
+            fetchGymById();
+        }
+    }, [slug, gyms, longitude, latitude]);
 
     useEffect(() => {
         if (amenitiesOpen || rulesOpen || priceBreakdownOpen) {
@@ -437,7 +455,7 @@ export default function GymDetails() {
                         <div className="flex items-center gap-1 text-sm text-gray-500 mt-1 leading-none w-full">
                             <HiLocationMarker size={14} className="flex-shrink-0" />
                             <span className="flex items-center gap-1 w-full text-nowrap">
-                                <span>{gym.distance} {gym.area}</span>
+                                <span>{gym.distance}, {gym.area}</span>
                                 <span>•</span>
                                 <span>{gym.open_status || `Open Till ${formatTime12Hour(gym.close_time)}`}</span>
                             </span>

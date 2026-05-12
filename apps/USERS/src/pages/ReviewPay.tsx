@@ -36,7 +36,7 @@ export interface PreviewData {
 
 export default function ReviewPay() {
 
-    const { userData } = useAppContext()
+    const { userData, longitude, latitude } = useAppContext()
 
     const navigate = useNavigate();
     const [showSuccess, setShowSuccess] = useState(false);
@@ -237,7 +237,7 @@ Hours: ${selectedHours?.label}
 
             try {
 
-                const detailRes = await fetch(`${backendUrl}/gymowner/gym/${id}/`, {
+                const detailRes = await fetch(`${backendUrl}/gymowner/gym/${id}/?lat=${latitude}&long=${longitude}`, {
                     headers: {
                         "Content-Type": "application/json",
                         Authorization: localStorage.getItem("token")
@@ -258,8 +258,10 @@ Hours: ${selectedHours?.label}
             }
         };
 
-        fetchGymById();
-    }, []);
+        if (userData && latitude && longitude) {
+            fetchGymById();
+        }
+    }, [longitude, latitude, userData, id]);
 
     useEffect(() => {
         const runPreview = async () => {

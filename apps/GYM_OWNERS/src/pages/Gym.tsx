@@ -21,6 +21,7 @@ interface GymType {
     location: string;
     address_line_1: string,
     gender_preference: "EVERYONE" | "WOMEN_ONLY" | "MEN_ONLY"
+    open_status: string;
     area: string,
     city: string,
     state: string,

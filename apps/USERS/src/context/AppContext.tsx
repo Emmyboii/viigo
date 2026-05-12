@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
+import { injectDistances } from "../utils/distance";
 
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -380,7 +381,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         ;
         try {
             const data = await request(`/gymowner/gyms/all/?lat=${lat}&long=${long}`);
-            setGyms(data?.data || []);
+            const gymsWithDistance = injectDistances(data?.data || [], lat, long);
+            setGyms(gymsWithDistance as GymType[]);
         } catch (err) {
             console.error(err);
         }

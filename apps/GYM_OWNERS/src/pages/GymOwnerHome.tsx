@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import Header from "../components/Header";
 import { MdError } from "react-icons/md";
 import { FaCircleCheck } from "react-icons/fa6";
 import { FaCheckCircle } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import OtpVerificationModal from "../components/OtpVerificationModal";
-
+import { HiLocationMarker, HiOutlineBell } from "react-icons/hi"
+import { useNavigate } from "react-router";
 import FilterChips from "../components/FilterChips";
 import UserCard from "../components/UserCard";
 import { useAppContext, type Booking } from "../context/AppContext";
@@ -29,7 +29,14 @@ const chipData = [
 const GymOwnerHome = () => {
 
 
-  const { bookings, isLoading } = useAppContext()
+  const {
+    bookings,
+    isLoading,
+    selectedGym,
+    hasUnread,
+  } = useAppContext();
+
+  const navigate = useNavigate();
 
   const [filter, setFilter] = useState<string>("all");
   const [selectedUser, setSelectedUser] = useState<Booking | null>(null);
@@ -64,7 +71,8 @@ const GymOwnerHome = () => {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [verifiedBookingId, setVerifiedBookingId] = useState<number | null>(null);
   const isDesktop = window.innerWidth >= 850;
-
+  const [isGymOpen, setIsGymOpen] = useState(false);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
 
   /* ---------------- Handle Input ---------------- */
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -191,6 +199,101 @@ const GymOwnerHome = () => {
     }
   };
 
+
+  const toggleGymStatus = async () => {
+    if (isUpdatingStatus) return;
+
+    const newStatus = !isGymOpen;
+
+    // optimistic update
+    setIsGymOpen(newStatus);
+
+    setIsUpdatingStatus(true);
+
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/gymowner/gym/status/`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            is_open: newStatus,
+          }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(
+          data?.message || "Failed to update gym status"
+        );
+      }
+
+      // sync with backend
+      setIsGymOpen(data.data.is_open);
+
+      setToast({
+        type: "success",
+        message: `Gym is now ${data.data.is_open ? "Open" : "Closed"}`,
+      });
+
+    } catch (err) {
+      console.error(err);
+
+      // rollback
+      setIsGymOpen(!newStatus);
+
+      setToast({
+        type: "error",
+        message:
+          err instanceof Error
+            ? err.message
+            : "Failed to update gym status",
+      });
+
+    } finally {
+      setIsUpdatingStatus(false);
+    }
+  };
+
+  useEffect(() => {
+    const fetchGymStatus = async () => {
+      try {
+        const token = localStorage.getItem("token");
+
+        const res = await fetch(
+          `${import.meta.env.VITE_BACKEND_URL}/gymowner/gym/status/`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error("Failed to fetch gym status");
+        }
+
+        // use ONLY this endpoint
+        setIsGymOpen(data.data.is_open);
+
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchGymStatus();
+  }, []);
+
   const handleClose = () => {
     localStorage.removeItem("paymentSuccess");
     closeModal("user");
@@ -264,7 +367,52 @@ const GymOwnerHome = () => {
     <>
       {/* {!selectedUser && ( */}
       <div className={`min-h-screen py-4 relative mk:max-w-[1900px] w-screen mk:w-full mk:mx-auto ${!selectedUser && "mk:block"}`}>
-        <Header />
+        <div className="flex justify-between items-center border-b border-[#E2E8F0] mk:pb-6 pb-2 pt-2 px-5">
+          <div className="flex items-center gap-2">
+            <HiLocationMarker className="text-[#475569] text-xl" />
+            <div className="leading-tight">
+              <div className="font-medium text-sm">{selectedGym?.name}</div>
+              <div className="text-sm font-medium">{selectedGym?.city}, {selectedGym?.state}</div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-6">
+            <button
+              onClick={toggleGymStatus}
+              disabled={isUpdatingStatus}
+              className={`relative w-20 h-7 rounded-full transition duration-300 ${isGymOpen
+                  ? "bg-[#22C55E] border border-[#22C55E]"
+                  : "bg-[#94A3B8]"
+                } ${isUpdatingStatus ? "opacity-70 cursor-not-allowed" : ""}`}
+            >
+              <span
+                className={`absolute inset-0 flex items-center text-[10px] font-semibold px-2 ${isGymOpen
+                    ? "justify-start text-white"
+                    : "justify-end text-white"
+                  }`}
+              >
+                {isGymOpen ? "Open" : "Closed"}
+              </span>
+
+              <div
+                className={`absolute top-1/2 -translate-y-1/2 w-[18px] h-[18px] bg-white rounded-full shadow-md transition-all duration-300 ${isGymOpen ? "right-2" : "left-2"
+                  }`}
+              />
+            </button>
+
+            <div className="relative">
+              <HiOutlineBell
+                onClick={() => navigate("/notifications")}
+                className="text-2xl text-[#475569] cursor-pointer"
+              />
+
+              {hasUnread && (
+                <span className="absolute top-0.5 right-1 w-2 h-2 bg-blue-600 rounded-full"></span>
+              )}
+            </div>
+          </div>
+
+        </div>
 
         {toast && <Toast type={toast.type} text={toast.message} onClose={handleToastClose} />}
 

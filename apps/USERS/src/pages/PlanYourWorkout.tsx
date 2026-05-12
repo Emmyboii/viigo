@@ -5,8 +5,10 @@ import { useAppContext, type GymCard } from "../context/AppContext";
 import type { Gym } from "../components/types/gym";
 import { HiLocationMarker, HiThumbUp } from "react-icons/hi";
 import { FriendsModal } from "../components/FriendsModal";
-import { IoArrowBack } from "react-icons/io5";
+import { IoArrowBack, IoMoonOutline } from "react-icons/io5";
 import fire from '../assets/fire.png'
+import most from '../assets/most.png'
+import { GrSun } from "react-icons/gr";
 // import check from '../assets/circle_check.png'
 // import { GoDotFill } from "react-icons/go";
 // import { CiCircleInfo } from "react-icons/ci";
@@ -193,8 +195,10 @@ const PlanYourWorkout = () => {
             }
         };
 
-        fetchGymById();
-    }, [slug, gyms]);
+        if (userData && latitude && longitude) {
+            fetchGymById();
+        }
+    }, [slug, gyms, longitude, latitude, userData]);
 
     function formatTime12Hour(time24: string | undefined) {
         const [hourStr, minuteStr] = time24?.split(":") || [];
@@ -374,7 +378,7 @@ const PlanYourWorkout = () => {
                     <img
                         src={gym?.images[0]?.image}
                         alt={gym?.name}
-                        className="w-[85px] h-[105px] rounded-tl rounded-bl object-cove"
+                        className="w-[85px] min-h-[105px] object-cover rounded-tl rounded-bl"
                     />
 
                     <div className="p-3">
@@ -566,17 +570,29 @@ const PlanYourWorkout = () => {
                                     <p className="text-[12px] font-medium text-[#0F7D37] flex items-center gap-1 mb-0.5">
                                         <HiThumbUp /> RECOMMENDED / BEST VALUE
                                     </p>
-                                    <p className="font-semibold text-[#101828] text-base">Non-Peak Hours</p>
+                                    <p className="font-semibold text-[#101828] text-base"></p>
+                                    <div className="flex items-center gap-2">
+                                        <p className="font-semibold text-[#101828] text-base">Non-Peak Hours</p>
+                                        <span className="text-[10px] bg-[#DCFCE7] text-[#166534] px-1.5 py-0.5 rounded-full font-medium">
+                                            50% Offer
+                                        </span>
+                                    </div>
                                     <p className="text-sm text-[#4A5565] mt-1">
                                         Timings : {gym?.recommended_workout_timings?.less_crowded_hours}
                                     </p>
                                 </div>
                             </div>
-                            <div className="text-right flex-shrink-0">
+                            <div className="text-center flex-shrink-0">
+                                <p className="text-xs font-medium text-center text-[#475569] line-through">₹{Math.round(Number(gym?.hourly_rate) * 1.5)}</p>
                                 <p className="text-lg font-semibold text-[#0F172A]">₹{Number(gym?.hourly_rate)}</p>
-                                <p className="text-xs text-[#94A3B8] font-medium">/session</p>
+                                <p className="text-xs text-[#94A3B8] font-medium">/Hour</p>
                             </div>
                         </div>
+                    </div>
+
+                    <div className="flex items-center gap-1">
+                        <img src={most} className="size-3" alt="" />
+                        <p className="text-xs text-[#0F172A]">Most users save by choosing this slot</p>
                     </div>
 
                     {/* Peak Option */}
@@ -601,21 +617,22 @@ const PlanYourWorkout = () => {
                                     </p>
                                     <div className="flex items-center gap-2">
                                         <p className="font-semibold text-[#101828] text-base">Peak Hours</p>
-                                        <span className="text-[10px] bg-[#FEE2E2] text-[#DC2626] px-1.5 py-0.5 rounded font-medium">
+                                        {/* <span className="text-[10px] bg-[#FEE2E2] text-[#DC2626] px-1.5 py-0.5 rounded font-medium">
                                             Surge Fee 50%
-                                        </span>
+                                        </span> */}
                                     </div>
-                                    <p className="text-xs text-[#4A5565] mt-1">
-                                        Morning: {gym?.recommended_workout_timings?.peak_hours?.morning}
+                                    <p className="text-xs gap-1 inline-flex text-[#4A5565] mt-1">
+                                        <GrSun className="mt-0.5" /> Morning: {gym?.recommended_workout_timings?.peak_hours?.morning}
                                     </p>
-                                    <p className="text-xs text-[#4A5565]">
-                                        Evening: {gym?.recommended_workout_timings?.peak_hours?.evening}
+                                    <br />
+                                    <p className="text-xs gap-1 inline-flex text-[#4A5565]">
+                                        <IoMoonOutline className="mt-0.5" /> Evening: {gym?.recommended_workout_timings?.peak_hours?.evening}
                                     </p>
                                 </div>
                             </div>
-                            <div className="text-right flex-shrink-0">
+                            <div className="text-center flex-shrink-0">
                                 <p className="text-lg font-semibold text-[#0F172A]">₹{Math.round(Number(gym?.hourly_rate) * 1.5)}</p>
-                                <p className="text-xs text-[#94A3B8] font-medium">/session</p>
+                                <p className="text-xs text-[#94A3B8] font-medium">/Hour</p>
                             </div>
                         </div>
                     </div>

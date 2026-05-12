@@ -2,7 +2,7 @@ import { FiArrowLeft } from "react-icons/fi";
 // import { FaRegClock } from "react-icons/fa";
 import { useCallback, useEffect, useMemo, useState, type JSX } from "react";
 // import { PiUserGearFill } from "react-icons/pi";
-import { HiLocationMarker, HiShare, HiUserAdd } from "react-icons/hi";
+import { HiLocationMarker, HiShare, HiUserAdd, HiUsers } from "react-icons/hi";
 import ImageCarousel from "./ImageCarousel";
 
 import BottomSheet from "./BottomSheet";
@@ -12,9 +12,12 @@ import { MdError } from "react-icons/md";
 import logoUrl from "../assets/icon2.png";
 import edit from "../assets/edit.png";
 // import * as htmlToImage from "html-to-image";
-import { FaRegClock } from "react-icons/fa";
 import { normalizeImagePath } from "../context/AppContext";
 import { snapdom } from "@zumer/snapdom";
+import { generateGymTags } from "../data/generateGymTags";
+import { FaRegClock, FaRestroom, FaLock } from "react-icons/fa";
+import { MdVerified } from "react-icons/md";
+import { RiWomenLine } from "react-icons/ri";
 
 type ToastType = "success" | "error" | null;
 
@@ -40,7 +43,8 @@ interface GymType {
     hourly_rate: string;
     phone_number: string;
     location: string;
-    gender_preference: "EVERYONE" | "WOMEN_ONLY" | "MEN_ONLY"
+    gender_preference: "EVERYONE" | "WOMEN_ONLY" | "MEN_ONLY";
+    open_status: string;
     distance: string;
     address_line_1: string,
     area: string,
@@ -75,10 +79,22 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
 
     const [toast, setToast] = useState<{ type: ToastType; message: string } | null>(null);
 
-    const tags = ["Hourly Access", "Beginner Friendly"];
+    // const tags = ["Hourly Access", "Beginner Friendly"];
+    const tags = gym ? generateGymTags(gym) : [];
+
+    // const tagIcons: Record<string, JSX.Element> = {
+    //     "Hourly Access": <FaRegClock size={14} />,
+    //     "Beginner Friendly": <HiUserAdd size={14} />,
+    // };
 
     const tagIcons: Record<string, JSX.Element> = {
-        // "Premium": <MdStar size={14} />,
+        "Unisex": <HiUsers size={14} />,
+        "Women Friendly": <RiWomenLine size={14} />,
+        "Trainer Available": <HiUserAdd size={14} />,
+        "Locker Facility": <FaLock size={12} />,
+        "Washroom Available": <FaRestroom size={13} />,
+        "Verified Photos": <MdVerified size={14} />,
+        // legacy — safe to keep
         "Hourly Access": <FaRegClock size={14} />,
         "Beginner Friendly": <HiUserAdd size={14} />,
     };
@@ -310,13 +326,6 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
 
     const [amenitiesOpen, setAmenitiesOpen] = useState(false);
     const [rulesOpen, setRulesOpen] = useState(false);
-
-
-
-    // const tagIcons: Record<string, JSX.Element> = {
-    //     "Hourly Access": <FaRegClock size={12} />,
-    //     "Beginner Friend": <PiUserGearFill size={12} />,
-    // };
 
     useEffect(() => {
         if ((amenitiesOpen || rulesOpen) && window.innerWidth < 850) {

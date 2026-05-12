@@ -7,7 +7,7 @@ import {
     FiClock,
     FiArrowRight,
 } from "react-icons/fi";
-import { FiSun, FiMoon } from "react-icons/fi";
+// import { FiSun, FiMoon } from "react-icons/fi";
 import { FaCircleCheck, FaPlus } from "react-icons/fa6";
 import { useNavigate } from "react-router";
 import { useRef } from "react";
@@ -15,11 +15,11 @@ import SelectionModal from "../components/SelectionModal";
 import { MdError } from "react-icons/md";
 import { RiArrowRightSLine } from "react-icons/ri";
 
-interface PeakHour {
-    id: string;
-    start: string;
-    end: string;
-}
+// interface PeakHour {
+//     id: string;
+//     start: string;
+//     end: string;
+// }
 
 interface TimeInputProps {
     value: string;
@@ -49,6 +49,7 @@ interface GymType {
     distance: string;
     address_line_1: string,
     gender_preference: "EVERYONE" | "WOMEN_ONLY" | "MEN_ONLY",
+    open_status: string,
     area: string,
     city: string,
     state: string,
@@ -130,43 +131,43 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
         }
     }, [price]);
 
-    const [morningPeak, setMorningPeak] = useState<PeakHour[]>(() => {
-        if (gym?.peak_morning && gym.peak_morning.length > 0) {
-            return gym.peak_morning.map((item) => {
-                if (Array.isArray(item)) {
-                    // It's a [start, end] tuple
-                    const [start, end] = item;
-                    return { id: crypto.randomUUID(), start, end };
-                } else {
-                    // It's already an object { start, end }
-                    return { id: crypto.randomUUID(), start: item.start, end: item.end };
-                }
-            });
-        }
+    // const [morningPeak, setMorningPeak] = useState<PeakHour[]>(() => {
+    //     if (gym?.peak_morning && gym.peak_morning.length > 0) {
+    //         return gym.peak_morning.map((item) => {
+    //             if (Array.isArray(item)) {
+    //                 // It's a [start, end] tuple
+    //                 const [start, end] = item;
+    //                 return { id: crypto.randomUUID(), start, end };
+    //             } else {
+    //                 // It's already an object { start, end }
+    //                 return { id: crypto.randomUUID(), start: item.start, end: item.end };
+    //             }
+    //         });
+    //     }
 
-        return [{ id: crypto.randomUUID(), start: "00:00", end: "00:01" }];
-    });
+    //     return [{ id: crypto.randomUUID(), start: "00:00", end: "00:01" }];
+    // });
 
-    const [eveningPeak, setEveningPeak] = useState<PeakHour[]>(() => {
-        if (gym?.peak_evening && gym.peak_evening.length > 0) {
-            return gym.peak_evening.map((item) => {
-                if (Array.isArray(item)) {
-                    const [start, end] = item;
-                    return { id: crypto.randomUUID(), start, end };
-                } else {
-                    return { id: crypto.randomUUID(), start: item.start, end: item.end };
-                }
-            });
-        }
+    // const [eveningPeak, setEveningPeak] = useState<PeakHour[]>(() => {
+    //     if (gym?.peak_evening && gym.peak_evening.length > 0) {
+    //         return gym.peak_evening.map((item) => {
+    //             if (Array.isArray(item)) {
+    //                 const [start, end] = item;
+    //                 return { id: crypto.randomUUID(), start, end };
+    //             } else {
+    //                 return { id: crypto.randomUUID(), start: item.start, end: item.end };
+    //             }
+    //         });
+    //     }
 
-        return [
-            {
-                id: crypto.randomUUID(),
-                start: "16:00",
-                end: gym?.close_time || "00:01",
-            },
-        ];
-    });
+    //     return [
+    //         {
+    //             id: crypto.randomUUID(),
+    //             start: "16:00",
+    //             end: gym?.close_time || "00:01",
+    //         },
+    //     ];
+    // });
 
     useEffect(() => {
         const handlePopState = (e: PopStateEvent) => {
@@ -215,27 +216,27 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
     }, [modalType, locationModal]);
 
     // If gym closes before evening peak start, automatically limit evening start
-    useEffect(() => {
-        const minStart = timeToMinutes("16:00");
-        const endLimit = timeToMinutes(endTime);
+    // useEffect(() => {
+    //     const minStart = timeToMinutes("16:00");
+    //     const endLimit = timeToMinutes(endTime);
 
-        setEveningPeak((prev) =>
-            prev.map((p) => {
-                let start = p.start;
-                let end = p.end;
+    //     setEveningPeak((prev) =>
+    //         prev.map((p) => {
+    //             let start = p.start;
+    //             let end = p.end;
 
-                if (timeToMinutes(start) < minStart) {
-                    start = "16:00";
-                }
+    //             if (timeToMinutes(start) < minStart) {
+    //                 start = "16:00";
+    //             }
 
-                if (timeToMinutes(end) > endLimit) {
-                    end = endTime;
-                }
+    //             if (timeToMinutes(end) > endLimit) {
+    //                 end = endTime;
+    //             }
 
-                return { ...p, start, end };
-            })
-        );
-    }, [endTime]);
+    //             return { ...p, start, end };
+    //         })
+    //     );
+    // }, [endTime]);
 
     const geocodeAddress = async (address: string) => {
         const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
@@ -294,8 +295,8 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
             amenities: selectedAmenities.slice().sort(),
             rules: selectedRules.slice().sort(),
             photos: photos.map(p => p.url).sort(),
-            morning: morningPeak.map(p => [p.start, p.end]),
-            evening: eveningPeak.map(p => [p.start, p.end]),
+            // morning: morningPeak.map(p => [p.start, p.end]),
+            // evening: eveningPeak.map(p => [p.start, p.end]),
         });
     }, [
         gymName,
@@ -308,8 +309,8 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
         selectedAmenities,
         selectedRules,
         photos,
-        morningPeak,
-        eveningPeak
+        // morningPeak,
+        // eveningPeak
     ]);
 
     const isChanged = initialData !== currentData;
@@ -428,11 +429,11 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
                 formData.append("rules", String(id))
             );
 
-            const peakMorningFormatted = morningPeak.map(p => [p.start, p.end]);
-            const peakEveningFormatted = eveningPeak.map(p => [p.start, p.end]);
+            // const peakMorningFormatted = morningPeak.map(p => [p.start, p.end]);
+            // const peakEveningFormatted = eveningPeak.map(p => [p.start, p.end]);
 
-            formData.append("peak_morning", JSON.stringify(peakMorningFormatted));
-            formData.append("peak_evening", JSON.stringify(peakEveningFormatted));
+            // formData.append("peak_morning", JSON.stringify(peakMorningFormatted));
+            // formData.append("peak_evening", JSON.stringify(peakEveningFormatted));
 
             const token = localStorage.getItem("token");
 
@@ -493,35 +494,34 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
         setToast(null);
     }, []);
 
-    const MORNING_END_LIMIT = "11:59";
-    const EVENING_START_LIMIT = "16:00";
+    // const MORNING_END_LIMIT = "11:59";
+    // const EVENING_START_LIMIT = "16:00";
 
-    const isMorningValid = (p: PeakHour, gymStartTime: string) => {
-        if (!p.start || !p.end) return false;
+    // const isMorningValid = (p: PeakHour, gymStartTime: string) => {
+    //     if (!p.start || !p.end) return false;
 
-        const start = timeToMinutes(p.start);
-        const end = timeToMinutes(p.end);
+    //     const start = timeToMinutes(p.start);
+    //     const end = timeToMinutes(p.end);
 
-        return (
-            start >= timeToMinutes(gymStartTime) &&
-            end <= timeToMinutes(MORNING_END_LIMIT) &&
-            end > start
-        );
-    };
+    //     return (
+    //         start >= timeToMinutes(gymStartTime) &&
+    //         end <= timeToMinutes(MORNING_END_LIMIT) &&
+    //         end > start
+    //     );
+    // };
 
-    const isEveningValid = (p: PeakHour, gymEndTime: string) => {
-        if (!p.start || !p.end) return false;
+    // const isEveningValid = (p: PeakHour, gymEndTime: string) => {
+    //     if (!p.start || !p.end) return false;
 
-        const start = timeToMinutes(p.start);
-        const end = timeToMinutes(p.end);
+    //     const start = timeToMinutes(p.start);
+    //     const end = timeToMinutes(p.end);
 
-        return (
-            start >= timeToMinutes(EVENING_START_LIMIT) &&
-            end <= timeToMinutes(gymEndTime) &&
-            end > start
-        );
-    };
-
+    //     return (
+    //         start >= timeToMinutes(EVENING_START_LIMIT) &&
+    //         end <= timeToMinutes(gymEndTime) &&
+    //         end > start
+    //     );
+    // };
 
     const isFormValid =
         bookingFor &&
@@ -534,9 +534,9 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
         isEndTimeValid(startTime, endTime) &&
         selectedAmenities.length > 0 &&
         selectedRules.length > 0 &&
-        photos.length > 0 &&
-        morningPeak.every((p) => isMorningValid(p, startTime)) &&
-        eveningPeak.every((p) => isEveningValid(p, endTime));
+        photos.length > 0
+        // morningPeak.every((p) => isMorningValid(p, startTime)) &&
+        // eveningPeak.every((p) => isEveningValid(p, endTime));
 
     return (
         <div className="min-h-screen pb-32 mk:bg-[#CBD5E1] max-w-[1900px] mk:mx-auto w-screen mk:w-full">
@@ -742,7 +742,7 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
                             />
 
                             {/* Peak Hours */}
-                            {display === "edit" && (
+                            {/* {display === "edit" && (
                                 <GymPeakHours
                                     morning={morningPeak}
                                     evening={eveningPeak}
@@ -751,7 +751,7 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
                                     gymEndTime={endTime}
                                     gymStartTime={startTime}
                                 />
-                            )}
+                            )} */}
 
                         </div>
 
@@ -1145,43 +1145,43 @@ const GymTimings = ({
     );
 };
 
-const GymPeakHours = ({
-    morning,
-    evening,
-    setMorning,
-    setEvening,
-    gymEndTime,
-    gymStartTime
-}: {
-    morning: PeakHour[];
-    evening: PeakHour[];
-    setMorning: React.Dispatch<React.SetStateAction<PeakHour[]>>;
-    setEvening: React.Dispatch<React.SetStateAction<PeakHour[]>>;
-    gymEndTime: string
-    gymStartTime: string
-}) => {
-    return (
-        <div className="space-y-4">
-            <h2 className="text-lg font-semibold">Set Gym Peak Hours</h2>
+// const GymPeakHours = ({
+//     morning,
+//     evening,
+//     setMorning,
+//     setEvening,
+//     gymEndTime,
+//     gymStartTime
+// }: {
+//     morning: PeakHour[];
+//     evening: PeakHour[];
+//     setMorning: React.Dispatch<React.SetStateAction<PeakHour[]>>;
+//     setEvening: React.Dispatch<React.SetStateAction<PeakHour[]>>;
+//     gymEndTime: string
+//     gymStartTime: string
+// }) => {
+//     return (
+//         <div className="space-y-4">
+//             <h2 className="text-lg font-semibold">Set Gym Peak Hours</h2>
 
-            <PeakSection
-                title="Morning"
-                data={morning}
-                setData={setMorning}
-                icon={<FiSun size={16} />}
-                gymStartTime={gymStartTime}
-            />
+//             <PeakSection
+//                 title="Morning"
+//                 data={morning}
+//                 setData={setMorning}
+//                 icon={<FiSun size={16} />}
+//                 gymStartTime={gymStartTime}
+//             />
 
-            <PeakSection
-                title="Evening"
-                data={evening}
-                setData={setEvening}
-                icon={<FiMoon size={16} />}
-                gymEndTime={gymEndTime}
-            />
-        </div>
-    );
-};
+//             <PeakSection
+//                 title="Evening"
+//                 data={evening}
+//                 setData={setEvening}
+//                 icon={<FiMoon size={16} />}
+//                 gymEndTime={gymEndTime}
+//             />
+//         </div>
+//     );
+// };
 
 const isEndTimeValid = (start: string, end: string) => {
     if (!start || !end) return true;
@@ -1195,166 +1195,166 @@ const isEndTimeValid = (start: string, end: string) => {
     return endMinutes > startMinutes;
 };
 
-const timeToMinutes = (time: string) => {
-    const [h, m] = time.split(":").map(Number);
-    return h * 60 + m;
-};
+// const timeToMinutes = (time: string) => {
+//     const [h, m] = time.split(":").map(Number);
+//     return h * 60 + m;
+// };
 
-const PeakSection = ({
-    title,
-    icon,
-    data,
-    setData,
-    gymEndTime,
-    gymStartTime
-}: {
-    title: string;
-    icon: React.ReactNode;
-    data: PeakHour[];
-    setData: React.Dispatch<React.SetStateAction<PeakHour[]>>;
-    gymEndTime?: string;
-    gymStartTime?: string;
-}) => {
-    const addMore = () => {
-        setData((prev) => [
-            ...prev,
-            { id: crypto.randomUUID(), start: "00:00", end: "00:00" },
-        ]);
-    };
+// const PeakSection = ({
+//     title,
+//     icon,
+//     data,
+//     setData,
+//     gymEndTime,
+//     gymStartTime
+// }: {
+//     title: string;
+//     icon: React.ReactNode;
+//     data: PeakHour[];
+//     setData: React.Dispatch<React.SetStateAction<PeakHour[]>>;
+//     gymEndTime?: string;
+//     gymStartTime?: string;
+// }) => {
+//     const addMore = () => {
+//         setData((prev) => [
+//             ...prev,
+//             { id: crypto.randomUUID(), start: "00:00", end: "00:00" },
+//         ]);
+//     };
 
-    useEffect(() => {
-        if (!gymEndTime) return;
+//     useEffect(() => {
+//         if (!gymEndTime) return;
 
-        const endLimit = timeToMinutes(gymEndTime);
-        const minStart = timeToMinutes("16:00");
+//         const endLimit = timeToMinutes(gymEndTime);
+//         const minStart = timeToMinutes("16:00");
 
-        setData((prev) =>
-            prev.map((p) => {
-                let start = p.start;
-                let end = p.end;
+//         setData((prev) =>
+//             prev.map((p) => {
+//                 let start = p.start;
+//                 let end = p.end;
 
-                if (timeToMinutes(start) < minStart) {
-                    start = "16:00";
-                }
+//                 if (timeToMinutes(start) < minStart) {
+//                     start = "16:00";
+//                 }
 
-                if (timeToMinutes(end) > endLimit) {
-                    end = gymEndTime;
-                }
+//                 if (timeToMinutes(end) > endLimit) {
+//                     end = gymEndTime;
+//                 }
 
-                return { ...p, start, end };
-            })
-        );
-    }, [gymEndTime, setData]);
+//                 return { ...p, start, end };
+//             })
+//         );
+//     }, [gymEndTime, setData]);
 
-    useEffect(() => {
-        if (title !== "Morning" || !gymStartTime) return;
+//     useEffect(() => {
+//         if (title !== "Morning" || !gymStartTime) return;
 
-        setData((prev) =>
-            prev.map((p) => {
-                let start = p.start;
-                let end = p.end;
+//         setData((prev) =>
+//             prev.map((p) => {
+//                 let start = p.start;
+//                 let end = p.end;
 
-                if (timeToMinutes(start) < timeToMinutes(gymStartTime)) {
-                    start = gymStartTime;
-                }
+//                 if (timeToMinutes(start) < timeToMinutes(gymStartTime)) {
+//                     start = gymStartTime;
+//                 }
 
-                if (timeToMinutes(end) > timeToMinutes("11:59")) {
-                    end = "11:59";
-                }
+//                 if (timeToMinutes(end) > timeToMinutes("11:59")) {
+//                     end = "11:59";
+//                 }
 
-                return { ...p, start, end };
-            })
-        );
-    }, [gymStartTime, title, setData]);
+//                 return { ...p, start, end };
+//             })
+//         );
+//     }, [gymStartTime, title, setData]);
 
-    const updateTime = (id: string, field: "start" | "end", value: string) => {
-        setData((prev) =>
-            prev.map((item) =>
-                item.id === id ? { ...item, [field]: value } : item
-            )
-        );
-    };
+//     const updateTime = (id: string, field: "start" | "end", value: string) => {
+//         setData((prev) =>
+//             prev.map((item) =>
+//                 item.id === id ? { ...item, [field]: value } : item
+//             )
+//         );
+//     };
 
-    return (
-        <div className="bg-[#DBEAFE] mk:bg-[#BFDBFE] rounded-lg p-3 py-5 space-y-5">
-            <div className="flex items-center gap-2 text-gray-700 font-medium">
-                {icon} {title}
-            </div>
+//     return (
+//         <div className="bg-[#DBEAFE] mk:bg-[#BFDBFE] rounded-lg p-3 py-5 space-y-5">
+//             <div className="flex items-center gap-2 text-gray-700 font-medium">
+//                 {icon} {title}
+//             </div>
 
-            {data.map((item, index) => (
-                <div key={item.id} className="space-y-3">
-                    <div className="flex items-center justify-between gap-1">
-                        <div className="flex-">
-                            <p className="text-sm mb-2 text-gray-700">Start Time</p>
-                            <TimeInput value={item.start} onChange={(v) => updateTime(item.id, "start", v)} />
-                        </div>
+//             {data.map((item, index) => (
+//                 <div key={item.id} className="space-y-3">
+//                     <div className="flex items-center justify-between gap-1">
+//                         <div className="flex-">
+//                             <p className="text-sm mb-2 text-gray-700">Start Time</p>
+//                             <TimeInput value={item.start} onChange={(v) => updateTime(item.id, "start", v)} />
+//                         </div>
 
-                        <FiArrowRight className="mt-6 text-gray-600" size={18} />
+//                         <FiArrowRight className="mt-6 text-gray-600" size={18} />
 
-                        <div className="flex-">
-                            <p className="text-sm mb-2 text-gray-700">End Time</p>
-                            <TimeInput value={item.end} onChange={(v) => updateTime(item.id, "end", v)} />
-                        </div>
-                    </div>
+//                         <div className="flex-">
+//                             <p className="text-sm mb-2 text-gray-700">End Time</p>
+//                             <TimeInput value={item.end} onChange={(v) => updateTime(item.id, "end", v)} />
+//                         </div>
+//                     </div>
 
-                    {data.length > 1 && (
-                        <button
-                            onClick={() => setData((prev) => prev.filter((p) => p.id !== item.id))}
-                            className="mt-6 text-red-500 cursor-pointer hover:text-red-600 text-sm font-medium"
-                        >
-                            Delete
-                        </button>
-                    )}
+//                     {data.length > 1 && (
+//                         <button
+//                             onClick={() => setData((prev) => prev.filter((p) => p.id !== item.id))}
+//                             className="mt-6 text-red-500 cursor-pointer hover:text-red-600 text-sm font-medium"
+//                         >
+//                             Delete
+//                         </button>
+//                     )}
 
-                    {!isEndTimeValid(item.start, item.end) && (
-                        <p className="text-red-500 text-xs mt-1">End time must be later than start time</p>
-                    )}
+//                     {!isEndTimeValid(item.start, item.end) && (
+//                         <p className="text-red-500 text-xs mt-1">End time must be later than start time</p>
+//                     )}
 
-                    {title === "Morning" && (
-                        <>
-                            {timeToMinutes(item.start) < timeToMinutes(gymStartTime || "00:00") && (
-                                <p className="text-red-500 text-xs">
-                                    Morning peak must start after gym opening time
-                                </p>
-                            )}
+//                     {title === "Morning" && (
+//                         <>
+//                             {timeToMinutes(item.start) < timeToMinutes(gymStartTime || "00:00") && (
+//                                 <p className="text-red-500 text-xs">
+//                                     Morning peak must start after gym opening time
+//                                 </p>
+//                             )}
 
-                            {timeToMinutes(item.end) > timeToMinutes("11:59") && (
-                                <p className="text-red-500 text-xs">
-                                    Morning peak must end before 11:59 AM
-                                </p>
-                            )}
-                        </>
-                    )}
+//                             {timeToMinutes(item.end) > timeToMinutes("11:59") && (
+//                                 <p className="text-red-500 text-xs">
+//                                     Morning peak must end before 11:59 AM
+//                                 </p>
+//                             )}
+//                         </>
+//                     )}
 
-                    {title === "Evening" && (
-                        <>
-                            {timeToMinutes(item.start) < timeToMinutes("16:00") && (
-                                <p className="text-red-500 text-xs">
-                                    Evening peak must start from 4:00 PM
-                                </p>
-                            )}
+//                     {title === "Evening" && (
+//                         <>
+//                             {timeToMinutes(item.start) < timeToMinutes("16:00") && (
+//                                 <p className="text-red-500 text-xs">
+//                                     Evening peak must start from 4:00 PM
+//                                 </p>
+//                             )}
 
-                            {timeToMinutes(item.end) > timeToMinutes(gymEndTime || "23:59") && (
-                                <p className="text-red-500 text-xs">
-                                    Evening peak cannot exceed gym closing time
-                                </p>
-                            )}
-                        </>
-                    )}
+//                             {timeToMinutes(item.end) > timeToMinutes(gymEndTime || "23:59") && (
+//                                 <p className="text-red-500 text-xs">
+//                                     Evening peak cannot exceed gym closing time
+//                                 </p>
+//                             )}
+//                         </>
+//                     )}
 
-                    {(index === data.length - 1 && title === "Morning") && (
-                        <button
-                            onClick={addMore}
-                            className="w-full bg-[#F1F5F9] cursor-pointer text-[#94A3B8] py-2 rounded-md text-xs font-medium hover:bg-blue-300 transition"
-                        >
-                            Add More
-                        </button>
-                    )}
-                </div>
-            ))}
-        </div>
-    );
-};
+//                     {(index === data.length - 1 && title === "Morning") && (
+//                         <button
+//                             onClick={addMore}
+//                             className="w-full bg-[#F1F5F9] cursor-pointer text-[#94A3B8] py-2 rounded-md text-xs font-medium hover:bg-blue-300 transition"
+//                         >
+//                             Add More
+//                         </button>
+//                     )}
+//                 </div>
+//             ))}
+//         </div>
+//     );
+// };
 
 const Section = ({ title, children }: SectionProps) => (
     <div>

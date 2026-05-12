@@ -333,7 +333,7 @@ export default function Explore() {
                     <MapView selectedGymFromDetails={location.state?.gym} />
 
                     {/* Search Bar */}
-                    <div
+                    {/* <div
                         onClick={() => {
                             setCurrentSortLabel(null);
                             openModal("search");
@@ -344,7 +344,7 @@ export default function Explore() {
                         <p className="text-sm text-gray-500">
                             Search for Hourly Gyms
                         </p>
-                    </div>
+                    </div> */}
 
                     {/* Filter Button */}
                     <button

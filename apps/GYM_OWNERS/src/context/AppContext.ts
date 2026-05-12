@@ -29,6 +29,7 @@ export interface GymType {
     gender_preference: "EVERYONE" | "WOMEN_ONLY" | "MEN_ONLY"
     address_line_1: string,
     distance: string;
+    open_status: string;
     area: string,
     city: string,
     state: string,

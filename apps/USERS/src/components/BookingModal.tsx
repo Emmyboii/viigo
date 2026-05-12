@@ -2,7 +2,7 @@ import {
     FiMapPin,
     FiClock,
 } from "react-icons/fi";
-import { HiShare } from "react-icons/hi";
+import { HiShare, HiThumbUp } from "react-icons/hi";
 import { TiLocation } from "react-icons/ti";
 // import three from "../assets/three.png";
 import halfCircle from "../assets/paymentWhiteImg.png";
@@ -14,6 +14,8 @@ import { MdPending, MdPhone } from "react-icons/md";
 // import { toPng } from "html-to-image";
 import { snapdom } from "@zumer/snapdom";
 import { PiWarningCircle } from "react-icons/pi";
+import type { RecommendedWorkoutTimings } from "./types/gym";
+import fire from '../assets/fire.png'
 
 type PaymentSuccessProps = {
     onClose: () => void;
@@ -30,6 +32,8 @@ type BookingPass = {
     gym_image: string;
     gym_owner_phone: string;
     gym_open_till: string;
+    slot_type: string;
+    recommended_workout_timings?: RecommendedWorkoutTimings;
     guest_name: string;
     duration_in_hours: string;
     formatted_date: string;
@@ -38,7 +42,7 @@ type BookingPass = {
     last_entry_time: string;
     base_price: string;
     platform_fee: string;
-    gst_fee: string;
+    area: string;
     tax_amount: string;
     total_amount: string;
     latitude: string;
@@ -235,8 +239,8 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
 
                 <div className="relative bg-gradient-to-b from-blue-600 to-blue-500 text-white rounded-3xl p-4 shadow-xl">
 
-                    <img src={halfCircle} alt="Half Circle" className="absolute bottom-[190px] left-[-13px] w-[48px] h-[55px]" />
-                    <img src={halfCircle} alt="Half Circle" className="absolute bottom-[190px] right-[-13px] rotate-180 w-[48px] h-[55px]" />
+                    <img src={halfCircle} alt="Half Circle" className={`absolute ${pass.slot_type === "NON_PEAK" ? "bottom-[100px]" : "bottom-[120px]"} left-[-13px] w-[48px] h-[55px]`} />
+                    <img src={halfCircle} alt="Half Circle" className={`absolute ${pass.slot_type === "NON_PEAK" ? "bottom-[100px]" : "bottom-[120px]"} right-[-13px] rotate-180 w-[48px] h-[55px]`} />
 
                     {/* Gym Header */}
                     <div className="flex gap-3">
@@ -299,41 +303,59 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
                     </div>
 
                     {/* OTP Section */}
-                    <div className="text-center mt-6">
+                    <div className="text-center mt-1">
                         <p className="text-[48px] font-semibold">OTP : {pass.otp}</p>
                         <p className="text-xs mt-2 max-w-[261px] mx-auto">
-                            Use OTP during check in. Once OTP is validated, your session timings will start.
+                            {/* Use OTP during check in. Once OTP is validated, your session timings will start. */}
+                            Use OTP during check in to start your session.
                         </p>
 
                         <p className="text-xs mt-2 max-w-[261px] mx-auto">
-                            This pass remains valid until 11:59 PM on the selected booking date.
+                            {/* This pass remains valid until 11:59 PM on the selected booking date. */}
+                            This pass will be valid till the end of selected booking slot
                         </p>
                     </div>
 
                     {/* Divider */}
-                    <div className="border-t border-dashed border-white/40 my-6" />
+                    <div className="border-t border-dashed border-white/40 my-3" />
 
-                    {/* {slotType && (
-                        <p className={`text-sm font-normal ${slotType === 'NON_PEAK' ? 'text-[#0F7D37]' : 'text-[#DC2626]'
+                    {pass.slot_type && (
+                        <p className={`text-sm font-normal ${pass.slot_type === 'NON_PEAK' ? 'text-[#0F7D37]' : 'text-[#DC2626]'
                             }`}>
-                            {slotType === 'NON_PEAK' ? (
-                                <div className="flex items-center gap-1 rounded-full justify-center bg-white">
+                            {pass.slot_type === 'NON_PEAK' ? (
+                                <div className="flex items-center gap-1 w-fit mx-auto py-1 mb-3 mt-4 px-2 rounded-full justify-center bg-white">
                                     <HiThumbUp /> Non-Peak Hours
                                 </div>
                             ) : (
-                                <div className="flex items-center gap-1 rounded-full justify-center bg-white">
+                                <div className="flex items-center gap-1 w-fit mx-auto py-1 mb-3 mt-4 px-2 rounded-full justify-center bg-white">
                                     <img src={fire} className="w-[10px]" alt="" /> Peak Hours
                                 </div>
                             )}
                         </p>
-                    )} */}
+                    )}
 
                     {/* Timings */}
                     <div className="space-y-3 text-sm">
-                        <div className="flex items-center text-nowrap text-[#DBEAFE] justify-center gap-2">
-                            <FiClock className="w-4 h-4" />
-                            Timings : <span>{pass.gym_timings} </span>
-                        </div>
+                        {pass.slot_type === 'NON_PEAK' && (
+                            <div className="flex items-center text-nowrap text-[#FFFFFF] text-sm justify-center gap-2">
+                                <FiClock className="w-4 h-4" />
+                                Timings : <span>{pass.gym_timings} </span>
+                            </div>
+                        )}
+
+                        {pass.slot_type === 'PEAK' && (
+                            <div className="flex items-center text-nowrap text-sm text-[#ffffff] justify-center gap-2">
+                                <FiClock className="w-4 h-4" />
+                                <div className="space-y-1">
+                                    <p className=" mt-1">
+                                        Morning: {pass?.recommended_workout_timings?.peak_hours?.morning}
+                                    </p>
+                                    <p className="">
+                                        Evening: {pass?.recommended_workout_timings?.peak_hours?.evening}
+                                    </p>
+                                </div>
+                            </div>
+                        )}
 
                         {/* <div className="flex items-center justify-center gap-2">
                             <img src={three} alt="Three" className="mt-1 w-6" />
@@ -354,7 +376,7 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
                             Last entry for selected duration: {pass.last_entry_time}
                         </p> */}
 
-                        <div className="flex items-center gap-1 text-[11px] text-[#475569] mt-2">
+                        <div className="flex items-center gap-1 text-[11px] text-[#ffffff] justify-center mt-2">
                             <PiWarningCircle className="rotate-180" size={14} />
                             <span>Entry should be within selected timing.</span>
                         </div>
