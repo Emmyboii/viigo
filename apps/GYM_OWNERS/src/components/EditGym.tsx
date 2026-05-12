@@ -276,8 +276,8 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
             amenities: gym?.amenities.map(a => a.id).sort(),
             rules: gym?.rules.map(r => r.id).sort(),
             photos: gym?.images?.map(img => img.image).sort(),
-            morning: gym?.peak_morning,
-            evening: gym?.peak_evening,
+            // morning: gym?.peak_morning,
+            // evening: gym?.peak_evening,
         });
 
         setInitialData(formatted);
