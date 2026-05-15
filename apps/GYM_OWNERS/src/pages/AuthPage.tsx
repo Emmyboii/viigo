@@ -162,14 +162,13 @@ const AuthPage = () => {
       setToast({ type: "validating", message: "Validating credentials..." });
 
       try {
-        const response = await fetch(`${backendUrl}/auth/google/`, {
+        const response = await fetch(`${backendUrl}/api/auth/gymowner/google/`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
             access_token: tokenResponse.access_token,
-            user_type: "GYM_OWNER"
           }),
         });
 

@@ -20,10 +20,11 @@ export default function UserCard({ booking, onClick }: UserCardProps) {
         status,
     } = booking;
 
-    // 🔥 STATUS MAPPING
-    const isUpcoming = status === "CONFIRMED";
+    // 🔥 STATUS MAPPING — order matters!
     const isActive = status === "ACTIVE";
-    const isCancelled = status === "CANCELLED";
+    const isCancelled = display_status === "Cancelled" || status === "CANCELLED";
+    const isUpcoming = !isCancelled && (display_status === "Upcoming" || status === "CONFIRMED");
+    const isCompleted = status === "COMPLETED" || display_status === "Completed";
 
     let statusText = "";
     if (isActive) statusText = `${contextual_text}`;
@@ -65,7 +66,9 @@ export default function UserCard({ booking, onClick }: UserCardProps) {
                                     ? "bg-[#FACC15] text-white"
                                     : isCancelled
                                         ? "bg-[#FDECEA] text-[#F43F5E]"
-                                        : "bg-[#CBD5E1] text-[#FFFFFF]"
+                                        : isCompleted
+                                            ? "bg-[#CBD5E1] text-[#ffffff]"
+                                            : "bg-[#CBD5E1] text-[#FFFFFF]"
                                 }`}
                         >
                             {display_status}
@@ -94,7 +97,7 @@ export default function UserCard({ booking, onClick }: UserCardProps) {
                 </div>
 
                 {/* Context */}
-                <p className="text-[12px] mk:text-lg mk:font-semibold text-right text-[#475569] font-medium mt-1">
+                <p className="text-[12px] mk:text-lg mk:font-semibold mk:text-right text-[#475569] font-medium mt-1">
                     {isActive && (
                         <>
                             Remaining time left <Countdown initialText={booking.contextual_text} />
