@@ -134,7 +134,7 @@ const AuthPage = () => {
         setToast({ type: "error", message });
 
         // Auto-hide toast after 3 seconds
-        setTimeout(() => setToast(null), 2000);
+        setTimeout(() => setToast(null), 3500);
         return; // stop here, don’t navigate
       }
 
@@ -146,12 +146,12 @@ const AuthPage = () => {
       setTimeout(() => {
         setToast(null);
         navigate("/validateotp");
-      }, 2000);
+      }, 2500);
 
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Something went wrong. Please try again.";
       setToast({ type: "error", message });
-      setTimeout(() => setToast(null), 2000);
+      setTimeout(() => setToast(null), 3500);
     } finally {
       setIsLoading(false);
     }
@@ -176,7 +176,7 @@ const AuthPage = () => {
 
         if (!response.ok) {
           setToast({ type: "error", message: data.message || "Google login failed" });
-          setTimeout(() => setToast(null), 2000);
+          setTimeout(() => setToast(null), 3500);
           return;
         }
 
@@ -189,17 +189,17 @@ const AuthPage = () => {
         setTimeout(async () => {
           await checkOnboardingAndRedirect(); // await so toast stays until redirect
           setToast(null);
-        }, 1500);
+        }, 2500);
 
       } catch (error: unknown) {
         const message = error instanceof Error ? error.message : "Something went wrong during Google login";
         setToast({ type: "error", message });
-        setTimeout(() => setToast(null), 2000);
+        setTimeout(() => setToast(null), 3500);
       }
     },
     onError: () => {
       setToast({ type: "error", message: "Google login failed" });
-      setTimeout(() => setToast(null), 2000);
+      setTimeout(() => setToast(null), 3500);
     },
   });
 
