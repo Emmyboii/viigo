@@ -6,6 +6,7 @@ import { HiOutlineUser } from "react-icons/hi";
 import { FaUserCircle } from "react-icons/fa";
 import { useAppContext } from "../context/AppContext";
 import muscle from "../assets/muscle.png";
+import muscle3 from "../assets/muscle3.png";
 import logo from "../assets/icon3.jpeg";
 
 export default function Sidebar() {
@@ -15,7 +16,7 @@ export default function Sidebar() {
 
     const tabs = [
         { name: "Dashboard", icon: AiFillHome, path: "/" },
-        { name: "Manage Gym", image: muscle, path: "/gym", path2: "/gym/edit" },
+        { name: "Manage Gym", image: muscle, image2: muscle3, path: "/gym", path2: "/gym/edit" },
         { name: "Wallet", icon: IoWalletOutline, path: "/wallet", path2: "/wallet/edit", path3: "/wallet/transactions" },
         { name: "Profile", icon: FaUser, path: "/profile", path2: "/notifications", path3: "/profile/edit", path4: "/faq", path5: "/support" },
     ];
@@ -51,7 +52,11 @@ export default function Sidebar() {
                                         }`}
                                 >
                                     {tab.image ? (
-                                        <img title="tab" src={tab.image} className="w-6 h-6" />
+                                        isActive ? (
+                                            <img src={tab.image2} alt={tab.name} className="w-6 h-6" />
+                                        ) : (
+                                            <img src={tab.image} alt={tab.name} className="w-6 h-6" />
+                                        )
                                     ) : (
                                         Icon && <Icon size={20} />
                                     )}
