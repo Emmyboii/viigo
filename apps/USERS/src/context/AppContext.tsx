@@ -45,6 +45,7 @@ export interface GymType {
     area: string,
     city: string,
     state: string,
+    is_open: boolean,
     postal_code: string,
     latitude: string;
     recommended_workout_timings?: RecommendedWorkoutTimings;
@@ -79,6 +80,7 @@ export interface GymCard {
     city: string,
     state: string,
     postal_code: string,
+    is_open: boolean,
     latitude: string;
     recommended_workout_timings?: RecommendedWorkoutTimings;
     longitude: string;

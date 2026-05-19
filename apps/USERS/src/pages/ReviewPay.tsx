@@ -17,9 +17,9 @@ import { FaCircleCheck } from "react-icons/fa6";
 import { MdError } from "react-icons/md";
 import PaymentSuccess from "./PaymentSuccess";
 import three2 from "../assets/three2.png";
-import logoUrl from "../assets/icon2.png";
+// import logoUrl from "../assets/icon2.png";
 // import * as htmlToImage from "html-to-image";
-import { snapdom } from "@zumer/snapdom";
+// import { snapdom } from "@zumer/snapdom";
 import fire from '../assets/fire.png'
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -29,6 +29,7 @@ export interface PreviewData {
     base_price: string
     platform_fee: string
     surge_fee: string
+    slot_type: string
     gst_fee: string
     total_payable: string
     duration: string
@@ -50,133 +51,133 @@ export default function ReviewPay() {
 
     const storedData = localStorage.getItem("bookingData");
 
-    const handleShare = async () => {
-        const element = document.getElementById("share-area");
-        const bottomBar = document.getElementById("share-bottom-bar");
+    //     const handleShare = async () => {
+    //         const element = document.getElementById("share-area");
+    //         const bottomBar = document.getElementById("share-bottom-bar");
 
-        if (!element) return;
+    //         if (!element) return;
 
-        // Save original styles
+    //         // Save original styles
 
-        if (bottomBar) {
+    //         if (bottomBar) {
 
-            bottomBar.style.position = "relative";
-            bottomBar.style.bottom = "0px";
-        }
-        try {
-            await document.fonts.ready;
+    //             bottomBar.style.position = "relative";
+    //             bottomBar.style.bottom = "0px";
+    //         }
+    //         try {
+    //             await document.fonts.ready;
 
-            // 🧠 SNAPDOM (replaces html-to-image)
-            const canvasEl = await snapdom.toCanvas(element, {
-                scale: 2, // similar to pixelRatio
-                backgroundColor: "#ffffff",
-            });
+    //             // 🧠 SNAPDOM (replaces html-to-image)
+    //             const canvasEl = await snapdom.toCanvas(element, {
+    //                 scale: 2, // similar to pixelRatio
+    //                 backgroundColor: "#ffffff",
+    //             });
 
-            const baseImage = new Image();
-            baseImage.src = canvasEl.toDataURL("image/png");
+    //             const baseImage = new Image();
+    //             baseImage.src = canvasEl.toDataURL("image/png");
 
-            await new Promise((res) => {
-                baseImage.onload = res;
-            });
+    //             await new Promise((res) => {
+    //                 baseImage.onload = res;
+    //             });
 
-            // 🎨 FINAL CANVAS
-            const canvas = document.createElement("canvas");
-            const ctx = canvas.getContext("2d");
-            if (!ctx) return;
+    //             // 🎨 FINAL CANVAS
+    //             const canvas = document.createElement("canvas");
+    //             const ctx = canvas.getContext("2d");
+    //             if (!ctx) return;
 
-            // Adjust header height dynamically if needed
-            const headerHeight = 150 * 3; // taller header for bigger logo/text
+    //             // Adjust header height dynamically if needed
+    //             const headerHeight = 150 * 3; // taller header for bigger logo/text
 
-            canvas.width = baseImage.width;
-            canvas.height = baseImage.height + headerHeight;
+    //             canvas.width = baseImage.width;
+    //             canvas.height = baseImage.height + headerHeight;
 
-            // 🔷 Gradient header
-            const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
-            gradient.addColorStop(0, "#2563EB");
-            gradient.addColorStop(1, "#3B82F6");
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, canvas.width, headerHeight);
+    //             // 🔷 Gradient header
+    //             const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+    //             gradient.addColorStop(0, "#2563EB");
+    //             gradient.addColorStop(1, "#3B82F6");
+    //             ctx.fillStyle = gradient;
+    //             ctx.fillRect(0, 0, canvas.width, headerHeight);
 
-            // 🧠 Logo
-            const logo = new Image();
-            logo.crossOrigin = "anonymous";
-            logo.src = logoUrl;
-            await new Promise((res) => { logo.onload = res; logo.onerror = res; });
+    //             // 🧠 Logo
+    //             const logo = new Image();
+    //             logo.crossOrigin = "anonymous";
+    //             logo.src = logoUrl;
+    //             await new Promise((res) => { logo.onload = res; logo.onerror = res; });
 
-            // Scale logo bigger
-            const logoHeight = 80 * 3; // bigger than before
-            const logoWidth = logoHeight * (logo.width / logo.height);
+    //             // Scale logo bigger
+    //             const logoHeight = 80 * 3; // bigger than before
+    //             const logoWidth = logoHeight * (logo.width / logo.height);
 
-            // 🧠 Text
-            const text = "Viigo";
-            ctx.font = `bold ${70 * 3}px sans-serif`; // larger font
-            ctx.fillStyle = "#fff";
+    //             // 🧠 Text
+    //             const text = "Viigo";
+    //             ctx.font = `bold ${70 * 3}px sans-serif`; // larger font
+    //             ctx.fillStyle = "#fff";
 
-            // Center logo + text horizontally
-            const textWidth = ctx.measureText(text).width;
-            const gap = 20;
-            const totalWidth = logoWidth + gap + textWidth;
-            const startX = (canvas.width - totalWidth) / 2;
+    //             // Center logo + text horizontally
+    //             const textWidth = ctx.measureText(text).width;
+    //             const gap = 20;
+    //             const totalWidth = logoWidth + gap + textWidth;
+    //             const startX = (canvas.width - totalWidth) / 2;
 
-            // Draw logo
-            ctx.drawImage(
-                logo,
-                startX,
-                (headerHeight - logoHeight) / 2, // vertically center
-                logoWidth,
-                logoHeight
-            );
+    //             // Draw logo
+    //             ctx.drawImage(
+    //                 logo,
+    //                 startX,
+    //                 (headerHeight - logoHeight) / 2, // vertically center
+    //                 logoWidth,
+    //                 logoHeight
+    //             );
 
-            // Draw text vertically centered
-            ctx.textBaseline = "middle";
-            ctx.fillText(
-                text,
-                startX + logoWidth + gap,
-                headerHeight / 2
-            );
+    //             // Draw text vertically centered
+    //             ctx.textBaseline = "middle";
+    //             ctx.fillText(
+    //                 text,
+    //                 startX + logoWidth + gap,
+    //                 headerHeight / 2
+    //             );
 
-            // 🖼 Draw main content
-            ctx.drawImage(baseImage, 0, headerHeight);
+    //             // 🖼 Draw main content
+    //             ctx.drawImage(baseImage, 0, headerHeight);
 
-            // 📦 Export
-            const finalUrl = canvas.toDataURL("image/png");
-            const blob = await (await fetch(finalUrl)).blob();
+    //             // 📦 Export
+    //             const finalUrl = canvas.toDataURL("image/png");
+    //             const blob = await (await fetch(finalUrl)).blob();
 
-            const userName = userData?.full_name
+    //             const userName = userData?.full_name
 
-            const fileName = `viigo-booking.png`;
+    //             const fileName = `viigo-booking.png`;
 
-            const file = new File([blob], fileName, { type: "image/png" });
+    //             const file = new File([blob], fileName, { type: "image/png" });
 
-            // Only essential info (NO links)
-            const shareText = `
-Viigo Booking
+    //             // Only essential info (NO links)
+    //             const shareText = `
+    // Viigo Booking
 
-Name: ${userName}
-Gym: ${gym?.name}
-Date: ${formattedLongDate}
-Hours: ${selectedHours?.label}
-`.trim();
+    // Name: ${userName}
+    // Gym: ${gym?.name}
+    // Date: ${formattedLongDate}
+    // Hours: ${selectedHours?.label}
+    // `.trim();
 
-            if (navigator.share && navigator.canShare({ files: [file] })) {
-                await navigator.share({ files: [file], text: shareText });
-            } else {
-                window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, "_blank");
+    //             if (navigator.share && navigator.canShare({ files: [file] })) {
+    //                 await navigator.share({ files: [file], text: shareText });
+    //             } else {
+    //                 window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, "_blank");
 
-                const link = document.createElement("a");
-                link.href = finalUrl;
-                link.download = fileName
-                link.click();
-            }
-        } catch (err) {
-            console.error("Share failed:", err);
-        }
+    //                 const link = document.createElement("a");
+    //                 link.href = finalUrl;
+    //                 link.download = fileName
+    //                 link.click();
+    //             }
+    //         } catch (err) {
+    //             console.error("Share failed:", err);
+    //         }
 
-        if (bottomBar) {
-            bottomBar.style.position = "fixed";
-            bottomBar.style.bottom = "3.5rem";
-        }
-    };
+    //         if (bottomBar) {
+    //             bottomBar.style.position = "fixed";
+    //             bottomBar.style.bottom = "3.5rem";
+    //         }
+    //     };
 
     // const initialState = location.state
     //     ? location.state
@@ -375,20 +376,64 @@ Hours: ${selectedHours?.label}
     //     ...eveningPeaks.map(normalizePeak),
     // ];
 
-    const closingTime = gym?.close_time
+    const getSlotClosingTime = () => {
+        if (!gym || !slotType) return null;
+
+        // NON-PEAK → use less crowded end time
+        if (slotType === "NON_PEAK") {
+            const lessCrowded = gym.recommended_workout_timings?.less_crowded_hours;
+
+            // Example: "8 AM - 5 PM"
+            if (lessCrowded?.includes(" - ")) {
+                return lessCrowded.split(" - ")[1].trim(); // "5 PM"
+            }
+        }
+
+        // PEAK → use evening peak end time
+        if (slotType === "PEAK") {
+            const eveningPeak =
+                gym.recommended_workout_timings?.peak_hours?.evening;
+
+            // Example: "5 PM - 11 PM"
+            if (eveningPeak?.includes(" - ")) {
+                return eveningPeak.split(" - ")[1].trim(); // "11 PM"
+            }
+        }
+
+        return null;
+    };
 
     const calculateLastEntry = () => {
-        if (!selectedHours?.value || !closingTime) return "";
+        if (!selectedHours?.value) return "";
 
-        const [hour, minute] = closingTime.split(":").map(Number);
+        const slotClosing = getSlotClosingTime();
 
+        if (!slotClosing) return "";
+
+        // Convert "11 PM" → Date
         const closingDate = new Date();
-        closingDate.setHours(hour, minute, 0, 0);
+
+        const [time, modifier] = slotClosing.split(" ");
+        let [hours, minutes] = time.split(":").map(Number);
+
+        if (!minutes) minutes = 0;
+
+        if (modifier === "PM" && hours !== 12) {
+            hours += 12;
+        }
+
+        if (modifier === "AM" && hours === 12) {
+            hours = 0;
+        }
+
+        closingDate.setHours(hours, minutes, 0, 0);
 
         // subtract selected duration
         const durationInMinutes = selectedHours.value * 60;
 
-        closingDate.setMinutes(closingDate.getMinutes() - durationInMinutes);
+        closingDate.setMinutes(
+            closingDate.getMinutes() - durationInMinutes
+        );
 
         return closingDate.toLocaleTimeString("en-GB", {
             hour: "numeric",
@@ -405,9 +450,9 @@ Hours: ${selectedHours?.label}
         ? bookingDate.toLocaleDateString("en-GB", { day: "2-digit", month: "short" })
         : "";
 
-    const formattedLongDate = bookingDate
-        ? bookingDate.toLocaleDateString("en-GB", { day: "numeric", month: "long" })
-        : "";
+    // const formattedLongDate = bookingDate
+    //     ? bookingDate.toLocaleDateString("en-GB", { day: "numeric", month: "long" })
+    //     : "";
 
     const loadRazorpayScript = () => {
         return new Promise((resolve) => {
@@ -574,7 +619,7 @@ Hours: ${selectedHours?.label}
 
                 <div>
                     {/* ===== Header ===== */}
-                    <PageHeader text="Review and Pay" onShare={handleShare} />
+                    <PageHeader text="Review and Pay" />
 
                     <div className="pt-14" />
 
@@ -714,10 +759,10 @@ Hours: ${selectedHours?.label}
                                     <span className="font-medium text-[#0F172A]">Rs. {previewData?.base_price ?? "N/A"}</span>
                                 </div>
 
-                                <div className="flex justify-between text-nowrap">
+                                {/* <div className="flex justify-between text-nowrap">
                                     <span>Surge Fee</span>
                                     <span className="font-medium text-[#0F172A]">Rs. {previewData?.surge_fee ?? "N/A"}</span>
-                                </div>
+                                </div> */}
 
                                 <div className="flex justify-between text-nowrap">
                                     <span>Platform Fee</span>

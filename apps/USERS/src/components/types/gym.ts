@@ -33,6 +33,7 @@ export interface Gym {
     area: string,
     city: string,
     state: string,
+    is_open: boolean,
     postal_code: string,
     latitude: string;
     recommended_workout_timings?: RecommendedWorkoutTimings;

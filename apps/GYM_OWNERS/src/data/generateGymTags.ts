@@ -15,7 +15,7 @@ export function generateGymTags(gym: GymForTags): string[] {
     if (gym.gender_preference === "EVERYONE") {
         tags.push("Unisex");
     } else if (gym.gender_preference === "WOMEN_ONLY") {
-        tags.push("Women Friendly");
+        tags.push("Women's Gym");
     }
 
     const amenityNames: string[] = (gym.amenities || []).map((a) =>

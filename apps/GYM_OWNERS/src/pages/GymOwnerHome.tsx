@@ -46,18 +46,38 @@ const GymOwnerHome = () => {
   // )
 
   const filteredBookings = bookings.filter((b) => {
-
+    // Exclude pending
     if (b.status === "PENDING") return false;
+
+    // Match same logic as UserCard
+    const isActive = b.status === "ACTIVE";
+
+    const isCancelled =
+      b.display_status === "Cancelled" ||
+      b.status === "CANCELLED";
+
+    const isUpcoming =
+      !isCancelled &&
+      (b.display_status === "Upcoming" ||
+        b.status === "CONFIRMED");
+
+    const isCompleted =
+      b.status === "COMPLETED" ||
+      b.display_status === "Completed";
 
     switch (filter) {
       case "upcoming":
-        return b.status === "CONFIRMED";
+        return isUpcoming;
+
       case "active":
-        return b.status === "ACTIVE";
+        return isActive;
+
       case "cancelled":
-        return b.status === "CANCELLED";
+        return isCancelled;
+
       case "completed":
-        return b.status === "COMPLETED";
+        return isCompleted;
+
       case "all":
       default:
         return true;
@@ -381,14 +401,14 @@ const GymOwnerHome = () => {
               onClick={toggleGymStatus}
               disabled={isUpdatingStatus}
               className={`relative w-20 h-7 rounded-full transition duration-300 ${isGymOpen
-                  ? "bg-[#22C55E] border border-[#22C55E]"
-                  : "bg-[#94A3B8]"
+                ? "bg-[#22C55E] border border-[#22C55E]"
+                : "bg-[#94A3B8]"
                 } ${isUpdatingStatus ? "opacity-70 cursor-not-allowed" : ""}`}
             >
               <span
                 className={`absolute inset-0 flex items-center text-[10px] font-semibold px-2 ${isGymOpen
-                    ? "justify-start text-white"
-                    : "justify-end text-white"
+                  ? "justify-start text-white"
+                  : "justify-end text-white"
                   }`}
               >
                 {isGymOpen ? "Open" : "Closed"}

@@ -179,14 +179,13 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
     const handleLocationClick = () => {
         if (!pass) return;
 
-        // Navigate to /explore with coordinates and gym info
-        navigate("/explore", {
-            state: {
-                pass,
-                latitude: pass.latitude,
-                longitude: pass.longitude,
-            }
-        });
+        const { latitude, longitude } = pass;
+
+        if (!latitude || !longitude) return;
+
+        const url = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
+
+        window.open(url, "_blank"); // opens Google Maps
     };
 
     const statusConfig = getStatusConfig(booking?.status || "PENDING");

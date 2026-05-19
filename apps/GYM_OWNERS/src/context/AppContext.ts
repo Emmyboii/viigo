@@ -33,6 +33,7 @@ export interface GymType {
     area: string,
     city: string,
     state: string,
+    is_open: boolean,
     postal_code: string,
     open_time: string;
     close_time: string;
@@ -127,6 +128,7 @@ export interface WalletChartPoint {
 export interface WalletDashboard {
     account_balance: string;
     todays_earnings: string;
+    yesterdays_earnings: string;
     todays_bookings: number;
     chart_data: WalletChartPoint[];
     recent_activity: WalletTransaction[];

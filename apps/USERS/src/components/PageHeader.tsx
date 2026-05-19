@@ -4,7 +4,7 @@ import { RiShareFill } from "react-icons/ri";
 
 interface PageHeaderProps {
     text: string
-    onShare: () => void;
+    onShare?: () => void;
 }
 
 const PageHeader = ({ text, onShare }: PageHeaderProps) => {
@@ -19,6 +19,10 @@ const PageHeader = ({ text, onShare }: PageHeaderProps) => {
         }
 
         // Otherwise, navigate normally
+        if (window.location.pathname.includes("/gyms/")) {
+            navigate("/");
+            return;
+        }
         navigate(-1);
     };
 
@@ -37,13 +41,15 @@ const PageHeader = ({ text, onShare }: PageHeaderProps) => {
                 <span className="font-semibold text-[#0F172A] text-lg">{text}</span>
             </div>
 
-            <button
-                aria-label="Share gym"
-                onClick={onShare}
-                className="p-1"
-            >
-                <RiShareFill className="text-[#475569] text-lg" size={22} />
-            </button>
+            {window.location.pathname.includes("/gyms/") && (
+                <button
+                    aria-label="Share gym"
+                    onClick={onShare}
+                    className="p-1"
+                >
+                    <RiShareFill className="text-[#475569] text-lg" size={22} />
+                </button>
+            )}
         </div>
     )
 }

@@ -57,8 +57,22 @@ export default function VerifiedWallet() {
     const [selectedTransactionId, setSelectedTransactionId] = useState<number | null>(null);
     const [toast, setToast] = useState<{ type: ToastType; message: string } | null>(null);
 
-    const pendingBookings =
-        bookings?.filter((b) => b.status === "PENDING").length ?? 0;
+    const calculatePercentageChange = (
+        current: number,
+        previous: number
+    ) => {
+        if (previous === 0) return 0;
+
+        return (((current - previous) / previous) * 100).toFixed(0);
+    };
+
+    const earningsPercentage = calculatePercentageChange(
+        Number(walletDashboard?.todays_earnings ?? 0),
+        Number(walletDashboard?.yesterdays_earnings ?? 0)
+    );
+
+    const pendingBookings = bookings.filter((b) => b.display_status === "Upcoming").length || 0
+
 
     const balance = Number(walletDashboard?.account_balance ?? 0);
     const isWithdrawDisabled = balance <= 0;
@@ -165,7 +179,15 @@ export default function VerifiedWallet() {
                             <div className="text-center bg-[#FFFFFF1A] p-3 rounded-lg space-y-1 w-full">
                                 <p className="text-xs">Today's Earnings</p>
                                 <h3 className="text-lg font-semibold">₹ {walletDashboard?.todays_earnings ?? "0"}</h3>
-                                <p className="text-sm text-[#00FF5E]">+12%</p>
+                                <p
+                                    className={`text-sm ${Number(earningsPercentage) >= 0
+                                            ? "text-[#00FF5E]"
+                                            : "text-red-500"
+                                        }`}
+                                >
+                                    {Number(earningsPercentage) >= 0 ? "+" : ""}
+                                    {earningsPercentage}%
+                                </p>
                             </div>
                             <div className="text-center bg-[#FFFFFF1A] p-3 rounded-lg space-y-1 w-full">
                                 <p className="text-xs">Today's Bookings</p>

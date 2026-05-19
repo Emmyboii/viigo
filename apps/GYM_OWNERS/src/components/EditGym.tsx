@@ -14,6 +14,7 @@ import { useRef } from "react";
 import SelectionModal from "../components/SelectionModal";
 import { MdError } from "react-icons/md";
 import { RiArrowRightSLine } from "react-icons/ri";
+import { useAppContext } from "../context/AppContext";
 
 // interface PeakHour {
 //     id: string;
@@ -52,6 +53,7 @@ interface GymType {
     open_status: string,
     area: string,
     city: string,
+    is_open: boolean,
     state: string,
     postal_code: string,
     open_time: string;
@@ -76,7 +78,7 @@ interface EditGymProps {
     setDisplay: React.Dispatch<React.SetStateAction<"details" | "edit" | "create">>;
     // setGymList: React.Dispatch<React.SetStateAction<GymType[]>>;
     setGym: React.Dispatch<React.SetStateAction<GymType | null>>;
-    gym?: GymType | null;
+    selectedGym?: GymType | null;
 }
 
 interface Amenity {
@@ -91,13 +93,16 @@ interface Rule {
 }
 
 type PhotoType = {
+    id?: number;
     url: string;
     isNew: boolean;
 };
 
-export default function EditGym({ display, setDisplay, gym, setGym }: EditGymProps) {
+export default function EditGym({ setDisplay, setGym }: EditGymProps) {
 
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
+    const { selectedGym, display } = useAppContext()
 
     const navigate = useNavigate();
     const [initialData, setInitialData] = useState<string>("");
@@ -105,21 +110,21 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
     const [isLoading, setIsLoading] = useState(false);
     const [toast, setToast] = useState<{ type: ToastType; message: string } | null>(null);
 
-    const [gymName, setGymName] = useState(gym?.name || "");
-    const [bookingFor, setBookingFor] = useState(gym?.gender_preference);
-    const [price, setPrice] = useState(gym?.hourly_rate || "");
-    const [phone, setPhone] = useState(gym?.phone_number || "+91 ");
-    const [location, setLocation] = useState(gym?.location || "");
-    const [addressLine1, setAddressLine1] = useState(gym?.address_line_1 || "");
-    const [area, setArea] = useState(gym?.area || "");
-    const [city, setCity] = useState(gym?.city || "");
-    const [state, setState] = useState(gym?.state || "");
-    const [postalCode, setPostalCode] = useState(gym?.postal_code || "");
+    const [gymName, setGymName] = useState(selectedGym?.name || "");
+    const [bookingFor, setBookingFor] = useState(selectedGym?.gender_preference);
+    const [price, setPrice] = useState(selectedGym?.hourly_rate || "");
+    const [phone, setPhone] = useState(selectedGym?.phone_number || "+91 ");
+    const [location, setLocation] = useState(selectedGym?.location || "");
+    const [addressLine1, setAddressLine1] = useState(selectedGym?.address_line_1 || "");
+    const [area, setArea] = useState(selectedGym?.area || "");
+    const [city, setCity] = useState(selectedGym?.city || "");
+    const [state, setState] = useState(selectedGym?.state || "");
+    const [postalCode, setPostalCode] = useState(selectedGym?.postal_code || "");
     const [locationModal, setLocationModal] = useState(false);
-    const [startTime, setStartTime] = useState(gym?.open_time || "00:00");
-    const [endTime, setEndTime] = useState(gym?.close_time || "00:01");
-    // const [latitude, setLatitude] = useState<string>(gym?.latitude || "");
-    // const [longitude, setLongitude] = useState<string>(gym?.longitude || "");
+    const [startTime, setStartTime] = useState(selectedGym?.open_time || "00:00");
+    const [endTime, setEndTime] = useState(selectedGym?.close_time || "00:01");
+    // const [latitude, setLatitude] = useState<string>(selectedGym?.latitude || "");
+    // const [longitude, setLongitude] = useState<string>(selectedGym?.longitude || "");
 
     const [priceError, setPriceError] = useState("");
 
@@ -132,7 +137,7 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
     }, [price]);
 
     // const [morningPeak, setMorningPeak] = useState<PeakHour[]>(() => {
-    //     if (gym?.peak_morning && gym.peak_morning.length > 0) {
+    //     if (selectedGym?.peak_morning && gym.peak_morning.length > 0) {
     //         return gym.peak_morning.map((item) => {
     //             if (Array.isArray(item)) {
     //                 // It's a [start, end] tuple
@@ -149,7 +154,7 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
     // });
 
     // const [eveningPeak, setEveningPeak] = useState<PeakHour[]>(() => {
-    //     if (gym?.peak_evening && gym.peak_evening.length > 0) {
+    //     if (selectedGym?.peak_evening && gym.peak_evening.length > 0) {
     //         return gym.peak_evening.map((item) => {
     //             if (Array.isArray(item)) {
     //                 const [start, end] = item;
@@ -164,7 +169,7 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
     //         {
     //             id: crypto.randomUUID(),
     //             start: "16:00",
-    //             end: gym?.close_time || "00:01",
+    //             end: selectedGym?.close_time || "00:01",
     //         },
     //     ];
     // });
@@ -181,17 +186,20 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
     }, [setDisplay]);
 
     const [photos, setPhotos] = useState<PhotoType[]>(
-        gym?.images?.map(img => ({
+        selectedGym?.images?.map(img => ({
+            id: img.id,
             url: img.image,
             isNew: false,
         })) || []
     );
 
+    const [imagesToDelete, setImagesToDelete] = useState<number[]>([]);
+
     const [selectedAmenities, setSelectedAmenities] = useState<number[]>(
-        gym?.amenities?.map(a => a.id) || []
+        selectedGym?.amenities?.map(a => a.id) || []
     );
     const [selectedRules, setSelectedRules] = useState<number[]>(
-        gym?.rules?.map(r => r.id) || []
+        selectedGym?.rules?.map(r => r.id) || []
     );
     const [amenities, setAmenities] = useState<Amenity[]>([]);
     const [amenitiesCount, setAmenitiesCount] = useState('');
@@ -263,25 +271,60 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
     };
 
     useEffect(() => {
-        if (!gym) return;
+        if (!selectedGym) return;
 
         const formatted = JSON.stringify({
-            name: gym?.name,
-            gender_preference: gym?.gender_preference,
-            price: gym?.hourly_rate,
-            phone: gym?.phone_number,
-            location: gym?.location,
-            start: gym?.open_time,
-            end: gym?.close_time,
-            amenities: gym?.amenities.map(a => a.id).sort(),
-            rules: gym?.rules.map(r => r.id).sort(),
-            photos: gym?.images?.map(img => img.image).sort(),
-            // morning: gym?.peak_morning,
-            // evening: gym?.peak_evening,
+            name: selectedGym?.name,
+            gender_preference: selectedGym?.gender_preference,
+            price: selectedGym?.hourly_rate,
+            phone: selectedGym?.phone_number,
+            location: selectedGym?.location,
+            start: selectedGym?.open_time,
+            end: selectedGym?.close_time,
+            amenities: selectedGym?.amenities.map(a => a.id).sort(),
+            rules: selectedGym?.rules.map(r => r.id).sort(),
+            photos: selectedGym?.images?.map(img => img.image).sort(),
+            // morning: selectedGym?.peak_morning,
+            // evening: selectedGym?.peak_evening,
         });
 
         setInitialData(formatted);
-    }, [gym]);
+    }, [selectedGym]);
+
+    useEffect(() => {
+        if (!selectedGym) return;
+
+        setGymName(selectedGym.name || "");
+        setBookingFor(selectedGym.gender_preference);
+        setPrice(selectedGym.hourly_rate || "");
+        setPhone(selectedGym.phone_number || "+91 ");
+        setLocation(selectedGym.location || "");
+
+        setAddressLine1(selectedGym.address_line_1 || "");
+        setArea(selectedGym.area || "");
+        setCity(selectedGym.city || "");
+        setState(selectedGym.state || "");
+        setPostalCode(selectedGym.postal_code || "");
+
+        setStartTime(selectedGym.open_time || "00:00");
+        setEndTime(selectedGym.close_time || "00:01");
+
+        setPhotos(
+            selectedGym.images?.map((img) => ({
+                id: img.id,
+                url: img.image,
+                isNew: false,
+            })) || []
+        );
+
+        setSelectedAmenities(
+            selectedGym.amenities?.map((a) => a.id) || []
+        );
+
+        setSelectedRules(
+            selectedGym.rules?.map((r) => r.id) || []
+        );
+    }, [selectedGym]);
 
     const currentData = useMemo(() => {
         return JSON.stringify({
@@ -362,8 +405,15 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
         setPhotos((prev) => [...prev, ...newPhotos]);
     };
 
-    const removePhoto = (url: string) => {
-        setPhotos((prev) => prev.filter((p) => p.url !== url));
+    const removePhoto = (photo: PhotoType) => {
+
+        // only existing backend images should be deleted
+        if (!photo.isNew && photo.id) {
+            setImagesToDelete((prev) => [...prev, photo.id!]);
+        }
+
+        setPhotos((prev) => prev.filter((p) => p.url !== photo.url));
+        console.log(imagesToDelete);
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -413,13 +463,18 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
             formData.append("longitude", lng);
 
             // Photos
-            // only upload NEW images
+            // // only upload NEW images
             for (const photo of photos) {
                 if (photo.isNew) {
-                    const blob = await fetch(photo.url).then(res => res.blob());
+                    const blob = await fetch(photo.url).then((res) => res.blob());
+
                     formData.append("uploaded_images", blob, "photo.jpg");
                 }
             }
+
+            imagesToDelete.forEach((id) => {
+                formData.append("images_to_delete", String(id));
+            });
 
             selectedAmenities.forEach((id) =>
                 formData.append("amenities", String(id))
@@ -440,7 +495,7 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
             let res;
             if (display === "edit") {
                 // EDIT existing gym
-                res = await fetch(`${backendUrl}/gymowner/gyms/${gym?.id}/`, {
+                res = await fetch(`${backendUrl}/gymowner/gyms/${selectedGym?.id}/`, {
                     method: "PUT",
                     body: formData,
                     headers: {
@@ -535,8 +590,8 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
         selectedAmenities.length > 0 &&
         selectedRules.length > 0 &&
         photos.length > 0
-        // morningPeak.every((p) => isMorningValid(p, startTime)) &&
-        // eveningPeak.every((p) => isEveningValid(p, endTime));
+    // morningPeak.every((p) => isMorningValid(p, startTime)) &&
+    // eveningPeak.every((p) => isEveningValid(p, endTime));
 
     return (
         <div className="min-h-screen pb-32 mk:bg-[#CBD5E1] max-w-[1900px] mk:mx-auto w-screen mk:w-full">
@@ -545,7 +600,7 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
                 <div className="flex items-center gap-3 p-4 bg-white cursor-pointer">
                     <FiArrowLeft
                         onClick={() => {
-                            if (display === "edit" && gym?.images.length !== 0) {
+                            if (display === "edit" && selectedGym?.images.length !== 0) {
                                 setDisplay("details");
                                 localStorage.setItem("gymDisplay", "details");
                                 if (window.history.state?.display === "edit") {
@@ -564,7 +619,7 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
                 <div className="mk:flex hidden items-center gap-4">
                     <button
                         onClick={() => {
-                            if (display === "edit" && gym?.images.length !== 0) {
+                            if (display === "edit" && selectedGym?.images.length !== 0) {
                                 setDisplay("details");
                                 localStorage.setItem("gymDisplay", "details");
                                 if (window.history.state?.display === "edit") {
@@ -613,7 +668,7 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
                             <Input label="Gym Name" value={gymName} onChange={setGymName} />
 
                             <div className="relative">
-                                <p className="text-base mb-1 text-[#0F172A] font-semibold">Who Can Book This Gym?</p>
+                                <p className="text-base mb-1 text-[#0F172A] font-semibold">Who Can Book This selectedGym?</p>
                                 <div className="flex items-start gap-6 flex-col mt-6">
                                     <label className="flex items-center mr-4 cursor-pointer">
                                         <input
@@ -707,7 +762,7 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
                                                 className="w-24 h-24 object-cover rounded-lg"
                                             />
                                             <button
-                                                onClick={() => removePhoto(photo.url)}
+                                                onClick={() => removePhoto(photo)}
                                                 title="remove"
                                                 className="absolute -top-2 -right-2 cursor-pointer bg-white p-1 rounded-full shadow"
                                             >
@@ -812,7 +867,7 @@ export default function EditGym({ display, setDisplay, gym, setGym }: EditGymPro
                                         className="w-24 h-24 object-cover rounded-lg"
                                     />
                                     <button
-                                        onClick={() => removePhoto(photo.url)}
+                                        onClick={() => removePhoto(photo)}
                                         title="remove"
                                         className="absolute -top-2 -right-2 bg-white p-1 rounded-full shadow cursor-pointer"
                                     >

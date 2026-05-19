@@ -7,14 +7,14 @@ import Footer from "../components/Footer";
 import MapView from "../components/MapView";
 import { IoArrowBack, IoSearchSharp } from "react-icons/io5";
 import FilterModal from "../components/FilterModal";
-import { HiFilter, HiShare } from "react-icons/hi";
+import { HiFilter } from "react-icons/hi";
 import FilterChips from "../components/FilterChips";
 import SortModal from "../components/SortModal";
 import { FaFilter } from "react-icons/fa";
 import { BiSortAlt2 } from "react-icons/bi";
-import logoUrl from "../assets/icon2.png";
+// // import logoUrl from "../assets/icon2.png";
 // import * as htmlToImage from "html-to-image";
-import { snapdom } from "@zumer/snapdom";
+// // import { snapdom } from "@zumer/snapdom";
 
 export default function Explore() {
     const {
@@ -188,120 +188,120 @@ export default function Explore() {
         };
     }, []);
 
-    const handleShare = async () => {
-        const element = document.getElementById("share-area");
-        const bottomBar = document.getElementById("share-bottom-bar");
+    // const handleShare = async () => {
+    //     const element = document.getElementById("share-area");
+    //     const bottomBar = document.getElementById("share-bottom-bar");
 
-        if (!element) return;
+    //     if (!element) return;
 
-        // Save original styles
-        if (bottomBar) {
+    //     // Save original styles
+    //     if (bottomBar) {
 
-            bottomBar.style.position = "relative";
-            bottomBar.style.bottom = "0px";
-        }
-        try {
-            await document.fonts.ready;
+    //         bottomBar.style.position = "relative";
+    //         bottomBar.style.bottom = "0px";
+    //     }
+    //     try {
+    //         await document.fonts.ready;
 
-            // 🧠 SNAPDOM (replaces html-to-image)
-            const canvasEl = await snapdom.toCanvas(element, {
-                scale: 2, // similar to pixelRatio
-                backgroundColor: "#ffffff",
-            });
+    //         // 🧠 SNAPDOM (replaces html-to-image)
+    //         const canvasEl = await snapdom.toCanvas(element, {
+    //             scale: 2, // similar to pixelRatio
+    //             backgroundColor: "#ffffff",
+    //         });
 
-            const baseImage = new Image();
-            baseImage.src = canvasEl.toDataURL("image/png");
+    //         const baseImage = new Image();
+    //         baseImage.src = canvasEl.toDataURL("image/png");
 
-            await new Promise((res) => {
-                baseImage.onload = res;
-            });
+    //         await new Promise((res) => {
+    //             baseImage.onload = res;
+    //         });
 
-            // 🎨 FINAL CANVAS
-            const canvas = document.createElement("canvas");
-            const ctx = canvas.getContext("2d");
-            if (!ctx) return;
+    //         // 🎨 FINAL CANVAS
+    //         const canvas = document.createElement("canvas");
+    //         const ctx = canvas.getContext("2d");
+    //         if (!ctx) return;
 
-            // Adjust header height dynamically if needed
-            const headerHeight = 150 * 3; // taller header for bigger logo/text
+    //         // Adjust header height dynamically if needed
+    //         const headerHeight = 150 * 3; // taller header for bigger logo/text
 
-            canvas.width = baseImage.width;
-            canvas.height = baseImage.height + headerHeight;
+    //         canvas.width = baseImage.width;
+    //         canvas.height = baseImage.height + headerHeight;
 
-            // 🔷 Gradient header
-            const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
-            gradient.addColorStop(0, "#2563EB");
-            gradient.addColorStop(1, "#3B82F6");
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, canvas.width, headerHeight);
+    //         // 🔷 Gradient header
+    //         const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+    //         gradient.addColorStop(0, "#2563EB");
+    //         gradient.addColorStop(1, "#3B82F6");
+    //         ctx.fillStyle = gradient;
+    //         ctx.fillRect(0, 0, canvas.width, headerHeight);
 
-            // 🧠 Logo
-            const logo = new Image();
-            logo.crossOrigin = "anonymous";
-            logo.src = logoUrl;
-            await new Promise((res) => { logo.onload = res; logo.onerror = res; });
+    //         // 🧠 Logo
+    //         const logo = new Image();
+    //         logo.crossOrigin = "anonymous";
+    //         logo.src = logoUrl;
+    //         await new Promise((res) => { logo.onload = res; logo.onerror = res; });
 
-            // Scale logo bigger
-            const logoHeight = 80 * 3; // bigger than before
-            const logoWidth = logoHeight * (logo.width / logo.height);
+    //         // Scale logo bigger
+    //         const logoHeight = 80 * 3; // bigger than before
+    //         const logoWidth = logoHeight * (logo.width / logo.height);
 
-            // 🧠 Text
-            const text = "Viigo";
-            ctx.font = `bold ${70 * 3}px sans-serif`; // larger font
-            ctx.fillStyle = "#fff";
+    //         // 🧠 Text
+    //         const text = "Viigo";
+    //         ctx.font = `bold ${70 * 3}px sans-serif`; // larger font
+    //         ctx.fillStyle = "#fff";
 
-            // Center logo + text horizontally
-            const textWidth = ctx.measureText(text).width;
-            const gap = 20;
-            const totalWidth = logoWidth + gap + textWidth;
-            const startX = (canvas.width - totalWidth) / 2;
+    //         // Center logo + text horizontally
+    //         const textWidth = ctx.measureText(text).width;
+    //         const gap = 20;
+    //         const totalWidth = logoWidth + gap + textWidth;
+    //         const startX = (canvas.width - totalWidth) / 2;
 
-            // Draw logo
-            ctx.drawImage(
-                logo,
-                startX,
-                (headerHeight - logoHeight) / 2, // vertically center
-                logoWidth,
-                logoHeight
-            );
+    //         // Draw logo
+    //         ctx.drawImage(
+    //             logo,
+    //             startX,
+    //             (headerHeight - logoHeight) / 2, // vertically center
+    //             logoWidth,
+    //             logoHeight
+    //         );
 
-            // Draw text vertically centered
-            ctx.textBaseline = "middle";
-            ctx.fillText(
-                text,
-                startX + logoWidth + gap,
-                headerHeight / 2
-            );
+    //         // Draw text vertically centered
+    //         ctx.textBaseline = "middle";
+    //         ctx.fillText(
+    //             text,
+    //             startX + logoWidth + gap,
+    //             headerHeight / 2
+    //         );
 
-            // 🖼 Draw main content
-            ctx.drawImage(baseImage, 0, headerHeight);
+    //         // 🖼 Draw main content
+    //         ctx.drawImage(baseImage, 0, headerHeight);
 
-            // 📦 Export
-            // const finalUrl = canvas.toDataURL("image/png");
-            const blob = await new Promise<Blob | null>((resolve) =>
-                canvas.toBlob(resolve, "image/png")
-            );
+    //         // 📦 Export
+    //         // const finalUrl = canvas.toDataURL("image/png");
+    //         const blob = await new Promise<Blob | null>((resolve) =>
+    //             canvas.toBlob(resolve, "image/png")
+    //         );
 
-            if (blob) {
-                const file = new File([blob], "viigo-share.png", { type: "image/png" });
+    //         if (blob) {
+    //             const file = new File([blob], "viigo-share.png", { type: "image/png" });
 
-                if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                    await navigator.share({
-                        files: [file],
-                        title: "Viigo Share",
-                        text: "Check out this gym!",
-                    });
-                } else {
-                    // Fallback download
-                    const link = document.createElement("a");
-                    link.href = URL.createObjectURL(file);
-                    link.download = "viigo-share.png";
-                    link.click();
-                }
-            }
-        } catch (err) {
-            console.error("Share failed:", err);
-        }
-    };
+    //             if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    //                 await navigator.share({
+    //                     files: [file],
+    //                     title: "Viigo Share",
+    //                     text: "Check out this gym!",
+    //                 });
+    //             } else {
+    //                 // Fallback download
+    //                 const link = document.createElement("a");
+    //                 link.href = URL.createObjectURL(file);
+    //                 link.download = "viigo-share.png";
+    //                 link.click();
+    //             }
+    //         }
+    //     } catch (err) {
+    //         console.error("Share failed:", err);
+    //     }
+    // };
 
     useEffect(() => {
         const handlePopState = (event: PopStateEvent) => {
@@ -387,9 +387,9 @@ export default function Explore() {
                                 <span className="font-semibold text-[#0F172A] text-lg text-nowrap">Explore Gym</span>
                             </div>
 
-                            <button onClick={handleShare} title="share" className="p-1">
+                            {/* <button onClick={handleShare} title="share" className="p-1">
                                 <HiShare className="text-[#475569]" size={20} />
-                            </button>
+                            </button> */}
                         </div>
 
                         <div className="pt-11"></div>

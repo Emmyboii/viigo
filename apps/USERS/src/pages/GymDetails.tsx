@@ -13,8 +13,8 @@ import Footer from "../components/Footer";
 import PageHeader from "../components/PageHeader";
 import { normalizeImagePath, useAppContext, type GymCard } from "../context/AppContext";
 import type { Gym } from "../components/types/gym";
-import red from '../assets/red.png'
-import chart from '../assets/chart-bar.png'
+// import red from '../assets/red.png'
+// import chart from '../assets/chart-bar.png'
 import { snapdom } from "@zumer/snapdom";
 import { generateGymTags } from "../utils/generateGymTags";
 import { FaRegClock, FaRestroom, FaLock } from "react-icons/fa";
@@ -37,6 +37,10 @@ export default function GymDetails() {
     const [amenitiesOpen, setAmenitiesOpen] = useState(false);
     const [rulesOpen, setRulesOpen] = useState(false);
     const [priceBreakdownOpen, setPriceBreakdownOpen] = useState(false);
+    const visibleAmenities = gym?.amenities.slice(0, 4);
+    const visibleRules = gym?.rules.slice(0, 3);
+
+    const isGymClosed = gym?.is_open;
 
     const handleShare = async () => {
         const element = document.getElementById("share-area");
@@ -183,7 +187,7 @@ export default function GymDetails() {
 
     const tagIcons: Record<string, JSX.Element> = {
         "Unisex": <HiUsers size={14} />,
-        "Women Friendly": <RiWomenLine size={14} />,
+        "Women's Gym": <RiWomenLine size={14} />,
         "Trainer Available": <HiUserAdd size={14} />,
         "Locker Facility": <FaLock size={12} />,
         "Washroom Available": <FaRestroom size={13} />,
@@ -311,58 +315,57 @@ export default function GymDetails() {
     const handleLocationClick = () => {
         if (!gym) return;
 
-        // Navigate to /explore with coordinates and gym info
-        navigate("/explore", {
-            state: {
-                gym,
-                latitude: gym.latitude,
-                longitude: gym.longitude,
-            }
-        });
+        const { latitude, longitude } = gym;
+
+        if (!latitude || !longitude) return;
+
+        const url = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
+
+        window.open(url, "_blank"); // opens Google Maps
     };
 
-    const isCurrentTimeInRange = (range?: string) => {
-        if (!range || !range.includes(" - ")) return false;
+    // const isCurrentTimeInRange = (range?: string) => {
+    //     if (!range || !range.includes(" - ")) return false;
 
-        const parts = range.split(" - ");
-        if (parts.length !== 2) return false;
+    //     const parts = range.split(" - ");
+    //     if (parts.length !== 2) return false;
 
-        const [start, end] = parts;
+    //     const [start, end] = parts;
 
-        const now = new Date();
+    //     const now = new Date();
 
-        const parseTime = (timeStr?: string) => {
-            if (!timeStr) return null;
+    //     const parseTime = (timeStr?: string) => {
+    //         if (!timeStr) return null;
 
-            const parts = timeStr.trim().split(" ");
-            if (parts.length < 2) return null;
+    //         const parts = timeStr.trim().split(" ");
+    //         if (parts.length < 2) return null;
 
-            const [time, modifier] = parts;
+    //         const [time, modifier] = parts;
 
-            let [hours, minutes] = time.split(":").map(Number);
+    //         let [hours, minutes] = time.split(":").map(Number);
 
-            if (isNaN(hours)) return null;
-            if (!minutes) minutes = 0;
+    //         if (isNaN(hours)) return null;
+    //         if (!minutes) minutes = 0;
 
-            if (modifier === "PM" && hours !== 12) hours += 12;
-            if (modifier === "AM" && hours === 12) hours = 0;
+    //         if (modifier === "PM" && hours !== 12) hours += 12;
+    //         if (modifier === "AM" && hours === 12) hours = 0;
 
-            const date = new Date();
-            date.setHours(hours, minutes, 0, 0);
-            return date;
-        };
+    //         const date = new Date();
+    //         date.setHours(hours, minutes, 0, 0);
+    //         return date;
+    //     };
 
-        const startTime = parseTime(start);
-        const endTime = parseTime(end);
+    //     const startTime = parseTime(start);
+    //     const endTime = parseTime(end);
 
-        if (!startTime || !endTime) return false;
+    //     if (!startTime || !endTime) return false;
 
-        return now >= startTime && now <= endTime;
-    };
+    //     return now >= startTime && now <= endTime;
+    // };
 
-    const isPeakNow =
-        isCurrentTimeInRange(gym?.recommended_workout_timings?.peak_hours?.morning || "") ||
-        isCurrentTimeInRange(gym?.recommended_workout_timings?.peak_hours?.evening || "");
+    // const isPeakNow =
+    //     isCurrentTimeInRange(gym?.recommended_workout_timings?.peak_hours?.morning || "") ||
+    //     isCurrentTimeInRange(gym?.recommended_workout_timings?.peak_hours?.evening || "");
 
     if (loading) {
         return (
@@ -390,18 +393,24 @@ export default function GymDetails() {
                 <p className="text-gray-500 text-sm">
                     Sorry, we couldn’t find the gym you’re looking for. Please check the link or try another search.
                 </p>
-                <button
-                    onClick={() => navigate(-1)}
-                    className="mt-2 px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
-                >
-                    Go Back
-                </button>
+                <div className="flex gap-3 justify-center">
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="bg-blue-600 text-white px-5 py-2 rounded-lg font-medium hover:bg-blue-700 transition"
+                    >
+                        Refresh
+                    </button>
+
+                    <button
+                        onClick={() => window.history.back()}
+                        className="border border-[#CBD5E1] text-[#475569] px-5 py-2 rounded-lg font-medium hover:bg-gray-100 transition"
+                    >
+                        Go Back
+                    </button>
+                </div>
             </div>
         </div>
     )
-
-    const visibleAmenities = gym.amenities.slice(0, 4);
-    const visibleRules = gym.rules.slice(0, 3);
 
     return (
         <div className="pb-32 bg-white min-h-screen max-w-[1300px] mx-auto">
@@ -430,6 +439,11 @@ export default function GymDetails() {
                     <div>
                         <div className="flex justify-between items-center gap-3 mt-1">
                             <h1 className="text-xl font-bold text-nowrap">{gym.name}</h1>
+                            {isGymClosed && (
+                                <div className="inline-flex items-center px-3 py-1 rounded-full bg-red-100 text-red-600 text-xs font-semibold">
+                                    Gym is currently closed
+                                </div>
+                            )}
 
                             {/* Call & Map Buttons */}
                             <div className="flex gap-3">
@@ -463,7 +477,7 @@ export default function GymDetails() {
 
                         {/* Tags */}
                         <div className="flex gap-2 mt-5 flex-wrap">
-                            {tags.map((tag, i) => (
+                            {tags.slice(0, 2).map((tag, i) => (
                                 <span
                                     key={i}
                                     className="flex items-center gap-1 text-nowrap bg-[#DBEAFE] text-[#2563EB] text-xs px-3 py-2 rounded-full"
@@ -479,7 +493,7 @@ export default function GymDetails() {
 
                     <div className="border border-dashed border-[#CBD5E1]"></div>
 
-                    {isPeakNow && (
+                    {/* {isPeakNow && (
                         <div className="flex items-center justify-between gap-2 px-4 py-4 rounded-lg text-sm border transition border-[#DBEAFE] text-[#0F172A]">
                             <img src={red} alt="Crowded" className="w-11" />
                             <div className="space-y-1">
@@ -492,7 +506,7 @@ export default function GymDetails() {
                             </div>
                             <img src={chart} alt="Crowded" className="w-8" />
                         </div>
-                    )}
+                    )} */}
                     {/* : (
                         <div className="flex items-center gap-2">
                             <img src={green} alt="Less crowded" width={35} />
@@ -514,7 +528,7 @@ export default function GymDetails() {
                         </h2>
 
                         <div className="space-y-3">
-                            {visibleAmenities.map((item, i) => (
+                            {visibleAmenities?.map((item, i) => (
                                 <p key={i} className="text-xs text-[#0F172A] flex items-center gap-2">
                                     <img
                                         src={`https://api.viigo.in/${normalizeImagePath(item?.icon)}`}
@@ -545,7 +559,7 @@ export default function GymDetails() {
                         </h2>
 
                         <div className="space-y-3 text-xs text-[#0F172A]">
-                            {visibleRules.map((rule, i) => (
+                            {visibleRules?.map((rule, i) => (
                                 <p key={i}>
                                     {i + 1}. {rule.description}
                                 </p>
@@ -573,7 +587,8 @@ export default function GymDetails() {
 
                         <div className="flex items-center gap-2 leading-none">
                             <p className="text-[22px] font-semibold flex items-center text-nowrap text-[#0F172A]">
-                                ₹{Number(gym.hourly_rate) + 10 + 1.8}/Hr
+                                ₹{Number(gym.hourly_rate) + Number(bookingConfig.platform_fee) + Math.round(Number(bookingConfig.gst_fee))}/Hr
+
                             </p>
 
                             <IoInformationCircleOutline
@@ -586,10 +601,17 @@ export default function GymDetails() {
                     </div>
 
                     <button
-                        onClick={() => navigate(`/gyms/${gym.slug}/plan`)}
-                        className="bg-blue-600 text-white px-6 py-4 text-sm rounded-md w-[153px] font-medium"
+                        onClick={() => {
+                            if (isGymClosed) return;
+                            navigate(`/gyms/${gym.slug}/plan`);
+                        }}
+                        disabled={isGymClosed}
+                        className={`px-6 py-4 text-sm rounded-md w-[153px] font-medium transition ${isGymClosed
+                                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                : "bg-blue-600 text-white"
+                            }`}
                     >
-                        Book Hour
+                        {isGymClosed ? "Closed" : "Book Hour"}
                     </button>
                 </div>
 
@@ -648,14 +670,16 @@ export default function GymDetails() {
 
                     <div className="flex items-center justify-between">
                         <p className="text-sm font-medium text-[#6A6A6A]">Gst Fee</p>
-                        <p className="text-sm font-medium text-[#0F172A]">Rs. {bookingConfig.gst_fee}</p>
+                        <p className="text-sm font-medium text-[#0F172A]">
+                            Rs. {Math.round(Number(bookingConfig.gst_fee))}
+                        </p>
                     </div>
 
                     <div className="border border-dashed border-[#CBD5E1]"></div>
 
                     <div className="flex items-center justify-between">
                         <p className="text-sm font-medium text-[#6A6A6A]">Total</p>
-                        <p className="text-sm font-medium text-[#0F172A]">Rs. {Number(gym.hourly_rate) + 10 + 1.8}</p>
+                        <p className="text-sm font-medium text-[#0F172A]">Rs. {Number(gym.hourly_rate) + Number(bookingConfig.platform_fee) + Math.round(Number(bookingConfig.gst_fee))}</p>
                     </div>
                 </div>
             </BottomSheet>

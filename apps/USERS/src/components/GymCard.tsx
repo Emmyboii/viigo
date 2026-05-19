@@ -25,7 +25,7 @@ export default function GymCard({ gym }: GymCardProps) {
         gym.amenities.slice(0, 2);
 
     return (
-        <div className="bg-white rounded-md shadow-md overflow-hidden h-[320px] flex flex-col">
+        <div className="bg-white rounded-md shadow-md overflow-hidden h-[350px] flex flex-col">
             <div className="h-40">
                 <ImageCarousel
                     images={gym.images.map(img => ({

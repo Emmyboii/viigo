@@ -3,6 +3,7 @@ import { AiFillHome } from "react-icons/ai";
 import { FaUser } from "react-icons/fa6";
 import { IoWalletOutline } from "react-icons/io5";
 import muscle from '../assets/muscle.png'
+import muscle2 from '../assets/muscle2.png'
 
 export default function Footer() {
     const location = useLocation();
@@ -10,8 +11,8 @@ export default function Footer() {
 
     const tabs = [
         { name: "Home", icon: AiFillHome, path: "/" },
-        { name: "Gym", image: muscle, icon: '', path: "/gym", path2: "/gym/edit" },
-        { name: "Wallet", icon: IoWalletOutline, path: "/wallet", path2: "/wallet/edit", path3:"/wallet/transactions" },
+        { name: "Gym", image: muscle, image2: muscle2, icon: '', path: "/gym", path2: "/gym/edit" },
+        { name: "Wallet", icon: IoWalletOutline, path: "/wallet", path2: "/wallet/edit", path3: "/wallet/transactions" },
         { name: "Profile", icon: FaUser, path: "/profile", path2: "/notifications", path3: "/profile/edit", path4: "/faq", path5: "/support" },
     ];
 
@@ -40,7 +41,11 @@ export default function Footer() {
                                 className="flex flex-col items-center justify-center flex-1 cursor-pointer"
                             >
                                 {tab.image ? (
-                                    <img src={tab.image} alt={tab.name} className="w-6 h-6" />
+                                    isActive ? (
+                                        <img src={tab.image2} alt={tab.name} className="w-6 h-6" />
+                                    ) : (
+                                        <img src={tab.image} alt={tab.name} className="w-6 h-6" />
+                                    )
                                 ) : (
                                     <Icon
                                         size={22}
@@ -60,7 +65,7 @@ export default function Footer() {
                 </div>
             </div>
 
-           
+
         </>
     );
 }

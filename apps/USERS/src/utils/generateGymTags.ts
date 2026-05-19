@@ -5,7 +5,7 @@ export function generateGymTags(gym: any): string[] {
     if (gym.gender_preference === "EVERYONE") {
         tags.push("Unisex");
     } else if (gym.gender_preference === "WOMEN_ONLY") {
-        tags.push("Women Friendly");
+        tags.push("Women's Gym");
     }
 
     // ── Facility (fuzzy amenity name matching) ────────────────────────────────

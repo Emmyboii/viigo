@@ -619,7 +619,7 @@ export default function MapView({ selectedGymFromDetails }: any) {
                                         {gym.distance} • {gym.area} • {gym.open_status}
                                     </p>
                                     <div className="flex items-center justify-between gap-2 mt-1">
-                                        <p className="text-lg font-semibold">₦{Number(gym.hourly_rate)}/Hr</p>
+                                        <p className="text-lg font-semibold">Rs. {Number(gym.hourly_rate)}/Hr</p>
                                         <p
                                             onClick={(e) => { e.stopPropagation(); navigate(`/gyms/${gym?.slug}`); }}
                                             className="text-sm font-semibold text-[#2563EB]"

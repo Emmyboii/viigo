@@ -24,6 +24,7 @@ interface GymType {
     open_status: string;
     area: string,
     city: string,
+    is_open: boolean,
     state: string,
     postal_code: string,
     open_time: string;
@@ -80,7 +81,7 @@ export default function Gym({ gym, loading, display, setDisplay, setGym }: GymPr
                     display={display}
                     setDisplay={setDisplay}
                     setGym={setGym}
-                    gym={gym}
+                    // gym={gym}
                 />
             )}
         </div>

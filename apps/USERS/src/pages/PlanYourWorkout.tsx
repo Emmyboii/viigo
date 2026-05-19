@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { FaUser } from "react-icons/fa6";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useAppContext, type GymCard } from "../context/AppContext";
@@ -47,12 +47,18 @@ const PlanYourWorkout = () => {
         }
     });
     const [friendsModalOpen, setFriendsModalOpen] = useState(false);
-    const [selectedSlot, setSelectedSlot] = useState<'NON_PEAK' | 'PEAK' | null>(() => {
+    const [selectedSlot, setSelectedSlot] = useState<'NON_PEAK' | 'PEAK'>(() => {
         const stored = localStorage.getItem("bookingData");
-        if (!stored) return null;
-        try {
-            return JSON.parse(stored)?.slot_type ?? null;
-        } catch { return null; }
+
+        if (stored) {
+            try {
+                return JSON.parse(stored)?.slot_type ?? "NON_PEAK";
+            } catch {
+                return "NON_PEAK";
+            }
+        }
+
+        return "NON_PEAK";
     });
 
     // --- Open modal function ---
@@ -87,11 +93,20 @@ const PlanYourWorkout = () => {
     }, [friendsModalOpen]);
 
     // --- Handle route reopenSheet state ---
+    const openedRef = useRef(false);
+
     useEffect(() => {
-        if (locations.state?.reopenSheet) {
-            openFriendsModal();
+        if (locations.state?.reopenSheet && !openedRef.current) {
+            setFriendsModalOpen(true);
+            openedRef.current = true;
+
+            // clear state so it never re-triggers
+            navigate(location.pathname, {
+                replace: true,
+                state: {}
+            });
         }
-    }, [locations.state]);
+    }, [locations.state, navigate]);
 
     const storedBooking = localStorage.getItem("bookingData");
 
@@ -127,7 +142,7 @@ const PlanYourWorkout = () => {
     const totalWithHr = selectedHours && gym?.hourly_rate && peopleCount > 0
         ? gym?.hourly_rate * peakMultiplier * selectedHours.value * (peopleCount + 1)
         : gym?.hourly_rate
-            ? Math.round(Number(gym.hourly_rate) * peakMultiplier)
+            ? Math.round(Number(gym.hourly_rate) * peakMultiplier * selectedHours.value)
             : 0;
 
     const id = gym?.id
@@ -254,20 +269,64 @@ const PlanYourWorkout = () => {
     );
 
 
-    const closingTime = gym?.close_time
+    const getSlotClosingTime = () => {
+        if (!gym || !selectedSlot) return null;
+
+        // NON-PEAK → use less crowded end time
+        if (selectedSlot === "NON_PEAK") {
+            const lessCrowded = gym.recommended_workout_timings?.less_crowded_hours;
+
+            // Example: "8 AM - 5 PM"
+            if (lessCrowded?.includes(" - ")) {
+                return lessCrowded.split(" - ")[1].trim(); // "5 PM"
+            }
+        }
+
+        // PEAK → use evening peak end time
+        if (selectedSlot === "PEAK") {
+            const eveningPeak =
+                gym.recommended_workout_timings?.peak_hours?.evening;
+
+            // Example: "5 PM - 11 PM"
+            if (eveningPeak?.includes(" - ")) {
+                return eveningPeak.split(" - ")[1].trim(); // "11 PM"
+            }
+        }
+
+        return null;
+    };
 
     const calculateLastEntry = () => {
-        if (!selectedHours?.value || !closingTime) return "";
+        if (!selectedHours?.value) return "";
 
-        const [hour, minute] = closingTime.split(":").map(Number);
+        const slotClosing = getSlotClosingTime();
 
+        if (!slotClosing) return "";
+
+        // Convert "11 PM" → Date
         const closingDate = new Date();
-        closingDate.setHours(hour, minute, 0, 0);
+
+        const [time, modifier] = slotClosing.split(" ");
+        let [hours, minutes] = time.split(":").map(Number);
+
+        if (!minutes) minutes = 0;
+
+        if (modifier === "PM" && hours !== 12) {
+            hours += 12;
+        }
+
+        if (modifier === "AM" && hours === 12) {
+            hours = 0;
+        }
+
+        closingDate.setHours(hours, minutes, 0, 0);
 
         // subtract selected duration
         const durationInMinutes = selectedHours.value * 60;
 
-        closingDate.setMinutes(closingDate.getMinutes() - durationInMinutes);
+        closingDate.setMinutes(
+            closingDate.getMinutes() - durationInMinutes
+        );
 
         return closingDate.toLocaleTimeString("en-GB", {
             hour: "numeric",
@@ -358,7 +417,7 @@ const PlanYourWorkout = () => {
 
                 <div className='flex items-center gap-2'>
                     <button
-                        onClick={() => navigate(-1)}
+                        onClick={() => navigate(`/gyms/${gym?.slug}`)}
                         aria-label="Go back"
                         className="p-1"
                     >
@@ -574,7 +633,7 @@ const PlanYourWorkout = () => {
                                     <div className="flex items-center gap-2">
                                         <p className="font-semibold text-[#101828] text-base">Non-Peak Hours</p>
                                         <span className="text-[10px] bg-[#DCFCE7] text-[#166534] px-1.5 py-0.5 rounded-full font-medium">
-                                            50% Offer
+                                            Save 50%
                                         </span>
                                     </div>
                                     <p className="text-sm text-[#4A5565] mt-1">

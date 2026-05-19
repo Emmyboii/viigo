@@ -37,13 +37,13 @@ export default function FilterModal({ filters, from, onClose, onApply }: Props) 
         let min_price = "";
         let max_price = "";
 
-        if (price === "under150") {
+        if (price === "under70") {
+            max_price = "70";
+        } else if (price === "70-150") {
+            min_price = "70";
             max_price = "150";
-        } else if (price === "150-250") {
-            min_price = "150";
-            max_price = "250";
         } else {
-            min_price = "250";
+            min_price = "150";
         }
 
         return {
@@ -64,16 +64,18 @@ export default function FilterModal({ filters, from, onClose, onApply }: Props) 
     };
 
     const derivePrice = () => {
-        if (filters.min_price === "150" && filters.max_price === "250") {
-            return "150-250";
-        }
-        if (filters.min_price === "250") {
-            return "250+";
-        }
-        if (filters.max_price === "150") {
-            return "under150";
-        }
-        return "250+";
+        const min = Number(filters.min_price);
+        const max = Number(filters.max_price);
+
+        if (!filters.min_price && !filters.max_price) return "150+";
+
+        if (max === 70) return "under70";
+
+        if (min === 70 && max === 150) return "70-150";
+
+        if (min === 150) return "150+";
+
+        return "150+";
     };
 
     const [price, setPrice] = useState(derivePrice());
@@ -85,7 +87,7 @@ export default function FilterModal({ filters, from, onClose, onApply }: Props) 
     const handleReset = () => {
         setSort("price_high");
         setRadius(5);
-        setPrice("250+");
+        setPrice("150+");
         setAmenitiesSelected([]);
 
         fetchFilteredGyms({
@@ -188,9 +190,9 @@ export default function FilterModal({ filters, from, onClose, onApply }: Props) 
                         <h3 className="font-semibold mb-3">Price per Hour</h3>
                         <div className="flex gap-3">
                             {[
-                                { label: "Under ₹150", value: "under150" },
-                                { label: "₹150–₹250", value: "150-250" },
-                                { label: "₹250+", value: "250+" },
+                                { label: "Under ₹70", value: "under70" },
+                                { label: "₹70–₹150", value: "70-150" },
+                                { label: "₹150+", value: "150+" },
                             ].map((p) => (
                                 <button
                                     key={p.value}
