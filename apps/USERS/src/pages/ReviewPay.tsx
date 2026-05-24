@@ -631,7 +631,7 @@ export default function ReviewPay() {
 
 
                             {/* ===== Gym Summary Card ===== */}
-                            <div className="bg-white rounded border flex gap-1">
+                            <div className="bg-white rounded border flex gap-1 max-h-[160px]">
                                 <img
                                     crossOrigin="anonymous"
                                     src={`https://api.viigo.in/${normalizeImagePath(gym?.images[0]?.image)}`}
@@ -656,7 +656,7 @@ export default function ReviewPay() {
                                         ))}
                                     </div>
 
-                                    <div className="flex items-center gap-2 mt-4">
+                                    <div className="flex items-center gap-2 mt-3">
                                         <p className="font-semibold text-[#0F172A]">₹{Number(gym?.hourly_rate)}/Hr</p>
                                         <span className="text-xs bg-[#22C55E] text-white px-2 py-0.5 rounded-full">
                                             Confirmed
@@ -782,12 +782,14 @@ export default function ReviewPay() {
                                 </div>
                             </div>
 
-                            <div className="pt-4">
-                                <div className="flex items-center gap-2 bg-[#F1F5F9] py-1 px-2 rounded text-wrap">
-                                    <PiWarningCircle className="rotate-180" size={14} />
-                                    <p className="text-xs text-[#0F172A]">After 4 pm passes will be cancelled automatically with some Cancellation charges</p>
+                            {slotType === "NON_PEAK" && (
+                                <div className="pt-4">
+                                    <div className="flex items-center gap-2 bg-[#F1F5F9] py-1 px-2 rounded text-wrap">
+                                        <PiWarningCircle className="rotate-180" size={14} />
+                                        <p className="text-xs text-[#0F172A]">After 4 pm passes will be cancelled automatically with some Cancellation charges</p>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
                         </div>
 
                         {/* ===== Sticky Bottom Pay Bar ===== */}

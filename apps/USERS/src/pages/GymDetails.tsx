@@ -40,7 +40,7 @@ export default function GymDetails() {
     const visibleAmenities = gym?.amenities.slice(0, 4);
     const visibleRules = gym?.rules.slice(0, 3);
 
-    const isGymClosed = gym?.is_open;
+    const isGymClosed = !gym?.is_open;
 
     const handleShare = async () => {
         const element = document.getElementById("share-area");
@@ -602,16 +602,13 @@ export default function GymDetails() {
 
                     <button
                         onClick={() => {
-                            if (isGymClosed) return;
+                            // if (isGymClosed) return;
                             navigate(`/gyms/${gym.slug}/plan`);
                         }}
-                        disabled={isGymClosed}
-                        className={`px-6 py-4 text-sm rounded-md w-[153px] font-medium transition ${isGymClosed
-                                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                                : "bg-blue-600 text-white"
-                            }`}
+                        // disabled={isGymClosed}
+                        className={`px-6 py-4 text-sm rounded-md w-[153px] font-medium transition bg-blue-600 text-white`}
                     >
-                        {isGymClosed ? "Closed" : "Book Hour"}
+                        Book Hour
                     </button>
                 </div>
 

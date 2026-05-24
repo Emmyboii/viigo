@@ -338,6 +338,16 @@ const PlanYourWorkout = () => {
     const lastEntryTime = calculateLastEntry();
 
     const handleApply = () => {
+
+        if (isGymClosedForSelectedDate) {
+            setError({
+                type: "general",
+                message: closedGymMessage,
+            });
+
+            return;
+        }
+
         if (selectedDate === null && !selectedHours && !selectedSlot) {
             setError({ type: "general", message: "Please complete all selections to continue." });
             return;
@@ -371,6 +381,44 @@ const PlanYourWorkout = () => {
         setError({ type: "", message: "" });
         window.scrollTo(0, 0);
     };
+
+    // ✅ Check if gym is open for selected date
+    const selectedDateAvailability = useMemo(() => {
+        if (!selectedDate) return null;
+
+        const selectedDateString = selectedDate.toISOString().split("T")[0];
+
+        return gym?.calendar_availability?.find(
+            (item) => item.date === selectedDateString
+        );
+    }, [selectedDate, gym]);
+
+    // ✅ Check if selected day is today
+    const isToday =
+        selectedDate &&
+        new Date(selectedDate).toDateString() === new Date().toDateString();
+
+    // ✅ Determine if gym is closed for selected date
+    const isGymClosedForSelectedDate = (() => {
+
+        // 1. Calendar override exists
+        if (selectedDateAvailability) {
+            return selectedDateAvailability.is_open === false;
+        }
+
+        // 2. No calendar entry for TODAY → fallback to gym.is_open
+        if (isToday) {
+            return !gym?.is_open;
+        }
+
+        // 3. Future date without availability entry → assume open
+        return false;
+    })();
+
+    // ✅ Dynamic closed message
+    const closedGymMessage = isToday
+        ? "Gym is closed today. Please select another date."
+        : "Gym will be closed on this day. Please choose another date.";
 
     // function normalizePeak(p: [string, string] | { start: string, end: string } | any): [string, string] {
     //     if (Array.isArray(p) && p.length === 2) return [p[0], p[1]];
@@ -433,24 +481,24 @@ const PlanYourWorkout = () => {
             <div className="space-y-4 relative">
 
                 {/* ===== Gym Summary Card ===== */}
-                <div className="bg-white rounded border flex gap-1 h-fit">
+                <div className="bg-white rounded border flex gap-1 max-h-[115px]">
                     <img
                         src={gym?.images[0]?.image}
                         alt={gym?.name}
-                        className="w-[85px] min-h-[105px] object-cover rounded-tl rounded-bl"
+                        className="w-[85px] object-cover rounded-tl rounded-bl"
                     />
 
                     <div className="p-3">
                         <h2 className="font-semibold">{gym?.name}</h2>
 
-                        <div className="flex items-center text-xs text-[#475569] gap-1 mt-2 flex-wrap">
+                        <div className="flex items-center text-xs text-[#475569] gap-1 mt-1 flex-wrap">
                             <HiLocationMarker size={12} />
                             <span>{gym?.distance}, {gym?.area}</span>
                             <span>•</span>
                             <span>{gym?.open_status || `Open Till ${formatTime12Hour(gym?.close_time)}`}</span>
                         </div>
 
-                        <div className="flex items-center gap-2 mt-2">
+                        <div className="flex items-center gap-2 mt-1">
                             <p className="font-semibold">₹{Number(gym?.hourly_rate)}/Hr</p>
                         </div>
                     </div>
@@ -499,30 +547,61 @@ const PlanYourWorkout = () => {
 
             {/* Date Selector */}
             <div className="flex gap-3 overflow-x-auto sm:justify-center pb-2">
-                {dates.map((item, index) => (
-                    <div
-                        key={index}
-                        onClick={() => {
-                            // Store the actual date object (or string)
-                            setSelectedDate(item.fullDate);
-                            setError({ type: "", message: "" });
-                        }}
-                        className={`min-w-[70px] text-center p-1.5 py-2 font-medium rounded-md space-y-2 border cursor-pointer transition ${selectedDate &&
-                            selectedDate.toDateString() === item.fullDate.toDateString()
-                            ? "bg-[#DBEAFE] border-[#2563EB] text-[#2563EB]"
-                            : "border-[#DBEAFE] text-[#0F172A]"
-                            }`}
-                    >
-                        <p className="text-sm font-normal">{item.day}</p>
-                        <p className="font-semibold text-[22px]">{item.date}</p>
-                        <p className="text-sm font-normal">{item.month}</p>
-                    </div>
-                ))}
+                {dates.map((item, index) => {
+
+                    const dateString = item.fullDate.toISOString().split("T")[0];
+
+                    const availability = gym?.calendar_availability?.find(
+                        (cal) => cal.date === dateString
+                    );
+
+                    const isClosed = availability?.is_open === false;
+
+                    return (
+                        <div
+                            key={index}
+                            onClick={() => {
+                                if (isClosed) return;
+
+                                setSelectedDate(item.fullDate);
+                                setError({ type: "", message: "" });
+                            }}
+                            className={`min-w-[70px] text-center p-1.5 py-2 font-medium rounded-md space-y-2 border transition ${isClosed
+                                ? "bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed"
+                                : selectedDate &&
+                                    selectedDate.toDateString() === item.fullDate.toDateString()
+                                    ? "bg-[#DBEAFE] border-[#2563EB] text-[#2563EB] cursor-pointer"
+                                    : "border-[#DBEAFE] text-[#0F172A] cursor-pointer"
+                                }`}
+                        >
+                            <p className="text-sm font-normal">{item.day}</p>
+                            <p className="font-semibold text-[22px]">{item.date}</p>
+                            <p className="text-sm font-normal">{item.month}</p>
+                            {isClosed && (
+                                <p className="text-[10px] font-medium text-red-500">
+                                    Closed
+                                </p>
+                            )}
+                        </div>
+                    )
+                })}
 
             </div>
 
             {error.type === 'date' && (
                 <p className="text-red-500 text-sm mt-2">{error.message}</p>
+            )}
+
+            {isGymClosedForSelectedDate && (
+                <div className="mt-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3">
+                    <p className="text-sm font-medium text-red-600">
+                        {closedGymMessage}
+                    </p>
+
+                    <p className="text-xs text-red-500 mt-1">
+                        Bookings are unavailable for this date.
+                    </p>
+                </div>
             )}
 
             {/* Hours Selection */}
@@ -533,7 +612,9 @@ const PlanYourWorkout = () => {
 
                 <div className="flex flex-wrap sm:justify-center gap-2">
                     {hoursOptions.map((hour, index) => {
-                        const disabled = isDurationInvalid(hour.value);
+                        const disabled =
+                            isDurationInvalid(hour.value) ||
+                            isGymClosedForSelectedDate;
 
                         return (
                             <button
@@ -611,7 +692,11 @@ const PlanYourWorkout = () => {
                 <div className="space-y-3">
                     {/* Non-Peak Option */}
                     <div
-                        onClick={() => setSelectedSlot('NON_PEAK')}
+                        onClick={() => {
+                            if (isGymClosedForSelectedDate) return;
+
+                            setSelectedSlot('NON_PEAK');
+                        }}
                         className={`px-4 py-4 rounded-lg border-2 cursor-pointer transition ${selectedSlot === 'NON_PEAK'
                             ? 'border-[#2563EB] bg-white'
                             : 'border-[#E2E8F0] bg-white'
@@ -656,7 +741,10 @@ const PlanYourWorkout = () => {
 
                     {/* Peak Option */}
                     <div
-                        onClick={() => setSelectedSlot('PEAK')}
+                        onClick={() => {
+                            if (isGymClosedForSelectedDate) return;
+                            setSelectedSlot('PEAK');
+                        }}
                         className={`px-4 py-4 rounded-lg border-2 cursor-pointer transition ${selectedSlot === 'PEAK'
                             ? 'border-[#2563EB] bg-white'
                             : 'border-[#E2E8F0] bg-white'
@@ -748,9 +836,9 @@ const PlanYourWorkout = () => {
                         </div>
 
                         <button
-                            disabled={allHoursDisabled}
+                            disabled={allHoursDisabled || isGymClosedForSelectedDate}
                             onClick={handleApply}
-                            className={`w-[130px] text-white px-6 py-3 rounded-md font-semibold cursor-pointer text-sm ${allHoursDisabled ? "bg-[#a6a7a8] cursor-not-allowed" : "bg-blue-600 cursor-pointer"}`}
+                            className={`w-[130px] text-white px-6 py-3 rounded-md font-semibold cursor-pointer text-sm ${allHoursDisabled || isGymClosedForSelectedDate ? "bg-[#a6a7a8] cursor-not-allowed" : "bg-blue-600 cursor-pointer"}`}
                         >
                             Apply
                         </button>
