@@ -402,10 +402,10 @@ export default function GymDetails() {
                     </button>
 
                     <button
-                        onClick={() => window.history.back()}
+                        onClick={() => navigate("/")}
                         className="border border-[#CBD5E1] text-[#475569] px-5 py-2 rounded-lg font-medium hover:bg-gray-100 transition"
                     >
-                        Go Back
+                        Go Home
                     </button>
                 </div>
             </div>
