@@ -1,5 +1,5 @@
 import { type ReactNode, useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
     AppContext,
     type GymType,
@@ -19,6 +19,31 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     const navigate = useNavigate()
     const [loading, setLoading] = useState(true);
+
+    const location = useLocation();
+
+    const publicRoutes = ["/login", "/register", "/forgot-password"];
+    const isPublicRoute = publicRoutes.includes(location.pathname);
+
+    const getValidToken = () => {
+        const token = localStorage.getItem("token");
+        const timestamp = localStorage.getItem("tokenTimestamp");
+
+        if (!token || !timestamp) return null;
+
+        const TWO_HOURS = 2 * 60 * 60 * 1000;
+        const isExpired = Date.now() - Number(timestamp) > TWO_HOURS;
+
+        if (isExpired) {
+            localStorage.removeItem("token");
+            localStorage.removeItem("tokenTimestamp");
+            return null;
+        }
+
+        return token;
+    };
+
+    const isAuthenticated = Boolean(getValidToken());
 
     const [userData, setUserData] = useState<UserType | null>(null);
     const [notifications, setNotifications] = useState<NotificationType[]>([]);
@@ -63,13 +88,15 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const request = useCallback(async (url: string, options?: RequestInit) => {
         const token = localStorage.getItem("token");
 
-        if (!token) return
+        if (!token) {
+            throw new Error("No token");
+        }
 
         const res = await fetch(`${backendUrl}${url}`, {
             ...options,
             headers: {
                 "Content-Type": "application/json",
-                Authorization: token ? `Bearer ${token}` : "",
+                Authorization: `Bearer ${token}`,
                 ...(options?.headers || {}),
             },
         });
@@ -77,7 +104,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         if (res.status === 401) {
             localStorage.removeItem("token");
             localStorage.removeItem("tokenTimestamp");
-            navigate("/login");
+            navigate("/login", { replace: true });
             throw new Error("Unauthorized");
         }
 
@@ -182,66 +209,41 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }, [request]);
 
     const fetchWalletTransactions = useCallback(async () => {
-
-        const token = localStorage.getItem("token");
-
-        if (!token) return
-
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/transactions/history/`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-
-            if (!res.ok) throw new Error("Failed to fetch wallet transactions");
-
-            const data = await res.json();
+            const data = await request("/transactions/history/");
             setWalletTransactions(data.data || []);
         } catch (err) {
             console.error("Error fetching wallet transactions:", err);
             setWalletTransactions([]);
         }
-    }, []);
+    }, [request]);
 
     const fetchNotifications = useCallback(async () => {
         setNotificationsLoading(true);
+
         try {
-
-            const token = localStorage.getItem("token");
-
-            if (!token) return
-
-            const res = await fetch(`${backendUrl}/notification/notifications/`, {
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`
-                },
-            });
-
-            const data = await res.json()
-            const notificationsData: NotificationType[] = data.data || [];
-
-            setNotifications(notificationsData);
-
+            const data = await request("/notification/notifications/");
+            setNotifications(data.data || []);
         } catch (err) {
             console.error(err);
         } finally {
             setNotificationsLoading(false);
         }
-    }, []);
+    }, [request]);
 
     const fetchBookings = useCallback(async () => {
-        setIsLoading(true);
         const token = localStorage.getItem("token");
 
-        if (!token) return
+        if (!token) {
+            setIsLoading(false);
+            return;
+        }
+
+        setIsLoading(true);
 
         try {
             const data = await request("/gymowner/owner/bookings/");
-            const bookings = data?.data || [];
-
-
-            setBookings(bookings);
+            setBookings(data?.data || []);
         } catch (err) {
             console.error(err);
         } finally {
@@ -249,9 +251,11 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [request]);
 
-    useEffect(() => {
-        fetchUser();
-    }, [fetchUser]);
+    // useEffect(() => {
+    //     if (!isAuthenticated || isPublicRoute) return;
+
+    //     fetchUser();
+    // }, [isAuthenticated, isPublicRoute, fetchUser]);
 
     useEffect(() => {
         if (userData) {
@@ -266,24 +270,22 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }, [userData, fetchWallet]);
 
     useEffect(() => {
+        if (!isAuthenticated || isPublicRoute) return;
+
+        fetchUser();
         fetchWalletDashboard();
-    }, [fetchWalletDashboard]);
-
-    useEffect(() => {
         fetchWalletTransactions();
-    }, [fetchWalletTransactions]);
-
-    useEffect(() => {
-        fetchNotifications()
-    }, [fetchNotifications]);
-
-    useEffect(() => {
-        fetchBookings()
-    }, [fetchBookings]);
-
-    useEffect(() => {
-        fetchNotifications()
-    }, [fetchNotifications]);
+        fetchNotifications();
+        fetchBookings();
+    }, [
+        isAuthenticated,
+        isPublicRoute,
+        fetchUser,
+        fetchWalletDashboard,
+        fetchWalletTransactions,
+        fetchNotifications,
+        fetchBookings,
+    ]);
 
     useEffect(() => {
         const timer = setTimeout(() => {

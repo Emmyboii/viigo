@@ -30,33 +30,51 @@ export default function WorkoutForm() {
         state.trim() !== '' &&
         postalCode.trim() !== '';
 
+    const token = localStorage.getItem('token');
+
     /* ---------------- Check onboarding ---------------- */
     useEffect(() => {
+        if (!token) {
+            navigate("/login", { replace: true });
+            return;
+        }
+
         const checkOnboarding = async () => {
             try {
-                const token = localStorage.getItem('token');
                 const res = await fetch(`${backendUrl}/api/onboarding/`, {
-                    method: 'GET',
+                    method: "GET",
                     headers: {
-                        'Content-Type': 'application/json',
+                        "Content-Type": "application/json",
                         Authorization: `Bearer ${token}`,
                     },
                 });
+
+                if (res.status === 401) {
+                    localStorage.removeItem("token");
+                    localStorage.removeItem("tokenTimestamp");
+                    navigate("/login", { replace: true });
+                    return;
+                }
+
+                if (!res.ok) {
+                    throw new Error("Failed to check onboarding");
+                }
+
                 const data = await res.json();
 
-                if (data.data.is_completed) {
-                    navigate('/'); // user already completed onboarding
+                if (data.data?.is_completed) {
+                    navigate("/", { replace: true });
                 } else {
-                    setCheckingOnboarding(false); // show form
+                    setCheckingOnboarding(false);
                 }
             } catch (err) {
-                console.error('Failed to check onboarding:', err);
-                setCheckingOnboarding(false); // fallback: show form
+                console.error("Failed to check onboarding:", err);
+                setCheckingOnboarding(false);
             }
         };
 
         checkOnboarding();
-    }, [backendUrl, navigate]);
+    }, [backendUrl, navigate, token]);
 
     const geocodeAddress = async (address: string) => {
         const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;

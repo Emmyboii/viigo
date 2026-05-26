@@ -1,8 +1,8 @@
-import type { JSX } from "react";
+import { type ReactNode } from "react";
 import { Navigate } from "react-router-dom";
 
 interface PublicRouteProps {
-    children: JSX.Element;
+    children: ReactNode;
 }
 
 const PublicRoute = ({ children }: PublicRouteProps) => {

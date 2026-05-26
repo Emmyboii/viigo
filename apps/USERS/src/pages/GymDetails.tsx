@@ -441,7 +441,7 @@ export default function GymDetails() {
                             <h1 className="text-xl font-bold text-nowrap">{gym.name}</h1>
                             {isGymClosed && (
                                 <div className="inline-flex items-center px-3 py-1 rounded-full bg-red-100 text-red-600 text-xs font-semibold">
-                                    Gym is currently closed
+                                    Closed
                                 </div>
                             )}
 
