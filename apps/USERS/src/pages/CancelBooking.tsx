@@ -309,12 +309,12 @@ export default function CancelBooking() {
                     </span>
                 </div>
 
-                {/* <div className="flex justify-between text-sm text-[#6A6A6A] mb-3">
+                <div className="flex justify-between text-sm text-[#6A6A6A] mb-3">
                     <span>Cancellation Fee</span>
                     <span className="text-black font-medium">
                         Rs. 10
                     </span>
-                </div> */}
+                </div>
 
                 <div className="border border-[#F2F2F2] border-dotted"></div>
 

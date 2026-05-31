@@ -9,9 +9,6 @@ import { IoArrowBack, IoMoonOutline } from "react-icons/io5";
 import fire from '../assets/fire.png'
 import most from '../assets/most.png'
 import { GrSun } from "react-icons/gr";
-// import check from '../assets/circle_check.png'
-// import { GoDotFill } from "react-icons/go";
-// import { CiCircleInfo } from "react-icons/ci";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -64,16 +61,12 @@ const PlanYourWorkout = () => {
     // --- Open modal function ---
     const openFriendsModal = () => {
         setFriendsModalOpen(true);
-
-        // Push a fake state so back button can close modal
         window.history.pushState({ modal: true }, "");
     };
 
     // --- Close modal function ---
     const closeFriendsModal = () => {
         setFriendsModalOpen(false);
-
-        // Only go back if we pushed a modal state
         if (window.history.state?.modal) {
             window.history.back();
         }
@@ -83,7 +76,6 @@ const PlanYourWorkout = () => {
     useEffect(() => {
         const handlePopState = () => {
             if (friendsModalOpen) {
-                // Close the modal instead of navigating back
                 setFriendsModalOpen(false);
             }
         };
@@ -100,7 +92,6 @@ const PlanYourWorkout = () => {
             setFriendsModalOpen(true);
             openedRef.current = true;
 
-            // clear state so it never re-triggers
             navigate(location.pathname, {
                 replace: true,
                 state: {}
@@ -157,14 +148,12 @@ const PlanYourWorkout = () => {
             setLoading(true);
 
             try {
-                // Try to find the gym locally first
                 const localGym = gyms.find((g) => g.slug === slug);
 
                 let gymId: number | undefined;
                 if (localGym) {
                     gymId = localGym.id;
                 } else {
-                    // If not found locally, fetch all gyms to find the ID
                     const res = await fetch(`${backendUrl}/gymowner/gyms/all/`, {
                         headers: {
                             "Content-Type": "application/json",
@@ -188,7 +177,6 @@ const PlanYourWorkout = () => {
                     gymId = foundGym.id;
                 }
 
-                // Now fetch gym details by ID
                 const detailRes = await fetch(`${backendUrl}/gymowner/gym/${gymId}/?lat=${latitude}&long=${longitude}`, {
                     headers: {
                         "Content-Type": "application/json",
@@ -227,7 +215,17 @@ const PlanYourWorkout = () => {
         return `${hour}:${minute} ${ampm}`;
     }
 
-    // ✅ 1️⃣ Generate Live Dates (Next 7 Days)
+    // ✅ Parse gym close time into a Date object (today's date at that time)
+    const gymCloseDate = useMemo(() => {
+        if (!gym?.close_time) return null;
+
+        const [hourStr, minuteStr] = gym.close_time.split(":");
+        const date = new Date();
+        date.setHours(Number(hourStr), Number(minuteStr), 0, 0);
+        return date;
+    }, [gym?.close_time]);
+
+    // ✅ Generate Live Dates (Next 7 Days)
     const dates = useMemo(() => {
         const today = new Date();
 
@@ -244,91 +242,84 @@ const PlanYourWorkout = () => {
         });
     }, []);
 
-    // ✅ 3️⃣ Check if duration exceeds closing time
-    const isDurationInvalid = (duration: number) => {
-        if (selectedDate === null) return false;
+    // ✅ Check if a duration is invalid for NON-PEAK (today only)
+    // Rule: session must not end after 5:00 PM (17:00)
+    const isNonPeakDurationInvalid = (duration: number): boolean => {
+        if (!selectedDate) return false;
 
         const now = new Date();
+        const isToday = selectedDate.toDateString() === now.toDateString();
 
-        // Only restrict if booking is today
-        if (
-            selectedDate.toDateString() === now.toDateString()
-        ) {
-            const currentHour = now.getHours();
-            const endHour = currentHour + duration;
+        if (!isToday) return false;
 
-            const closeTimeHour = gym?.close_time ? parseInt(gym.close_time.split(":")[0], 10) : 24;
-            return endHour > closeTimeHour;
-        }
+        const NON_PEAK_END_HOUR = 17; // 5:00 PM
+        const currentHour = now.getHours();
+        const currentMinutes = now.getMinutes();
 
-        return false;
+        // Convert current time and duration to minutes for precision
+        const currentTotalMinutes = currentHour * 60 + currentMinutes;
+        const durationMinutes = duration * 60;
+        const sessionEndMinutes = currentTotalMinutes + durationMinutes;
+
+        return sessionEndMinutes > NON_PEAK_END_HOUR * 60;
+    };
+
+    // ✅ Check if a duration is invalid for PEAK (today only)
+    // Rule: session must not end after gym close time
+    const isPeakDurationInvalid = (duration: number): boolean => {
+        if (!selectedDate || !gymCloseDate) return false;
+
+        const now = new Date();
+        const isToday = selectedDate.toDateString() === now.toDateString();
+
+        if (!isToday) return false;
+
+        const currentTotalMinutes = now.getHours() * 60 + now.getMinutes();
+        const durationMinutes = duration * 60;
+        const sessionEndMinutes = currentTotalMinutes + durationMinutes;
+
+        const closeMinutes = gymCloseDate.getHours() * 60 + gymCloseDate.getMinutes();
+
+        return sessionEndMinutes > closeMinutes;
+    };
+
+    // ✅ Unified duration check based on selected slot
+    const isDurationInvalid = (duration: number): boolean => {
+        if (selectedSlot === 'NON_PEAK') return isNonPeakDurationInvalid(duration);
+        return isPeakDurationInvalid(duration);
     };
 
     const allHoursDisabled = hoursOptions.every((hour) =>
         isDurationInvalid(hour.value)
     );
 
-
-    const getSlotClosingTime = () => {
-        if (!gym || !selectedSlot) return null;
-
-        // NON-PEAK → use less crowded end time
-        if (selectedSlot === "NON_PEAK") {
-            const lessCrowded = gym.recommended_workout_timings?.less_crowded_hours;
-
-            // Example: "8 AM - 5 PM"
-            if (lessCrowded?.includes(" - ")) {
-                return lessCrowded.split(" - ")[1].trim(); // "5 PM"
-            }
-        }
-
-        // PEAK → use evening peak end time
-        if (selectedSlot === "PEAK") {
-            const eveningPeak =
-                gym.recommended_workout_timings?.peak_hours?.evening;
-
-            // Example: "5 PM - 11 PM"
-            if (eveningPeak?.includes(" - ")) {
-                return eveningPeak.split(" - ")[1].trim(); // "11 PM"
-            }
-        }
-
-        return null;
-    };
-
-    const calculateLastEntry = () => {
+    // ✅ Calculate last entry time based on selected slot
+    // Non-Peak: always 4:00 PM
+    // Peak: gym close time - selected duration
+    const calculateLastEntry = (): string => {
         if (!selectedHours?.value) return "";
 
-        const slotClosing = getSlotClosingTime();
+        if (selectedSlot === 'NON_PEAK') {
+            // Non-peak last entry = 5:00 PM - selected duration
+            const lastEntry = new Date();
+            lastEntry.setHours(17, 0, 0, 0); // 5:00 PM
+            lastEntry.setMinutes(lastEntry.getMinutes() - selectedHours.value * 60);
 
-        if (!slotClosing) return "";
-
-        // Convert "11 PM" → Date
-        const closingDate = new Date();
-
-        const [time, modifier] = slotClosing.split(" ");
-        let [hours, minutes] = time.split(":").map(Number);
-
-        if (!minutes) minutes = 0;
-
-        if (modifier === "PM" && hours !== 12) {
-            hours += 12;
+            return lastEntry.toLocaleTimeString("en-GB", {
+                hour: "numeric",
+                minute: "2-digit",
+                hour12: true,
+            });
         }
 
-        if (modifier === "AM" && hours === 12) {
-            hours = 0;
-        }
+        // Peak: last entry = gym close time - selected duration
+        if (!gymCloseDate) return "";
 
-        closingDate.setHours(hours, minutes, 0, 0);
-
-        // subtract selected duration
+        const lastEntryDate = new Date(gymCloseDate);
         const durationInMinutes = selectedHours.value * 60;
+        lastEntryDate.setMinutes(lastEntryDate.getMinutes() - durationInMinutes);
 
-        closingDate.setMinutes(
-            closingDate.getMinutes() - durationInMinutes
-        );
-
-        return closingDate.toLocaleTimeString("en-GB", {
+        return lastEntryDate.toLocaleTimeString("en-GB", {
             hour: "numeric",
             minute: "2-digit",
             hour12: true,
@@ -400,18 +391,14 @@ const PlanYourWorkout = () => {
 
     // ✅ Determine if gym is closed for selected date
     const isGymClosedForSelectedDate = (() => {
-
-        // 1. Calendar override exists
         if (selectedDateAvailability) {
             return selectedDateAvailability.is_open === false;
         }
 
-        // 2. No calendar entry for TODAY → fallback to gym.is_open
         if (isToday) {
             return !gym?.is_open;
         }
 
-        // 3. Future date without availability entry → assume open
         return false;
     })();
 
@@ -419,26 +406,6 @@ const PlanYourWorkout = () => {
     const closedGymMessage = isToday
         ? "Gym is closed today. Please select another date."
         : "Gym will be closed on this day. Please choose another date.";
-
-    // function normalizePeak(p: [string, string] | { start: string, end: string } | any): [string, string] {
-    //     if (Array.isArray(p) && p.length === 2) return [p[0], p[1]];
-    //     if (p?.start && p?.end) return [p.start, p.end];
-    //     return ["00:00", "00:00"];
-    // }
-
-    // Ensure peak_morning and peak_evening are arrays
-    // const morningPeaks = Array.isArray(gym?.peak_morning)
-    //     ? gym.peak_morning
-    //     : gym?.peak_morning ? [gym.peak_morning] : [];
-
-    // const eveningPeaks = Array.isArray(gym?.peak_evening)
-    //     ? gym.peak_evening
-    //     : gym?.peak_evening ? [gym.peak_evening] : [];
-
-    // const allPeaks: [string, string][] = [
-    //     ...morningPeaks.map(normalizePeak),
-    //     ...eveningPeaks.map(normalizePeak),
-    // ];
 
     if (loading) {
         return (
@@ -460,7 +427,6 @@ const PlanYourWorkout = () => {
         <div className="pb-40 min-h-screen px-5 max-w-[1300px] mx-auto">
 
             {/* ===== Header ===== */}
-
             <div className="fixed max-w-[1300px] mx-auto top-0 left-0 right-0 z-40 bg-white flex items-center justify-between px-4 py-3" >
 
                 <div className='flex items-center gap-2'>
@@ -501,42 +467,6 @@ const PlanYourWorkout = () => {
                         <div className="flex items-center gap-2 mt-1">
                             <p className="font-semibold">₹{Number(gym?.hourly_rate)}/Hr</p>
                         </div>
-                    </div>
-                </div>
-
-                <div className="pt-1 space-y-4">
-                    <h4 className="text-base font-semibold sm:text-center text-black">
-                        Who's joining?
-                    </h4>
-
-                    <div className="flex items-center sm:justify-center gap-1.5 pb-7">
-                        <FaUser className="text-[#475569] size-3" />
-
-                        {peopleCount === 0 ? (
-                            <>
-                                <p className="break-all font-semibold">{userData?.full_name.split(" ")[0] || userData?.email}</p>
-
-                                <button
-                                    onClick={openFriendsModal}
-                                    className="bg-[#DBEAFE] text-[#2563EB] px-2 py-2 rounded-lg text-sm font-medium ml-3"
-                                >
-                                    + Add Friends
-                                </button>
-                            </>
-                        ) : (
-                            <>
-                                <span className="font-medium break-all">
-                                    {userData?.full_name.split(" ")[0] || userData?.email} +{peopleCount}
-                                </span>
-
-                                <button
-                                    onClick={openFriendsModal}
-                                    className="bg-[#DBEAFE] text-[#2563EB] px-2 py-2 rounded-lg text-sm font-medium ml-3"
-                                >
-                                    Edit
-                                </button>
-                            </>
-                        )}
                     </div>
                 </div>
             </div>
@@ -585,7 +515,6 @@ const PlanYourWorkout = () => {
                         </div>
                     )
                 })}
-
             </div>
 
             {error.type === 'date' && (
@@ -648,38 +577,41 @@ const PlanYourWorkout = () => {
                 )}
             </div>
 
-            {/* <div className="mt-6">
-                <h4 className="font-semibold mb-3">
-                    Recommended workout timings
+            <div className="pt-7 space-y-4">
+                <h4 className="text-base font-semibold sm:text-center text-black">
+                    Who's joining? <span className="text-[#94A3B8] text-xs">(Optional)</span>
                 </h4>
 
-                <div className={`px-4 py-4 space-y-4 rounded-lg text-sm border transition border-[#DBEAFE] text-[#0F172A]`}>
-                    <div className="flex items-center gap-2">
-                        <img src={check} alt="Red Peak" width={35} />
-                        <div className="space-y-2">
-                            <p className="text-sm text-[#0F7D37]">Less crowded hours</p>
-                            <span className="text-xs text-[#0F172A]">{gym?.recommended_workout_timings?.less_crowded_hours}</span>
-                        </div>
-                    </div>
+                <div className="flex items-center sm:justify-center gap-1.5">
+                    <FaUser className="text-[#475569] size-3" />
 
-                    <div className="flex items-center gap-2">
-                        <img src={red} alt="Red Peak" width={35} />
-                        <div className="space-y-2">
-                            <p className="text-sm text-[#D32F2F]">Peak hours</p>
-                            <span className="text-xs text-[#0F172A] flex items-center">Morning <GoDotFill className="text-[#CBD5E1]" /> {gym?.recommended_workout_timings?.peak_hours.morning}</span>
-                            <span className="text-xs text-[#0F172A] flex items-center">Evening <GoDotFill className="text-[#CBD5E1]" /> {gym?.recommended_workout_timings?.peak_hours.evening}</span>
-                        </div>
-                    </div>
+                    {peopleCount === 0 ? (
+                        <>
+                            <p className="break-all font-semibold">{userData?.full_name.split(" ")[0] || userData?.email}</p>
 
+                            <button
+                                onClick={openFriendsModal}
+                                className="bg-[#DBEAFE] text-[#2563EB] px-2 py-2 rounded-lg text-sm font-medium ml-3"
+                            >
+                                + Add Friends
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <span className="font-normal break-all">
+                                {userData?.full_name.split(" ")[0] || userData?.email} +{peopleCount}
+                            </span>
 
-                    <div className="space-y-1">
-                        <div className="border border-[#CBD5E1] border-dotted"></div>
-
-                        <p className="text-[11px] text-[#475569] pt-1 flex items-center gap-1"><CiCircleInfo /> Workouts during peak hours may use more minutes</p>
-                        <p className="text-[11px] text-[#475569] flex items-center gap-1"><CiCircleInfo /> Based on gym input • Crowd may vary</p>
-                    </div>
+                            <button
+                                onClick={openFriendsModal}
+                                className="bg-[#DBEAFE] text-[#2563EB] px-2 py-2 rounded-lg text-sm font-medium ml-3"
+                            >
+                                Edit
+                            </button>
+                        </>
+                    )}
                 </div>
-            </div> */}
+            </div>
 
             <div className="mt-6">
                 <h4 className="font-semibold mb-1">
@@ -694,7 +626,6 @@ const PlanYourWorkout = () => {
                     <div
                         onClick={() => {
                             if (isGymClosedForSelectedDate) return;
-
                             setSelectedSlot('NON_PEAK');
                         }}
                         className={`px-4 py-4 rounded-lg border-2 cursor-pointer transition ${selectedSlot === 'NON_PEAK'
@@ -714,7 +645,6 @@ const PlanYourWorkout = () => {
                                     <p className="text-[12px] font-medium text-[#0F7D37] flex items-center gap-1 mb-0.5">
                                         <HiThumbUp /> RECOMMENDED / BEST VALUE
                                     </p>
-                                    <p className="font-semibold text-[#101828] text-base"></p>
                                     <div className="flex items-center gap-2">
                                         <p className="font-semibold text-[#101828] text-base">Non-Peak Hours</p>
                                         <span className="text-[10px] bg-[#DCFCE7] text-[#166534] px-1.5 py-0.5 rounded-full font-medium">
@@ -764,9 +694,6 @@ const PlanYourWorkout = () => {
                                     </p>
                                     <div className="flex items-center gap-2">
                                         <p className="font-semibold text-[#101828] text-base">Peak Hours</p>
-                                        {/* <span className="text-[10px] bg-[#FEE2E2] text-[#DC2626] px-1.5 py-0.5 rounded font-medium">
-                                            Surge Fee 50%
-                                        </span> */}
                                     </div>
                                     <p className="text-xs gap-1 inline-flex text-[#4A5565] mt-1">
                                         <GrSun className="mt-0.5" /> Morning: {gym?.recommended_workout_timings?.peak_hours?.morning}
@@ -790,21 +717,6 @@ const PlanYourWorkout = () => {
                 )}
             </div>
 
-            {/* <div className="mt-6 mb-10">
-                <h4 className="font-semibold mb-3">
-                    Flexible Entry
-                </h4>
-
-                <div className={`px-4 py-4 flex items-center gap-3 rounded-lg text-sm border transition border-[#DBEAFE] text-[#0F172A]`}>
-                    <FaRegClock className="text-[30px] text-[#93C5FD]" />
-
-                    <div className="space-y-0.5">
-                        <p className="text-sm font-semibold text-[#262A33]">No Fixed Slot</p>
-                        <p className="text-sm font-medium text-[#262A33]">Come Anytime</p>
-                    </div>
-                </div>
-            </div> */}
-
             {/* ===== Sticky Bottom Pay Bar ===== */}
             <div className="fixed max-w-[1300px] mx-auto bottom-0 left-0 right-0 bg-white">
                 <div className="bg-blue-50 text-blue-700 text-sm px-4 py-3 font-medium text-center">
@@ -819,10 +731,6 @@ const PlanYourWorkout = () => {
                     <div className="flex items-center justify-between">
 
                         <div className="space-y-1.5">
-                            {/* <p className="text-xs text-[#475569] font-medium">
-                                Gym timings : {formatTime12Hour(gym?.open_time)} - {formatTime12Hour(gym?.close_time)}
-                            </p> */}
-
                             {selectedSlot && (
                                 <p className={`text-sm font-normal ${selectedSlot === 'NON_PEAK' ? 'text-[#0F7D37]' : 'text-[#DC2626]'
                                     }`}>
