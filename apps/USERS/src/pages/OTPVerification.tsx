@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import lock from "../assets/otpChecking.png";
 import lockChecked from "../assets/otpVerified.png";
 import lockWrong from "../assets/lockWrong.png";
@@ -29,6 +29,7 @@ export default function OTPVerification() {
 
     const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
     const navigate = useNavigate();
+    const location = useLocation();
 
     // Fetch identifier from localStorage
     useEffect(() => {
@@ -122,6 +123,12 @@ export default function OTPVerification() {
     const checkOnboardingAndRedirect = async () => {
         try {
             const token = localStorage.getItem("token");
+            const from = location.state?.from
+                || sessionStorage.getItem("redirectAfterLogin")
+                || "/";
+
+            console.log("from:", from);
+            sessionStorage.removeItem("redirectAfterLogin");
 
             const res = await fetch(`${backendUrl}/api/onboarding/`, {
                 method: "GET",
@@ -134,14 +141,13 @@ export default function OTPVerification() {
             const data = await res.json();
 
             if (data?.data?.is_completed) {
-                window.location.reload()
-                navigate("/");
+                window.location.href = from;
             } else {
-                navigate("/onboarding");
+                navigate("/onboarding", { state: location.state });
             }
         } catch (err) {
             console.error("Failed to check onboarding:", err);
-            navigate("/onboarding"); // fallback
+            navigate("/onboarding", { state: location.state }); // fallback
         }
     };
 
@@ -188,7 +194,7 @@ export default function OTPVerification() {
 
             // Navigate after toast
             setTimeout(async () => {
-               await checkOnboardingAndRedirect();
+                await checkOnboardingAndRedirect();
                 setToast(null);
             }, 3000);
         } catch (err: any) {

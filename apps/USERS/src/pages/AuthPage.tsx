@@ -6,7 +6,7 @@ import { FcGoogle } from "react-icons/fc";
 import Autoplay from "embla-carousel-autoplay";
 import useEmblaCarousel from "embla-carousel-react";
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { FaPhoneAlt } from 'react-icons/fa';
 import { MdError } from 'react-icons/md';
 import { FaCircleCheck } from 'react-icons/fa6';
@@ -36,6 +36,7 @@ const AuthPage = () => {
   const [emailAddress, setEmailAddress] = useState('')
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const [toast, setToast] = useState<{ type: ToastType; message: string } | null>(null);
 
   useEffect(() => {
@@ -95,6 +96,12 @@ const AuthPage = () => {
   const checkOnboardingAndRedirect = async () => {
     try {
       const token = localStorage.getItem("token");
+      const from = location.state?.from
+        || sessionStorage.getItem("redirectAfterLogin")
+        || "/";
+
+      console.log("from:", from);
+      sessionStorage.removeItem("redirectAfterLogin");
 
       const res = await fetch(`${backendUrl}/api/onboarding/`, {
         method: "GET",
@@ -107,14 +114,13 @@ const AuthPage = () => {
       const data = await res.json();
 
       if (data?.data?.is_completed) {
-        window.location.reload()
-        navigate("/");
+        window.location.href = from;
       } else {
-        navigate("/onboarding");
+        navigate("/onboarding", { state: location.state });
       }
     } catch (err) {
       console.error("Failed to check onboarding:", err);
-      navigate("/onboarding"); // fallback
+      navigate("/onboarding", { state: location.state }); // fallback
     }
   };
 
@@ -165,7 +171,7 @@ const AuthPage = () => {
 
       setTimeout(() => {
         setToast(null);
-        navigate("/validateotp");
+        navigate("/validateotp", { state: location.state }); // 👈 carry the from state through
       }, 2500);
 
     } catch (err: any) {
@@ -357,8 +363,8 @@ const AuthPage = () => {
         </div>
 
         <div className="text-center font-redhat">
-          <p className="text-[#0F172A] text-sm font-normal">By continuing, you are agreeing to Viigo’s Terms of Service and Privacy Policy.</p>
-          <p className="text-[#60A5FA] text-sm font-normal pt-2 cursor-pointer">View Terms and Conditions</p>
+          <p className="text-[#0F172A] text-sm mb-2 font-normal">By continuing, you are agreeing to Viigo’s Terms of Service and Privacy Policy.</p>
+          <a href="/terms-and-conditions" target='_blank' className="text-[#60A5FA] text-sm font-normal cursor-pointer">View Terms and Conditions</a >
         </div>
       </div>
     </div>

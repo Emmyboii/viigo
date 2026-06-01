@@ -2,12 +2,13 @@
 import { useEffect, useState } from 'react';
 import { FaCircleCheck } from 'react-icons/fa6';
 import { MdError } from 'react-icons/md';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 type ToastType = "success" | "error" | null;
 
 export default function WorkoutForm() {
     const navigate = useNavigate();
+    const location = useLocation();
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
     const [name, setName] = useState('');
@@ -41,6 +42,7 @@ export default function WorkoutForm() {
 
         const checkOnboarding = async () => {
             try {
+                const from = location.state?.from || "/";
                 const res = await fetch(`${backendUrl}/api/onboarding/`, {
                     method: "GET",
                     headers: {
@@ -63,7 +65,7 @@ export default function WorkoutForm() {
                 const data = await res.json();
 
                 if (data.data?.is_completed) {
-                    navigate("/", { replace: true });
+                    navigate(from, { replace: true });
                 } else {
                     setCheckingOnboarding(false);
                 }
@@ -74,7 +76,7 @@ export default function WorkoutForm() {
         };
 
         checkOnboarding();
-    }, [backendUrl, navigate, token]);
+    }, [backendUrl, navigate, token, location]);
 
     const geocodeAddress = async (address: string) => {
         const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
@@ -156,9 +158,8 @@ export default function WorkoutForm() {
             // Navigate after 2 seconds
             setTimeout(() => {
                 setToast(null);
-                window.location.reload()
-                navigate('/');
-                // go to home
+                const from = (location.state as { from?: string })?.from || '/'; // 👈
+                window.location.href = from;
             }, 1700);
         } catch (err: unknown) {
             console.error(err);

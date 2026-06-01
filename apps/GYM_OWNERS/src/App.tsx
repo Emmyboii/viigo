@@ -20,6 +20,8 @@ import OnboardingGuard from "./components/OnboardingGuard";
 import EditWallet from "./pages/EditWallet";
 import AppLayout from "./components/AppLayout";
 import WalletGuard from "./components/WalletGuard";
+import TermsAndCondtions from "./pages/TermsAndCondtions";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 function App() {
 
@@ -43,6 +45,20 @@ function App() {
               <PublicRoute>
                 <AuthPage />
               </PublicRoute>
+            }
+          />
+
+          <Route
+            path="/terms-and-conditions"
+            element={
+              <TermsAndCondtions />
+            }
+          />
+
+          <Route
+            path="/privacy-policy"
+            element={
+              <PrivacyPolicy />
             }
           />
 

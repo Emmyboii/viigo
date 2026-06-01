@@ -1,16 +1,19 @@
-import { type ReactNode } from "react";
-import { Navigate } from "react-router-dom";
+import type { JSX } from "react";
+import { Navigate, useLocation } from "react-router-dom";
 
 interface PublicRouteProps {
-    children: ReactNode;
+    children: JSX.Element;
 }
 
 const PublicRoute = ({ children }: PublicRouteProps) => {
     const token = localStorage.getItem("token");
+    const location = useLocation();
 
-    // If logged in, redirect to home
+
     if (token) {
-        return <Navigate to="/onboarding" replace />;
+        const from = (location.state as { from?: string })?.from || "/";
+        console.log("PublicRoute: redirecting to:", from);
+        return <Navigate to={from} replace />;
     }
 
     return children;

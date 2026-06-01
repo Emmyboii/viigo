@@ -24,6 +24,8 @@ import NearBy from "./pages/NearBy";
 import { useEffect } from "react";
 import PlanYourWorkout from "./pages/PlanYourWorkout";
 import WorkoutRatingModal from "./components/Workoutratingmodal";
+import TermsAndCondtions from "./pages/TermsAndCondtions";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 function App() {
 
@@ -89,6 +91,20 @@ function App() {
               <PublicRoute>
                 <AuthPage />
               </PublicRoute>
+            }
+          />
+
+          <Route
+            path="/terms-and-conditions"
+            element={
+              <TermsAndCondtions />
+            }
+          />
+
+          <Route
+            path="/privacy-policy"
+            element={
+              <PrivacyPolicy />
             }
           />
 
@@ -258,7 +274,7 @@ function App() {
         </Routes>
 
         {isKnownRoute && <WorkoutRatingModal />}
-        
+
       </div>
     </div>
   )

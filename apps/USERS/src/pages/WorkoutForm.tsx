@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { MdError } from 'react-icons/md';
 import { FaCircleCheck } from 'react-icons/fa6';
 import { HiArrowLeft } from 'react-icons/hi';
@@ -9,6 +9,7 @@ type ToastType = "success" | "error" | null;
 
 export default function WorkoutForm() {
     const navigate = useNavigate();
+    const location = useLocation();
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
     const [name, setName] = useState('');
@@ -39,6 +40,7 @@ export default function WorkoutForm() {
     useEffect(() => {
         const checkOnboarding = async () => {
             try {
+                const from = location.state?.from || "/";
                 const token = localStorage.getItem('token');
                 const res = await fetch(`${backendUrl}/api/onboarding/`, {
                     method: 'GET',
@@ -50,7 +52,7 @@ export default function WorkoutForm() {
                 const data = await res.json();
 
                 if (data.data.is_completed) {
-                    navigate('/'); // user already completed onboarding
+                    navigate(from); // user already completed onboarding
                 } else {
                     setCheckingOnboarding(false); // show form
                 }
@@ -108,9 +110,9 @@ export default function WorkoutForm() {
             // Navigate after 2 seconds
             setTimeout(() => {
                 setToast(null);
-                window.location.reload()
-                navigate('/');
-                // go to home
+                const from = (location.state as { from?: string })?.from || '/'; // 👈
+                window.location.href = from;
+
             }, 2000);
         } catch (err: any) {
             console.error(err);
@@ -153,7 +155,8 @@ export default function WorkoutForm() {
 
             setTimeout(() => {
                 setToast(null);
-                navigate('/');
+                const from = (location.state as { from?: string })?.from || '/'; // 👈
+                window.location.href = from;
             }, 1000);
 
         } catch (err: any) {
