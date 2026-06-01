@@ -631,7 +631,7 @@ export default function ReviewPay() {
 
 
                             {/* ===== Gym Summary Card ===== */}
-                            <div className="bg-white rounded border flex gap-1 max-h-[160px]">
+                            <div className="bg-white rounded border flex gap-1 max-h-[250px]">
                                 <img
                                     crossOrigin="anonymous"
                                     src={`https://api.viigo.in/${normalizeImagePath(gym?.images[0]?.image)}`}
