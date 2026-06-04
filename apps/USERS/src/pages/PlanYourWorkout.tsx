@@ -9,6 +9,8 @@ import { IoArrowBack, IoMoonOutline } from "react-icons/io5";
 import fire from '../assets/fire.png'
 import most from '../assets/most.png'
 import { GrSun } from "react-icons/gr";
+import { getNowIST, toIST } from "../utils/ist";
+import { PlanWorkoutSkeleton } from "../components/Gymskeletons ";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -103,7 +105,7 @@ const PlanYourWorkout = () => {
         : null;
 
     const [selectedDate, setSelectedDate] = useState<Date | null>(
-        initialBookingState?.selectedDate ?? new Date()
+        initialBookingState?.selectedDate ?? getNowIST()
     );
 
     const [selectedHours, setSelectedHours] = useState(
@@ -196,16 +198,16 @@ const PlanYourWorkout = () => {
     const gymCloseDate = useMemo(() => {
         if (!gym?.close_time) return null;
         const [hourStr, minuteStr] = gym.close_time.split(":");
-        const date = new Date();
+        const date = getNowIST();
         date.setHours(Number(hourStr), Number(minuteStr), 0, 0);
         return date;
     }, [gym?.close_time]);
 
     // ✅ Generate Live Dates (Next 7 Days)
     const dates = useMemo(() => {
-        const today = new Date();
+        const today = getNowIST();
         return Array.from({ length: 7 }).map((_, index) => {
-            const date = new Date();
+            const date = getNowIST();
             date.setDate(today.getDate() + index);
             return {
                 day: index === 0 ? "Today" : date.toLocaleDateString("en-US", { weekday: "short" }),
@@ -217,14 +219,20 @@ const PlanYourWorkout = () => {
     }, []);
 
     // ✅ Is the selected date today?
-    const isToday = useMemo(() =>
-        selectedDate?.toDateString() === new Date().toDateString(),
-        [selectedDate]
-    );
+    const isToday = useMemo(() => {
+        if (!selectedDate) return false;
+        const nowIST = getNowIST();
+        const selIST = toIST(selectedDate);
+        return (
+            selIST.getFullYear() === nowIST.getFullYear() &&
+            selIST.getMonth() === nowIST.getMonth() &&
+            selIST.getDate() === nowIST.getDate()
+        );
+    }, [selectedDate]);
 
     // ✅ Current time in minutes (only meaningful when isToday)
     const nowMinutes = useMemo(() => {
-        const now = new Date();
+        const now = getNowIST();
         return now.getHours() * 60 + now.getMinutes();
     }, []);
 
@@ -296,7 +304,7 @@ const PlanYourWorkout = () => {
         if (!selectedHours?.value) return "";
 
         if (selectedSlot === 'NON_PEAK') {
-            const lastEntry = new Date();
+            const lastEntry = getNowIST();
             lastEntry.setHours(17, 0, 0, 0);
             lastEntry.setMinutes(lastEntry.getMinutes() - selectedHours.value * 60);
             return lastEntry.toLocaleTimeString("en-GB", { hour: "numeric", minute: "2-digit", hour12: true });
@@ -411,17 +419,19 @@ const PlanYourWorkout = () => {
         ? "Gym is closed today. Please select another date."
         : "Gym will be closed on this day. Please choose another date.";
 
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center min-h-screen">
-                <div className="flex flex-col items-center gap-4 p-8 bg-white animate-fadeIn">
-                    <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                    <p className="text-gray-700 text-lg font-medium">Loading...</p>
-                    <p className="text-gray-400 text-sm text-center">This might take a few seconds. Sit tight!</p>
-                </div>
-            </div>
-        );
-    }
+    // if (loading) {
+    //     return (
+    //         <div className="flex items-center justify-center min-h-screen">
+    //             <div className="flex flex-col items-center gap-4 p-8 bg-white animate-fadeIn">
+    //                 <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+    //                 <p className="text-gray-700 text-lg font-medium">Loading...</p>
+    //                 <p className="text-gray-400 text-sm text-center">This might take a few seconds. Sit tight!</p>
+    //             </div>
+    //         </div>
+    //     );
+    // }
+
+    if (loading) { return <PlanWorkoutSkeleton />; }
 
     return (
         <div className="pb-40 min-h-screen sp:px-5 px-3.5 max-w-[1300px] mx-auto">
@@ -701,8 +711,8 @@ const PlanYourWorkout = () => {
                             disabled={allHoursDisabled || isGymClosedForSelectedDate || (isToday && (selectedSlot === 'NON_PEAK' ? isNonPeakClosedToday : isPeakClosedToday))}
                             onClick={handleApply}
                             className={`w-[130px] text-white px-6 py-3 rounded-md font-semibold cursor-pointer text-sm ${allHoursDisabled || isGymClosedForSelectedDate || (isToday && (selectedSlot === 'NON_PEAK' ? isNonPeakClosedToday : isPeakClosedToday))
-                                    ? "bg-[#a6a7a8] cursor-not-allowed"
-                                    : "bg-blue-600 cursor-pointer"
+                                ? "bg-[#a6a7a8] cursor-not-allowed"
+                                : "bg-blue-600 cursor-pointer"
                                 }`}
                         >
                             Apply

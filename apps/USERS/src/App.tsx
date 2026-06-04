@@ -26,6 +26,7 @@ import PlanYourWorkout from "./pages/PlanYourWorkout";
 import WorkoutRatingModal from "./components/Workoutratingmodal";
 import TermsAndCondtions from "./pages/TermsAndCondtions";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import DeleteAccount from "./pages/DeleteAccount";
 
 function App() {
 
@@ -220,6 +221,15 @@ function App() {
             element={
               <ProtectedRoute>
                 <Bookings />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/delete-account"
+            element={
+              <ProtectedRoute>
+                <DeleteAccount />
               </ProtectedRoute>
             }
           />

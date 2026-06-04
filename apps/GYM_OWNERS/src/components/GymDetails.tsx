@@ -18,6 +18,7 @@ import { generateGymTags } from "../data/generateGymTags";
 import { FaRegClock, FaRestroom, FaLock } from "react-icons/fa";
 import { MdVerified } from "react-icons/md";
 import { RiWomenLine } from "react-icons/ri";
+import { getNowIST } from "../utils/ist";
 
 type ToastType = "success" | "error" | null;
 
@@ -222,8 +223,8 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
     const initialAvailability = useMemo(() => {
         if (!gym) return [];
 
-        const today = new Date();
-        const endDate = new Date();
+        const today = getNowIST();
+        const endDate = getNowIST();
         // endDate.setMonth(today.getMonth() + 1);
         endDate.setDate(today.getDate() + 6)
 
@@ -855,11 +856,11 @@ function Toast({ text, type, onClose }: { text: string; type: ToastType; onClose
 
     return (
         <div
-            className={`fixed w-[280px] bottom-20 z-50 left-1/2 justify-center -translate-x-1/2 
-      bg-white px-4 py-3 rounded-lg flex items-center gap-3
-      shadow-[0_10px_40px_rgba(0,0,0,0.18)] animate-[fadeIn_0.2s_ease-out]`}
+             className={`fixed bottom-20 z-50 left-4 right-4 mx-auto max-w-sm w-fit
+            bg-white px-4 py-3 rounded-lg flex items-center gap-3
+            shadow-[0_10px_40px_rgba(0,0,0,0.18)] animate-[fadeIn_0.2s_ease-out]`}
         >
-            <span className={`text-xl ${isSuccess ? "text-green-500" : "text-red-500"}`}>
+            <span className={`text-xl flex-shrink-0 ${isSuccess ? "text-green-500" : "text-red-500"}`}>
                 {isSuccess ? <FaCircleCheck /> : <MdError />}
             </span>
             <p className="text-sm font-medium">{text}</p>

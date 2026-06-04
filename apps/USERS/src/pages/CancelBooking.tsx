@@ -9,6 +9,7 @@ import CancelSuccessModal from "../components/CancelSuccessModal";
 import type { Gym } from "../components/types/gym";
 import { useAppContext } from "../context/AppContext";
 import type { Booking } from "./Bookings";
+import { CancelBookingSkeleton } from "../components/Gymskeletons ";
 
 const reasons = [
     "Changed the plans",
@@ -242,163 +243,167 @@ export default function CancelBooking() {
         }
     };
 
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center min-h-screen">
-                <div className="flex flex-col items-center gap-4 p-8 bg-white animate-fadeIn">
-                    <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                    <p className="text-gray-700 text-lg font-medium">
-                        Loading...
-                    </p>
-                </div>
-            </div>
-        );
-    }
+    // if (loading) {
+    //     return (
+    //         <div className="flex items-center justify-center min-h-screen">
+    //             <div className="flex flex-col items-center gap-4 p-8 bg-white animate-fadeIn">
+    //                 <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+    //                 <p className="text-gray-700 text-lg font-medium">
+    //                     Loading...
+    //                 </p>
+    //             </div>
+    //         </div>
+    //     );
+    // }
 
     return (
         <div className="min-h-screen p-4 max-w-[1300px] mx-auto relative">
-            {/* Header */}
-            <div className="flex items-center gap-3 mb-4">
-                <FiArrowLeft onClick={() => navigate(-1)} className="text-xl cursor-pointer" />
-                <h1 className="text-lg font-semibold">Cancel Booking</h1>
-            </div>
+            {loading ? <CancelBookingSkeleton /> : (
+                <>
+                    {/* Header */}
+                    <div className="flex items-center gap-3 mb-4">
+                        <FiArrowLeft onClick={() => navigate(-1)} className="text-xl cursor-pointer" />
+                        <h1 className="text-lg font-semibold">Cancel Booking</h1>
+                    </div>
 
-            {/* Gym Card */}
-            <div className="bg-white rounded shadow-sm border">
-                <div className="flex">
-                    <img
-                        src={gym?.images[0]?.image}
-                        alt="gym"
-                        className="w-20 h-auto rounded-tl rounded-bl object-cover"
-                    />
+                    {/* Gym Card */}
+                    <div className="bg-white rounded shadow-sm border">
+                        <div className="flex">
+                            <img
+                                src={gym?.images[0]?.image}
+                                alt="gym"
+                                className="w-20 h-auto rounded-tl rounded-bl object-cover"
+                            />
 
-                    <div className="flex-1  p-3">
-                        <div className="flex justify-between items-start">
-                            <h2 className="font-semibold text-sm">
-                                {gym?.name}
-                            </h2>
+                            <div className="flex-1  p-3">
+                                <div className="flex justify-between items-start">
+                                    <h2 className="font-semibold text-sm">
+                                        {gym?.name}
+                                    </h2>
 
-                            {/* <span className="flex items-center gap-1 text-xs bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE] px-2 py-1 rounded-full">
+                                    {/* <span className="flex items-center gap-1 text-xs bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE] px-2 py-1 rounded-full">
                                 <FiLock size={12} />
                                 Premium
                             </span> */}
-                        </div>
-
-                        <div className="text-xs text-gray-500 mt-1 flex items-center gap-2">
-                            <FiCalendar /> {selectedBooking?.display_date}
-                        </div>
-
-                        <div className="text-xs text-gray-500 flex items-center gap-2 pt-1">
-                            <FiClock /> Duration : {hours}
-                            {/* • Flexible Entry */}
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Refund Summary */}
-            <div className="bg-white rounded-xl p-4 mt-5 border shadow-sm">
-                <h3 className="text-sm font-medium mb-3">
-                    Refund Summary
-                </h3>
-
-                <div className="flex justify-between text-sm text-[#6A6A6A] mb-2">
-                    <span>Total Paid</span>
-                    <span className="text-black font-medium">
-                        Rs. {price}
-                    </span>
-                </div>
-
-                <div className="flex justify-between text-sm text-[#6A6A6A] mb-3">
-                    <span>Cancellation Fee</span>
-                    <span className="text-black font-medium">
-                        Rs. 10
-                    </span>
-                </div>
-
-                <div className="border border-[#F2F2F2] border-dotted"></div>
-
-                <div className="flex justify-between text-sm font-normal mt-3">
-                    <span>Total Refund Amount</span>
-                    <span>Rs. {totalRefund}</span>
-                </div>
-            </div>
-
-            {/* Reason */}
-            <div className="mt-8">
-                <h3 className="text-base font-semibold mb-3">
-                    Reason for Cancellation
-                </h3>
-
-                <div className="space-y-3">
-                    {reasons.map((reason) => {
-                        const active = selectedReason === reason;
-
-                        return (
-                            <button
-                                key={reason}
-                                onClick={() => {
-                                    setSelectedReason(reason);
-                                    setError("");
-                                }}
-                                className={`w-full flex items-center gap-3 p-3 rounded border transition
-                                        ${active
-                                        ? "border-[#2563EB] bg-[#DBEAFE]"
-                                        : "border-[#E2E8F0] bg-white"
-                                    }
-                                    `}
-                            >
-                                <div
-                                    className={`w-4 h-4 rounded-full border flex items-center justify-center
-                                        ${active
-                                            ? "border-[#2563EB]"
-                                            : "border-[#E2E8F0]"
-                                        }
-                                    `}
-                                >
-                                    {active && (
-                                        <div className="w-2 h-2 bg-blue-500 rounded-full" />
-                                    )}
                                 </div>
 
-                                <span
-                                    className={`text-sm ${active
-                                        ? "text-[#0F172A]"
-                                        : "text-[#0F172A]"
-                                        }`}
-                                >
-                                    {reason}
-                                </span>
-                            </button>
-                        );
-                    })}
-                </div>
+                                <div className="text-xs text-gray-500 mt-1 flex items-center gap-2">
+                                    <FiCalendar /> {selectedBooking?.display_date}
+                                </div>
 
-                {error && (
-                    <p className="text-red-500 text-sm mt-2">{error}</p>
-                )}
-            </div>
+                                <div className="text-xs text-gray-500 flex items-center gap-2 pt-1">
+                                    <FiClock /> Duration : {hours}
+                                    {/* • Flexible Entry */}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-            {/* Bottom */}
-            <div className="fixed bottom-0 left-0 w-full bg-white p-4 border-t border-[#F1F5F9]">
-                <div className="max-w-[1300px] mx-auto flex items-center justify-between gap-4">
-                    <button onClick={() => navigate(-1)} className="text-[#2563EB] text-sm font-semibold">
-                        Don’t Cancel
-                    </button>
+                    {/* Refund Summary */}
+                    <div className="bg-white rounded-xl p-4 mt-5 border shadow-sm">
+                        <h3 className="text-sm font-medium mb-3">
+                            Refund Summary
+                        </h3>
 
-                    <button
-                        className="w-[209px] bg-[#F43F5E] text-white py-3 rounded-md text-sm font-semibold flex justify-center items-center gap-2"
-                        onClick={handleCancel}
-                        disabled={isCancelling}
-                    >
-                        {isCancelling ? (
-                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        ) : (
-                            "Cancel Booking"
+                        <div className="flex justify-between text-sm text-[#6A6A6A] mb-2">
+                            <span>Total Paid</span>
+                            <span className="text-black font-medium">
+                                Rs. {price}
+                            </span>
+                        </div>
+
+                        <div className="flex justify-between text-sm text-[#6A6A6A] mb-3">
+                            <span>Cancellation Fee</span>
+                            <span className="text-black font-medium">
+                                Rs. 10
+                            </span>
+                        </div>
+
+                        <div className="border border-[#F2F2F2] border-dotted"></div>
+
+                        <div className="flex justify-between text-sm font-normal mt-3">
+                            <span>Total Refund Amount</span>
+                            <span>Rs. {totalRefund}</span>
+                        </div>
+                    </div>
+
+                    {/* Reason */}
+                    <div className="mt-8">
+                        <h3 className="text-base font-semibold mb-3">
+                            Reason for Cancellation
+                        </h3>
+
+                        <div className="space-y-3">
+                            {reasons.map((reason) => {
+                                const active = selectedReason === reason;
+
+                                return (
+                                    <button
+                                        key={reason}
+                                        onClick={() => {
+                                            setSelectedReason(reason);
+                                            setError("");
+                                        }}
+                                        className={`w-full flex items-center gap-3 p-3 rounded border transition
+                                        ${active
+                                                ? "border-[#2563EB] bg-[#DBEAFE]"
+                                                : "border-[#E2E8F0] bg-white"
+                                            }
+                                    `}
+                                    >
+                                        <div
+                                            className={`w-4 h-4 rounded-full border flex items-center justify-center
+                                        ${active
+                                                    ? "border-[#2563EB]"
+                                                    : "border-[#E2E8F0]"
+                                                }
+                                    `}
+                                        >
+                                            {active && (
+                                                <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                                            )}
+                                        </div>
+
+                                        <span
+                                            className={`text-sm ${active
+                                                ? "text-[#0F172A]"
+                                                : "text-[#0F172A]"
+                                                }`}
+                                        >
+                                            {reason}
+                                        </span>
+                                    </button>
+                                );
+                            })}
+                        </div>
+
+                        {error && (
+                            <p className="text-red-500 text-sm mt-2">{error}</p>
                         )}
-                    </button>
-                </div>
-            </div>
+                    </div>
+
+                    {/* Bottom */}
+                    <div className="fixed bottom-0 left-0 w-full bg-white p-4 border-t border-[#F1F5F9]">
+                        <div className="max-w-[1300px] mx-auto flex items-center justify-between gap-4">
+                            <button onClick={() => navigate(-1)} className="text-[#2563EB] text-sm font-semibold">
+                                Don’t Cancel
+                            </button>
+
+                            <button
+                                className="w-[209px] bg-[#F43F5E] text-white py-3 rounded-md text-sm font-semibold flex justify-center items-center gap-2"
+                                onClick={handleCancel}
+                                disabled={isCancelling}
+                            >
+                                {isCancelling ? (
+                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                ) : (
+                                    "Cancel Booking"
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </>
+            )}
 
             {/* ✅ Success Modal */}
             {showSuccess && <CancelSuccessModal onClose={handleClose} price={price} total={totalRefund} />}

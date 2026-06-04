@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { IoArrowBack } from 'react-icons/io5';
 import { useNavigate } from 'react-router-dom';
 import Footer from '../components/Footer';
+import { GymHorizontalCardSkeleton } from '../components/Gymskeletons ';
 
 const Recommended = () => {
 
@@ -24,21 +25,21 @@ const Recommended = () => {
         );
     });
 
-    if (loading2) {
-        return (
-            <div className="flex items-center justify-center min-h-screen">
-                <div className="flex flex-col items-center gap-4 p-8 bg-white animate-fadeIn">
-                    <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                    <p className="text-gray-700 text-lg font-medium">
-                        Loading Recommended gyms...
-                    </p>
-                    <p className="text-gray-400 text-sm text-center">
-                        This might take a few seconds. Sit tight!
-                    </p>
-                </div>
-            </div>
-        );
-    }
+    // if (loading2) {
+    //     return (
+    //         <div className="flex items-center justify-center min-h-screen">
+    //             <div className="flex flex-col items-center gap-4 p-8 bg-white animate-fadeIn">
+    //                 <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+    //                 <p className="text-gray-700 text-lg font-medium">
+    //                     Loading Recommended gyms...
+    //                 </p>
+    //                 <p className="text-gray-400 text-sm text-center">
+    //                     This might take a few seconds. Sit tight!
+    //                 </p>
+    //             </div>
+    //         </div>
+    //     );
+    // }
 
     return (
         <Container>
@@ -54,7 +55,7 @@ const Recommended = () => {
                         <IoArrowBack size={20} />
                     </button>
 
-                    <span className="font-semibold text-lg">Recommended</span>
+                    <span className="font-semibold text-lg">Recommended Gyms</span>
                 </div>
             </div>
 
@@ -65,7 +66,13 @@ const Recommended = () => {
                 />
             </div>
 
-            {filteredGyms.length === 0 ? (
+            {loading2 ? (
+                <div className="space-y-4 mb-20 mt-7">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                        <GymHorizontalCardSkeleton key={i} />
+                    ))}
+                </div>
+            ) : filteredGyms.length === 0 ? (
                 <p className="text-center text-gray-400 py-6">
                     {query ? "No gyms match your search" : "No recommended gyms available"}
                 </p>

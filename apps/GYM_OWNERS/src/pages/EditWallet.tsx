@@ -63,6 +63,35 @@ export default function EditWallet() {
         });
     }, [wallet]);
 
+    const extractErrorMessage = (data: unknown): string => {
+        if (!data || typeof data !== "object") return "Something went wrong";
+
+        const response = data as {
+            data?: unknown;
+            message?: unknown;
+        };
+
+        if (!response.data || typeof response.data !== "object") return "Something went wrong";
+
+        const d = response.data as Record<string, unknown>;
+
+        // { error: "..." }
+        if (typeof d.error === "string") return d.error;
+
+        // { ifsc_code: ["..."], ... } — field errors
+        if (typeof d === "object") {
+            const firstKey = Object.keys(d)[0];
+            const firstValue = d[firstKey];
+            if (Array.isArray(firstValue) && firstValue.length > 0 && typeof firstValue[0] === "string") return firstValue[0];
+            if (typeof firstValue === "string") return firstValue;
+        }
+
+        // { message: "..." }
+        if (typeof response.message === "string") return response.message;
+
+        return "Something went wrong";
+    };
+
     const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
         e.preventDefault()
 
@@ -89,7 +118,7 @@ export default function EditWallet() {
             const data = await res.json();
 
             if (!res.ok) {
-                setToast({ type: "error", message: data.data.error });
+                setToast({ type: "error", message: extractErrorMessage(data) });
                 return
             }
 
@@ -199,7 +228,7 @@ export default function EditWallet() {
                 </button>
 
             </form>
-            
+
         </div>
     );
 }
@@ -251,11 +280,11 @@ function Toast({ text, type, onClose }: { text: string; type: ToastType; onClose
 
     return (
         <div
-            className={`fixed w-[280px] bottom-20 z-50 left-1/2 justify-center -translate-x-1/2
-      bg-white px-4 py-3 rounded-lg flex items-center gap-3
-      shadow-[0_10px_40px_rgba(0,0,0,0.18)] animate-[fadeIn_0.2s_ease-out]`}
+            className={`fixed bottom-20 z-50 left-4 right-4 mx-auto max-w-sm w-fit
+            bg-white px-4 py-3 rounded-lg flex items-center gap-3
+            shadow-[0_10px_40px_rgba(0,0,0,0.18)] animate-[fadeIn_0.2s_ease-out]`}
         >
-            <span className={`text-xl ${isSuccess ? "text-green-500" : "text-red-500"}`}>
+            <span className={`text-xl flex-shrink-0 ${isSuccess ? "text-green-500" : "text-red-500"}`}>
                 {isSuccess ? <FaCircleCheck /> : <MdError />}
             </span>
             <p className="text-sm font-medium">{text}</p>

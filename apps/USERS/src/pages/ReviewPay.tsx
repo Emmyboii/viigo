@@ -21,6 +21,7 @@ import three2 from "../assets/three2.png";
 // import * as htmlToImage from "html-to-image";
 // import { snapdom } from "@zumer/snapdom";
 import fire from '../assets/fire.png'
+import { ReviewPaySkeleton } from "../components/Gymskeletons ";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 type ToastType = "success" | "error" | null;
@@ -33,6 +34,8 @@ export interface PreviewData {
     gst_fee: string
     total_payable: string
     duration: string
+    peak_hours: string
+    non_peak_hours: string
 }
 
 export default function ReviewPay() {
@@ -597,21 +600,23 @@ export default function ReviewPay() {
 
     const visibleAmenities = gym?.amenities.slice(0, 2);
 
-    if (loading || previewLoading) {
-        return (
-            <div className="flex items-center justify-center min-h-screen">
-                <div className="flex flex-col items-center gap-4 p-8 bg-white animate-fadeIn">
-                    <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                    <p className="text-gray-700 text-lg font-medium">
-                        Loading...
-                    </p>
-                    <p className="text-gray-400 text-sm text-center">
-                        This might take a few seconds. Sit tight!
-                    </p>
-                </div>
-            </div>
-        );
-    }
+    // if (loading || previewLoading) {
+    //     return (
+    //         <div className="flex items-center justify-center min-h-screen">
+    //             <div className="flex flex-col items-center gap-4 p-8 bg-white animate-fadeIn">
+    //                 <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+    //                 <p className="text-gray-700 text-lg font-medium">
+    //                     Loading...
+    //                 </p>
+    //                 <p className="text-gray-400 text-sm text-center">
+    //                     This might take a few seconds. Sit tight!
+    //                 </p>
+    //             </div>
+    //         </div>
+    //     );
+    // }
+
+    if (loading || previewLoading) { return <ReviewPaySkeleton />; }
 
     return (
         <div className="pb-36 min-h-screen max-w-[1300px] mx-auto">
@@ -717,12 +722,22 @@ export default function ReviewPay() {
 
                                             <div className="flex items-center gap-2 text-nowrap text-sm text-[#0F172A] mt-2">
                                                 <IoTimeOutline size={14} />
-                                                <span>{formatTime12Hour(gym?.open_time)} – {formatTime12Hour(gym?.close_time)} </span>
+                                                {slotType === "PEAK" ? (
+                                                    // <span>{previewData?.peak_hours}</span>
+                                                    <span>{formatTime12Hour(gym?.open_time)} – {formatTime12Hour(gym?.close_time)} </span>
+
+                                                ) : (
+                                                    <span>{previewData?.non_peak_hours}</span>
+                                                )}
                                             </div>
 
                                             <div className="flex items-center gap-1 text-[11px] text-[#475569] mt-2">
                                                 <PiWarningCircle className="rotate-180" size={14} />
-                                                <span>Entry should be within selected timing.</span>
+                                                {slotType === "PEAK" ? (
+                                                    <span>Enter anytime during the day</span>
+                                                ) : (
+                                                    <span>Entry should be within selected timing.</span>
+                                                )}
                                             </div>
                                         </div>
 
@@ -920,11 +935,11 @@ function Toast({ text, type, onClose }: { text: string; type: ToastType; onClose
     return (
         <div
             role="alert"
-            className={`fixed w-[280px] bottom-10 z-50 left-1/2 -translate-x-1/2 
-      bg-white px-4 py-3 rounded-lg flex items-center gap-3
-      shadow-[0_10px_40px_rgba(0,0,0,0.18)] animate-[fadeIn_0.2s_ease-out]`}
+             className={`fixed bottom-20 z-50 left-4 right-4 mx-auto max-w-sm w-fit
+            bg-white px-4 py-3 rounded-lg flex items-center gap-3
+            shadow-[0_10px_40px_rgba(0,0,0,0.18)] animate-[fadeIn_0.2s_ease-out]`}
         >
-            <span className={`text-xl ${isSuccess ? "text-green-500" : "text-red-500"}`}>
+            <span className={`text-xl flex-shrink-0 ${isSuccess ? "text-green-500" : "text-red-500"}`}>
                 {isSuccess ? <FaCircleCheck /> : <MdError />}
             </span>
             <p className="text-sm font-medium">{text}</p>

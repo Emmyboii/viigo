@@ -16,6 +16,7 @@ import { snapdom } from "@zumer/snapdom";
 import { PiWarningCircle } from "react-icons/pi";
 import type { RecommendedWorkoutTimings } from "./types/gym";
 import fire from '../assets/fire.png'
+import { BookingModalSkeleton } from "./Gymskeletons ";
 
 type PaymentSuccessProps = {
     onClose: () => void;
@@ -205,19 +206,21 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
         }
     };
 
-    if (loading || !pass) {
-        return (
-            <div className="flex items-center justify-center min-h-screen">
-                <div className="flex flex-col items-center gap-4 p-8 bg-white animate-fadeIn">
-                    <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                    <p className="text-gray-700 text-lg font-medium">
-                        Loading booking details...
-                    </p>
-                </div>
-            </div>
-        );
-    }
+    // if (loading || !pass) {
+    //     return (
+    //         <div className="flex items-center justify-center min-h-screen">
+    //             <div className="flex flex-col items-center gap-4 p-8 bg-white animate-fadeIn">
+    //                 <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+    //                 <p className="text-gray-700 text-lg font-medium">
+    //                     Loading booking details...
+    //                 </p>
+    //             </div>
+    //         </div>
+    //     );
+    // }
 
+    if (loading || !pass) { return <BookingModalSkeleton />; }
+    
     return (
         <div className="min-h-screen pb-28 overflow-x-hidden max-w-[400px] mx-auto">
 

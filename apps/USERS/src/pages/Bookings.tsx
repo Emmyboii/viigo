@@ -11,6 +11,7 @@ import BookingModal from "../components/BookingModal"
 import { normalizeImagePath } from "../context/AppContext"
 // import { snapdom } from "@zumer/snapdom";
 import { IoSearchSharp } from "react-icons/io5"
+import { BookingCardSkeleton } from "../components/Gymskeletons "
 
 export type Booking = {
     id: number;
@@ -239,18 +240,18 @@ const Bookings = () => {
         }
     });
 
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center min-h-screen">
-                <div className="flex flex-col items-center gap-4 p-8 bg-white animate-fadeIn">
-                    <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                    <p className="text-gray-700 text-lg font-medium">
-                        Loading Bookings...
-                    </p>
-                </div>
-            </div>
-        );
-    }
+    // if (loading) {
+    //     return (
+    //         <div className="flex items-center justify-center min-h-screen">
+    //             <div className="flex flex-col items-center gap-4 p-8 bg-white animate-fadeIn">
+    //                 <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+    //                 <p className="text-gray-700 text-lg font-medium">
+    //                     Loading Bookings...
+    //                 </p>
+    //             </div>
+    //         </div>
+    //     );
+    // }
 
     return (
         <div>
@@ -282,7 +283,9 @@ const Bookings = () => {
                             onChange={(id) => setActiveFilter(id)}
                         />
                         <div className="space-y-4 mb-20 mt-8">
-                            {filteredBookings.length == 0 ? (
+                            {loading ? (
+                                [1, 2, 3, 4].map((i) => <BookingCardSkeleton key={i} />)
+                            ) : filteredBookings.length === 0 ? (
                                 <div className="text-center text-gray-500 mt-10">
                                     {query
                                         ? `No bookings match "${query}"`

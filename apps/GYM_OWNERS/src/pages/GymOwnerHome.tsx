@@ -9,6 +9,7 @@ import { useNavigate } from "react-router";
 import FilterChips from "../components/FilterChips";
 import UserCard from "../components/UserCard";
 import { useAppContext, type Booking } from "../context/AppContext";
+import { GymOwnerHomeSkeleton } from "../components/Gymskeletons ";
 
 type Status =
   | "idle"
@@ -367,21 +368,23 @@ const GymOwnerHome = () => {
 
 
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="flex flex-col items-center gap-4 p-8 bg-white animate-fadeIn">
-          <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-gray-700 text-lg font-medium">
-            Fetching your booking details...
-          </p>
-          <p className="text-gray-400 text-sm text-center">
-            This might take a few seconds. Sit tight!
-          </p>
-        </div>
-      </div>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <div className="flex items-center justify-center min-h-screen">
+  //       <div className="flex flex-col items-center gap-4 p-8 bg-white animate-fadeIn">
+  //         <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+  //         <p className="text-gray-700 text-lg font-medium">
+  //           Fetching your booking details...
+  //         </p>
+  //         <p className="text-gray-400 text-sm text-center">
+  //           This might take a few seconds. Sit tight!
+  //         </p>
+  //       </div>
+  //     </div>
+  //   );
+  // }
+
+  if (isLoading) { return <GymOwnerHomeSkeleton />; }
 
   return (
     <>
@@ -577,11 +580,11 @@ function Toast({
 
   return (
     <div
-      className={`fixed z-50 w-[280px] bottom-20 left-1/2 -translate-x-1/2 
-      bg-white px-4 py-3 rounded-lg flex items-center gap-3
-      shadow-[0_10px_40px_rgba(0,0,0,0.18)] animate-[fadeIn_0.2s_ease-out]`}
+      className={`fixed bottom-20 z-50 left-4 right-4 mx-auto max-w-sm w-fit
+            bg-white px-4 py-3 rounded-lg flex items-center gap-3
+            shadow-[0_10px_40px_rgba(0,0,0,0.18)] animate-[fadeIn_0.2s_ease-out]`}
     >
-      <span className={`text-xl ${isSuccess ? "text-green-500" : "text-red-500"}`}>
+      <span className={`text-xl flex-shrink-0 ${isSuccess ? "text-green-500" : "text-red-500"}`}>
         {isSuccess ? <FaCircleCheck /> : <MdError />}
       </span>
       <p className="text-sm font-medium">{text}</p>

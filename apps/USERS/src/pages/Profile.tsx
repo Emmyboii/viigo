@@ -57,7 +57,7 @@ const Profile = ({ user }: UserProps) => {
                     <div className="space-y-3">
                         <div className="flex items-center gap-1">
                             <p className="text-[#0F172A] font-semibold">Profile</p>
-                            <img src={icon} className="w-4 pt-1" alt="Profile Icon" />
+                            <img src={icon} className="w-4" alt="Profile Icon" />
                         </div>
                         <div className="flex items-center gap-1">
                             <FaUser size={16} />
@@ -90,6 +90,10 @@ const Profile = ({ user }: UserProps) => {
             </div>
 
             <button onClick={() => setShowLogoutModal(true)} className="mt-40 bg-[#2563EB] w-full h-[50px] font-semibold text-sm text-white py-2 px-4 rounded-md">Log Out</button>
+
+            <p className='text-center text-[#F43F5E] text-sm mt-5 cursor-pointer' onClick={() => navigate('/delete-account')}>
+                Delete Account
+            </p>
 
             <Footer />
 

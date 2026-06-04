@@ -4,7 +4,7 @@ import ImageCarousel from "../components/ImageCarousel";
 import { useEffect, useState, type JSX } from "react";
 import logoUrl from "../assets/icon2.png";
 import {
-    IoInformationCircleOutline,
+    // IoInformationCircleOutline,
     IoWarningOutline,
 } from "react-icons/io5";
 import { HiLocationMarker, HiOutlineLocationMarker, HiUserAdd, HiUsers } from "react-icons/hi";
@@ -20,6 +20,7 @@ import { generateGymTags } from "../utils/generateGymTags";
 import { FaRegClock, FaRestroom, FaLock } from "react-icons/fa";
 import { MdVerified } from "react-icons/md";
 import { RiWomenLine } from "react-icons/ri";
+import { GymDetailsSkeleton } from "../components/Gymskeletons ";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -367,21 +368,23 @@ export default function GymDetails() {
     //     isCurrentTimeInRange(gym?.recommended_workout_timings?.peak_hours?.morning || "") ||
     //     isCurrentTimeInRange(gym?.recommended_workout_timings?.peak_hours?.evening || "");
 
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center min-h-screen">
-                <div className="flex flex-col items-center gap-4 p-8 bg-white animate-fadeIn">
-                    <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                    <p className="text-gray-700 text-lg font-medium">
-                        Fetching gym details...
-                    </p>
-                    <p className="text-gray-400 text-sm text-center">
-                        This might take a few seconds. Sit tight!
-                    </p>
-                </div>
-            </div>
-        );
-    }
+    // if (loading) {
+    //     return (
+    //         <div className="flex items-center justify-center min-h-screen">
+    //             <div className="flex flex-col items-center gap-4 p-8 bg-white animate-fadeIn">
+    //                 <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+    //                 <p className="text-gray-700 text-lg font-medium">
+    //                     Fetching gym details...
+    //                 </p>
+    //                 <p className="text-gray-400 text-sm text-center">
+    //                     This might take a few seconds. Sit tight!
+    //                 </p>
+    //             </div>
+    //         </div>
+    //     );
+    // }
+
+    if (loading) { return <GymDetailsSkeleton />; }
 
     if (!gym) return (
         <div className="flex items-center justify-center min-h-screen px-4">
@@ -581,22 +584,23 @@ export default function GymDetails() {
 
                 <div id="share-bottom-bar" className="fixed max-w-[1300px] mx-auto bottom-14 left-0 right-0 bg-white border-t px-3 pb-6 pt-2.5 flex justify-between items-center">
                     <div className="space-y-2">
-                        <p className="text-[11px] text-[#475569] font-medium">
+                        <p className="text-[11px] text-[#475569] font-medium text-nowrap">
                             Gym timings : {formatTime12Hour(gym.open_time)} - {formatTime12Hour(gym.close_time)}
                         </p>
 
                         <div className="flex items-center gap-2 leading-none">
                             <p className="text-[22px] font-semibold flex items-center text-nowrap text-[#0F172A]">
-                                ₹{Number(gym.hourly_rate) + Number(bookingConfig.platform_fee) + Math.round(Number(bookingConfig.gst_fee))}/Hr
+                                ₹{Number(gym.hourly_rate)}/Hr
+                                {/* ₹{Number(gym.hourly_rate) + Number(bookingConfig.platform_fee) + Math.round(Number(bookingConfig.gst_fee))}/Hr */}
 
                             </p>
 
-                            <IoInformationCircleOutline
+                            {/* <IoInformationCircleOutline
                                 size={20}
                                 onClick={() => openSheet("price")}
                                 className="text-[#94A3B8] flex-shrink-0"
                                 style={{ transform: "translateY(1px)" }}
-                            />
+                            /> */}
                         </div>
                     </div>
 
@@ -680,15 +684,6 @@ export default function GymDetails() {
                     </div>
                 </div>
             </BottomSheet>
-
-            {/* <PickHoursSheet
-                open={open}
-                setOpen={setOpen}
-                onClose={() => setOpen(false)}
-                defaultDate={initialBookingState?.selectedDate}
-                defaultHours={initialBookingState?.selectedHours}
-                gym={gym}
-            /> */}
         </div>
     );
 }

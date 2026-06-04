@@ -22,6 +22,7 @@ import AppLayout from "./components/AppLayout";
 import WalletGuard from "./components/WalletGuard";
 import TermsAndCondtions from "./pages/TermsAndCondtions";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import DeleteAccount from "./pages/DeleteAccount";
 
 function App() {
 
@@ -202,6 +203,17 @@ function App() {
                     <Notifications Loading={loading} />
                   </AppLayout>
                 </OnboardingGuard>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/delete-account"
+            element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <DeleteAccount />
+                </AppLayout>
               </ProtectedRoute>
             }
           />

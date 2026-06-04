@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import SortModal from "../components/SortModal";
 import { FaFilter } from "react-icons/fa";
 import { BiSortAlt2 } from "react-icons/bi";
+import { GymCardSkeleton, GymHorizontalCardSkeleton } from "../components/Gymskeletons ";
 
 
 export default function UserHome() {
@@ -32,57 +33,27 @@ export default function UserHome() {
     const chipData = [
         { id: "filters", label: "Filters", icon: <FaFilter /> },
         { id: "sort", label: "Sort By", icon: <BiSortAlt2 className="text-xl" /> },
-        // { id: "near", label: "Near Me" },
-        // { id: "women", label: "Women" },
-        // { id: "top_rated", label: "Top Rated" },
     ];
 
-
-    // --- Open modal function ---
     const openSortModal = () => {
         setShowSortModal(true);
-
-        // Push fake state so back button can close modal
         window.history.pushState({ modal: "sort" }, "");
     };
 
-    // --- Close modal function ---
     const closeSortModal = () => {
         setShowSortModal(false);
-
-        // Only go back if modal state was pushed
         if (window.history.state?.modal === "sort") {
             window.history.back();
         }
     };
 
-    // --- Back button handler ---
     useEffect(() => {
         const handlePopState = () => {
-            if (showSortModal) {
-                setShowSortModal(false);
-            }
+            if (showSortModal) setShowSortModal(false);
         };
-
         window.addEventListener("popstate", handlePopState);
         return () => window.removeEventListener("popstate", handlePopState);
     }, [showSortModal]);
-
-    if (loading2) {
-        return (
-            <div className="flex items-center justify-center min-h-screen">
-                <div className="flex flex-col items-center gap-4 p-8 bg-white animate-fadeIn">
-                    <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                    <p className="text-gray-700 text-lg font-medium">
-                        Loading
-                    </p>
-                    <p className="text-gray-400 text-sm text-center">
-                        This might take a few seconds. Sit tight!
-                    </p>
-                </div>
-            </div>
-        );
-    }
 
     return (
         <Container>
@@ -93,20 +64,29 @@ export default function UserHome() {
                 activeId={activeId}
                 onChange={(id) => {
                     setActiveId(id);
-
                     if (id === "filters") {
                         navigate("/explore", { state: { openFilter: true, from: location.pathname } });
                     }
-
                     if (id === "sort") {
                         openSortModal();
                     }
                 }}
             />
 
+            {/* ===== Recommended Section ===== */}
             <SectionHeader title="Recommended For You" url="/gyms/recommended" />
 
-            {recommendedGyms.length === 0 ? (
+            {loading2 ? (
+                <div className="overflow-hidden py-2">
+                    <div className="flex gap-4">
+                        {[1, 2].map((i) => (
+                            <div key={i} className="flex-[0_0_85%]">
+                                <GymCardSkeleton />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            ) : recommendedGyms.length === 0 ? (
                 <p className="text-center text-gray-400 py-6">
                     No recommended gyms available
                 </p>
@@ -114,7 +94,7 @@ export default function UserHome() {
                 <div className="overflow-hidden py-2" ref={emblaRef}>
                     <div className="flex gap-4 embla__container">
                         {recommendedGyms.map((gym, index) => (
-                            <div key={index} className={`embla__slide ${recommendedGyms.length === 1 ? "" : "flex-[0_0_85%] "}`}>
+                            <div key={index} className={`embla__slide ${recommendedGyms.length === 1 ? "" : "flex-[0_0_85%]"}`}>
                                 <GymCard gym={gym} />
                             </div>
                         ))}
@@ -122,10 +102,16 @@ export default function UserHome() {
                 </div>
             )}
 
-
+            {/* ===== Nearby Section ===== */}
             <SectionHeader title="Hourly Gyms Near You" url="/gyms/nearby" />
 
-            {nearbyGyms.length === 0 ? (
+            {loading2 ? (
+                <div className="space-y-4 mb-20">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                        <GymHorizontalCardSkeleton key={i} />
+                    ))}
+                </div>
+            ) : nearbyGyms.length === 0 ? (
                 <p className="text-center text-gray-400 py-6">
                     No gyms found near you
                 </p>
@@ -141,16 +127,10 @@ export default function UserHome() {
                 <SortModal
                     onClose={closeSortModal}
                     onSelect={(value, label) => {
-                        // Step 1: Navigate first
                         navigate("/explore", {
-                            state: {
-                                sort: value,
-                                sortLabel: label,
-                            },
+                            state: { sort: value, sortLabel: label },
                             replace: true,
                         });
-
-                        // Step 2: Close modal locally
                         setShowSortModal(false);
                     }}
                     currentSort=""

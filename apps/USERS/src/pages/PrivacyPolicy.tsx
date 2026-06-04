@@ -1,98 +1,110 @@
-const privacySections = [
-    {
-        title: "1. Information We Collect",
-        body: "Viigo may collect personal information such as your name, phone number, email address, location, profile details, booking history, payment status, and device information when you use the platform.",
-    },
-    {
-        title: "2. How We Use Information",
-        body: "We use collected information to create and manage accounts, process bookings, send OTPs and alerts, personalize the user experience, improve services, prevent misuse, and provide customer support.",
-    },
-    {
-        title: "3. Location Data",
-        body: "Viigo may use location data to help users discover nearby gyms, fitness centers, trainers, and fitness-related services. Users can manage location permissions through their device settings.",
-    },
-    {
-        title: "4. Booking and Payment Information",
-        body: "Booking details may be shared with partner gyms, trainers, or service providers to confirm and manage reservations. Payments are processed through third-party payment gateways and Viigo does not store complete card or banking details.",
-    },
-    {
-        title: "5. Communications",
-        body: "Viigo may send service messages, OTPs, booking updates, support responses, promotional offers, emails, and push notifications. Users may opt out of promotional communication where applicable.",
-    },
-    {
-        title: "6. Sharing of Information",
-        body: "We may share necessary information with service partners, payment providers, analytics tools, SMS providers, cloud hosting vendors, and legal authorities when required by law or platform safety needs.",
-    },
-    {
-        title: "7. Data Security",
-        body: "Viigo uses reasonable technical and organizational measures to protect user information from unauthorized access, misuse, alteration, or disclosure. However, no digital platform can guarantee absolute security.",
-    },
-    {
-        title: "8. Data Retention",
-        body: "We retain user information for as long as needed to provide services, comply with legal obligations, resolve disputes, prevent fraud, and enforce platform policies.",
-    },
-    {
-        title: "9. User Rights",
-        body: "Users may request access, correction, update, or deletion of their personal information, subject to verification and applicable legal or operational requirements.",
-    },
-    {
-        title: "10. Cookies and Analytics",
-        body: "Viigo may use cookies, analytics tools, and similar technologies to understand platform usage, improve performance, remember preferences, and measure service effectiveness.",
-    },
-    {
-        title: "11. Third-Party Links and Services",
-        body: "The platform may contain integrations or links to third-party services. Viigo is not responsible for the privacy practices, content, or policies of third-party platforms.",
-    },
-    {
-        title: "12. Children's Privacy",
-        body: "Viigo is intended for users who are at least 18 years old or using the platform with guardian consent. We do not knowingly collect information from children without appropriate consent.",
-    },
-    {
-        title: "13. Changes to This Policy",
-        body: "Viigo may update this Privacy Policy from time to time. Continued use of the platform after updates means users accept the revised policy.",
-    },
-];
-
 const PrivacyPolicy = () => {
     return (
         <main className="min-h-screen bg-white px-6 py-8 text-black sm:px-12 lg:px-16">
             <section className="mx-auto max-w-[900px]">
-                <h1 className="text-center text-[28px] font-bold leading-tight sm:text-[34px]">
-                    Viigo - Privacy Policy
-                </h1>
-
-                <div className="mt-14 border-t border-[#bfbfbf]" />
-
-                <p className="mt-16 max-w-[870px] text-[16px] leading-[1.75] sm:text-[18px]">
-                    This Privacy Policy explains how Viigo collects, uses, stores, and
-                    protects information when users access or use the Viigo mobile
-                    application, website, platform, and related services. By using Viigo,
-                    users agree to the practices described in this Privacy Policy.
-                </p>
-
-                <div className="mt-16 space-y-11">
-                    {privacySections.map((section) => (
-                        <section key={section.title}>
-                            <h2 className="text-[14px] font-bold leading-6 sm:text-[15px]">
-                                {section.title}
-                            </h2>
-                            <p className="text-[14px] leading-[1.7] sm:text-[15px]">
-                                {section.body}
-                            </p>
-                        </section>
-                    ))}
+                <div className="space-y-1 text-center">
+                    <h1 className="text-center text-[28px] font-bold leading-tight sm:text-[34px]">
+                        Viigo - Privacy Policy
+                    </h1>
+                    <p className="text-[14px]">Effective Date: June 2, 2026</p>
                 </div>
 
-                <section className="mt-14">
-                    <h2 className="text-[14px] font-bold leading-6 sm:text-[15px]">
-                        14. Contact Information
-                    </h2>
-                    <div className="space-y-1 text-[14px] leading-[1.6] sm:text-[15px]">
-                        <p>Viigo Support</p>
-                        <p>Email: support@viigo.in</p>
-                        <p>Website: www.viigo.in</p>
-                    </div>
-                </section>
+                <div className="mt-7 border-t border-[#bfbfbf]" />
+
+
+                <div className="mt-8 space-y-7">
+
+                    <section>
+                        <h2 className="text-[14px] font-bold leading-6">1. Introduction</h2>
+                        <p className="text-[14px] leading-[1.7]">
+                            Viigo ("Viigo", "we", "our", or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use the Viigo mobile application, website, and related services (collectively, the "Services").
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 className="text-[14px] font-bold leading-6">2. Information We Collect</h2>
+                        <ul className="text-[14px] leading-[1.7] space-y-0.5">
+                            <li>• Full name</li>
+                            <li>• Mobile number</li>
+                            <li>• Email address</li>
+                            <li>• Profile information</li>
+                            <li>• Location information</li>
+                            <li>• Booking and activity information</li>
+                            <li>• Device and usage information</li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h2 className="text-[14px] font-bold leading-6">3. Payment Information</h2>
+                        <p className="text-[14px] leading-[1.7]">
+                            Payments are processed by trusted third-party providers, including Razorpay. Viigo does not store complete card details, UPI PINs, or banking credentials.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 className="text-[14px] font-bold leading-6">4. How We Use Your Information</h2>
+                        <ul className="text-[14px] leading-[1.7] space-y-0.5">
+                            <li>• Manage accounts and bookings</li>
+                            <li>• Process payments</li>
+                            <li>• Provide customer support</li>
+                            <li>• Improve services</li>
+                            <li>• Prevent fraud and abuse</li>
+                            <li>• Comply with legal obligations</li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h2 className="text-[14px] font-bold leading-6">5. Information Sharing</h2>
+                        <p className="text-[14px] leading-[1.7]">
+                            We do not sell personal information. Information may be shared with fitness partners, service providers, legal authorities when required, or during business transfers.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 className="text-[14px] font-bold leading-6">6. User Rights</h2>
+                        <p className="text-[14px] leading-[1.7]">
+                            Users may request access, correction, or deletion of personal information subject to applicable laws.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 className="text-[14px] font-bold leading-6">7. Data Retention</h2>
+                        <p className="text-[14px] leading-[1.7]">
+                            Information is retained as long as necessary to provide services and meet legal obligations.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 className="text-[14px] font-bold leading-6">8. Data Security</h2>
+                        <p className="text-[14px] leading-[1.7]">
+                            We implement reasonable safeguards to protect user information, but no method of transmission or storage is completely secure.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 className="text-[14px] font-bold leading-6">9. Children's Privacy</h2>
+                        <p className="text-[14px] leading-[1.7]">
+                            Viigo is not intended for children under 18 without parental or guardian consent.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 className="text-[14px] font-bold leading-6">10. Changes to this Policy</h2>
+                        <p className="text-[14px] leading-[1.7]">
+                            We may update this Privacy Policy periodically. Updates will be posted within the Services.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 className="text-[14px] font-bold leading-6">11. Contact Us</h2>
+                        <div className="space-y-0.5 text-[14px] leading-[1.6]">
+                            <p>Viigo</p>
+                            <p>Email: support@viigo.in</p>
+                            <p>Website: https://viigo.in</p>
+                        </div>
+                    </section>
+
+                </div>
             </section>
         </main>
     );

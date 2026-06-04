@@ -15,6 +15,7 @@ import { TiLocation } from "react-icons/ti";
 import { snapdom } from "@zumer/snapdom";
 import { PiWarningCircle } from "react-icons/pi";
 import fire from '../assets/fire.png'
+import { PaymentSuccessSkeleton } from "../components/Gymskeletons ";
 
 type PaymentSuccessProps = {
     gym: GymCard | null
@@ -188,15 +189,18 @@ export default function PaymentSuccess({ onClose }: PaymentSuccessProps) {
         window.open(url, "_blank"); // opens Google Maps
     };
 
-    if (loading || !pass || !booking) {
-        return (
-            <div className="flex items-center justify-center min-h-screen">
-                <div className="flex flex-col items-center gap-4 p-8 bg-white animate-fadeIn">
-                    <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                    <p className="text-gray-500 text-sm">Processing your booking...</p>
-                </div>
-            </div>);
-    }
+    // if (loading || !pass || !booking) {
+    //     return (
+    //         <div className="flex items-center justify-center min-h-screen">
+    //             <div className="flex flex-col items-center gap-4 p-8 bg-white animate-fadeIn">
+    //                 <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+    //                 <p className="text-gray-500 text-sm">Processing your booking...</p>
+    //             </div>
+    //         </div>);
+    // }
+
+    if (loading || !pass || !booking) { return <PaymentSuccessSkeleton />; }
+
 
     return (
         <div className="min-h-screen pb- overflow-x-hidden max-w-[400px] mx-auto">

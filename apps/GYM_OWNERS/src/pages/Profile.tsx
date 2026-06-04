@@ -126,7 +126,7 @@ const Profile = ({ user }: UserProps) => {
 
             <div className='mk:p-4 pt-10 mk:bg-[#DBEAFE] min-h-[93.3vh] mk:flex justify-center flex-col'>
 
-                <div className='mk:border mk:flex flex-col gap-16 border-[#DBEAFE] w-full bg-white mk:py-6 mk:px-5 py-3 px-4 rounded-md space-y-4 mk:max-w-[400px] mk:mx-auto'>
+                <div className='mk:border mk:flex flex-col border-[#DBEAFE] w-full bg-white mk:py-6 mk:px-5 py-3 px-4 rounded-md space-y-4 mk:max-w-[400px] mk:mx-auto'>
 
                     <div className='border border-[#DBEAFE] bg-white py-3 px-4 rounded-md space-y-4'>
 
@@ -135,7 +135,7 @@ const Profile = ({ user }: UserProps) => {
                             <div className="space-y-3">
                                 <div className="flex items-center gap-1">
                                     <p className="text-[#0F172A] font-semibold">Profile</p>
-                                    <img src={icon} className="w-4 pt-1" alt="" />
+                                    <img src={icon} className="w-4" alt="" />
                                 </div>
 
                                 <div className="flex items-center gap-1">
@@ -171,12 +171,19 @@ const Profile = ({ user }: UserProps) => {
                         </div>
                     </div>
 
-                    <button
-                        onClick={openLogout}
-                        className="mt-16 bg-[#2563EB] w-full h-[50px] text-white rounded-md"
-                    >
-                        Log Out
-                    </button>
+                    <div className="space-y-4">
+
+                        <button
+                            onClick={openLogout}
+                            className="mt-16 bg-[#2563EB] w-full h-[50px] text-white rounded-md"
+                        >
+                            Log Out
+                        </button>
+
+                        <p className='text-center text-[#F43F5E] text-sm cursor-pointer' onClick={() => navigate('/delete-account')}>
+                            Delete Account
+                        </p>
+                    </div>
                 </div>
 
                 {/* ========================= */}
@@ -241,7 +248,7 @@ const Profile = ({ user }: UserProps) => {
                         className="fixed inset-0 z-50 flex justify-center items-start mk:items-center"
                     >
                         <div
-                            className="hidden mk:block fixed inset-0 bg-[#0C0A0AC7]"
+                            className="block fixed inset-0 bg-[#0C0A0AC7]"
                             onClick={() => window.history.back()}
                         />
                         <EditProfile setEdit={setEdit} />
@@ -256,7 +263,7 @@ const Profile = ({ user }: UserProps) => {
                 {support && (
                     <motion.div className="fixed inset-0 z-50 flex justify-center items-start mk:items-center">
                         <div
-                            className="hidden mk:block fixed inset-0 bg-[#0C0A0AC7]"
+                            className="block fixed inset-0 bg-[#0C0A0AC7]"
                             onClick={() => window.history.back()}
                         />
                         <Support setSupport={setSupport} />
@@ -271,7 +278,7 @@ const Profile = ({ user }: UserProps) => {
                 {faq && (
                     <motion.div className="fixed inset-0 z-50 flex justify-center items-start mk:items-center">
                         <div
-                            className="hidden mk:block fixed inset-0 bg-[#0C0A0AC7]"
+                            className="block fixed inset-0 bg-[#0C0A0AC7]"
                             onClick={() => window.history.back()}
                         />
                         <FAQ setFaq={setFaq} />
