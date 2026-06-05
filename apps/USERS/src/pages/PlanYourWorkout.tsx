@@ -278,10 +278,25 @@ const PlanYourWorkout = () => {
 
     // ── Duration validation per slot (today only) ───────────────────────────
 
+    // ── Gym open time as total minutes from midnight ─────────────────────────
+    const gymOpenMinutes = useMemo(() => {
+        if (!gym?.open_time) return null;
+        const [hourStr, minuteStr] = gym.open_time.split(":");
+        return Number(hourStr) * 60 + Number(minuteStr);
+    }, [gym?.open_time]);
+
     const isMorningPeakDurationInvalid = (duration: number): boolean => {
-        if (!isToday) return false;
-        // Session must end by 8:00 AM
-        return nowMinutes + duration * 60 > MORNING_PEAK_END_MINUTES;
+        // The morning peak window is gym open time → 8:00 AM.
+        // A duration is only valid if it fits within that window.
+        // e.g. gym opens at 7:00 AM → window = 60 min → only 1 Hr fits.
+        const windowStart = gymOpenMinutes ?? 0;
+        const windowSizeMinutes = MORNING_PEAK_END_MINUTES - windowStart;
+        if (duration * 60 > windowSizeMinutes) return true;
+
+        // Also apply time-of-day check for today: session must still end by 8:00 AM
+        if (isToday && nowMinutes + duration * 60 > MORNING_PEAK_END_MINUTES) return true;
+
+        return false;
     };
 
     const isNonPeakDurationInvalid = (duration: number): boolean => {
@@ -806,8 +821,8 @@ const PlanYourWorkout = () => {
                                     {selectedSlot === 'NON_PEAK'
                                         ? 'Non-Peak Hours'
                                         : selectedSlot === 'MORNING_PEAK'
-                                            ? 'Morning Peak'
-                                            : 'Evening Peak'}
+                                            ? 'Morning Peak Hours'
+                                            : 'Evening Peak Hours'}
                                 </p>
                             )}
                             <p className="text-[22px] font-semibold">

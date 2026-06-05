@@ -207,13 +207,13 @@ export function BookingModalSkeleton() {
 
 export function PaymentSuccessSkeleton() {
     return (
-        <div className="min-h-screen pb-28 max-w-[400px] mx-auto px-2 animate-pulse">
+        <div className="min-h-screen pb-28 max-w-[400px] mx-auto px-3 animate-pulse">
             <div className="flex flex-col items-center pt-10 pb-6 gap-3">
                 <div className="w-16 h-16 rounded-full bg-gray-200" />
                 <div className="h-5 bg-gray-200 rounded w-40" />
                 <div className="h-3 bg-gray-200 rounded w-48" />
             </div>
-            <div className="bg-gray-200 rounded-3xl h-[460px] w-full mx-2" />
+            <div className="bg-gray-200 rounded-3xl h-[460px] w-full" />
             <div className="mt-6 space-y-3 px-2">
                 <div className="h-4 bg-gray-200 rounded w-24" />
                 {[1, 2, 3, 4].map((i) => (
