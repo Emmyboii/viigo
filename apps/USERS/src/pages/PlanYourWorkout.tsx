@@ -9,7 +9,7 @@ import { IoArrowBack, IoMoonOutline } from "react-icons/io5";
 import fire from '../assets/fire.png'
 import most from '../assets/most.png'
 import { GrSun } from "react-icons/gr";
-import { getNowIST, toIST } from "../utils/ist";
+import { getNowIST } from "../utils/ist";
 import { PlanWorkoutSkeleton } from "../components/Gymskeletons ";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
