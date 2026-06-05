@@ -89,7 +89,7 @@ export default function UserCard({ booking, onClick }: UserCardProps) {
                             {slot_type && (
                                 <span className={`text-xs font-medium ${slot_type === 'NON_PEAK' ? 'text-[#22C55E]' : 'text-[#D32F2F]'
                                     }`}>
-                                    {slot_type === 'NON_PEAK' ? '• Non-peak Hour' : '• Peak Hour'}
+                                    {slot_type === 'NON_PEAK' ? '• Non-peak Hour' : slot_type === 'MORNING_PEAK'? '• Morning Peak Hour' : '• Evening Peak Hour'}
                                 </span>
                             )}
                         </p>

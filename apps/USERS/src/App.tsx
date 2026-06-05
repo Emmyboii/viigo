@@ -35,7 +35,7 @@ function App() {
 
   useEffect(() => {
     if (
-      !location.pathname.startsWith("/reviewpay") &&
+      !location.pathname.startsWith("/reviewpayment") &&
       !location.pathname.startsWith("/gyms/")
     ) {
       localStorage.removeItem("bookingData");
@@ -44,7 +44,7 @@ function App() {
 
   useEffect(() => {
     if (
-      !location.pathname.startsWith("/reviewpay")
+      !location.pathname.startsWith("/reviewpayment")
     ) {
       localStorage.removeItem("paid");
       localStorage.removeItem("paymentSuccess");
@@ -60,7 +60,7 @@ function App() {
     "/gyms/recommended",
     "/gyms/nearby",
     "/explore",
-    "/reviewpay",
+    "/reviewpayment",
     "/notifications",
     "/bookings",
     "/profile",
@@ -190,7 +190,7 @@ function App() {
           />
 
           <Route
-            path="/reviewpay"
+            path="/reviewpayment"
             element={
               <ProtectedRoute>
                 <ReviewPay />

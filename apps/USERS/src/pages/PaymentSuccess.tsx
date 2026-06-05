@@ -322,7 +322,7 @@ export default function PaymentSuccess({ onClose }: PaymentSuccessProps) {
                     {/* Divider */}
                     <div className="border-t border-dashed border-white/40 my-3" />
 
-                    {pass.slot_type && (
+                    {/* {pass.slot_type && (
                         <p className={`text-sm font-normal ${pass.slot_type === 'NON_PEAK' ? 'text-[#0F7D37]' : 'text-[#DC2626]'
                             }`}>
                             {pass.slot_type === 'NON_PEAK' ? (
@@ -332,6 +332,25 @@ export default function PaymentSuccess({ onClose }: PaymentSuccessProps) {
                             ) : (
                                 <div className="flex items-center gap-1 w-fit mx-auto py-1 mb-3 mt-4 px-2 rounded-full justify-center bg-white">
                                     <img src={fire} className="w-[10px]" alt="" /> Peak Hours
+                                </div>
+                            )}
+                        </p>
+                    )} */}
+
+                    {pass.slot_type && (
+                        <p className={`text-sm font-normal ${pass.slot_type === 'NON_PEAK' ? 'text-[#0F7D37]' : 'text-[#DC2626]'
+                            }`}>
+                            {pass.slot_type === 'NON_PEAK' ? (
+                                <div className="flex items-center gap-1 w-fit mx-auto py-1 mb-3 mt-4 px-2 rounded-full justify-center bg-white">
+                                    <HiThumbUp /> Non-Peak Hours
+                                </div>
+                            ) : pass.slot_type === 'MORNING_PEAK' ? (
+                                <div className="flex items-center gap-1 w-fit mx-auto py-1 mb-3 mt-4 px-2 rounded-full justify-center bg-white">
+                                    <img src={fire} className="w-[10px]" alt="" /> Morning Peak Hours
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-1 w-fit mx-auto py-1 mb-3 mt-4 px-2 rounded-full justify-center bg-white">
+                                    <img src={fire} className="w-[10px]" alt="" /> Evening Peak Hours
                                 </div>
                             )}
                         </p>
@@ -346,7 +365,21 @@ export default function PaymentSuccess({ onClose }: PaymentSuccessProps) {
                             </div>
                         )}
 
-                        {pass.slot_type === 'PEAK' && (
+                        {pass.slot_type === 'MORNING_PEAK' && (
+                            <div className="flex items-center text-nowrap text-[#FFFFFF] text-sm justify-center gap-2">
+                                <FiClock className="w-4 h-4" />
+                                Timings : <span>{pass?.recommended_workout_timings?.peak_hours?.morning} </span>
+                            </div>
+                        )}
+
+                        {pass.slot_type === 'EVENING_PEAK' && (
+                            <div className="flex items-center text-nowrap text-[#FFFFFF] text-sm justify-center gap-2">
+                                <FiClock className="w-4 h-4" />
+                                Timings : <span>{pass?.recommended_workout_timings?.peak_hours?.evening} </span>
+                            </div>
+                        )}
+
+                        {/* {pass.slot_type === 'PEAK' && (
                             <div className="flex items-center text-nowrap text-sm text-[#ffffff] justify-center gap-2">
                                 <FiClock className="w-4 h-4" />
                                 <div className="space-y-1">
@@ -358,7 +391,7 @@ export default function PaymentSuccess({ onClose }: PaymentSuccessProps) {
                                     </p>
                                 </div>
                             </div>
-                        )}
+                        )} */}
 
                         {/* <div className="flex items-center justify-center gap-2">
                             <img src={three} alt="Three" className="mt-1 w-6" />
@@ -379,10 +412,18 @@ export default function PaymentSuccess({ onClose }: PaymentSuccessProps) {
                             Last entry for selected duration: {pass.last_entry_time}
                         </p> */}
 
-                        <div className="flex items-center gap-1 text-[11px] text-[#ffffff] justify-center mt-2">
-                            <PiWarningCircle className="rotate-180" size={14} />
-                            <span>Entry should be within selected timing.</span>
-                        </div>
+                        {(pass.slot_type === 'MORNING_PEAK' || pass.slot_type === 'EVENING_PEAK') && (
+                            <div className="flex items-center gap-1 text-[11px] text-[#ffffff] justify-center mt-2">
+                                <PiWarningCircle className="rotate-180" size={14} />
+                                <span>Enter anytime during the day</span>
+                            </div>
+                        )}
+                        {pass.slot_type === 'NON_PEAK' && (
+                            <div className="flex items-center gap-1 text-[11px] text-[#ffffff] justify-center mt-2">
+                                <PiWarningCircle className="rotate-180" size={14} />
+                                <span>Entry should be within selected timing.</span>
+                            </div>
+                        )}
                     </div>
                 </motion.div>
             </div>

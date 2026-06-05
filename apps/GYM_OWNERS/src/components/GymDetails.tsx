@@ -239,7 +239,8 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
         const current = new Date(today);
 
         while (current <= endDate) {
-            const formatted = current.toISOString().split("T")[0];
+            const formatted =
+                `${current.getFullYear()}-${String(current.getMonth() + 1).padStart(2, "0")}-${String(current.getDate()).padStart(2, "0")}`;
 
             dates.push({
                 date: formatted,
@@ -589,13 +590,62 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
                         <Section title="Manage Gym Availability">
                             <div className="bg-white rounded-xl border p-3 h-[300px] overflow-y-auto space-y-3 mb-8">
 
-                                {availability.map((item, index) => (
+                                {availability.map((item, index) => {
+                                    const [year, month, day] = item.date.split("-").map(Number);
+                                    const displayDate = new Date(year, month - 1, day);
+                                    return (
+                                        <div
+                                            key={item.date}
+                                            className="flex items-center justify-between py-2"
+                                        >
+                                            <p className="text-sm font-semibold text-[#0F172A]">
+                                                {displayDate.toDateString()}
+                                            </p>
+
+                                            <button
+                                                onClick={() => toggleDate(index)}
+                                                className={`relative w-16 h-7 rounded-full transition duration-300 ${item.is_open
+                                                    ? "bg-[#22C55E] border border-[#22C55E]"
+                                                    : "bg-[#94A3B8]"
+                                                    }`}
+                                            >
+                                                <span
+                                                    className={`absolute inset-0 flex items-center text-[10px] font-semibold px-2 ${item.is_open
+                                                        ? "justify-start text-white"
+                                                        : "justify-end text-white"
+                                                        }`}
+                                                >
+                                                    {item.is_open ? "Open" : "Closed"}
+                                                </span>
+
+                                                <div
+                                                    className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-md transition-all duration-300 ${item.is_open ? "right-1" : "left-1"
+                                                        }`}
+                                                />
+                                            </button>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                        </Section>
+                    </div>
+                </div>
+
+                <div className="lj:flex mk:grid lg:grid-cols-2 items-stretch p-10 justify-between gap-6 hidden">
+                    {/* TIMINGS */}
+                    <Section2 title="Manage Gym Availability">
+                        <div className="bg-white rounded-xl border p-3 h-[300px] overflow-y-auto space-y-3">
+
+                            {availability.map((item, index) => {
+                                const [year, month, day] = item.date.split("-").map(Number);
+                                const displayDate = new Date(year, month - 1, day);
+                                return (
                                     <div
                                         key={item.date}
                                         className="flex items-center justify-between py-2"
                                     >
                                         <p className="text-sm font-semibold text-[#0F172A]">
-                                            {new Date(item.date).toDateString()}
+                                            {displayDate.toDateString()}
                                         </p>
 
                                         <button
@@ -620,49 +670,8 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
                                             />
                                         </button>
                                     </div>
-                                ))}
-                            </div>
-                        </Section>
-                    </div>
-                </div>
-
-                <div className="lj:flex mk:grid lg:grid-cols-2 items-stretch p-10 justify-between gap-6 hidden">
-                    {/* TIMINGS */}
-                    <Section2 title="Manage Gym Availability">
-                        <div className="bg-white rounded-xl border p-3 h-[300px] overflow-y-auto space-y-3">
-
-                            {availability.map((item, index) => (
-                                <div
-                                    key={item.date}
-                                    className="flex items-center justify-between py-2"
-                                >
-                                    <p className="text-sm font-semibold text-[#0F172A]">
-                                        {new Date(item.date).toDateString()}
-                                    </p>
-
-                                    <button
-                                        onClick={() => toggleDate(index)}
-                                        className={`relative w-16 h-7 rounded-full transition duration-300 ${item.is_open
-                                            ? "bg-[#22C55E] border border-[#22C55E]"
-                                            : "bg-[#94A3B8]"
-                                            }`}
-                                    >
-                                        <span
-                                            className={`absolute inset-0 flex items-center text-[10px] font-semibold px-2 ${item.is_open
-                                                ? "justify-start text-white"
-                                                : "justify-end text-white"
-                                                }`}
-                                        >
-                                            {item.is_open ? "Open" : "Closed"}
-                                        </span>
-
-                                        <div
-                                            className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-md transition-all duration-300 ${item.is_open ? "right-1" : "left-1"
-                                                }`}
-                                        />
-                                    </button>
-                                </div>
-                            ))}
+                                )
+                            })}
                         </div>
                     </Section2>
 
@@ -856,7 +865,7 @@ function Toast({ text, type, onClose }: { text: string; type: ToastType; onClose
 
     return (
         <div
-             className={`fixed bottom-20 z-50 left-4 right-4 mx-auto max-w-sm w-fit
+            className={`fixed bottom-20 z-50 left-4 right-4 mx-auto max-w-sm w-fit
             bg-white px-4 py-3 rounded-lg flex items-center gap-3
             shadow-[0_10px_40px_rgba(0,0,0,0.18)] animate-[fadeIn_0.2s_ease-out]`}
         >

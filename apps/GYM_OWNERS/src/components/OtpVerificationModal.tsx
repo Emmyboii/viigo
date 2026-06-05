@@ -233,9 +233,13 @@ export default function OtpVerificationModal({ user, onClose }: OtpVerificationM
                                             <div className="flex items-center gap-1">
                                                 <HiThumbUp /> Non-Peak Hours
                                             </div>
+                                        ) :user.slot_type === 'MORNING_PEAK'? (
+                                            <div className="flex items-center gap-1">
+                                                <img src={fire} className="w-[10px]" alt="" /> Morning Peak Hours
+                                            </div>
                                         ) : (
                                             <div className="flex items-center gap-1">
-                                                <img src={fire} className="w-[10px]" alt="" /> Peak Hours
+                                                <img src={fire} className="w-[10px]" alt="" /> Evening Peak Hours
                                             </div>
                                         )}
                                     </p>

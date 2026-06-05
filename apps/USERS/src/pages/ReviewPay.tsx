@@ -32,6 +32,7 @@ export interface PreviewData {
     surge_fee: string
     slot_type: string
     gst_fee: string
+    last_entry_time: string
     total_payable: string
     duration: string
     peak_hours: string
@@ -386,7 +387,7 @@ export default function ReviewPay() {
         if (slotType === "NON_PEAK") {
             const lessCrowded = gym.recommended_workout_timings?.less_crowded_hours;
 
-            // Example: "8 AM - 5 PM"
+            // Example: "8:00 AM - 5 PM"
             if (lessCrowded?.includes(" - ")) {
                 return lessCrowded.split(" - ")[1].trim(); // "5 PM"
             }
@@ -712,9 +713,13 @@ export default function ReviewPay() {
                                                         <div className="flex items-center gap-1">
                                                             <HiThumbUp /> Non-Peak Hours
                                                         </div>
+                                                    ) : slotType === 'MORNING_PEAK' ? (
+                                                        <div className="flex items-center gap-1">
+                                                            <img src={fire} className="w-[10px]" alt="" /> Morning Peak Hours
+                                                        </div>
                                                     ) : (
                                                         <div className="flex items-center gap-1">
-                                                            <img src={fire} className="w-[10px]" alt="" /> Peak Hours
+                                                            <img src={fire} className="w-[10px]" alt="" /> Evening Peak Hours
                                                         </div>
                                                     )}
                                                 </p>
@@ -722,10 +727,10 @@ export default function ReviewPay() {
 
                                             <div className="flex items-center gap-2 text-nowrap text-sm text-[#0F172A] mt-2">
                                                 <IoTimeOutline size={14} />
-                                                {slotType === "PEAK" ? (
-                                                    // <span>{previewData?.peak_hours}</span>
-                                                    <span>{formatTime12Hour(gym?.open_time)} – {formatTime12Hour(gym?.close_time)} </span>
-
+                                                {slotType === "MORNING_PEAK" ? (
+                                                    <span>{formatTime12Hour(gym?.open_time)} – 8:00 AM </span>
+                                                ) : slotType === "EVENING_PEAK" ? (
+                                                    <span>5:00 PM – {formatTime12Hour(gym?.close_time)} </span>
                                                 ) : (
                                                     <span>{previewData?.non_peak_hours}</span>
                                                 )}
@@ -733,10 +738,10 @@ export default function ReviewPay() {
 
                                             <div className="flex items-center gap-1 text-[11px] text-[#475569] mt-2">
                                                 <PiWarningCircle className="rotate-180" size={14} />
-                                                {slotType === "PEAK" ? (
-                                                    <span>Enter anytime during the day</span>
-                                                ) : (
+                                                {slotType === "NON_PEAK" ? (
                                                     <span>Entry should be within selected timing.</span>
+                                                ) : (
+                                                    <span>Enter anytime during the day</span>
                                                 )}
                                             </div>
                                         </div>
@@ -810,7 +815,7 @@ export default function ReviewPay() {
                         {/* ===== Sticky Bottom Pay Bar ===== */}
                         <div id="share-bottom-bar" className="fixed max-w-[1300px] mx-auto bottom-0 left-0 right-0 bg-white">
                             <div className="bg-[#DBEAFE] text-[#2563EB] text-sm px-4 py-3 font-medium text-center">
-                                Last entry for selected duration: {lastEntryTime}
+                                Last entry for selected duration: {previewData?.last_entry_time}
                             </div>
 
                             <div className="flex justify-between items-center px-4 py-5">
@@ -822,7 +827,7 @@ export default function ReviewPay() {
                                     {slotType && (
                                         <p className={`text-sm font-normal ${slotType === 'NON_PEAK' ? 'text-[#0F7D37]' : 'text-[#DC2626]'
                                             }`}>
-                                            {slotType === 'NON_PEAK' ? 'Non-Peak Hours' : 'Peak Hours'}
+                                            {slotType === 'NON_PEAK' ? 'Non-peak Hour' : slotType === 'MORNING_PEAK' ? 'Morning Peak Hour' : 'Evening Peak Hour'}
                                         </p>
                                     )}
 
@@ -935,7 +940,7 @@ function Toast({ text, type, onClose }: { text: string; type: ToastType; onClose
     return (
         <div
             role="alert"
-             className={`fixed bottom-20 z-50 left-4 right-4 mx-auto max-w-sm w-fit
+            className={`fixed bottom-20 z-50 left-4 right-4 mx-auto max-w-sm w-fit
             bg-white px-4 py-3 rounded-lg flex items-center gap-3
             shadow-[0_10px_40px_rgba(0,0,0,0.18)] animate-[fadeIn_0.2s_ease-out]`}
         >
