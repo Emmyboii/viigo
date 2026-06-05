@@ -380,73 +380,73 @@ export default function ReviewPay() {
     //     ...eveningPeaks.map(normalizePeak),
     // ];
 
-    const getSlotClosingTime = () => {
-        if (!gym || !slotType) return null;
+    // const getSlotClosingTime = () => {
+    //     if (!gym || !slotType) return null;
 
-        // NON-PEAK → use less crowded end time
-        if (slotType === "NON_PEAK") {
-            const lessCrowded = gym.recommended_workout_timings?.less_crowded_hours;
+    //     // NON-PEAK → use less crowded end time
+    //     if (slotType === "NON_PEAK") {
+    //         const lessCrowded = gym.recommended_workout_timings?.less_crowded_hours;
 
-            // Example: "8:00 AM - 5 PM"
-            if (lessCrowded?.includes(" - ")) {
-                return lessCrowded.split(" - ")[1].trim(); // "5 PM"
-            }
-        }
+    //         // Example: "8:00 AM - 5 PM"
+    //         if (lessCrowded?.includes(" - ")) {
+    //             return lessCrowded.split(" - ")[1].trim(); // "5 PM"
+    //         }
+    //     }
 
-        // PEAK → use evening peak end time
-        if (slotType === "PEAK") {
-            const eveningPeak =
-                gym.recommended_workout_timings?.peak_hours?.evening;
+    //     // PEAK → use evening peak end time
+    //     if (slotType === "PEAK") {
+    //         const eveningPeak =
+    //             gym.recommended_workout_timings?.peak_hours?.evening;
 
-            // Example: "5 PM - 11 PM"
-            if (eveningPeak?.includes(" - ")) {
-                return eveningPeak.split(" - ")[1].trim(); // "11 PM"
-            }
-        }
+    //         // Example: "5 PM - 11 PM"
+    //         if (eveningPeak?.includes(" - ")) {
+    //             return eveningPeak.split(" - ")[1].trim(); // "11 PM"
+    //         }
+    //     }
 
-        return null;
-    };
+    //     return null;
+    // };
 
-    const calculateLastEntry = () => {
-        if (!selectedHours?.value) return "";
+    // const calculateLastEntry = () => {
+    //     if (!selectedHours?.value) return "";
 
-        const slotClosing = getSlotClosingTime();
+    //     const slotClosing = getSlotClosingTime();
 
-        if (!slotClosing) return "";
+    //     if (!slotClosing) return "";
 
-        // Convert "11 PM" → Date
-        const closingDate = new Date();
+    //     // Convert "11 PM" → Date
+    //     const closingDate = new Date();
 
-        const [time, modifier] = slotClosing.split(" ");
-        let [hours, minutes] = time.split(":").map(Number);
+    //     const [time, modifier] = slotClosing.split(" ");
+    //     let [hours, minutes] = time.split(":").map(Number);
 
-        if (!minutes) minutes = 0;
+    //     if (!minutes) minutes = 0;
 
-        if (modifier === "PM" && hours !== 12) {
-            hours += 12;
-        }
+    //     if (modifier === "PM" && hours !== 12) {
+    //         hours += 12;
+    //     }
 
-        if (modifier === "AM" && hours === 12) {
-            hours = 0;
-        }
+    //     if (modifier === "AM" && hours === 12) {
+    //         hours = 0;
+    //     }
 
-        closingDate.setHours(hours, minutes, 0, 0);
+    //     closingDate.setHours(hours, minutes, 0, 0);
 
-        // subtract selected duration
-        const durationInMinutes = selectedHours.value * 60;
+    //     // subtract selected duration
+    //     const durationInMinutes = selectedHours.value * 60;
 
-        closingDate.setMinutes(
-            closingDate.getMinutes() - durationInMinutes
-        );
+    //     closingDate.setMinutes(
+    //         closingDate.getMinutes() - durationInMinutes
+    //     );
 
-        return closingDate.toLocaleTimeString("en-GB", {
-            hour: "numeric",
-            minute: "2-digit",
-            hour12: true,
-        });
-    };
+    //     return closingDate.toLocaleTimeString("en-GB", {
+    //         hour: "numeric",
+    //         minute: "2-digit",
+    //         hour12: true,
+    //     });
+    // };
 
-    const lastEntryTime = calculateLastEntry();
+    // const lastEntryTime = calculateLastEntry();
 
     const bookingDate = selectedDate ? new Date(selectedDate) : null;
 
