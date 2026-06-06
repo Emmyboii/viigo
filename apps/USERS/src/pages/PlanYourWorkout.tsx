@@ -26,7 +26,7 @@ type SlotType = 'NON_PEAK' | 'MORNING_PEAK' | 'EVENING_PEAK';
 
 // ── Time constants (minutes from midnight) ──────────────────────────────────
 const MORNING_PEAK_END_MINUTES = 8 * 60;        // 8:00 AM  — morning peak ends
-const MORNING_PEAK_CUTOFF_MINUTES = 7 * 60;     // 7:00 AM  — last entry for 1 hr morning peak
+// const MORNING_PEAK_CUTOFF_MINUTES = 7 * 60;     // 7:00 AM  — last entry for 1 hr morning peak
 const NON_PEAK_END_MINUTES = 17 * 60;            // 5:00 PM  — non-peak ends
 const NON_PEAK_CUTOFF_MINUTES = 16 * 60;         // 4:00 PM  — last entry for 1 hr non-peak
 
@@ -105,18 +105,18 @@ const PlanYourWorkout = () => {
     const initialBookingState = storedBooking
         ? (() => {
             const parsed = JSON.parse(storedBooking);
-            return {
-                ...parsed,
-                selectedDate: parsed.selectedDate ? new Date(parsed.selectedDate) : null,
-            };
+            let restoredDate: Date | null = null;
+            if (parsed.selectedDate) {
+                // Parse as local date (YYYY-MM-DD) to avoid UTC midnight → previous day in IST
+                const [y, m, d] = parsed.selectedDate.split("-").map(Number);
+                restoredDate = new Date(y, m - 1, d, 0, 0, 0, 0);
+            }
+            return { ...parsed, selectedDate: restoredDate };
         })()
         : null;
 
-    const defaultDate = getNowIST();
-    defaultDate.setHours(0, 0, 0, 0);
-
     const [selectedDate, setSelectedDate] = useState<Date | null>(
-        initialBookingState?.selectedDate ?? defaultDate
+        initialBookingState?.selectedDate ?? getNowIST()
     );
 
     const [selectedHours, setSelectedHours] = useState(
@@ -217,12 +217,9 @@ const PlanYourWorkout = () => {
     // ── Generate next 7 dates ────────────────────────────────────────────────
     const dates = useMemo(() => {
         const today = getNowIST();
-        today.setHours(0, 0, 0, 0);
-
         return Array.from({ length: 7 }).map((_, index) => {
-            const date = new Date(today);
+            const date = getNowIST();
             date.setDate(today.getDate() + index);
-
             return {
                 day: index === 0 ? "Today" : date.toLocaleDateString("en-US", { weekday: "short" }),
                 date: date.getDate().toString().padStart(2, "0"),
@@ -233,22 +230,9 @@ const PlanYourWorkout = () => {
     }, []);
 
     // ── Is selected date today? ──────────────────────────────────────────────
-    // const isToday = useMemo(() => {
-    //     if (!selectedDate) return false;
-    //     const nowIST = getNowIST();
-    //     const selIST = toIST(selectedDate);
-    //     return (
-    //         selIST.getFullYear() === nowIST.getFullYear() &&
-    //         selIST.getMonth() === nowIST.getMonth() &&
-    //         selIST.getDate() === nowIST.getDate()
-    //     );
-    // }, [selectedDate]);
-
     const isToday = useMemo(() => {
         if (!selectedDate) return false;
-
         const nowIST = getNowIST();
-
         return (
             selectedDate.getFullYear() === nowIST.getFullYear() &&
             selectedDate.getMonth() === nowIST.getMonth() &&
@@ -256,16 +240,28 @@ const PlanYourWorkout = () => {
         );
     }, [selectedDate]);
 
-    // ── Current time in minutes from midnight (IST) ──────────────────────────
-    const nowMinutes = useMemo(() => {
+    // ── Current time in minutes — updates every minute so slots close on time ──
+    const [nowMinutes, setNowMinutes] = useState(() => {
         const now = getNowIST();
         return now.getHours() * 60 + now.getMinutes();
+    });
+
+    useEffect(() => {
+        const tick = () => {
+            const now = getNowIST();
+            setNowMinutes(now.getHours() * 60 + now.getMinutes());
+        };
+        const interval = setInterval(tick, 60_000);
+        return () => clearInterval(interval);
     }, []);
 
     // ── Slot closed states (today only) ─────────────────────────────────────
 
-    // Morning Peak: closed once past 7:00 AM (can't fit even 1hr before 8:00 AM cutoff)
-    const isMorningPeakClosedToday = isToday && nowMinutes >= MORNING_PEAK_CUTOFF_MINUTES;
+    // Morning Peak: closed when no valid duration can fit before 8:00 AM.
+    // The minimum valid session is 1hr, so cutoff = 8:00 AM - 1hr = 7:00 AM.
+    // But if gym opens later (e.g. 7:30 AM), the slot is always closed since even 1hr can't fit.
+    const morningPeakLastEntryMinutes = MORNING_PEAK_END_MINUTES - 60; // 7:00 AM
+    const isMorningPeakClosedToday = isToday && nowMinutes >= morningPeakLastEntryMinutes;
 
     // Non-Peak: closed once past 4:00 PM
     const isNonPeakClosedToday = isToday && nowMinutes >= NON_PEAK_CUTOFF_MINUTES;
@@ -289,8 +285,8 @@ const PlanYourWorkout = () => {
         // The morning peak window is gym open time → 8:00 AM.
         // A duration is only valid if it fits within that window.
         // e.g. gym opens at 7:00 AM → window = 60 min → only 1 Hr fits.
-        const windowStart = gymOpenMinutes ?? 0;
-        const windowSizeMinutes = MORNING_PEAK_END_MINUTES - windowStart;
+        const windowStart = gymOpenMinutes ?? 0; // fallback to midnight if unknown
+        const windowSizeMinutes = MORNING_PEAK_END_MINUTES - windowStart; // e.g. 480 - 420 = 60 min
         if (duration * 60 > windowSizeMinutes) return true;
 
         // Also apply time-of-day check for today: session must still end by 8:00 AM
@@ -320,9 +316,8 @@ const PlanYourWorkout = () => {
     const allHoursDisabled = hoursOptions.every((hour) => isDurationInvalid(hour.value));
 
     // ── Auto-reset selected duration when switching slots if it becomes invalid
+    // Note: no isToday guard — Morning Peak window restriction applies on all dates
     useEffect(() => {
-        if (!isToday) return;
-
         const currentDurationInvalid = isDurationInvalid(selectedHours.value);
         if (!currentDurationInvalid) return;
 
@@ -345,11 +340,13 @@ const PlanYourWorkout = () => {
     const calculateLastEntry = (): string => {
         if (!selectedHours?.value) return "";
 
+        const durationMs = selectedHours.value * 60 * 60 * 1000;
+
         if (selectedSlot === 'MORNING_PEAK') {
             // Last entry = 8:00 AM minus selected duration
             const lastEntry = getNowIST();
             lastEntry.setHours(8, 0, 0, 0);
-            lastEntry.setMinutes(lastEntry.getMinutes() - selectedHours.value * 60);
+            lastEntry.setTime(lastEntry.getTime() - durationMs);
             return lastEntry.toLocaleTimeString("en-GB", { hour: "numeric", minute: "2-digit", hour12: true });
         }
 
@@ -357,14 +354,14 @@ const PlanYourWorkout = () => {
             // Last entry = 5:00 PM minus selected duration
             const lastEntry = getNowIST();
             lastEntry.setHours(17, 0, 0, 0);
-            lastEntry.setMinutes(lastEntry.getMinutes() - selectedHours.value * 60);
+            lastEntry.setTime(lastEntry.getTime() - durationMs);
             return lastEntry.toLocaleTimeString("en-GB", { hour: "numeric", minute: "2-digit", hour12: true });
         }
 
         // Evening Peak: last entry = gym close time minus selected duration
         if (!gymCloseDate) return "";
         const lastEntryDate = new Date(gymCloseDate);
-        lastEntryDate.setMinutes(lastEntryDate.getMinutes() - selectedHours.value * 60);
+        lastEntryDate.setTime(lastEntryDate.getTime() - durationMs);
         return lastEntryDate.toLocaleTimeString("en-GB", { hour: "numeric", minute: "2-digit", hour12: true });
     };
 
@@ -394,14 +391,17 @@ const PlanYourWorkout = () => {
 
     // ── Duration disabled explanation ────────────────────────────────────────
     const durationDisabledMessage = useMemo(() => {
-        if (!isToday) return null;
         const someDisabled = hoursOptions.some((h) => isDurationInvalid(h.value));
         const allDisabled = hoursOptions.every((h) => isDurationInvalid(h.value));
         if (!someDisabled || allDisabled) return null;
 
         if (selectedSlot === 'MORNING_PEAK') {
-            return "Some durations are unavailable as the session would end after 8:00 AM.";
+            // Window restriction applies always (not just today)
+            return "Some durations are unavailable as they exceed the morning peak window (gym open – 8:00 AM).";
         }
+
+        // For Non-Peak and Evening Peak, only relevant today
+        if (!isToday) return null;
 
         if (selectedSlot === 'NON_PEAK') {
             return "Some durations are unavailable as the session would end after 5:00 PM.";
@@ -417,17 +417,25 @@ const PlanYourWorkout = () => {
     }, [selectedSlot, isToday, nowMinutes, gymCloseDate]);
 
     // ── Gym closed for selected date ─────────────────────────────────────────
+    // Format a Date as YYYY-MM-DD using LOCAL date parts (avoids UTC rollback on IST midnight dates)
+    const toLocalDateString = (date: Date): string => {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, "0");
+        const d = String(date.getDate()).padStart(2, "0");
+        return `${y}-${m}-${d}`;
+    };
+
     const selectedDateAvailability = useMemo(() => {
         if (!selectedDate) return null;
-        const selectedDateString = selectedDate.toISOString().split("T")[0];
+        const selectedDateString = toLocalDateString(selectedDate);
         return gym?.calendar_availability?.find((item) => item.date === selectedDateString);
     }, [selectedDate, gym]);
 
-    const isGymClosedForSelectedDate = (() => {
+    const isGymClosedForSelectedDate = useMemo(() => {
         if (selectedDateAvailability) return selectedDateAvailability.is_open === false;
         if (isToday) return !gym?.is_open;
         return false;
-    })();
+    }, [selectedDateAvailability, isToday, gym?.is_open]);
 
     const closedGymMessage = isToday
         ? "Gym is closed today. Please select another date."
@@ -473,7 +481,14 @@ const PlanYourWorkout = () => {
             return;
         }
 
-        const bookingData = { selectedDate, selectedHours, peopleCount, id, slot_type: selectedSlot };
+        // Store date as a local YYYY-MM-DD string to avoid UTC rollback on serialization
+        const bookingData = {
+            selectedDate: toLocalDateString(selectedDate),
+            selectedHours,
+            peopleCount,
+            id,
+            slot_type: selectedSlot,
+        };
         localStorage.setItem("bookingData", JSON.stringify(bookingData));
         navigate("/reviewpayment");
         setError({ type: "", message: "" });
@@ -486,9 +501,9 @@ const PlanYourWorkout = () => {
     const slotCardClass = (slot: SlotType, isClosed: boolean) => {
         const isSelected = selectedSlot === slot;
         if (isClosed || isGymClosedForSelectedDate) {
-            return "px-4 py-2 rounded-lg border-2 border-[#E2E8F0] bg-gray-50 opacity-60 cursor-not-allowed transition";
+            return "px-4 py-4 rounded-lg border-2 border-[#E2E8F0] bg-gray-50 opacity-60 cursor-not-allowed transition";
         }
-        return `px-4 py-2 rounded-lg border-2 cursor-pointer transition ${isSelected ? 'border-[#2563EB] bg-white' : 'border-[#E2E8F0] bg-white'}`;
+        return `px-4 py-4 rounded-lg border-2 cursor-pointer transition ${isSelected ? 'border-[#2563EB] bg-white' : 'border-[#E2E8F0] bg-white'}`;
     };
 
     const radioClass = (slot: SlotType, isClosed: boolean) => {
@@ -544,7 +559,7 @@ const PlanYourWorkout = () => {
             {/* Date Selector */}
             <div className="flex gap-3 overflow-x-auto sm:justify-center pb-2">
                 {dates.map((item, index) => {
-                    const dateString = item.fullDate.toISOString().split("T")[0];
+                    const dateString = toLocalDateString(item.fullDate);
                     const availability = gym?.calendar_availability?.find((cal) => cal.date === dateString);
                     const isClosed = availability?.is_open === false;
 
@@ -693,7 +708,7 @@ const PlanYourWorkout = () => {
                             </div>
                             <div className="text-center flex-shrink-0">
                                 <p className="text-lg font-semibold text-[#0F172A]">₹{Math.round(Number(gym?.hourly_rate) * 1.5)}</p>
-                                <p className="text-xs text-[#94A3B8] font-medium">/Session</p>
+                                <p className="text-xs text-[#94A3B8] font-medium">/Hour</p>
                             </div>
                         </div>
                     </div>
@@ -723,9 +738,7 @@ const PlanYourWorkout = () => {
                                     </p>
                                     <div className="flex items-center gap-2">
                                         <p className="font-semibold text-[#101828] text-base">Non-Peak Hours</p>
-                                        {!isNonPeakClosedToday && (
-                                            <span className="text-[10px] bg-[#DCFCE7] text-[#166534] px-1.5 py-0.5 rounded-full font-medium">Save 50%</span>
-                                        )}
+                                        <span className="text-[10px] bg-[#DCFCE7] text-[#166534] px-1.5 py-0.5 rounded-full font-medium">Save 50%</span>
                                         {isNonPeakClosedToday && (
                                             <span className="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full font-medium">Closed</span>
                                         )}
@@ -733,16 +746,12 @@ const PlanYourWorkout = () => {
                                     <p className="text-sm text-[#4A5565] mt-1">
                                         Timings : {gym?.recommended_workout_timings?.less_crowded_hours}
                                     </p>
-                                    <div className="flex items-center gap-1">
-                                        <img src={most} className="size-2.5" alt="" />
-                                        <p className="text-[11px] text-[#0F172A]">Most users save by choosing this slot</p>
-                                    </div>
                                 </div>
                             </div>
                             <div className="text-center flex-shrink-0">
                                 <p className="text-xs font-medium text-center text-[#475569] line-through">₹{Math.round(Number(gym?.hourly_rate) * 1.5)}</p>
                                 <p className="text-lg font-semibold text-[#0F172A]">₹{Number(gym?.hourly_rate)}</p>
-                                <p className="text-xs text-[#94A3B8] font-medium">/Session</p>
+                                <p className="text-xs text-[#94A3B8] font-medium">/Hour</p>
                             </div>
                         </div>
                     </div>
@@ -753,6 +762,11 @@ const PlanYourWorkout = () => {
                             <p className="text-sm font-medium text-red-600">{slotClosedMessage}</p>
                         </div>
                     )}
+
+                    <div className="flex items-center gap-1">
+                        <img src={most} className="size-3" alt="" />
+                        <p className="text-xs text-[#0F172A]">Most users save by choosing Non-Peak</p>
+                    </div>
 
                     {/* ── Evening Peak ── */}
                     <div
@@ -783,7 +797,7 @@ const PlanYourWorkout = () => {
                             </div>
                             <div className="text-center flex-shrink-0">
                                 <p className="text-lg font-semibold text-[#0F172A]">₹{Math.round(Number(gym?.hourly_rate) * 1.5)}</p>
-                                <p className="text-xs text-[#94A3B8] font-medium">/Session</p>
+                                <p className="text-xs text-[#94A3B8] font-medium">/Hour</p>
                             </div>
                         </div>
                     </div>
@@ -815,14 +829,14 @@ const PlanYourWorkout = () => {
                         <div className="space-y-1.5">
                             {selectedSlot && (
                                 <p className={`text-sm font-normal ${selectedSlot === 'NON_PEAK'
-                                    ? 'text-[#0F7D37]'
-                                    : 'text-[#DC2626]'
+                                        ? 'text-[#0F7D37]'
+                                        : 'text-[#DC2626]'
                                     }`}>
                                     {selectedSlot === 'NON_PEAK'
                                         ? 'Non-Peak Hours'
                                         : selectedSlot === 'MORNING_PEAK'
-                                            ? 'Morning Peak Hours'
-                                            : 'Evening Peak Hours'}
+                                            ? 'Morning Peak'
+                                            : 'Evening Peak'}
                                 </p>
                             )}
                             <p className="text-[22px] font-semibold">
@@ -834,8 +848,8 @@ const PlanYourWorkout = () => {
                             disabled={allHoursDisabled || isGymClosedForSelectedDate || isSelectedSlotClosedToday}
                             onClick={handleApply}
                             className={`w-[130px] text-white px-6 py-3 rounded-md font-semibold cursor-pointer text-sm ${allHoursDisabled || isGymClosedForSelectedDate || isSelectedSlotClosedToday
-                                ? "bg-[#a6a7a8] cursor-not-allowed"
-                                : "bg-blue-600 cursor-pointer"
+                                    ? "bg-[#a6a7a8] cursor-not-allowed"
+                                    : "bg-blue-600 cursor-pointer"
                                 }`}
                         >
                             Apply

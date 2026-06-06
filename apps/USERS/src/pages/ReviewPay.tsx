@@ -2,8 +2,6 @@ import { useNavigate } from "react-router-dom";
 
 import {
     IoTimeOutline,
-    // IoPeopleOutline,
-    // IoInformationCircleOutline,
 } from "react-icons/io5";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCallback, useEffect, useState } from "react";
@@ -17,9 +15,6 @@ import { FaCircleCheck } from "react-icons/fa6";
 import { MdError } from "react-icons/md";
 import PaymentSuccess from "./PaymentSuccess";
 import three2 from "../assets/three2.png";
-// import logoUrl from "../assets/icon2.png";
-// import * as htmlToImage from "html-to-image";
-// import { snapdom } from "@zumer/snapdom";
 import fire from '../assets/fire.png'
 import { ReviewPaySkeleton } from "../components/Gymskeletons ";
 
@@ -39,6 +34,37 @@ export interface PreviewData {
     non_peak_hours: string
 }
 
+// ── Shared backend error extractor ──────────────────────────────────────────
+// Handles all backend error shapes:
+//   { data: { field: ["msg", ...] } }     → first field-level message
+//   { data: { non_field_errors: ["msg"] } }
+//   { message: "..." }                    → top-level message
+//   Error instance                        → error.message
+function extractErrorMessage(error: unknown): string {
+    if (error instanceof Error) return error.message;
+
+    if (typeof error === "object" && error !== null) {
+        const err = error as {
+            data?: Record<string, string | string[]>;
+            message?: string;
+            non_field_errors?: string[];
+        };
+
+        if (err.data && typeof err.data === "object") {
+            // Flatten all field-level error arrays and return the first message
+            const allMessages = Object.values(err.data)
+                .flat()
+                .filter((v): v is string => typeof v === "string");
+            if (allMessages.length) return allMessages[0];
+        }
+
+        if (err.non_field_errors?.length) return err.non_field_errors[0];
+        if (err.message) return err.message;
+    }
+
+    return "Something went wrong. Please try again.";
+}
+
 export default function ReviewPay() {
 
     const { userData, longitude, latitude } = useAppContext()
@@ -55,140 +81,6 @@ export default function ReviewPay() {
 
     const storedData = localStorage.getItem("bookingData");
 
-    //     const handleShare = async () => {
-    //         const element = document.getElementById("share-area");
-    //         const bottomBar = document.getElementById("share-bottom-bar");
-
-    //         if (!element) return;
-
-    //         // Save original styles
-
-    //         if (bottomBar) {
-
-    //             bottomBar.style.position = "relative";
-    //             bottomBar.style.bottom = "0px";
-    //         }
-    //         try {
-    //             await document.fonts.ready;
-
-    //             // 🧠 SNAPDOM (replaces html-to-image)
-    //             const canvasEl = await snapdom.toCanvas(element, {
-    //                 scale: 2, // similar to pixelRatio
-    //                 backgroundColor: "#ffffff",
-    //             });
-
-    //             const baseImage = new Image();
-    //             baseImage.src = canvasEl.toDataURL("image/png");
-
-    //             await new Promise((res) => {
-    //                 baseImage.onload = res;
-    //             });
-
-    //             // 🎨 FINAL CANVAS
-    //             const canvas = document.createElement("canvas");
-    //             const ctx = canvas.getContext("2d");
-    //             if (!ctx) return;
-
-    //             // Adjust header height dynamically if needed
-    //             const headerHeight = 150 * 3; // taller header for bigger logo/text
-
-    //             canvas.width = baseImage.width;
-    //             canvas.height = baseImage.height + headerHeight;
-
-    //             // 🔷 Gradient header
-    //             const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
-    //             gradient.addColorStop(0, "#2563EB");
-    //             gradient.addColorStop(1, "#3B82F6");
-    //             ctx.fillStyle = gradient;
-    //             ctx.fillRect(0, 0, canvas.width, headerHeight);
-
-    //             // 🧠 Logo
-    //             const logo = new Image();
-    //             logo.crossOrigin = "anonymous";
-    //             logo.src = logoUrl;
-    //             await new Promise((res) => { logo.onload = res; logo.onerror = res; });
-
-    //             // Scale logo bigger
-    //             const logoHeight = 80 * 3; // bigger than before
-    //             const logoWidth = logoHeight * (logo.width / logo.height);
-
-    //             // 🧠 Text
-    //             const text = "Viigo";
-    //             ctx.font = `bold ${70 * 3}px sans-serif`; // larger font
-    //             ctx.fillStyle = "#fff";
-
-    //             // Center logo + text horizontally
-    //             const textWidth = ctx.measureText(text).width;
-    //             const gap = 20;
-    //             const totalWidth = logoWidth + gap + textWidth;
-    //             const startX = (canvas.width - totalWidth) / 2;
-
-    //             // Draw logo
-    //             ctx.drawImage(
-    //                 logo,
-    //                 startX,
-    //                 (headerHeight - logoHeight) / 2, // vertically center
-    //                 logoWidth,
-    //                 logoHeight
-    //             );
-
-    //             // Draw text vertically centered
-    //             ctx.textBaseline = "middle";
-    //             ctx.fillText(
-    //                 text,
-    //                 startX + logoWidth + gap,
-    //                 headerHeight / 2
-    //             );
-
-    //             // 🖼 Draw main content
-    //             ctx.drawImage(baseImage, 0, headerHeight);
-
-    //             // 📦 Export
-    //             const finalUrl = canvas.toDataURL("image/png");
-    //             const blob = await (await fetch(finalUrl)).blob();
-
-    //             const userName = userData?.full_name
-
-    //             const fileName = `viigo-booking.png`;
-
-    //             const file = new File([blob], fileName, { type: "image/png" });
-
-    //             // Only essential info (NO links)
-    //             const shareText = `
-    // Viigo Booking
-
-    // Name: ${userName}
-    // Gym: ${gym?.name}
-    // Date: ${formattedLongDate}
-    // Hours: ${selectedHours?.label}
-    // `.trim();
-
-    //             if (navigator.share && navigator.canShare({ files: [file] })) {
-    //                 await navigator.share({ files: [file], text: shareText });
-    //             } else {
-    //                 window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, "_blank");
-
-    //                 const link = document.createElement("a");
-    //                 link.href = finalUrl;
-    //                 link.download = fileName
-    //                 link.click();
-    //             }
-    //         } catch (err) {
-    //             console.error("Share failed:", err);
-    //         }
-
-    //         if (bottomBar) {
-    //             bottomBar.style.position = "fixed";
-    //             bottomBar.style.bottom = "3.5rem";
-    //         }
-    //     };
-
-    // const initialState = location.state
-    //     ? location.state
-    //     : storedData
-    //         ? JSON.parse(storedData)
-    //         : null;
-
     const initialState = storedData
         ? JSON.parse(storedData)
         : null;
@@ -200,8 +92,6 @@ export default function ReviewPay() {
             navigate("/", { replace: true });
         }
     }, [navigate]);
-
-    // const { selectedDate, selectedHours, id } = initialState;
 
     const selectedDate = initialState?.selectedDate
     const selectedHours = initialState?.selectedHours
@@ -241,7 +131,6 @@ export default function ReviewPay() {
             setLoading(true);
 
             try {
-
                 const detailRes = await fetch(`${backendUrl}/gymowner/gym/${id}/?lat=${latitude}&long=${longitude}`, {
                     headers: {
                         "Content-Type": "application/json",
@@ -277,7 +166,7 @@ export default function ReviewPay() {
             try {
                 const payload = {
                     gym_id: id,
-                    date: formatDateForAPI(selectedDate),
+                    date: selectedDate, // already a "YYYY-MM-DD" string from PlanYourWorkout
                     duration: String(selectedHours.value),
                     number_of_friends: peopleCount,
                     slot_type: slotType
@@ -304,12 +193,8 @@ export default function ReviewPay() {
 
             } catch (error) {
                 console.error("Preview failed:", error);
-
-                setToast({
-                    type: "error",
-                    message: "Unable to preview booking",
-                });
-
+                setToast({ type: "error", message: extractErrorMessage(error) });
+                setTimeout(() => setToast(null), 3400);
             } finally {
                 setPreviewLoading(false);
             }
@@ -317,30 +202,6 @@ export default function ReviewPay() {
 
         runPreview();
     }, []);
-
-    // const totalWithHr = (initialState?.selectedHours && gym)
-    //     ? gym?.hourly_rate * initialState?.selectedHours.value
-    //     : gym?.hourly_rate;
-
-    // const platformFee = 12;
-    // const gst = 2.16;
-    // const total = totalWithHr && totalWithHr + platformFee + gst;
-
-    // const convertTo24Hour = (time12h: string) => {
-    //     const [time, modifier] = time12h.split(" ");
-
-    //     let hours = parseInt(time, 10);
-
-    //     if (modifier === "PM" && hours !== 12) {
-    //         hours += 12;
-    //     }
-
-    //     if (modifier === "AM" && hours === 12) {
-    //         hours = 0;
-    //     }
-
-    //     return `${hours.toString().padStart(2, "0")}:00`;
-    // };
 
     function formatTime12Hour(time24: string | undefined) {
         const [hourStr, minuteStr] = time24?.split(":") || [];
@@ -354,109 +215,11 @@ export default function ReviewPay() {
         return `${hour}:${minute} ${ampm}`;
     }
 
-    const formatDateForAPI = (isoDate: string) => {
-        const date = new Date(isoDate);
-
-        return date.toISOString().split("T")[0]; // "2026-02-28"
-    };
-
-    // function normalizePeak(p: [string, string] | { start: string, end: string } | any): [string, string] {
-    //     if (Array.isArray(p) && p.length === 2) return [p[0], p[1]];
-    //     if (p?.start && p?.end) return [p.start, p.end];
-    //     return ["00:00", "00:00"];
-    // }
-
-    // // Ensure peak_morning and peak_evening are arrays
-    // const morningPeaks = Array.isArray(gym?.peak_morning)
-    //     ? gym.peak_morning
-    //     : gym?.peak_morning ? [gym.peak_morning] : [];
-
-    // const eveningPeaks = Array.isArray(gym?.peak_evening)
-    //     ? gym.peak_evening
-    //     : gym?.peak_evening ? [gym.peak_evening] : [];
-
-    // const allPeaks: [string, string][] = [
-    //     ...morningPeaks.map(normalizePeak),
-    //     ...eveningPeaks.map(normalizePeak),
-    // ];
-
-    // const getSlotClosingTime = () => {
-    //     if (!gym || !slotType) return null;
-
-    //     // NON-PEAK → use less crowded end time
-    //     if (slotType === "NON_PEAK") {
-    //         const lessCrowded = gym.recommended_workout_timings?.less_crowded_hours;
-
-    //         // Example: "8:00 AM - 5 PM"
-    //         if (lessCrowded?.includes(" - ")) {
-    //             return lessCrowded.split(" - ")[1].trim(); // "5 PM"
-    //         }
-    //     }
-
-    //     // PEAK → use evening peak end time
-    //     if (slotType === "PEAK") {
-    //         const eveningPeak =
-    //             gym.recommended_workout_timings?.peak_hours?.evening;
-
-    //         // Example: "5 PM - 11 PM"
-    //         if (eveningPeak?.includes(" - ")) {
-    //             return eveningPeak.split(" - ")[1].trim(); // "11 PM"
-    //         }
-    //     }
-
-    //     return null;
-    // };
-
-    // const calculateLastEntry = () => {
-    //     if (!selectedHours?.value) return "";
-
-    //     const slotClosing = getSlotClosingTime();
-
-    //     if (!slotClosing) return "";
-
-    //     // Convert "11 PM" → Date
-    //     const closingDate = new Date();
-
-    //     const [time, modifier] = slotClosing.split(" ");
-    //     let [hours, minutes] = time.split(":").map(Number);
-
-    //     if (!minutes) minutes = 0;
-
-    //     if (modifier === "PM" && hours !== 12) {
-    //         hours += 12;
-    //     }
-
-    //     if (modifier === "AM" && hours === 12) {
-    //         hours = 0;
-    //     }
-
-    //     closingDate.setHours(hours, minutes, 0, 0);
-
-    //     // subtract selected duration
-    //     const durationInMinutes = selectedHours.value * 60;
-
-    //     closingDate.setMinutes(
-    //         closingDate.getMinutes() - durationInMinutes
-    //     );
-
-    //     return closingDate.toLocaleTimeString("en-GB", {
-    //         hour: "numeric",
-    //         minute: "2-digit",
-    //         hour12: true,
-    //     });
-    // };
-
-    // const lastEntryTime = calculateLastEntry();
-
     const bookingDate = selectedDate ? new Date(selectedDate) : null;
 
     const formattedShortDate = bookingDate
         ? bookingDate.toLocaleDateString("en-GB", { day: "2-digit", month: "short" })
         : "";
-
-    // const formattedLongDate = bookingDate
-    //     ? bookingDate.toLocaleDateString("en-GB", { day: "numeric", month: "long" })
-    //     : "";
 
     const loadRazorpayScript = () => {
         return new Promise((resolve) => {
@@ -474,7 +237,6 @@ export default function ReviewPay() {
         setPayLoading(true);
 
         try {
-
             const scriptLoaded = await loadRazorpayScript();
 
             if (!scriptLoaded) {
@@ -483,7 +245,7 @@ export default function ReviewPay() {
 
             const payload = {
                 gym: id,
-                booking_date: formatDateForAPI(selectedDate),
+                booking_date: selectedDate, // already a "YYYY-MM-DD" string from PlanYourWorkout
                 duration_in_hours: String(selectedHours.value),
                 number_of_friends: peopleCount,
                 slot_type: slotType
@@ -496,8 +258,6 @@ export default function ReviewPay() {
                     : "",
             };
 
-
-            // 2️⃣ CONFIRM BOOKING
             const confirmRes = await fetch(`${backendUrl}/client/booking/confirm/`, {
                 method: "POST",
                 headers,
@@ -506,13 +266,10 @@ export default function ReviewPay() {
 
             const confirmData = await confirmRes.json();
 
-            if (!confirmRes.ok) {
-                throw confirmData;
-            }
+            if (!confirmRes.ok) throw confirmData;
 
             const payment = confirmData.data.payment_details;
 
-            // 2️⃣ OPEN RAZORPAY
             const options = {
                 key: payment.razorpay_key_id,
                 amount: payment.amount,
@@ -522,13 +279,7 @@ export default function ReviewPay() {
                 order_id: payment.razorpay_order_id,
 
                 handler: function (response: any) {
-
                     console.log("Payment success:", response);
-
-                    // response contains:
-                    // razorpay_payment_id
-                    // razorpay_order_id
-                    // razorpay_signature
 
                     localStorage.setItem("paymentSuccess", "true");
                     localStorage.setItem("paid", "true");
@@ -555,32 +306,10 @@ export default function ReviewPay() {
             };
 
             const razorpay = new (window as any).Razorpay(options);
-
             razorpay.open();
 
         } catch (error: unknown) {
-            let errorMessage = "Something went wrong";
-
-            if (error instanceof Error) {
-                errorMessage = error.message;
-            } else if (typeof error === "object" && error !== null) {
-                const err = error as {
-                    data?: Record<string, string[]>;
-                    message?: string;
-                    non_field_errors?: string[];
-                };
-
-                if (err.data) {
-                    const fieldErrors = Object.values(err.data).flat();
-                    if (fieldErrors.length) errorMessage = fieldErrors[0];
-                } else if (err.non_field_errors?.length) {
-                    errorMessage = err.non_field_errors[0];
-                } else if (err.message) {
-                    errorMessage = err.message;
-                }
-            }
-
-            setToast({ type: "error", message: errorMessage });
+            setToast({ type: "error", message: extractErrorMessage(error) });
             setTimeout(() => setToast(null), 3400);
         } finally {
             setPayLoading(false);
@@ -592,7 +321,6 @@ export default function ReviewPay() {
         localStorage.removeItem("bookingData");
         localStorage.removeItem("selectedBookingId");
         setShowSecondSuccess(false);
-        // navigate("/");
     };
 
     const handleToastClose = useCallback(() => {
@@ -600,22 +328,6 @@ export default function ReviewPay() {
     }, []);
 
     const visibleAmenities = gym?.amenities.slice(0, 2);
-
-    // if (loading || previewLoading) {
-    //     return (
-    //         <div className="flex items-center justify-center min-h-screen">
-    //             <div className="flex flex-col items-center gap-4 p-8 bg-white animate-fadeIn">
-    //                 <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-    //                 <p className="text-gray-700 text-lg font-medium">
-    //                     Loading...
-    //                 </p>
-    //                 <p className="text-gray-400 text-sm text-center">
-    //                     This might take a few seconds. Sit tight!
-    //                 </p>
-    //             </div>
-    //         </div>
-    //     );
-    // }
 
     if (loading || previewLoading) { return <ReviewPaySkeleton />; }
 
@@ -635,7 +347,6 @@ export default function ReviewPay() {
 
                             {toast && <Toast type={toast.type} text={toast.message} onClose={handleToastClose} />}
 
-
                             {/* ===== Gym Summary Card ===== */}
                             <div className="bg-white rounded border flex gap-1 max-h-[250px]">
                                 <img
@@ -651,7 +362,6 @@ export default function ReviewPay() {
                                     <div className="flex items-center text-nowrap text-xs text-[#475569] gap-1 mt-2 flex-wrap">
                                         <HiLocationMarker size={12} />
                                         <span>{gym?.distance}, {gym?.area}</span>
-                                        {/* <span>{gym?.location?.split(",")[0]}</span> */}
                                         <span>•</span>
                                         <span>{gym?.open_status || `Open Till ${formatTime12Hour(gym?.close_time)}`}</span>
                                     </div>
@@ -756,15 +466,6 @@ export default function ReviewPay() {
                                         </button>
                                     </div>
                                 </div>
-
-                                {/* <hr /> */}
-
-                                {/* Gym timings */}
-                                {/* <div>
-                                    <h4 className="font-medium">Gym timings</h4>
-
-                                   
-                                </div> */}
                             </div>
 
                             {/* ===== Price Breakdown ===== */}
@@ -774,15 +475,9 @@ export default function ReviewPay() {
                                 </h3>
 
                                 <div className="flex justify-between text-nowrap">
-                                    {/* <span>{previewData?.duration ?? "N/A"} Hours</span> */}
                                     <span>{selectedHours?.label}</span>
                                     <span className="font-medium text-[#0F172A]">Rs. {previewData?.base_price ?? "N/A"}</span>
                                 </div>
-
-                                {/* <div className="flex justify-between text-nowrap">
-                                    <span>Surge Fee</span>
-                                    <span className="font-medium text-[#0F172A]">Rs. {previewData?.surge_fee ?? "N/A"}</span>
-                                </div> */}
 
                                 <div className="flex justify-between text-nowrap">
                                     <span>Platform Fee</span>
@@ -820,10 +515,6 @@ export default function ReviewPay() {
 
                             <div className="flex justify-between items-center px-4 py-5">
                                 <div>
-                                    {/* <p className="text-xs text-[#475569] text-nowrap font-medium mb-1">
-                                        Valid on {formattedLongDate}
-                                    </p> */}
-
                                     {slotType && (
                                         <p className={`text-sm font-normal ${slotType === 'NON_PEAK' ? 'text-[#0F7D37]' : 'text-[#DC2626]'
                                             }`}>
@@ -862,7 +553,6 @@ export default function ReviewPay() {
                                 exit={{ opacity: 0 }}
                                 className="fixed inset-0 bg-blue-500 z-50 flex items-center justify-center"
                             >
-                                {/* Bounce + squash wrapper */}
                                 <motion.div
                                     initial={{ y: "-60vh", opacity: 0 }}
                                     animate={{
@@ -877,7 +567,6 @@ export default function ReviewPay() {
                                         ease: "easeIn"
                                     }}
                                 >
-                                    {/* Counter-scale so content stays undistorted */}
                                     <motion.div
                                         animate={{
                                             scaleX: [1, 1 / 1.3, 1 / 0.9, 1 / 1.1, 1 / 0.95, 1],
@@ -889,7 +578,6 @@ export default function ReviewPay() {
                                             ease: "easeIn"
                                         }}
                                     >
-                                        {/* Impact tremble — fires after first bounce hit */}
                                         <motion.div
                                             animate={{
                                                 y: [0, -6, 5, -4, 3, -2, 1, 0],
@@ -917,11 +605,10 @@ export default function ReviewPay() {
                 </div>
             )}
 
-            {/* Second Success Modal */}
             {showSecondSuccess && (
                 <PaymentSuccess onClose={handleClose} gym={gym} />
             )}
-        </div >
+        </div>
     );
 }
 
