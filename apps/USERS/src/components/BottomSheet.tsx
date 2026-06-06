@@ -47,7 +47,7 @@ export default function BottomSheet({
 
         {/* Footer */}
         {footer && (
-          <div className="border-t border-[#F8FAFC] py-2 px-4 shadow-2xl shadow-[#000000] bg-white">
+          <div className="border-t border-[#F8FAFC] py-2 px-4 shadow-[#000000] bg-white">
             {footer}
           </div>
         )}

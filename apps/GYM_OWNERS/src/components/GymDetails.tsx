@@ -258,13 +258,14 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
     function formatTime12Hour(time24: string) {
         const [hourStr, minuteStr] = time24.split(":");
         let hour = Number(hourStr);
-        const minute = minuteStr;
         const ampm = hour >= 12 ? "PM" : "AM";
 
         hour = hour % 12;
         if (hour === 0) hour = 12;
 
-        return `${hour}:${minute} ${ampm}`;
+        return minuteStr === "00"
+            ? `${hour} ${ampm}`
+            : `${hour}:${minuteStr} ${ampm}`;
     }
 
     const [availability, setAvailability] = useState<

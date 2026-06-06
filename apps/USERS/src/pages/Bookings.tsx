@@ -21,6 +21,14 @@ export type Booking = {
     gym_image: string;
     display_date: string;
     display_time: string;
+    last_entry_time: string;
+    payment_breakdown: {
+        base_price: string;
+        booking_hours: number;
+        platform_fee: string;
+        tax_amount: string;
+        total_amount: string;
+    };
     price_tag: string;
     status: "PENDING" | "CONFIRMED" | "CANCELLED" | "ACTIVE" | "COMPLETED";
 };

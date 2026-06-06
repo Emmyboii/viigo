@@ -191,11 +191,14 @@ const PlanYourWorkout = () => {
     function formatTime12Hour(time24: string | undefined) {
         const [hourStr, minuteStr] = time24?.split(":") || [];
         let hour = Number(hourStr);
-        const minute = minuteStr;
         const ampm = hour >= 12 ? "PM" : "AM";
+
         hour = hour % 12;
         if (hour === 0) hour = 12;
-        return `${hour}:${minute} ${ampm}`;
+
+        return minuteStr === "00"
+            ? `${hour} ${ampm}`
+            : `${hour}:${minuteStr} ${ampm}`;
     }
 
     // ── Gym close time as total minutes from midnight ────────────────────────
@@ -495,6 +498,25 @@ const PlanYourWorkout = () => {
         window.scrollTo(0, 0);
     };
 
+    const selectedSlotTiming = useMemo(() => {
+        if (!gym) return "";
+
+        switch (selectedSlot) {
+            case "MORNING_PEAK":
+                return gym?.recommended_workout_timings?.peak_hours?.morning || "Gym Open - 8 AM";
+
+            case "NON_PEAK":
+                return gym?.recommended_workout_timings?.less_crowded_hours ||
+                    `${formatTime12Hour(gym?.open_time)} - ${formatTime12Hour(gym?.close_time)}`;
+
+            case "EVENING_PEAK":
+                return gym?.recommended_workout_timings?.peak_hours?.evening || "5 PM - Close";
+
+            default:
+                return "";
+        }
+    }, [selectedSlot, gym]);
+
     if (loading) { return <PlanWorkoutSkeleton />; }
 
     // ── Helpers for slot card styling ────────────────────────────────────────
@@ -517,6 +539,11 @@ const PlanYourWorkout = () => {
         setSelectedSlot(slot);
         setError({ type: "", message: "" });
     };
+
+    const allSlotsClosed =
+        isMorningPeakClosedToday &&
+        isNonPeakClosedToday &&
+        isEveningPeakClosedToday;
 
     return (
         <div className="pb-40 min-h-screen sp:px-5 px-3.5 max-w-[1300px] mx-auto">
@@ -601,7 +628,7 @@ const PlanYourWorkout = () => {
             {/* Hours Selection */}
             <div className="mt-6">
                 <h4 className="font-semibold sm:text-center mb-3">
-                    How long do you want to work out?
+                    Duration
                 </h4>
 
                 <div className="flex flex-wrap sm:justify-center gap-2">
@@ -645,7 +672,7 @@ const PlanYourWorkout = () => {
 
             <div className="pt-7 space-y-4">
                 <h4 className="text-base font-semibold sm:text-center text-black">
-                    Who's joining? <span className="text-[#94A3B8] text-xs">(Optional)</span>
+                    Workout with Friends <span className="text-[#94A3B8] text-xs">(Optional)</span>
                 </h4>
 
                 <div className="flex items-center sm:justify-center gap-1.5">
@@ -654,7 +681,7 @@ const PlanYourWorkout = () => {
                     {peopleCount === 0 ? (
                         <>
                             <p className="break-all font-semibold">{userData?.full_name.split(" ")[0] || userData?.email}</p>
-                            <button onClick={openFriendsModal} className="bg-[#DBEAFE] text-[#2563EB] px-2 py-2 rounded-lg text-sm font-medium ml-3">
+                            <button onClick={openFriendsModal} className="bg-[#DBEAFE] text-[#2563EB] px-2 py-2 rounded-full text-sm font-medium ml-3">
                                 + Add Friends
                             </button>
                         </>
@@ -714,7 +741,7 @@ const PlanYourWorkout = () => {
                     </div>
 
                     {/* Closed banner for Morning Peak */}
-                    {isToday && selectedSlot === 'MORNING_PEAK' && isMorningPeakClosedToday && (
+                    {isToday && selectedSlot === 'MORNING_PEAK' && isMorningPeakClosedToday && (!isNonPeakClosedToday && !isEveningPeakClosedToday) && (
                         <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3">
                             <p className="text-sm font-medium text-red-600">{slotClosedMessage}</p>
                         </div>
@@ -738,7 +765,9 @@ const PlanYourWorkout = () => {
                                     </p>
                                     <div className="flex items-center gap-2">
                                         <p className="font-semibold text-[#101828] text-base">Non-Peak Hours</p>
-                                        <span className="text-[10px] bg-[#DCFCE7] text-[#166534] px-1.5 py-0.5 rounded-full font-medium">Save 50%</span>
+                                        {!isNonPeakClosedToday && (
+                                            <span className="text-[10px] bg-[#DCFCE7] text-[#166534] px-1.5 py-0.5 rounded-full font-medium">Save 50%</span>
+                                        )}
                                         {isNonPeakClosedToday && (
                                             <span className="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full font-medium">Closed</span>
                                         )}
@@ -757,7 +786,7 @@ const PlanYourWorkout = () => {
                     </div>
 
                     {/* Closed banner for Non-Peak */}
-                    {isToday && selectedSlot === 'NON_PEAK' && isNonPeakClosedToday && (
+                    {isToday && selectedSlot === 'NON_PEAK' && isNonPeakClosedToday && (!isMorningPeakClosedToday && !isEveningPeakClosedToday) && (
                         <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3">
                             <p className="text-sm font-medium text-red-600">{slotClosedMessage}</p>
                         </div>
@@ -803,7 +832,7 @@ const PlanYourWorkout = () => {
                     </div>
 
                     {/* Closed banner for Evening Peak */}
-                    {isToday && selectedSlot === 'EVENING_PEAK' && isEveningPeakClosedToday && (
+                    {isToday && selectedSlot === 'EVENING_PEAK' && isEveningPeakClosedToday && (!isMorningPeakClosedToday && !isNonPeakClosedToday) && (
                         <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3">
                             <p className="text-sm font-medium text-red-600">{slotClosedMessage}</p>
                         </div>
@@ -812,6 +841,17 @@ const PlanYourWorkout = () => {
 
                 {error.type === 'slot' && (
                     <p className="text-red-500 text-sm mt-2">{error.message}</p>
+                )}
+
+                {allSlotsClosed && isToday && (
+                    <div className="mt-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3">
+                        <p className="text-sm font-medium text-red-600">
+                            No workout slots are available for today.
+                        </p>
+                        <p className="text-xs text-red-500 mt-1">
+                            All booking windows have closed for the day. Please select a future date to continue.
+                        </p>
+                    </div>
                 )}
             </div>
 
@@ -825,19 +865,29 @@ const PlanYourWorkout = () => {
                     {error.type === 'general' && (
                         <p className="text-red-500 text-sm mb-2">{error.message}</p>
                     )}
-                    <div className="flex items-center justify-between">
-                        <div className="space-y-1.5">
+                    <div className="flex items-center justify-between gap-3">
+                        <div className="space-y-1.5 text-nowrap">
                             {selectedSlot && (
-                                <p className={`text-sm font-normal ${selectedSlot === 'NON_PEAK'
-                                        ? 'text-[#0F7D37]'
-                                        : 'text-[#DC2626]'
-                                    }`}>
-                                    {selectedSlot === 'NON_PEAK'
-                                        ? 'Non-Peak Hours'
-                                        : selectedSlot === 'MORNING_PEAK'
-                                            ? 'Morning Peak'
-                                            : 'Evening Peak'}
-                                </p>
+                                <div className="text-xs font-medium text-nowrap">
+                                    <span className="text-[#475569]">
+                                        {selectedSlotTiming}
+                                    </span>
+
+                                    <span
+                                        className={
+                                            selectedSlot === "NON_PEAK"
+                                                ? "text-[#0F7D37]"
+                                                : "text-[#DC2626]"
+                                        }
+                                    >
+                                        {" "}
+                                        {selectedSlot === "NON_PEAK"
+                                            ? "• Non-Peak"
+                                            : selectedSlot === "MORNING_PEAK"
+                                                ? "• Morning Peak"
+                                                : "• Evening Peak"}
+                                    </span>
+                                </div>
                             )}
                             <p className="text-[22px] font-semibold">
                                 ₹{totalWithHr}{selectedHours?.label ? `/${editSelectedHr}` : ""}
@@ -847,12 +897,12 @@ const PlanYourWorkout = () => {
                         <button
                             disabled={allHoursDisabled || isGymClosedForSelectedDate || isSelectedSlotClosedToday}
                             onClick={handleApply}
-                            className={`w-[130px] text-white px-6 py-3 rounded-md font-semibold cursor-pointer text-sm ${allHoursDisabled || isGymClosedForSelectedDate || isSelectedSlotClosedToday
-                                    ? "bg-[#a6a7a8] cursor-not-allowed"
-                                    : "bg-blue-600 cursor-pointer"
+                            className={`min-w-[140px] h-[50px] w-full text-white px-6 py-3 rounded-md font-semibold cursor-pointer text-sm ${allHoursDisabled || isGymClosedForSelectedDate || isSelectedSlotClosedToday
+                                ? "bg-[#a6a7a8] cursor-not-allowed"
+                                : "bg-blue-600 cursor-pointer"
                                 }`}
                         >
-                            Apply
+                            Continue
                         </button>
                     </div>
                 </div>

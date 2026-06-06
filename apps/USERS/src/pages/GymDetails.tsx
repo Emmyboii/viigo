@@ -169,13 +169,14 @@ export default function GymDetails() {
     function formatTime12Hour(time24: string) {
         const [hourStr, minuteStr] = time24.split(":");
         let hour = Number(hourStr);
-        const minute = minuteStr;
         const ampm = hour >= 12 ? "PM" : "AM";
 
         hour = hour % 12;
         if (hour === 0) hour = 12;
 
-        return `${hour}:${minute} ${ampm}`;
+        return minuteStr === "00"
+            ? `${hour} ${ampm}`
+            : `${hour}:${minuteStr} ${ampm}`;
     }
 
     // const tags = ["Hourly Access", "Beginner Friendly"];
@@ -582,7 +583,7 @@ export default function GymDetails() {
 
                 {/* ===== Sticky Bottom CTA ===== */}
 
-                <div id="share-bottom-bar" className="fixed max-w-[1300px] mx-auto bottom-14 left-0 right-0 bg-white border-t px-3 pb-6 pt-2.5 flex justify-between items-center">
+                <div id="share-bottom-bar" className="fixed max-w-[1300px] mx-auto bottom-14 left-0 right-0 bg-white border-t px-3 pb-6 pt-2.5 flex justify-between gap-3 items-center">
                     <div className="space-y-2">
                         <p className="text-[11px] text-[#475569] font-medium text-nowrap">
                             Gym timings : {formatTime12Hour(gym.open_time)} - {formatTime12Hour(gym.close_time)}
@@ -610,7 +611,7 @@ export default function GymDetails() {
                             navigate(`/gyms/${gym.slug}/plan`);
                         }}
                         // disabled={isGymClosed}
-                        className={`px-6 py-4 text-sm rounded-md w-[153px] font-medium transition bg-blue-600 text-white`}
+                        className={`px-6 py-4 text-sm rounded-md min-w-[153px] h-[50px] w-full font-medium transition bg-blue-600 text-white`}
                     >
                         Book Hour
                     </button>
@@ -670,7 +671,7 @@ export default function GymDetails() {
                     </div>
 
                     <div className="flex items-center justify-between">
-                        <p className="text-sm font-medium text-[#6A6A6A]">Gst Fee</p>
+                        <p className="text-sm font-medium text-[#6A6A6A]">GST on Platform Fee</p>
                         <p className="text-sm font-medium text-[#0F172A]">
                             Rs. {Math.round(Number(bookingConfig.gst_fee))}
                         </p>

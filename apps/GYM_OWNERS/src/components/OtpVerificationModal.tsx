@@ -233,7 +233,7 @@ export default function OtpVerificationModal({ user, onClose }: OtpVerificationM
                                             <div className="flex items-center gap-1">
                                                 <HiThumbUp /> Non-Peak Hours
                                             </div>
-                                        ) :user.slot_type === 'MORNING_PEAK'? (
+                                        ) : user.slot_type === 'MORNING_PEAK' ? (
                                             <div className="flex items-center gap-1">
                                                 <img src={fire} className="w-[10px]" alt="" /> Morning Peak Hours
                                             </div>
@@ -378,9 +378,14 @@ export default function OtpVerificationModal({ user, onClose }: OtpVerificationM
                     </div>
 
                     <div className="flex items-center justify-between text-nowrap">
-                        <p className="text-sm font-medium text-[#6A6A6A]">GST Fee</p>
+                        <p className="text-sm font-medium text-[#6A6A6A]">GST on Platform Fee</p>
                         {<p className="text-sm font-medium text-[#0F172A]">Rs. {user?.payment_breakdown.tax_amount}</p>
                         }
+                    </div>
+
+                    <div className="flex justify-between text-nowrap">
+                        <span>Roundoff</span>
+                        <span className="font-medium text-[#0F172A]">Rs. 0.2</span>
                     </div>
 
                     {user?.status === "CANCELLED" && (

@@ -4,7 +4,7 @@ import {
     IoTimeOutline,
 } from "react-icons/io5";
 import { motion, AnimatePresence } from "framer-motion";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { FaCheckCircle } from "react-icons/fa";
 import PageHeader from "../components/PageHeader";
 import { normalizeImagePath, useAppContext, type GymCard } from "../context/AppContext";
@@ -17,6 +17,7 @@ import PaymentSuccess from "./PaymentSuccess";
 import three2 from "../assets/three2.png";
 import fire from '../assets/fire.png'
 import { ReviewPaySkeleton } from "../components/Gymskeletons ";
+import BottomSheet from "../components/BottomSheet";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 type ToastType = "success" | "error" | null;
@@ -78,6 +79,8 @@ export default function ReviewPay() {
     const [previewLoading, setPreviewLoading] = useState(true);
     const [previewData, setPreviewData] = useState<PreviewData | null>(null);
     const [payLoading, setPayLoading] = useState(false);
+    const [bookingReference, setBookingReference] = useState<string | null>(null);
+    const [showPaymentFailed, setShowPaymentFailed] = useState(false);
 
     const storedData = localStorage.getItem("bookingData");
 
@@ -206,13 +209,25 @@ export default function ReviewPay() {
     function formatTime12Hour(time24: string | undefined) {
         const [hourStr, minuteStr] = time24?.split(":") || [];
         let hour = Number(hourStr);
-        const minute = minuteStr;
         const ampm = hour >= 12 ? "PM" : "AM";
 
         hour = hour % 12;
         if (hour === 0) hour = 12;
 
-        return `${hour}:${minute} ${ampm}`;
+        return minuteStr === "00"
+            ? `${hour} ${ampm}`
+            : `${hour}:${minuteStr} ${ampm}`;
+    }
+
+    function formatTime12Hour2(time24: string | undefined) {
+        const [hourStr, minuteStr] = time24?.split(":") || [];
+        let hour = Number(hourStr);
+        const ampm = hour >= 12 ? "PM" : "AM";
+
+        hour = hour % 12;
+        if (hour === 0) hour = 12;
+
+        return `${hour}:${minuteStr} ${ampm}`;
     }
 
     const bookingDate = selectedDate ? new Date(selectedDate) : null;
@@ -268,6 +283,10 @@ export default function ReviewPay() {
 
             if (!confirmRes.ok) throw confirmData;
 
+            const bookingRef = confirmData.data.booking_reference;
+            setBookingReference(bookingRef);
+            localStorage.setItem("bookingReference", bookingRef);
+
             const payment = confirmData.data.payment_details;
 
             const options = {
@@ -297,6 +316,7 @@ export default function ReviewPay() {
                 modal: {
                     ondismiss: function () {
                         setPayLoading(false);
+                        setShowPaymentFailed(true);
                     }
                 },
 
@@ -320,6 +340,7 @@ export default function ReviewPay() {
         localStorage.removeItem("paymentSuccess");
         localStorage.removeItem("bookingData");
         localStorage.removeItem("selectedBookingId");
+        localStorage.removeItem("bookingReference");
         setShowSecondSuccess(false);
     };
 
@@ -329,10 +350,29 @@ export default function ReviewPay() {
 
     const visibleAmenities = gym?.amenities.slice(0, 2);
 
+    const selectedSlotTiming = useMemo(() => {
+        if (!gym) return "";
+
+        switch (slotType) {
+            case "MORNING_PEAK":
+                return gym?.recommended_workout_timings?.peak_hours?.morning || "Gym Open - 8 AM";
+
+            case "NON_PEAK":
+                return gym?.recommended_workout_timings?.less_crowded_hours ||
+                    `${formatTime12Hour(gym?.open_time)} - ${formatTime12Hour(gym?.close_time)}`;
+
+            case "EVENING_PEAK":
+                return gym?.recommended_workout_timings?.peak_hours?.evening || "5 PM - Close";
+
+            default:
+                return "";
+        }
+    }, [slotType, gym]);
+
     if (loading || previewLoading) { return <ReviewPaySkeleton />; }
 
     return (
-        <div className="pb-36 min-h-screen max-w-[1300px] mx-auto">
+        <div className="pb-44 min-h-screen max-w-[1300px] mx-auto">
             {!showSecondSuccess && (
 
                 <div>
@@ -381,6 +421,7 @@ export default function ReviewPay() {
                                 </div>
                             </div>
 
+
                             {/* ===== Selected Pass ===== */}
                             <div className="bg-white rounded-xl border p-4 space-y-4">
                                 <div>
@@ -390,7 +431,8 @@ export default function ReviewPay() {
 
                                             <div className="flex items-center gap-1 text-nowrap text-sm mt-2">
                                                 <img src={three2} alt="Three" className="mt- w-4" />
-                                                <p className="break-al text-[#0F172A]">{userData?.full_name.split(" ")[0] || userData?.email} +{peopleCount} {peopleCount > 1 ? "Friends" : "Friend"} </p>
+                                                <p className="break-al text-[#0F172A]">{userData?.full_name.split(" ")[0] || userData?.email}
+                                                    {peopleCount > 0 && ` +${peopleCount} ${peopleCount > 1 ? "Friends" : "Friend"}`}</p>
                                             </div>
                                         </div>
 
@@ -404,6 +446,8 @@ export default function ReviewPay() {
                                             Edit
                                         </button>
                                     </div>
+
+                                    <hr className="border-[0.5px] my-2" />
 
                                     <div className="flex justify-between items-center">
                                         <div className="space-y-3">
@@ -438,20 +482,22 @@ export default function ReviewPay() {
                                             <div className="flex items-center gap-2 text-nowrap text-sm text-[#0F172A] mt-2">
                                                 <IoTimeOutline size={14} />
                                                 {slotType === "MORNING_PEAK" ? (
-                                                    <span>{formatTime12Hour(gym?.open_time)} – 8:00 AM </span>
+                                                    <span>{formatTime12Hour2(gym?.open_time)} – 8:00 AM </span>
                                                 ) : slotType === "EVENING_PEAK" ? (
-                                                    <span>5:00 PM – {formatTime12Hour(gym?.close_time)} </span>
+                                                    <span>5:00 PM – {formatTime12Hour2(gym?.close_time)} </span>
                                                 ) : (
                                                     <span>{previewData?.non_peak_hours}</span>
                                                 )}
                                             </div>
 
                                             <div className="flex items-center gap-1 text-[11px] text-[#475569] mt-2">
-                                                <PiWarningCircle className="rotate-180" size={14} />
+                                                <PiWarningCircle className="rotate-180 flex-shrink-0" size={14} />
                                                 {slotType === "NON_PEAK" ? (
-                                                    <span>Entry should be within selected timing.</span>
-                                                ) : (
+                                                    <span>Slot starts at 8:00 AM. You can check in anytime before 4:00 PM.</span>
+                                                ) : slotType === "EVENING_PEAK" ? (
                                                     <span>Enter anytime during the day</span>
+                                                ) : (
+                                                    <span>Slot starts at {formatTime12Hour2(gym?.open_time)}. You can check in anytime before 7:00 AM.</span>
                                                 )}
                                             </div>
                                         </div>
@@ -469,42 +515,77 @@ export default function ReviewPay() {
                             </div>
 
                             {/* ===== Price Breakdown ===== */}
-                            <div className="space-y-2 text-sm text-[#6A6A6A] text-nowrap mt-2">
+                            <div className="space-y-2 text-sm text-[#6A6A6A] text-nowrap pt-5 pb-5">
                                 <h3 className="text-black text-sm mb-2">
                                     Price Breakdown
                                 </h3>
 
                                 <div className="flex justify-between text-nowrap">
-                                    <span>{selectedHours?.label}</span>
-                                    <span className="font-medium text-[#0F172A]">Rs. {previewData?.base_price ?? "N/A"}</span>
+                                    <span>{selectedHours?.label} (Base Fee)</span>
+                                    <span className="font-medium text-[#0F172A]">{previewData?.base_price ?? "N/A"}₹</span>
                                 </div>
 
                                 <div className="flex justify-between text-nowrap">
                                     <span>Platform Fee</span>
-                                    <span className="font-medium text-[#0F172A]">Rs. {previewData?.platform_fee ?? "N/A"}</span>
+                                    <span className="font-medium text-[#0F172A]">{previewData?.platform_fee ?? "N/A"}₹</span>
                                 </div>
 
                                 <div className="flex justify-between text-nowrap">
                                     <span>GST on Platform Fee</span>
-                                    <span className="font-medium text-[#0F172A]">Rs. {previewData?.gst_fee ?? "N/A"}</span>
+                                    <span className="font-medium text-[#0F172A]">{previewData?.gst_fee ?? "N/A"}₹</span>
+                                </div>
+
+                                <div className="flex justify-between text-nowrap">
+                                    <span>Roundoff</span>
+                                    <span className="font-medium text-[#0F172A]">0.2₹</span>
                                 </div>
 
                                 <hr className="border-dashed my-2" />
 
                                 <div className="flex justify-between text-nowrap text-[#0F172A] text-sm">
                                     <span>Total</span>
-                                    <span className="text-sm text-black">Rs. {previewData?.total_payable ?? "N/A"}</span>
+                                    <span className="text-sm text-black">Rs. {Math.round(Number(previewData?.total_payable)) ?? "N/A"}</span>
                                 </div>
                             </div>
 
-                            {slotType === "NON_PEAK" && (
+                            {/* {slotType === "NON_PEAK" && (
                                 <div className="pt-4">
                                     <div className="flex items-center gap-2 bg-[#F1F5F9] py-1 px-2 rounded text-wrap">
                                         <PiWarningCircle className="rotate-180" size={14} />
                                         <p className="text-xs text-[#0F172A]">After 4 pm passes will be cancelled automatically with some Cancellation charges</p>
                                     </div>
                                 </div>
-                            )}
+                            )} */}
+
+                            <div className="rounded-lg bg-[#F1F5F9] p-2">
+                                <h3 className="font-semibold text-[#1E293B] text-sm mb-3">
+                                    Cancellation Policy
+                                </h3>
+
+                                <div className="space-y-2">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-2 h-2 rounded-full bg-[#22C55E] mt-1.5 flex-shrink-0" />
+                                        <p className="text-[10.5px] text-[#0F172A] leading-relaxed">
+                                            Cancel at least 1 hour before your last entry time for a full refund.
+                                        </p>
+                                    </div>
+
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-2 h-2 rounded-full bg-[#EAB308] mt-1.5 flex-shrink-0" />
+                                        <p className="text-[10.5px] text-[#0F172A] leading-relaxed">
+                                            Cancel within 1 hour of your last entry time and receive a 50% refund.
+                                        </p>
+                                    </div>
+
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-2 h-2 rounded-full bg-[#F43F5E] mt-1.5 flex-shrink-0" />
+                                        <p className="text-[10.5px] text-[#0F172A] leading-relaxed">
+                                            If you don't check in before your last entry time, no refund will be
+                                            issued and your booking will be marked as a No-Show.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         {/* ===== Sticky Bottom Pay Bar ===== */}
@@ -513,24 +594,40 @@ export default function ReviewPay() {
                                 Last entry for selected duration: {previewData?.last_entry_time}
                             </div>
 
-                            <div className="flex justify-between items-center px-4 py-5">
+                            <div className="flex justify-between items-center gap-3 px-4 py-5">
                                 <div>
                                     {slotType && (
-                                        <p className={`text-sm font-normal ${slotType === 'NON_PEAK' ? 'text-[#0F7D37]' : 'text-[#DC2626]'
-                                            }`}>
-                                            {slotType === 'NON_PEAK' ? 'Non-peak Hour' : slotType === 'MORNING_PEAK' ? 'Morning Peak Hour' : 'Evening Peak Hour'}
-                                        </p>
+                                        <div className="text-xs font-medium text-nowrap">
+                                            <span className="text-[#475569]">
+                                                {selectedSlotTiming}
+                                            </span>
+
+                                            <span
+                                                className={
+                                                    slotType === "NON_PEAK"
+                                                        ? "text-[#0F7D37]"
+                                                        : "text-[#DC2626]"
+                                                }
+                                            >
+                                                {" "}
+                                                {slotType === "NON_PEAK"
+                                                    ? "• Non-Peak"
+                                                    : slotType === "MORNING_PEAK"
+                                                        ? "• Morning Peak"
+                                                        : "• Evening Peak"}
+                                            </span>
+                                        </div>
                                     )}
 
                                     <p className="text-[22px] font-semibold text-nowrap">
-                                        ₹{previewData?.total_payable ?? "N/A"}/{selectedHours?.label}
+                                        ₹{(Math.round(Number(previewData?.total_payable))) ?? "N/A"}/{selectedHours?.label}
                                     </p>
                                 </div>
 
                                 <button
                                     onClick={handlePayment}
                                     disabled={payLoading}
-                                    className="bg-[#2563EB] text-white px-4 py-4 w-[150px] text-xs rounded-md font-medium flex items-center justify-center gap-2 disabled:opacity-60"
+                                    className="bg-[#2563EB] text-white px-4 py-4 min-w-[150px] h-[50px] w-full text-xs rounded-md font-medium flex items-center justify-center gap-2 disabled:opacity-60"
                                 >
                                     {payLoading ? (
                                         <>
@@ -606,8 +703,36 @@ export default function ReviewPay() {
             )}
 
             {showSecondSuccess && (
-                <PaymentSuccess onClose={handleClose} gym={gym} />
+                <PaymentSuccess onClose={handleClose} gym={gym} bookingReference={bookingReference ?? localStorage.getItem("bookingReference")} />
             )}
+
+            {/* ===== Payment Failed Sheet ===== */}
+            <BottomSheet
+                open={showPaymentFailed}
+                onClose={() => setShowPaymentFailed(false)}
+                title=""
+                footer={
+                    <button
+                        onClick={() => setShowPaymentFailed(false)}
+                        className="w-full bg-[#2563EB] text-white py-4 rounded-md font-semibold text-sm"
+                    >
+                        Ok
+                    </button>
+                }
+            >
+                <div className="flex flex-col items-center text-center gap-3">
+                    <div className="bg-[#F43F5E] text-white rounded-full p-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18" />
+                            <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                    </div>
+                    <h2 className="text-xl font-bold text-[#0F172A]">Payment Failed</h2>
+                    <p className="text-sm text-[#000000]">
+                        Please try a different payment method or try again later.
+                    </p>
+                </div>
+            </BottomSheet>
         </div>
     );
 }

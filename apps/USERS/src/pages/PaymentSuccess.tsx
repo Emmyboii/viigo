@@ -4,7 +4,6 @@ import {
     FiClock,
 } from "react-icons/fi";
 import { HiShare, HiThumbUp } from "react-icons/hi";
-// import three from "../assets/three.png";
 import halfCircle from "../assets/paymentWhiteImg.png";
 import { FaCheckCircle } from "react-icons/fa";
 import { useEffect, useRef, useState } from "react";
@@ -18,10 +17,10 @@ import fire from '../assets/fire.png'
 import { PaymentSuccessSkeleton } from "../components/Gymskeletons ";
 
 type PaymentSuccessProps = {
-    gym: GymCard | null
+    gym: GymCard | null;
     onClose: () => void;
+    bookingReference: string | null; // e.g. "VG-403763EE" from confirm response
 };
-
 
 type BookingPass = {
     booking_reference: string;
@@ -48,15 +47,14 @@ type BookingPass = {
     longitude: string;
 };
 
-
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-export default function PaymentSuccess({ onClose }: PaymentSuccessProps) {
+export default function PaymentSuccess({ onClose, bookingReference }: PaymentSuccessProps) {
 
     const shareRef = useRef<HTMLDivElement>(null);
 
     const [pass, setPass] = useState<BookingPass | null>(null);
-    const { userData } = useAppContext()
+    const { userData } = useAppContext();
     const navigate = useNavigate();
     const [booking, setBooking] = useState<any>(null);
     const [loading, setLoading] = useState(true);
@@ -65,30 +63,22 @@ export default function PaymentSuccess({ onClose }: PaymentSuccessProps) {
         if (!shareRef.current) return;
 
         try {
-            // 🧠 SNAPDOM: generate canvas from element
             const canvasEl = await snapdom.toCanvas(shareRef.current, {
                 scale: 2,
                 backgroundColor: "#ffffff",
             });
 
-            // convert canvas → Blob
             const blob = await new Promise<Blob | null>((resolve) => {
                 canvasEl.toBlob(resolve, "image/png");
             });
 
             if (!blob) throw new Error("Failed to create image blob");
 
-            // create File object
             const file = new File([blob], "booking-pass.png", { type: "image/png" });
 
-            // use Web Share API if available
             if (navigator.share && navigator.canShare({ files: [file] })) {
-                await navigator.share({
-                    files: [file],
-                    title: "My Booking Pass",
-                });
+                await navigator.share({ files: [file], title: "My Booking Pass" });
             } else {
-                // fallback download
                 const link = document.createElement("a");
                 link.href = URL.createObjectURL(file);
                 link.download = "booking-pass.png";
@@ -104,7 +94,7 @@ export default function PaymentSuccess({ onClose }: PaymentSuccessProps) {
             setLoading(true);
 
             try {
-                // 1️⃣ Fetch bookings FIRST
+                // 1️⃣ Fetch all bookings
                 const bookingsRes = await fetch(
                     `${backendUrl}/client/bookings/my-bookings/`,
                     {
@@ -118,33 +108,27 @@ export default function PaymentSuccess({ onClose }: PaymentSuccessProps) {
                 );
 
                 const bookingsData = await bookingsRes.json();
-                const firstBooking = bookingsData.data?.[0];
+                const bookingsArray: any[] = bookingsData.data ?? [];
 
-                if (!firstBooking) {
+                // 2️⃣ Find by booking_reference from the confirm response
+                //    Falls back to the most recent booking if reference isn't available
+                const ref = bookingReference ?? localStorage.getItem("bookingReference");
+                const foundBooking = ref
+                    ? bookingsArray.find((b) => b.booking_reference === ref)
+                    : bookingsArray[0];
+
+                if (!foundBooking) {
                     setBooking(null);
                     setPass(null);
                     return;
                 }
 
-                setBooking(firstBooking);
+                setBooking(foundBooking);
+                localStorage.setItem("selectedBookingId", String(foundBooking.id));
 
-                // const bookingsData = await bookingsRes.json();
-
-                // const bookingsArray = bookingsData.data ?? [];
-                // const lastBooking = bookingsArray.at(-1);
-
-                if (!firstBooking) {
-                    setBooking(null);
-                    setPass(null);
-                    return;
-                }
-
-                setBooking(firstBooking);
-                localStorage.setItem("selectedBookingId", String(firstBooking.id));
-
-                // 2️⃣ THEN fetch pass using the booking ID
+                // 3️⃣ Fetch pass using the matched booking ID
                 const passRes = await fetch(
-                    `${backendUrl}/client/booking/${firstBooking.id}/pass/`,
+                    `${backendUrl}/client/booking/${foundBooking.id}/pass/`,
                     {
                         headers: {
                             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -164,14 +148,11 @@ export default function PaymentSuccess({ onClose }: PaymentSuccessProps) {
         };
 
         fetchData();
-    }, []);
+    }, [bookingReference]);
 
     const handlePhoneClick = () => {
         if (!pass?.gym_owner_phone) return;
-
         const phone = pass.gym_owner_phone.replace(/\s+/g, "");
-
-
         const link = document.createElement("a");
         link.href = `tel:${phone}`;
         link.click();
@@ -179,28 +160,13 @@ export default function PaymentSuccess({ onClose }: PaymentSuccessProps) {
 
     const handleLocationClick = () => {
         if (!pass) return;
-
         const { latitude, longitude } = pass;
-
         if (!latitude || !longitude) return;
-
         const url = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
-
-        window.open(url, "_blank"); // opens Google Maps
+        window.open(url, "_blank");
     };
 
-    // if (loading || !pass || !booking) {
-    //     return (
-    //         <div className="flex items-center justify-center min-h-screen">
-    //             <div className="flex flex-col items-center gap-4 p-8 bg-white animate-fadeIn">
-    //                 <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-    //                 <p className="text-gray-500 text-sm">Processing your booking...</p>
-    //             </div>
-    //         </div>);
-    // }
-
     if (loading || !pass || !booking) { return <PaymentSuccessSkeleton />; }
-
 
     return (
         <div className="min-h-screen pb- overflow-x-hidden max-w-[400px] mx-auto">
@@ -210,10 +176,7 @@ export default function PaymentSuccess({ onClose }: PaymentSuccessProps) {
                 {/* Top Success Section */}
                 <div className="flex flex-col items-center pt-10 pb-6">
                     <FaCheckCircle className="text-green-500 text-[65px]" />
-
-                    <h1 className="mt-4 text-xl font-semibold">
-                        Payment Successful
-                    </h1>
+                    <h1 className="mt-4 text-xl font-semibold">Payment Successful</h1>
                     <p className="text-gray-500 text-sm">
                         Booked through UPI : {userData?.email}
                     </p>
@@ -221,29 +184,13 @@ export default function PaymentSuccess({ onClose }: PaymentSuccessProps) {
 
                 {/* 🎯 Animated Blue Card */}
                 <motion.div
-                    initial={{
-                        scale: 0,
-                        rotate: -90,
-                        opacity: 0
-                    }}
-                    animate={{
-                        scale: 1,
-                        rotate: 0,
-                        opacity: 1
-                    }}
-                    transition={{
-                        type: "spring",
-                        stiffness: 60,
-                        damping: 20,
-                        mass: 0.8,
-                        duration: 0.8,
-                        ease: "easeOut"
-                    }}
+                    initial={{ scale: 0, rotate: -90, opacity: 0 }}
+                    animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                    transition={{ type: "spring", stiffness: 60, damping: 20, mass: 0.8, duration: 0.8, ease: "easeOut" }}
                     className="relative bg-gradient-to-b from-blue-600 to-blue-500 text-white rounded-3xl mx-2 p-4 shadow-xl"
                 >
-
-                    <img src={halfCircle} alt="Half Circle" className={`absolute ${pass.slot_type === "NON_PEAK" ? "bottom-[100px]" : "bottom-[130px]"} left-[-13px] w-[48px] h-[55px]`} />
-                    <img src={halfCircle} alt="Half Circle" className={`absolute ${pass.slot_type === "NON_PEAK" ? "bottom-[100px]" : "bottom-[130px]"} right-[-13px] rotate-180 w-[48px] h-[55px]`} />
+                    <img src={halfCircle} alt="Half Circle" className={`absolute ${pass.slot_type === "NON_PEAK" ? "bottom-[120px]" : pass.slot_type === "MORNING_PEAK" ? "bottom-[120px]" : "bottom-[100px]"} left-[-13px] w-[48px] h-[55px]`} />
+                    <img src={halfCircle} alt="Half Circle" className={`absolute ${pass.slot_type === "NON_PEAK" ? "bottom-[120px]" : pass.slot_type === "MORNING_PEAK" ? "bottom-[120px]" : "bottom-[100px]"} right-[-13px] rotate-180 w-[48px] h-[55px]`} />
 
                     {/* Gym Header */}
                     <div className="flex gap-3">
@@ -252,36 +199,19 @@ export default function PaymentSuccess({ onClose }: PaymentSuccessProps) {
                             alt={pass?.gym_name || "Gym"}
                             className="w-[97px] h-[97px] rounded object-cover"
                         />
-
                         <div className="flex-1">
                             <div className="flex justify-between items-center gap-2">
-                                <h2 className="font-semibold text-nowrap text-lg">
-                                    {pass?.gym_name}
-                                </h2>
-
+                                <h2 className="font-semibold text-nowrap text-lg">{pass?.gym_name}</h2>
                                 <div className="flex gap-3">
-                                    {/* Phone */}
-                                    <div
-                                        onClick={handlePhoneClick}
-                                        className="bg-[#BFDBFE] text-[#2563EB] p-1 rounded-lg cursor-pointer hover:bg-gray-200 transition"
-                                    >
+                                    <div onClick={handlePhoneClick} className="bg-[#BFDBFE] text-[#2563EB] p-1 rounded-lg cursor-pointer hover:bg-gray-200 transition">
                                         <MdPhone size={16} />
                                     </div>
-
-                                    {/* Location */}
-                                    <div
-                                        onClick={handleLocationClick}
-                                        className="bg-[#BFDBFE] text-[#2563EB] p-1 rounded-lg cursor-pointer hover:bg-gray-200 transition"
-                                    >
+                                    <div onClick={handleLocationClick} className="bg-[#BFDBFE] text-[#2563EB] p-1 rounded-lg cursor-pointer hover:bg-gray-200 transition">
                                         <TiLocation size={16} />
                                     </div>
                                 </div>
                             </div>
-
-                            <div className="flex items-center gap-2 py-1 text-sm text-[#CBD5E1]">
-                                {pass.gym_location}
-                            </div>
-
+                            <div className="flex items-center gap-2 py-1 text-sm text-[#CBD5E1]">{pass.gym_location}</div>
                             <div className="flex items-center gap-1 text-sm opacity-90">
                                 <FiMapPin className="w-4 h-4" />
                                 <span className="pl-2 text-nowrap">{`${pass.gym_open_till}`}</span>
@@ -293,7 +223,7 @@ export default function PaymentSuccess({ onClose }: PaymentSuccessProps) {
                     <div className="grid grid-cols-3 gap-1 justify-between mt-2 text-sm border-b border-white/30 py-4">
                         <div>
                             <p className="text-[#DBEAFE]">Guest Name</p>
-                            <p className="break-all"> {pass.guest_name?.split(" ")[0]}</p>
+                            <p className="break-all">{pass.guest_name?.split(" ")[0]}</p>
                         </div>
                         <div className="border-l border-[#FFFFFF33] pl-2">
                             <p className="text-[#DBEAFE]">Hours</p>
@@ -308,38 +238,14 @@ export default function PaymentSuccess({ onClose }: PaymentSuccessProps) {
                     {/* OTP Section */}
                     <div className="text-center mt-1">
                         <p className="text-[48px] font-semibold">OTP : {pass.otp}</p>
-                        <p className="text-xs mt-2 max-w-[261px] mx-auto">
-                            {/* Use OTP during check in. Once OTP is validated, your session timings will start. */}
-                            Use OTP during check in to start your session.
-                        </p>
-
-                        <p className="text-xs mt-2 max-w-[261px] mx-auto">
-                            {/* This pass remains valid until 11:59 PM on the selected booking date. */}
-                            This pass will be valid till the end of selected booking slot
-                        </p>
+                        <p className="text-xs mt-2 max-w-[261px] mx-auto">Use OTP during check in to start your session.</p>
+                        <p className="text-xs mt-2 max-w-[261px] mx-auto">This pass will be valid till the end of selected booking slot</p>
                     </div>
 
-                    {/* Divider */}
                     <div className="border-t border-dashed border-white/40 my-3" />
 
-                    {/* {pass.slot_type && (
-                        <p className={`text-sm font-normal ${pass.slot_type === 'NON_PEAK' ? 'text-[#0F7D37]' : 'text-[#DC2626]'
-                            }`}>
-                            {pass.slot_type === 'NON_PEAK' ? (
-                                <div className="flex items-center gap-1 w-fit mx-auto py-1 mb-3 mt-4 px-2 rounded-full justify-center bg-white">
-                                    <HiThumbUp /> Non-Peak Hours
-                                </div>
-                            ) : (
-                                <div className="flex items-center gap-1 w-fit mx-auto py-1 mb-3 mt-4 px-2 rounded-full justify-center bg-white">
-                                    <img src={fire} className="w-[10px]" alt="" /> Peak Hours
-                                </div>
-                            )}
-                        </p>
-                    )} */}
-
                     {pass.slot_type && (
-                        <p className={`text-sm font-normal ${pass.slot_type === 'NON_PEAK' ? 'text-[#0F7D37]' : 'text-[#DC2626]'
-                            }`}>
+                        <p className={`text-sm font-normal ${pass.slot_type === 'NON_PEAK' ? 'text-[#0F7D37]' : 'text-[#DC2626]'}`}>
                             {pass.slot_type === 'NON_PEAK' ? (
                                 <div className="flex items-center gap-1 w-fit mx-auto py-1 mb-3 mt-4 px-2 rounded-full justify-center bg-white">
                                     <HiThumbUp /> Non-Peak Hours
@@ -361,77 +267,47 @@ export default function PaymentSuccess({ onClose }: PaymentSuccessProps) {
                         {pass.slot_type === 'NON_PEAK' && (
                             <div className="flex items-center text-nowrap text-[#FFFFFF] text-sm justify-center gap-2">
                                 <FiClock className="w-4 h-4" />
-                                Timings : <span>{pass.gym_timings} </span>
+                                Timings : <span>{pass.gym_timings}</span>
+                            </div>
+                        )}
+                        {pass.slot_type === 'MORNING_PEAK' && (
+                            <div className="flex items-center text-nowrap text-[#FFFFFF] text-sm justify-center gap-2">
+                                <FiClock className="w-4 h-4" />
+                                Timings : <span>{pass?.recommended_workout_timings?.peak_hours?.morning}</span>
+                            </div>
+                        )}
+                        {pass.slot_type === 'EVENING_PEAK' && (
+                            <div className="flex items-center text-nowrap text-[#FFFFFF] text-sm justify-center gap-2">
+                                <FiClock className="w-4 h-4" />
+                                Timings : <span>{pass?.recommended_workout_timings?.peak_hours?.evening}</span>
                             </div>
                         )}
 
                         {pass.slot_type === 'MORNING_PEAK' && (
-                            <div className="flex items-center text-nowrap text-[#FFFFFF] text-sm justify-center gap-2">
-                                <FiClock className="w-4 h-4" />
-                                Timings : <span>{pass?.recommended_workout_timings?.peak_hours?.morning} </span>
+                            <div className="flex gap-1 text-[11px] text-[#ffffff] text-center justify-center mt-2">
+                                <PiWarningCircle className="rotate-180 mt-[3px]" size={14} />
+                                <span>Slot starts at 5:00 AM. You can check in anytime before 7:00 AM.</span>
                             </div>
                         )}
-
                         {pass.slot_type === 'EVENING_PEAK' && (
-                            <div className="flex items-center text-nowrap text-[#FFFFFF] text-sm justify-center gap-2">
-                                <FiClock className="w-4 h-4" />
-                                Timings : <span>{pass?.recommended_workout_timings?.peak_hours?.evening} </span>
-                            </div>
-                        )}
-
-                        {/* {pass.slot_type === 'PEAK' && (
-                            <div className="flex items-center text-nowrap text-sm text-[#ffffff] justify-center gap-2">
-                                <FiClock className="w-4 h-4" />
-                                <div className="space-y-1">
-                                    <p className=" mt-1">
-                                        Morning: {pass?.recommended_workout_timings?.peak_hours?.morning}
-                                    </p>
-                                    <p className="">
-                                        Evening: {pass?.recommended_workout_timings?.peak_hours?.evening}
-                                    </p>
-                                </div>
-                            </div>
-                        )} */}
-
-                        {/* <div className="flex items-center justify-center gap-2">
-                            <img src={three} alt="Three" className="mt-1 w-6" />
-                            <div>
-                                <div className="flex gap-2 flex-wrap">
-                                    Peak hours :
-                                    <div className="flex gap-2 flex-wrap">
-                                        {pass.peak_hours}
-                                    </div>
-                                </div>
-                                <p className="text-[11px] text-[#BFDBFE] text-cente">
-                                    (Workouts during peak hours may use more minutes)
-                                </p>
-                            </div>
-                        </div> */}
-
-                        {/* <p className="text-xs text-[#BFDBFE] font-medium text-center pt-2">
-                            Last entry for selected duration: {pass.last_entry_time}
-                        </p> */}
-
-                        {(pass.slot_type === 'MORNING_PEAK' || pass.slot_type === 'EVENING_PEAK') && (
-                            <div className="flex items-center gap-1 text-[11px] text-[#ffffff] justify-center mt-2">
-                                <PiWarningCircle className="rotate-180" size={14} />
+                            <div className="flex gap-1 text-[11px] text-[#ffffff] text-center justify-center mt-2">
+                                <PiWarningCircle className="rotate-180 mt-[3px]" size={14} />
                                 <span>Enter anytime during the day</span>
                             </div>
                         )}
                         {pass.slot_type === 'NON_PEAK' && (
-                            <div className="flex items-center gap-1 text-[11px] text-[#ffffff] justify-center mt-2">
-                                <PiWarningCircle className="rotate-180" size={14} />
-                                <span>Entry should be within selected timing.</span>
+                            <div className="flex gap-1 text-[11px] text-[#ffffff] text-center justify-center mt-2">
+                                <PiWarningCircle className="rotate-180 mt-[3px]" size={14} />
+                                <span>Slot starts at 8:00 AM. You can check in anytime before 4:00 PM.</span>
                             </div>
                         )}
                     </div>
                 </motion.div>
             </div>
 
-
             {/* Change of Plans */}
             {booking?.status === "CONFIRMED" && (
-                <div className="bg-[#F1F5F9] rounded-lg p-4 mx-4">
+                <div className="rounded-lg bg-[#F1F5F9] p-2 mx-4">
                     <div className="flex gap-3 items-center">
                         <h3 className="font-semibold text-sm">Change of Plans</h3>
                         <button onClick={() => navigate(`/cancelbooking/${pass?.booking_reference}`)} className="text-[#F43F5E] font-medium text-sm border border-[#F43F5E] px-3 py-1 rounded-md">
@@ -439,31 +315,43 @@ export default function PaymentSuccess({ onClose }: PaymentSuccessProps) {
                         </button>
                     </div>
 
-                    <p className="text-xs text-[#0F172A] mt-3">
-                        Cancel anytime before 12 am during the day.
-                        After 12 am, bookings will be canceled automatically with no refund.
-                    </p>
+                    <div className="space-y-2 mt-2">
+                        <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-[#22C55E] mt-1.5 flex-shrink-0" />
+                            <p className="text-[10.5px] text-[#0F172A] leading-relaxed">Cancel at least 1 hour before your last entry time for a full refund.</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-[#EAB308] mt-1.5 flex-shrink-0" />
+                            <p className="text-[10.5px] text-[#0F172A] leading-relaxed">Cancel within 1 hour of your last entry time and receive a 50% refund.</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-[#F43F5E] mt-1.5 flex-shrink-0" />
+                            <p className="text-[10.5px] text-[#0F172A] leading-relaxed">If you don't check in before your last entry time, no refund will be issued and your booking will be marked as a No-Show.</p>
+                        </div>
+                    </div>
                 </div>
             )}
 
-            {/* Price Details */}
+            {/* Price Breakdown */}
             <div className="mt-6 text-sm space-y-2 px-4">
-                <p className="text-sm">Price Details</p>
+                <p className="text-sm">Price Breakdown</p>
                 <div className="flex justify-between">
-                    <span className="text-[#6A6A6A] font-medium">{pass.duration_in_hours} Hr</span>
-                    <span className="font-medium">Rs. {pass.base_price}</span>
+                    <span className="text-[#6A6A6A] font-medium">{pass.duration_in_hours} Hr (Base Fee)</span>
+                    <span className="font-medium">{pass.base_price}₹</span>
                 </div>
-
                 <div className="flex justify-between">
                     <span className="text-[#6A6A6A] font-medium">Platform Fee</span>
-                    <span className="font-medium">Rs. {pass.platform_fee}</span>
+                    <span className="font-medium">{pass.platform_fee}₹</span>
                 </div>
-
                 <div className="flex justify-between">
-                    <span className="text-[#6A6A6A] font-medium">GST Fee</span>
-                    <span className="font-medium">Rs. {pass.tax_amount}</span>
+                    <span className="text-[#6A6A6A] font-medium">GST on Platform Fee</span>
+                    <span className="font-medium">{pass.tax_amount}₹</span>
                 </div>
-
+                <div className="flex justify-between text-nowrap pb-2">
+                    <span>Roundoff</span>
+                    <span className="font-medium text-[#0F172A]">0.2₹</span>
+                </div>
+                <hr className="border-[0.5px] border-dotted border-[#E2E8F0]" />
                 <div className="flex justify-between pt-3">
                     <span className="font-medium">Total Paid Amount</span>
                     <span className="font-medium">Rs. {pass.total_amount}</span>
@@ -472,11 +360,6 @@ export default function PaymentSuccess({ onClose }: PaymentSuccessProps) {
 
             {/* Action Buttons */}
             <div className="mt-6 flex gap-2 w-fit mx-auto">
-                {/* <button className="flex-1 bg-blue-100 text-[#2563EB] py-2 px-2 rounded-full text-xs flex items-center justify-center gap-2">
-                    <BiSolidCalendarAlt size={16} />
-                    Add To Calendar
-                </button> */}
-
                 <button onClick={handleShare} className="flex-1 bg-blue-100 text-[#2563EB] w-[150px] py-2 px-2 rounded-full text-xs flex items-center justify-center gap-2">
                     <HiShare size={16} />
                     Share Pass
@@ -485,23 +368,10 @@ export default function PaymentSuccess({ onClose }: PaymentSuccessProps) {
 
             {/* Bottom Buttons */}
             <div className="fixed max-w-[400px] mx-auto bottom-0 left-0 right-0 bg-white p-4 border-t border-[#F1F5F9] flex gap-4 items-center justify-between">
-                <button onClick={() => {
-                    onClose();
-                    navigate('/')
-                    localStorage.removeItem("selectedBookingId");
-                }}
-                    className="text-blue-600"
-                >
+                <button onClick={() => { onClose(); navigate('/'); localStorage.removeItem("selectedBookingId"); }} className="text-blue-600">
                     Go To Home
                 </button>
-
-                <button onClick={() => {
-                    onClose();
-                    navigate('/bookings')
-                    localStorage.removeItem("selectedBookingId");
-                }}
-                    className="bg-blue-600 text-white py-3 rounded-md w-[200px]"
-                >
+                <button onClick={() => { onClose(); navigate('/bookings'); localStorage.removeItem("selectedBookingId"); }} className="bg-blue-600 text-white py-3 rounded-md w-[200px]">
                     View Bookings
                 </button>
             </div>

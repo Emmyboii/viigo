@@ -241,8 +241,8 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
 
                 <div className="relative bg-gradient-to-b from-blue-600 to-blue-500 text-white rounded-3xl p-4 shadow-xl">
 
-                    <img src={halfCircle} alt="Half Circle" className={`absolute ${pass.slot_type === "NON_PEAK" ? "bottom-[100px]" : "bottom-[120px]"} left-[-13px] w-[48px] h-[55px]`} />
-                    <img src={halfCircle} alt="Half Circle" className={`absolute ${pass.slot_type === "NON_PEAK" ? "bottom-[100px]" : "bottom-[120px]"} right-[-13px] rotate-180 w-[48px] h-[55px]`} />
+                    <img src={halfCircle} alt="Half Circle" className={`absolute ${pass.slot_type === "NON_PEAK" ? "bottom-[120px]" : pass.slot_type === "MORNING_PEAK" ? "bottom-[120px]" : "bottom-[100px]"} left-[-13px] w-[48px] h-[55px]`} />
+                    <img src={halfCircle} alt="Half Circle" className={`absolute ${pass.slot_type === "NON_PEAK" ? "bottom-[120px]" : pass.slot_type === "MORNING_PEAK" ? "bottom-[120px]" : "bottom-[100px]"} right-[-13px] rotate-180 w-[48px] h-[55px]`} />
 
                     {/* Gym Header */}
                     <div className="flex gap-3">
@@ -411,16 +411,24 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
                             Last entry for selected duration: {pass.last_entry_time}
                         </p> */}
 
-                        {(pass.slot_type === 'MORNING_PEAK' || pass.slot_type === 'EVENING_PEAK') && (
-                            <div className="flex items-center gap-1 text-[11px] text-[#ffffff] justify-center mt-2">
-                                <PiWarningCircle className="rotate-180" size={14} />
+                        {pass.slot_type === 'MORNING_PEAK' && (
+                            <div className="flex gap-1 text-[11px] text-[#ffffff] text-center justify-center mt-2">
+                                <PiWarningCircle className="rotate-180 mt-[3px]" size={14} />
+                                <span>Slot starts at 5:00 AM. You can check in anytime before 7:00 AM.</span>
+                            </div>
+                        )}
+
+                        {pass.slot_type === 'EVENING_PEAK' && (
+                            <div className="flex gap-1 text-[11px] text-[#ffffff] text-center justify-center mt-2">
+                                <PiWarningCircle className="rotate-180 mt-[3px]" size={14} />
                                 <span>Enter anytime during the day</span>
                             </div>
                         )}
+
                         {pass.slot_type === 'NON_PEAK' && (
-                            <div className="flex items-center gap-1 text-[11px] text-[#ffffff] justify-center mt-2">
-                                <PiWarningCircle className="rotate-180" size={14} />
-                                <span>Entry should be within selected timing.</span>
+                            <div className="flex gap-1 text-[11px] text-[#ffffff] text-center justify-center mt-2">
+                                <PiWarningCircle className="rotate-180 mt-[3px]" size={14} />
+                                <span>Slot starts at 8:00 AM. You can check in anytime before 4:00 PM.</span>
                             </div>
                         )}
                     </div>
@@ -430,7 +438,8 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
 
             {/* Change of Plans */}
             {booking?.status === "CONFIRMED" && (
-                <div className="bg-[#F1F5F9] rounded-lg p-4 mx-4">
+
+                <div className="rounded-lg bg-[#F1F5F9] p-2 mx-4">
                     <div className="flex gap-3 items-center">
                         <h3 className="font-semibold text-sm">Change of Plans</h3>
                         <button onClick={() => navigate(`/cancelbooking/${pass?.booking_reference}`)} className="text-[#F43F5E] font-medium text-sm border border-[#F43F5E] px-3 py-1 rounded-md">
@@ -438,30 +447,56 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
                         </button>
                     </div>
 
-                    <p className="text-xs text-[#0F172A] mt-3">
-                        Cancel anytime before 12 am during the day.
-                        After 12 am, bookings will be canceled automatically with no refund.
-                    </p>
+                    <div className="space-y-2 mt-2">
+                        <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-[#22C55E] mt-1.5 flex-shrink-0" />
+                            <p className="text-[10.5px] text-[#0F172A] leading-relaxed">
+                                Cancel at least 1 hour before your last entry time for a full refund.
+                            </p>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-[#EAB308] mt-1.5 flex-shrink-0" />
+                            <p className="text-[10.5px] text-[#0F172A] leading-relaxed">
+                                Cancel within 1 hour of your last entry time and receive a 50% refund.
+                            </p>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-[#F43F5E] mt-1.5 flex-shrink-0" />
+                            <p className="text-[10.5px] text-[#0F172A] leading-relaxed">
+                                If you don't check in before your last entry time, no refund will be
+                                issued and your booking will be marked as a No-Show.
+                            </p>
+                        </div>
+                    </div>
                 </div>
             )}
 
-            {/* Price Details */}
+            {/* Price Breakdown */}
             <div className="mt-6 text-sm space-y-2 px-4">
-                <p className="text-sm">Price Details</p>
+                <p className="text-sm">Price Breakdown</p>
                 <div className="flex justify-between">
-                    <span className="text-[#6A6A6A] font-medium">{pass.duration_in_hours} Hr</span>
-                    <span className="font-medium">Rs. {pass.base_price}</span>
+                    <span className="text-[#6A6A6A] font-medium">{pass.duration_in_hours} Hr (Base Fee)</span>
+                    <span className="font-medium">{pass.base_price}₹</span>
                 </div>
 
                 <div className="flex justify-between">
                     <span className="text-[#6A6A6A] font-medium">Platform Fee</span>
-                    <span className="font-medium">Rs. {pass.platform_fee}</span>
+                    <span className="font-medium">{pass.platform_fee}₹</span>
                 </div>
 
                 <div className="flex justify-between">
-                    <span className="text-[#6A6A6A] font-medium">GST Fee</span>
-                    <span className="font-medium">Rs. {pass.tax_amount}</span>
+                    <span className="text-[#6A6A6A] font-medium">GST on Platform Fee</span>
+                    <span className="font-medium">{pass.tax_amount}₹</span>
                 </div>
+
+                <div className="flex justify-between text-nowrap pb-2">
+                    <span>Roundoff</span>
+                    <span className="font-medium text-[#0F172A]">0.2₹</span>
+                </div>
+
+                <hr className="border-[0.5px] border-dotted border-[#E2E8F0]" />
 
                 <div className="flex justify-between pt-3">
                     <span className="font-medium">Total Paid Amount</span>

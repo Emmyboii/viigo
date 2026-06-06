@@ -340,7 +340,7 @@ const TransactionDetails = ({ id, setSelectedTransactionId }: { id: number, setS
                     </p>
 
                     <p className="text-xs text-[#0F172A] text-nowrap flex justify-between">
-                        <span className='text-[#6A6A6A] text-xs'>GST Fee</span>
+                        <span className='text-[#6A6A6A] text-xs'>GST on Platform Fee</span>
                         <span>₹{displayTransaction.payment_breakdown?.gst_fee}</span>
                     </p>
 

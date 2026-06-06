@@ -4,11 +4,13 @@ import { FiInfo } from "react-icons/fi";
 export default function CancelSuccessModal({
     onClose,
     price,
-    total
+    total,
+    cancellationFee,
 }: {
     onClose: () => void;
-    price: number,
-    total: number
+    price: number;
+    total: number;
+    cancellationFee: number;
 }) {
     return (
         <div className="fixed inset-0 bg-black/40 flex justify-center z-50">
@@ -39,31 +41,33 @@ export default function CancelSuccessModal({
 
                         <div className="flex justify-between text-sm text-[#6A6A6A]">
                             <span>Total Paid</span>
-                            <span className="text-black">Rs. {price}</span>
+                            <span className="text-black">Rs. {price.toFixed(2)}</span>
                         </div>
 
                         <div className="flex justify-between text-sm text-[#6A6A6A] mt-1">
                             <span>Cancellation Fee</span>
-                            <span className="text-black">Rs. 10</span>
+                            <span className={`font-medium ${cancellationFee === 0 ? "text-black" : "text-black"}`}>
+                                {cancellationFee === 0 ? "Rs. 0" : `Rs. ${cancellationFee.toFixed(2)}`}
+                            </span>
                         </div>
+
+                        <div className="border border-[#475569] mt-4 border-dotted"></div>
 
                         <div className="flex justify-between text-sm font-normal mt-5">
                             <span>Total Refund Amount</span>
-                            <span>Rs.{total}</span>
+                            <span className="font-medium">Rs. {total.toFixed(2)}</span>
                         </div>
                     </div>
 
                     {/* Info */}
-                    <div className="bg-[#DBEAFE] text-[#2563EB] p-3 text-xs font-medium rounded-lg mt-5 flex  items-center gap-2">
+                    <div className="bg-[#DBEAFE] text-[#2563EB] p-3 text-xs font-medium rounded-lg mt-5 flex items-center gap-2">
                         <FiInfo className="size-7" />
                         <p>
                             Refund will reflect in your account within 5-7
                             Business days
                         </p>
                     </div>
-
                 </div>
-
 
                 {/* Button */}
                 <button
