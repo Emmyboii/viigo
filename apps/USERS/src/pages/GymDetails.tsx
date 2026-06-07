@@ -442,12 +442,14 @@ export default function GymDetails() {
                     {/* Gym Name */}
                     <div>
                         <div className="flex justify-between items-center gap-3 mt-1">
-                            <h1 className="text-xl font-bold text-nowrap">{gym.name}</h1>
-                            {isGymClosed && (
-                                <div className="inline-flex items-center px-3 py-1 rounded-full bg-red-100 text-red-600 text-xs font-semibold">
-                                    Closed
-                                </div>
-                            )}
+                            <div className="flex items-center gap-2">
+                                <h1 className="text-xl font-bold text-nowrap">{gym.name}</h1>
+                                {isGymClosed && (
+                                    <div className="inline-flex items-center px-3 py-1 rounded-full bg-red-100 text-red-600 text-xs font-semibold">
+                                        Closed
+                                    </div>
+                                )}
+                            </div>
 
                             {/* Call & Map Buttons */}
                             <div className="flex gap-3">

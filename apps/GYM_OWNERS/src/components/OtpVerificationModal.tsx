@@ -2,7 +2,7 @@ import { FaCheckCircle, FaTimesCircle, FaUserCircle } from 'react-icons/fa';
 // import { useNavigate } from 'react-router-dom';
 import { FaUser, FaRegClock } from "react-icons/fa6";
 import { HiMiniCurrencyRupee } from 'react-icons/hi2';
-import { HiOutlineCalendar, HiThumbUp } from 'react-icons/hi';
+import { HiOutlineCalendar } from 'react-icons/hi';
 import BottomSheet from './BottomSheet';
 import { useEffect, useRef, useState } from 'react';
 import upcoming from '../assets/otpChecking.png'
@@ -13,6 +13,7 @@ import { RiShareFill } from 'react-icons/ri';
 import { snapdom } from '@zumer/snapdom';
 import Countdown from './Countdown';
 import fire from '../assets/fire.png'
+import leaf from '../assets/leaf.png'
 
 type OtpVerificationModalProps = {
     user?: Booking;
@@ -231,7 +232,7 @@ export default function OtpVerificationModal({ user, onClose }: OtpVerificationM
                                         }`}>
                                         {user.slot_type === 'NON_PEAK' ? (
                                             <div className="flex items-center gap-1">
-                                                <HiThumbUp /> Non-Peak Hours
+                                                <img src={leaf} className="w-[16px] flex-shrink-0" alt="" /> Non-Peak Hours
                                             </div>
                                         ) : user.slot_type === 'MORNING_PEAK' ? (
                                             <div className="flex items-center gap-1">
@@ -384,8 +385,8 @@ export default function OtpVerificationModal({ user, onClose }: OtpVerificationM
                     </div>
 
                     <div className="flex justify-between text-nowrap">
-                        <span>Roundoff</span>
-                        <span className="font-medium text-[#0F172A]">Rs. 0.2</span>
+                        <span className="text-sm font-medium text-[#6A6A6A]">Roundoff</span>
+                        <span className="font-medium text-sm text-[#0F172A]">Rs. 0.2</span>
                     </div>
 
                     {user?.status === "CANCELLED" && (

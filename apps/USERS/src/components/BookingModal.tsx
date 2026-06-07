@@ -2,7 +2,7 @@ import {
     FiMapPin,
     FiClock,
 } from "react-icons/fi";
-import { HiShare, HiThumbUp } from "react-icons/hi";
+import { HiShare } from "react-icons/hi";
 import { TiLocation } from "react-icons/ti";
 // import three from "../assets/three.png";
 import halfCircle from "../assets/paymentWhiteImg.png";
@@ -17,6 +17,7 @@ import { PiWarningCircle } from "react-icons/pi";
 import type { RecommendedWorkoutTimings } from "./types/gym";
 import fire from '../assets/fire.png'
 import { BookingModalSkeleton } from "./Gymskeletons ";
+import leaf from '../assets/leaf.png'
 
 type PaymentSuccessProps = {
     onClose: () => void;
@@ -326,7 +327,7 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
                             }`}>
                             {pass.slot_type === 'NON_PEAK' ? (
                                 <div className="flex items-center gap-1 w-fit mx-auto py-1 mb-3 mt-4 px-2 rounded-full justify-center bg-white">
-                                    <HiThumbUp /> Non-Peak Hours
+                                    <img src={leaf} className="w-[16px] flex-shrink-0" alt="" /> Non-Peak Hours
                                 </div>
                             ) : (
                                 <div className="flex items-center gap-1 w-fit mx-auto py-1 mb-3 mt-4 px-2 rounded-full justify-center bg-white">
@@ -341,15 +342,15 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
                             }`}>
                             {pass.slot_type === 'NON_PEAK' ? (
                                 <div className="flex items-center gap-1 w-fit mx-auto py-1 mb-3 mt-4 px-2 rounded-full justify-center bg-white">
-                                    <HiThumbUp /> Non-Peak Hours
+                                    <img src={leaf} className="w-[16px] flex-shrink-0" alt="" /> Non-Peak Hours
                                 </div>
                             ) : pass.slot_type === 'MORNING_PEAK' ? (
                                 <div className="flex items-center gap-1 w-fit mx-auto py-1 mb-3 mt-4 px-2 rounded-full justify-center bg-white">
-                                    <img src={fire} className="w-[10px]" alt="" /> Morning Peak Hours
+                                    <img src={fire} className="w-[10px] flex-shrink-0" alt="" /> Morning Peak Hours
                                 </div>
                             ) : (
                                 <div className="flex items-center gap-1 w-fit mx-auto py-1 mb-3 mt-4 px-2 rounded-full justify-center bg-white">
-                                    <img src={fire} className="w-[10px]" alt="" /> Evening Peak Hours
+                                    <img src={fire} className="w-[10px] flex-shrink-0" alt="" /> Evening Peak Hours
                                 </div>
                             )}
                         </p>
@@ -360,7 +361,7 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
                         {pass.slot_type === 'NON_PEAK' && (
                             <div className="flex items-center text-nowrap text-[#FFFFFF] text-sm justify-center gap-2">
                                 <FiClock className="w-4 h-4" />
-                                Timings : <span>{pass.gym_timings} </span>
+                                Timings : <span>{pass.recommended_workout_timings?.less_crowded_hours} </span>
                             </div>
                         )}
 

@@ -9,13 +9,14 @@ import { FaCheckCircle } from "react-icons/fa";
 import PageHeader from "../components/PageHeader";
 import { normalizeImagePath, useAppContext, type GymCard } from "../context/AppContext";
 import FacilityTag from "../components/FacilityTag";
-import { HiLocationMarker, HiOutlineCalendar, HiThumbUp } from "react-icons/hi";
+import { HiLocationMarker, HiOutlineCalendar } from "react-icons/hi";
 import { PiWarningCircle } from "react-icons/pi";
 import { FaCircleCheck } from "react-icons/fa6";
 import { MdError } from "react-icons/md";
 import PaymentSuccess from "./PaymentSuccess";
 import three2 from "../assets/three2.png";
 import fire from '../assets/fire.png'
+import leaf from '../assets/leaf.png'
 import { ReviewPaySkeleton } from "../components/Gymskeletons ";
 import BottomSheet from "../components/BottomSheet";
 
@@ -465,7 +466,7 @@ export default function ReviewPay() {
                                                     }`}>
                                                     {slotType === 'NON_PEAK' ? (
                                                         <div className="flex items-center gap-1">
-                                                            <HiThumbUp /> Non-Peak Hours
+                                                            <img src={leaf} className="w-[16px] flex-shrink-0" alt="" /> Non-Peak Hours
                                                         </div>
                                                     ) : slotType === 'MORNING_PEAK' ? (
                                                         <div className="flex items-center gap-1">

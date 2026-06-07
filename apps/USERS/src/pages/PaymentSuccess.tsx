@@ -3,7 +3,7 @@ import {
     FiMapPin,
     FiClock,
 } from "react-icons/fi";
-import { HiShare, HiThumbUp } from "react-icons/hi";
+import { HiShare } from "react-icons/hi";
 import halfCircle from "../assets/paymentWhiteImg.png";
 import { FaCheckCircle } from "react-icons/fa";
 import { useEffect, useRef, useState } from "react";
@@ -14,6 +14,7 @@ import { TiLocation } from "react-icons/ti";
 import { snapdom } from "@zumer/snapdom";
 import { PiWarningCircle } from "react-icons/pi";
 import fire from '../assets/fire.png'
+import leaf from '../assets/leaf.png'
 import { PaymentSuccessSkeleton } from "../components/Gymskeletons ";
 
 type PaymentSuccessProps = {
@@ -248,15 +249,15 @@ export default function PaymentSuccess({ onClose, bookingReference }: PaymentSuc
                         <p className={`text-sm font-normal ${pass.slot_type === 'NON_PEAK' ? 'text-[#0F7D37]' : 'text-[#DC2626]'}`}>
                             {pass.slot_type === 'NON_PEAK' ? (
                                 <div className="flex items-center gap-1 w-fit mx-auto py-1 mb-3 mt-4 px-2 rounded-full justify-center bg-white">
-                                    <HiThumbUp /> Non-Peak Hours
+                                    <img src={leaf} className="w-[16px] flex-shrink-0" alt="" /> Non-Peak Hours
                                 </div>
                             ) : pass.slot_type === 'MORNING_PEAK' ? (
                                 <div className="flex items-center gap-1 w-fit mx-auto py-1 mb-3 mt-4 px-2 rounded-full justify-center bg-white">
-                                    <img src={fire} className="w-[10px]" alt="" /> Morning Peak Hours
+                                    <img src={fire} className="w-[10px] flex-shrink-0" alt="" /> Morning Peak Hours
                                 </div>
                             ) : (
                                 <div className="flex items-center gap-1 w-fit mx-auto py-1 mb-3 mt-4 px-2 rounded-full justify-center bg-white">
-                                    <img src={fire} className="w-[10px]" alt="" /> Evening Peak Hours
+                                    <img src={fire} className="w-[10px] flex-shrink-0" alt="" /> Evening Peak Hours
                                 </div>
                             )}
                         </p>

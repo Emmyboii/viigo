@@ -37,29 +37,44 @@ export default function CancelBooking() {
     // ── Pricing from payment_breakdown ───────────────────────────────────────
     const totalAmount = parseFloat(selectedBooking?.payment_breakdown?.total_amount ?? "0");
 
+    function parseBookingDateTime(displayDate: string, timeStr: string): Date | null {
+        // "9th June" → day=9, month="June"
+        const match = displayDate.match(/(\d+)\w*\s+(\w+)/);
+        if (!match) return null;
+
+        const day = parseInt(match[1]);
+        const monthStr = match[2]; // "June"
+
+        const now = getNowIST();
+        const currentYear = now.getFullYear();
+
+        // Try current year first, then next year (handles Dec→Jan edge case)
+        const candidate = new Date(`${monthStr} ${day}, ${currentYear} ${timeStr}`);
+        if (isNaN(candidate.getTime())) return null;
+
+        // If the date is more than ~6 months in the past, it's probably next year
+        if (candidate.getTime() < now.getTime() - 180 * 24 * 60 * 60 * 1000) {
+            return new Date(`${monthStr} ${day}, ${currentYear + 1} ${timeStr}`);
+        }
+
+        return candidate;
+    }
+
     // ── Cancellation fee logic based on last_entry_time (IST) ──────────────
     // Rule: cancel >= 1hr before last_entry_time → full refund (fee = 0)
     //       cancel < 1hr before last_entry_time  → 50% refund (fee = 50%)
     const cancellationFee = (() => {
-        const lastEntryRaw = selectedBooking?.last_entry_time; // e.g. "4:00 pm"
-        if (!lastEntryRaw) return 0;
+        const lastEntryRaw = selectedBooking?.last_entry_time;
+        const displayDate = selectedBooking?.display_date;
+        if (!lastEntryRaw || !displayDate) return 0;
 
-        // Use IST for "now" — not the user's device locale
-        const nowIST = getNowIST();
+        const parsed = parseBookingDateTime(displayDate, lastEntryRaw);
+        if (!parsed) return 0;
 
-        // Build last entry as an IST Date using IST year/month/day + the time string
-        // Avoids toDateString() which would use the device's local timezone
-        const y = nowIST.getFullYear();
-        const m = String(nowIST.getMonth() + 1).padStart(2, "0");
-        const d = String(nowIST.getDate()).padStart(2, "0");
-        const parsed = new Date(`${y}-${m}-${d} ${lastEntryRaw}`);
-        if (isNaN(parsed.getTime())) return 0;
+        const minutesUntilLastEntry = (parsed.getTime() - getNowIST().getTime()) / 60000;
 
-        // Compare in milliseconds — both anchored to the same IST day
-        const minutesUntilLastEntry = (parsed.getTime() - nowIST.getTime()) / 60000;
-
-        if (minutesUntilLastEntry >= 60) return 0;                        // full refund
-        return Math.round(totalAmount * 0.5 * 100) / 100;                // 50% fee
+        if (minutesUntilLastEntry >= 60) return 0;
+        return Math.round(totalAmount * 0.5 * 100) / 100;
     })();
 
     const totalRefund = Math.round((totalAmount - cancellationFee) * 100) / 100;

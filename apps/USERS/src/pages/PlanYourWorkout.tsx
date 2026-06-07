@@ -3,7 +3,7 @@ import { FaUser } from "react-icons/fa6";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useAppContext, type GymCard } from "../context/AppContext";
 import type { Gym } from "../components/types/gym";
-import { HiLocationMarker, HiThumbUp } from "react-icons/hi";
+import { HiLocationMarker } from "react-icons/hi";
 import { FriendsModal } from "../components/FriendsModal";
 import { IoArrowBack, IoMoonOutline } from "react-icons/io5";
 import fire from '../assets/fire.png'
@@ -11,6 +11,7 @@ import most from '../assets/most.png'
 import { GrSun } from "react-icons/gr";
 import { getNowIST } from "../utils/ist";
 import { PlanWorkoutSkeleton } from "../components/Gymskeletons ";
+import leaf from '../assets/leaf.png'
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -728,8 +729,8 @@ const PlanYourWorkout = () => {
                                             <span className="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full font-medium">Closed</span>
                                         )}
                                     </div>
-                                    <p className="text-xs gap-1 inline-flex text-[#4A5565] mt-1">
-                                        <GrSun className="mt-0.5" /> {gym?.recommended_workout_timings?.peak_hours?.morning || "Gym open – 8:00 AM"}
+                                    <p className="text-[12px] gap-1 inline-flex text-[#4A5565] mt-1">
+                                        <GrSun className="mt-0.5" /> {gym?.recommended_workout_timings?.peak_hours?.morning || "Gym open – 8:00 AM"} • Entry Window
                                     </p>
                                 </div>
                             </div>
@@ -761,7 +762,7 @@ const PlanYourWorkout = () => {
                                 </div>
                                 <div>
                                     <p className="text-[12px] font-medium text-[#0F7D37] flex items-center gap-1 mb-0.5">
-                                        <HiThumbUp /> RECOMMENDED / BEST VALUE
+                                        <img src={leaf} className="w-[16px] flex-shrink-0" alt="" /> RECOMMENDED / BEST VALUE
                                     </p>
                                     <div className="flex items-center gap-2">
                                         <p className="font-semibold text-[#101828] text-base">Non-Peak Hours</p>
@@ -772,9 +773,14 @@ const PlanYourWorkout = () => {
                                             <span className="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full font-medium">Closed</span>
                                         )}
                                     </div>
-                                    <p className="text-sm text-[#4A5565] mt-1">
-                                        Timings : {gym?.recommended_workout_timings?.less_crowded_hours}
+                                    <p className="text-[12px] text-[#4A5565] mt-1">
+                                        Timings : {gym?.recommended_workout_timings?.less_crowded_hours} • Entry Window
                                     </p>
+
+                                    <div className="flex items-center gap-1">
+                                        <img src={most} className="size-2.5 flex-shrink-0" alt="" />
+                                        <p className="text-[10.5px] text-[#0F172A]">Most users save by choosing Non-Peak</p>
+                                    </div>
                                 </div>
                             </div>
                             <div className="text-center flex-shrink-0">
@@ -791,11 +797,6 @@ const PlanYourWorkout = () => {
                             <p className="text-sm font-medium text-red-600">{slotClosedMessage}</p>
                         </div>
                     )}
-
-                    <div className="flex items-center gap-1">
-                        <img src={most} className="size-3" alt="" />
-                        <p className="text-xs text-[#0F172A]">Most users save by choosing Non-Peak</p>
-                    </div>
 
                     {/* ── Evening Peak ── */}
                     <div
@@ -819,8 +820,8 @@ const PlanYourWorkout = () => {
                                             <span className="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full font-medium">Closed</span>
                                         )}
                                     </div>
-                                    <p className="text-xs gap-1 inline-flex text-[#4A5565] mt-1">
-                                        <IoMoonOutline className="mt-0.5" /> {gym?.recommended_workout_timings?.peak_hours?.evening || "5:00 PM – Gym close"}
+                                    <p className="text-[12px] gap-1 inline-flex text-[#4A5565] mt-1">
+                                        <IoMoonOutline className="mt-0.5" /> {gym?.recommended_workout_timings?.peak_hours?.evening || "5:00 PM – Gym close"} • Entry Window
                                     </p>
                                 </div>
                             </div>
