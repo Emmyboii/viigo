@@ -287,19 +287,19 @@ export default function PaymentSuccess({ onClose, bookingReference }: PaymentSuc
                         {pass.slot_type === 'MORNING_PEAK' && (
                             <div className="flex gap-1 text-[11px] text-[#ffffff] text-center justify-center mt-2">
                                 <PiWarningCircle className="rotate-180 mt-[3px]" size={14} />
-                                <span>Slot starts at 5:00 AM. You can check in anytime before 7:00 AM.</span>
+                                <span>Slot starts at {pass.gym_timings.split(" - ")[0]}. You can check in anytime before {pass?.last_entry_time}.</span>
                             </div>
                         )}
                         {pass.slot_type === 'EVENING_PEAK' && (
                             <div className="flex gap-1 text-[11px] text-[#ffffff] text-center justify-center mt-2">
                                 <PiWarningCircle className="rotate-180 mt-[3px]" size={14} />
-                                <span>Enter anytime during the day</span>
+                                <span>Slot starts at 5:00 PM. You can check in anytime before {pass?.last_entry_time}.</span>
                             </div>
                         )}
                         {pass.slot_type === 'NON_PEAK' && (
                             <div className="flex gap-1 text-[11px] text-[#ffffff] text-center justify-center mt-2">
                                 <PiWarningCircle className="rotate-180 mt-[3px]" size={14} />
-                                <span>Slot starts at 8:00 AM. You can check in anytime before 4:00 PM.</span>
+                                <span>Slot starts at 8:00 AM. You can check in anytime before {pass?.last_entry_time}.</span>
                             </div>
                         )}
                     </div>
@@ -369,10 +369,23 @@ export default function PaymentSuccess({ onClose, bookingReference }: PaymentSuc
 
             {/* Bottom Buttons */}
             <div className="fixed max-w-[400px] mx-auto bottom-0 left-0 right-0 bg-white p-4 border-t border-[#F1F5F9] flex gap-4 items-center justify-between">
-                <button onClick={() => { onClose(); navigate('/'); localStorage.removeItem("selectedBookingId"); }} className="text-blue-600">
+                <button onClick={() => {
+                    // onClose();
+                    navigate('/')
+                    localStorage.removeItem("selectedBookingId");
+                }}
+                    className="text-blue-600 text-center w-full"
+                >
                     Go To Home
                 </button>
-                <button onClick={() => { onClose(); navigate('/bookings'); localStorage.removeItem("selectedBookingId"); }} className="bg-blue-600 text-white py-3 rounded-md w-[200px]">
+
+                <button onClick={() => {
+                    onClose();
+                    navigate('/bookings')
+                    localStorage.removeItem("selectedBookingId");
+                }}
+                    className="bg-blue-600 text-white py-3 rounded-md min-w-[200px]"
+                >
                     View Bookings
                 </button>
             </div>

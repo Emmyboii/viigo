@@ -494,11 +494,11 @@ export default function ReviewPay() {
                                             <div className="flex items-center gap-1 text-[11px] text-[#475569] mt-2">
                                                 <PiWarningCircle className="rotate-180 flex-shrink-0" size={14} />
                                                 {slotType === "NON_PEAK" ? (
-                                                    <span>Slot starts at 8:00 AM. You can check in anytime before 4:00 PM.</span>
+                                                    <span>Slot starts at 8:00 AM. You can check in anytime before {previewData?.last_entry_time}.</span>
                                                 ) : slotType === "EVENING_PEAK" ? (
-                                                    <span>Enter anytime during the day</span>
+                                                    <span>Slot starts at 5:00 PM. You can check in anytime before {previewData?.last_entry_time}.</span>
                                                 ) : (
-                                                    <span>Slot starts at {formatTime12Hour2(gym?.open_time)}. You can check in anytime before 7:00 AM.</span>
+                                                    <span>Slot starts at {formatTime12Hour2(gym?.open_time)}. You can check in anytime before {previewData?.last_entry_time}.</span>
                                                 )}
                                             </div>
                                         </div>

@@ -464,31 +464,46 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
+    const fallbackToSavedLocation = async () => {
+        try {
+            const data = await request("/api/user/location/");
+            const lat = data?.data?.latitude;
+            const lng = data?.data?.longitude;
+            if (lat && lng) {
+                setLatitude(String(lat));
+                setLongitude(String(lng));
+            }
+        } catch (err) {
+            console.error("Fallback location fetch failed", err);
+        }
+    };
+
     const fetchCurrentLocation = () => {
         if (!navigator.geolocation) {
-            alert("Geolocation is not supported by your browser.");
+            fallbackToSavedLocation();
             return;
         }
-
         navigator.geolocation.getCurrentPosition(
             async (position) => {
                 const lat = position.coords.latitude.toFixed(6);
                 const lng = position.coords.longitude.toFixed(6);
-
                 setLatitude(lat);
                 setLongitude(lng);
-
                 const address = await getAddressFromCoords(lat, lng);
-
                 await saveLocation(lat, lng, address);
             },
-            (error) => {
+            async (error) => {
                 if (error.code === error.PERMISSION_DENIED) {
                     alert("Please allow location access to find gyms near you.");
-                } else {
-                    console.error(error);
+                } else if (error.code === error.POSITION_UNAVAILABLE) {
+                    alert("Location unavailable. Please check your device settings.");
+                } else if (error.code === error.TIMEOUT) {
+                    alert("Location request timed out. Please try again.");
                 }
-            }
+                // regardless of error type, try loading from saved location
+                await fallbackToSavedLocation();
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
         );
     };
 

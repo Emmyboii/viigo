@@ -230,7 +230,14 @@ export default function CancelBooking() {
             });
             if (!res.ok) {
                 const errData = await res.json();
-                throw new Error(errData?.message || "Failed to cancel booking");
+
+                const message =
+                    errData?.data?.non_field_errors?.[0] ||
+                    errData?.data?.detail ||
+                    errData?.message ||
+                    "Failed to cancel booking";
+
+                throw new Error(message);
             }
             openModal();
         } catch (err: any) {
@@ -259,7 +266,7 @@ export default function CancelBooking() {
         : "";
 
     return (
-        <div className="min-h-screen p-4 max-w-[1300px] mx-auto relative mb-10">
+        <div className="min-h-screen p-4 max-w-[1300px] mx-auto relative mb-24">
             {loading ? <CancelBookingSkeleton /> : (
                 <>
                     {/* Header */}

@@ -65,6 +65,9 @@ export interface WalletType {
 type payment_breakdownType = {
     booking_hours: number;
     base_price: string;
+    cancellation_fee: string;
+    refund_amount: string;
+    is_refunded: boolean;
     tax_amount: string;
     platform_fee: string;
     total_amount: string;

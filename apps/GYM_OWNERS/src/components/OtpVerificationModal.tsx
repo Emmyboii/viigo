@@ -396,13 +396,20 @@ export default function OtpVerificationModal({ user, onClose }: OtpVerificationM
                         </div>
                     )}
 
+                    {user?.status === "CANCELLED" && (
+                        <div className="flex items-center justify-between text-nowrap">
+                            <p className="text-sm font-medium text-[#6A6A6A]">Cancellation Fee</p>
+                            <p className="text-sm font-medium text-[#0F172A]">Rs. {user.payment_breakdown.cancellation_fee}</p>
+                        </div>
+                    )}
+
 
                     <div className="border border-dashed border-[#CBD5E1]"></div>
 
                     {user?.status === "CANCELLED" ? (
                         <div className="flex items-center justify-between text-nowrap">
                             <p className="text-sm font-medium text-[#6A6A6A]">Refunded Amount</p>
-                            <p className="text-sm font-medium text-[#0F172A]">Rs. {user.payment_breakdown.total_amount}</p>
+                            <p className="text-sm font-medium text-[#0F172A]">Rs. {user.payment_breakdown.refund_amount}</p>
                         </div>
                     ) : (
                         <div className="flex items-center justify-between text-nowrap">
