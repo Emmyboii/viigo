@@ -33,20 +33,23 @@ export default function OTPVerification() {
 
     // Fetch identifier from localStorage
     useEffect(() => {
-        const tempIdentifierStr = localStorage.getItem("tempIdentifier");
+        const tempIdentifierStr = JSON.parse(
+            localStorage.getItem("tempIdentifier") || "{}"
+        );
         if (!tempIdentifierStr) {
             navigate("/login");
             return;
         }
 
-        const tempIdentifier = JSON.parse(tempIdentifierStr);
+        const tempIdentifier = JSON.parse(
+            localStorage.getItem("tempIdentifier") || "{}"
+        );
 
         if (tempIdentifier.Email) {
             setIdentifierText(`Email: ${tempIdentifier.Email}`);
         } else if (tempIdentifier.Phone) {
-            setIdentifierText(`Mobile number ending in ${tempIdentifier.Phone}`);
-        } else {
-            setIdentifierText("your number/email");
+            const last4 = tempIdentifier.Phone.slice(-4);
+            setIdentifierText(`Mobile number ending in ${last4}`);
         }
     }, [navigate]);
 

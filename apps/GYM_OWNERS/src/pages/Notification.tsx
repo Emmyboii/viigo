@@ -219,20 +219,16 @@ export default function Notifications({ Loading = false }: { Loading?: boolean }
                 {notifications.length === 0 ? (
                     <EmptyNotifications />
                 ) : (
-                    <AnimatePresence>
+                    <div className="flex flex-col gap-3">
                         {notifications.map((item) => (
-                            <motion.div
+                            <div
                                 key={item.id}
-                                initial={{ x: 100, opacity: 0 }}
-                                animate={controls}
-                                exit={{ x: 100, opacity: 0 }}
-                                layout
                                 className="relative"
                             >
                                 {/* Swipe-to-delete background */}
-                                <div className="absolute inset-0 rounded-lg flex items-center justify-end pr-4">
+                                {/* <div className="absolute inset-0 rounded-lg flex items-center justify-end pr-4">
                                     <span className="text-white font-semibold">Delete</span>
-                                </div>
+                                </div> */}
 
                                 {/* Notification card */}
                                 <motion.div
@@ -250,7 +246,7 @@ export default function Notifications({ Loading = false }: { Loading?: boolean }
                                     //     }
                                     // }}
                                     // whileTap={{ cursor: "grabbing" }}
-                                    className={`flex gap-3 p-2 rounded-lg items-center border border-[#E2E8F0] relative z-10 cursor-gra transition ${!item.is_read
+                                    className={`flex gap-3 p-2 rounded-lg cursor-pointer items-center border border-[#E2E8F0] relative z-10 cursor-gra transition ${!item.is_read
                                         ? "border-l-blue-500 border-l-4"
                                         : "border-[#E2E8F0] bg-white border"
                                         }`}
@@ -273,9 +269,9 @@ export default function Notifications({ Loading = false }: { Loading?: boolean }
                                         </div>
                                     </div>
                                 </motion.div>
-                            </motion.div>
+                            </div>
                         ))}
-                    </AnimatePresence>
+                    </div>
                 )}
             </div>
 

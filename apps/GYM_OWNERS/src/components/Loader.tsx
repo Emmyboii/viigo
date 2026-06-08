@@ -19,10 +19,10 @@ export default function Loader() {
                 {!complete && (
                     <>
                         {/* Static line */}
-                        <div className="absolute w-[4px] h-[50px] bg-white origin-bottom" />
+                        <div className="absolute w-[6px] rounded-full h-[60px] bg-white origin-bottom" />
 
                         {/* Rotating line */}
-                        <div className="absolute w-[4px] h-[50px] bg-white origin-bottom animate-spinToTop" />
+                        <div className="absolute w-[6px] h-[60px] rounded-full bg-white origin-bottom animate-spinToTop" />
                     </>
                 )}
 

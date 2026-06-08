@@ -141,13 +141,22 @@ const AuthPage = () => {
     try {
       const payload = { identifier: useEmail ? emailAddress : phoneNumber };
 
-      const tempData = JSON.parse(localStorage.getItem("tempIdentifier") || "{}");
+      let tempData = {};
 
       if (useEmail) {
-        tempData["Email"] = payload.identifier;
+        tempData = {
+          Email: payload.identifier,
+        };
       } else {
-        tempData["Phone"] = payload.identifier;
+        tempData = {
+          Phone: payload.identifier,
+        };
       }
+
+      localStorage.setItem(
+        "tempIdentifier",
+        JSON.stringify(tempData)
+      );
 
       const response = await fetch(`${backendUrl}/api/auth/otp/request/`, {
         method: "POST",

@@ -5,7 +5,7 @@ import {
 } from "react-icons/io5";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { FaCheckCircle } from "react-icons/fa";
+// import { FaCheckCircle } from "react-icons/fa";
 import PageHeader from "../components/PageHeader";
 import { normalizeImagePath, useAppContext, type GymCard } from "../context/AppContext";
 import FacilityTag from "../components/FacilityTag";
@@ -652,9 +652,9 @@ export default function ReviewPay() {
                                 className="fixed inset-0 bg-blue-500 z-50 flex items-center justify-center"
                             >
                                 <motion.div
-                                    initial={{ y: "-60vh", opacity: 0 }}
+                                    initial={{ y: "-11vh", opacity: 0 }}
                                     animate={{
-                                        y: ["-60vh", "0vh", "-5vh", "0vh", "-2vh", "0vh"],
+                                        y: ["-11vh", "0vh", "-1vh", "0vh"],
                                         opacity: [0, 1, 1, 1, 1, 1],
                                         scaleX: [1, 1.3, 0.9, 1.1, 0.95, 1],
                                         scaleY: [1, 0.6, 1.1, 0.9, 1.05, 1],
@@ -687,7 +687,7 @@ export default function ReviewPay() {
                                             }}
                                             className="text-white p-8 w-80 text-center"
                                         >
-                                            <FaCheckCircle className="text-green-500 bg-white rounded-full text-[85px] mx-auto mb-3" />
+                                            <FaCircleCheck className="text-green-500 bg-white rounded-full text-[85px] mx-auto mb-3" />
                                             <h2 className="text-lg font-semibold mb-2">
                                                 Payment Successful
                                             </h2>

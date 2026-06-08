@@ -20,14 +20,13 @@ export default function Header() {
                 </div>
             </div>
 
-            <div className="relative">
+            <div className="relative cursor-pointer" onClick={() => navigate("/notifications")}>
                 <HiOutlineBell
-                    onClick={() => navigate("/notifications")}
                     className="text-2xl text-[#475569] cursor-pointer"
                 />
 
                 {hasUnread && (
-                    <span className="absolute top-0.5 right-1 w-2 h-2 bg-blue-600 rounded-full"></span>
+                    <span className="absolute cursor-pointer top-0.5 right-1 w-2 h-2 bg-blue-600 rounded-full"></span>
                 )}
             </div>
         </div>

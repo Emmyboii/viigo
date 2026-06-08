@@ -114,14 +114,22 @@ const AuthPage = () => {
       const payload = { identifier: useEmail ? emailAddress : phoneNumber };
 
       // Retrieve existing storage or start fresh
-      const tempData = JSON.parse(localStorage.getItem("tempIdentifier") || "{}");
+      let tempData = {};
 
-      // Set new value dynamically
       if (useEmail) {
-        tempData["Email"] = payload.identifier;
+        tempData = {
+          Email: payload.identifier,
+        };
       } else {
-        tempData["Phone"] = payload.identifier;
+        tempData = {
+          Phone: payload.identifier,
+        };
       }
+
+      localStorage.setItem(
+        "tempIdentifier",
+        JSON.stringify(tempData)
+      );
 
       const response = await fetch(`${backendUrl}/api/auth/gym-owner/otp/request/`, {
         method: "POST",

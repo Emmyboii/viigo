@@ -196,6 +196,7 @@ export type AppContextType = {
     request: <T = unknown>(url: string, options?: RequestInit) => Promise<T>;
     fetchUser: () => Promise<void>;
     fetchBookings: () => Promise<void>;
+    fetchNotifications: () => Promise<void>;
     fetchGyms: () => Promise<void>;
     fetchWallet: () => Promise<void>;
     fetchWalletDashboard: () => Promise<void>;

@@ -228,7 +228,7 @@ export default function OtpVerificationModal({ user, onClose }: OtpVerificationM
                                     )}
                                 </div>
                                 {user?.slot_type && (
-                                    <p className={`text-sm font-normal ${user.slot_type === 'NON_PEAK' ? 'text-[#0F7D37]' : 'text-[#DC2626]'
+                                    <div className={`text-sm font-normal ${user.slot_type === 'NON_PEAK' ? 'text-[#0F7D37]' : 'text-[#DC2626]'
                                         }`}>
                                         {user.slot_type === 'NON_PEAK' ? (
                                             <div className="flex items-center gap-1">
@@ -243,7 +243,7 @@ export default function OtpVerificationModal({ user, onClose }: OtpVerificationM
                                                 <img src={fire} className="w-[10px]" alt="" /> Evening Peak Hours
                                             </div>
                                         )}
-                                    </p>
+                                    </div>
                                 )}
                                 {user?.status === 'CANCELLED' ? (
                                     <div className="flex items-center gap-2 text-nowrap">
@@ -327,14 +327,14 @@ export default function OtpVerificationModal({ user, onClose }: OtpVerificationM
                                 <p className='text-[#475569] font-medium text-xs'>
                                     {user?.status === "ACTIVE" ? "Remaining Time" : user?.status === "CONFIRMED" ? "Last Entry is at" : ""}
                                 </p>
-                                <p className='text-[#1D4ED8] font-semibold text-base'>
+                                <div className='text-[#1D4ED8] font-semibold text-base'>
                                     {user?.status === "ACTIVE" && user.contextual_text && (
                                         <>
                                             <Countdown initialText={user.contextual_text} /> left
                                         </>
                                     )}
                                     {user?.status !== "ACTIVE" && getRemainingTime()}
-                                </p>
+                                </div>
                             </div>
                         )}
                     </div>

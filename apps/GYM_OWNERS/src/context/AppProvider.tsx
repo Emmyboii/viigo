@@ -352,6 +352,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
                 fetchWalletDashboard,
                 fetchWalletTransactions,
+                fetchNotifications,
                 fetchBookings,
                 fetchUser,
                 fetchGyms,
