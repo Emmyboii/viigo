@@ -1,6 +1,8 @@
 import EditGym from "../components/EditGym";
 import GymDetails from "../components/GymDetails";
 import { GymOwnerDetailsSkeleton } from "../components/Gymskeletons ";
+import NetworkErrorModal from "../components/NetworkErrorModal";
+import { useAppContext } from "../context/AppContext";
 
 interface Amenity {
     id: number;
@@ -53,23 +55,16 @@ interface GymProps {
 
 export default function Gym({ gym, loading, display, setDisplay, setGym }: GymProps) {
 
-    // if (loading) {
-    //     return (
-    //         <div className="flex items-center justify-center min-h-screen">
-    //             <div className="flex flex-col items-center gap-4 p-8 bg-white animate-fadeIn">
-    //                 <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-    //                 <p className="text-gray-700 text-lg font-medium">
-    //                     Fetching your gym details...
-    //                 </p>
-    //                 <p className="text-gray-400 text-sm text-center">
-    //                     This might take a few seconds. Sit tight!
-    //                 </p>
-    //             </div>
-    //         </div>
-    //     );
-    // }
+    const { isOffline, networkError } = useAppContext();
 
-    if (loading) { return <GymOwnerDetailsSkeleton />; }
+    if (loading) {
+        return (
+            <>
+                <GymOwnerDetailsSkeleton />
+                {(isOffline || networkError) && <NetworkErrorModal />}
+            </>
+        );
+    }
 
     return (
         <div className="min-h-screen">
@@ -84,9 +79,10 @@ export default function Gym({ gym, loading, display, setDisplay, setGym }: GymPr
                     display={display}
                     setDisplay={setDisplay}
                     setGym={setGym}
-                // gym={gym}
                 />
             )}
+
+            {(isOffline || networkError) && <NetworkErrorModal />}
         </div>
     );
 }

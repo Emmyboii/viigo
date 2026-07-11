@@ -62,6 +62,27 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [wallet, setWallet] = useState<WalletType | null>(null);
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [notificationsLoading, setNotificationsLoading] = useState(true);
+    const [isOffline, setIsOffline] = useState(!navigator.onLine);
+    const [networkError, setNetworkError] = useState(false);
+
+    useEffect(() => {
+        const handleOffline = () => setIsOffline(true);
+        const handleOnline = () => {
+            setIsOffline(false);
+            setNetworkError(false);
+        };
+
+        window.addEventListener("offline", handleOffline);
+        window.addEventListener("online", handleOnline);
+
+        return () => {
+            window.removeEventListener("offline", handleOffline);
+            window.removeEventListener("online", handleOnline);
+        };
+    }, []);
+
+    const isNetworkError = (err: unknown) =>
+        err instanceof TypeError && /fetch/i.test(err.message);
 
     useEffect(() => {
         localStorage.setItem("gymDisplay", display);
@@ -155,6 +176,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         } catch (err) {
             console.error(err);
             setDisplay("details");
+            if (isNetworkError(err) || !navigator.onLine) {
+                setNetworkError(true);
+            }
         } finally {
             setIsLoading(false);
         }
@@ -184,6 +208,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         } catch (err) {
             console.error(err);
             setDisplayWallet("details");
+            if (isNetworkError(err) || !navigator.onLine) {
+                setNetworkError(true);
+            }
         } finally {
             setIsLoading(false);
         }
@@ -203,6 +230,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             setWalletDashboard(dashboard);
         } catch (err) {
             console.error(err);
+            if (isNetworkError(err) || !navigator.onLine) {
+                setNetworkError(true);
+            }
         } finally {
             setIsLoading(false);
         }
@@ -215,6 +245,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         } catch (err) {
             console.error("Error fetching wallet transactions:", err);
             setWalletTransactions([]);
+            if (isNetworkError(err) || !navigator.onLine) {
+                setNetworkError(true);
+            }
         }
     }, [request]);
 
@@ -226,6 +259,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             setNotifications(data.data || []);
         } catch (err) {
             console.error(err);
+            if (isNetworkError(err) || !navigator.onLine) {
+                setNetworkError(true);
+            }
         } finally {
             setNotificationsLoading(false);
         }
@@ -246,6 +282,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             setBookings(data?.data || []);
         } catch (err) {
             console.error(err);
+            if (isNetworkError(err) || !navigator.onLine) {
+                setNetworkError(true);
+            }
         } finally {
             setIsLoading(false);
         }
@@ -356,7 +395,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                 fetchBookings,
                 fetchUser,
                 fetchGyms,
-                fetchWallet
+                fetchWallet,
+                isOffline,
+                networkError,
             }}
         >
             {children}

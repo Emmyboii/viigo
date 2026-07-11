@@ -21,6 +21,8 @@ type PaymentSuccessProps = {
     gym: GymCard | null;
     onClose: () => void;
     bookingReference: string | null; // e.g. "VG-403763EE" from confirm response
+    onReady?: () => void;        // NEW
+    hideSkeleton?: boolean;
 };
 
 type BookingPass = {
@@ -50,7 +52,7 @@ type BookingPass = {
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-export default function PaymentSuccess({ onClose, bookingReference }: PaymentSuccessProps) {
+export default function PaymentSuccess({ onClose, bookingReference, onReady, hideSkeleton }: PaymentSuccessProps) {
 
     const shareRef = useRef<HTMLDivElement>(null);
 
@@ -167,7 +169,27 @@ export default function PaymentSuccess({ onClose, bookingReference }: PaymentSuc
         window.open(url, "_blank");
     };
 
-    if (loading || !pass || !booking) { return <PaymentSuccessSkeleton />; }
+    useEffect(() => {
+        if (!loading) {
+            onReady?.(); // fires whether it succeeded or failed
+        }
+    }, [loading, onReady]);
+
+    if (loading) {
+        if (hideSkeleton) return null;
+        return <PaymentSuccessSkeleton />;
+    }
+
+    if (!pass || !booking) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center px-4 text-center gap-3">
+                <p className="text-red-500 font-medium">We couldn't load your booking pass.</p>
+                <button onClick={() => window.location.reload()} className="text-blue-600 underline text-sm">
+                    Try again
+                </button>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen pb- overflow-x-hidden max-w-[400px] mx-auto">

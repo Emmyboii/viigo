@@ -19,6 +19,7 @@ import fire from '../assets/fire.png'
 import leaf from '../assets/leaf.png'
 import { ReviewPaySkeleton } from "../components/Gymskeletons ";
 import BottomSheet from "../components/BottomSheet";
+import NetworkErrorModal from "../components/NetworkErrorModal";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 type ToastType = "success" | "error" | null;
@@ -82,6 +83,29 @@ export default function ReviewPay() {
     const [payLoading, setPayLoading] = useState(false);
     const [bookingReference, setBookingReference] = useState<string | null>(null);
     const [showPaymentFailed, setShowPaymentFailed] = useState(false);
+    const [justPaid, setJustPaid] = useState(false);
+    const [showWaitMessage, setShowWaitMessage] = useState(false);
+    const [isOffline, setIsOffline] = useState(!navigator.onLine);
+    const [networkError, setNetworkError] = useState(false);
+
+    useEffect(() => {
+        const handleOffline = () => setIsOffline(true);
+        const handleOnline = () => {
+            setIsOffline(false);
+            setNetworkError(false); // give them a clean slate once back online
+        };
+
+        window.addEventListener("offline", handleOffline);
+        window.addEventListener("online", handleOnline);
+
+        return () => {
+            window.removeEventListener("offline", handleOffline);
+            window.removeEventListener("online", handleOnline);
+        };
+    }, []);
+
+    const isNetworkError = (err: unknown) =>
+        err instanceof TypeError && /fetch/i.test(err.message);
 
     const storedData = localStorage.getItem("bookingData");
 
@@ -118,6 +142,7 @@ export default function ReviewPay() {
             if (success === "true") {
                 localStorage.removeItem("paymentSuccess");
                 localStorage.removeItem("selectedBookingId");
+                localStorage.removeItem("bookingReference");
             }
         };
 
@@ -150,6 +175,9 @@ export default function ReviewPay() {
                 setGym(detailData?.data || null);
             } catch (err) {
                 console.error(err);
+                if (isNetworkError(err) || !navigator.onLine) {
+                    setNetworkError(true);
+                }
                 setGym(null);
             } finally {
                 setLoading(false);
@@ -197,8 +225,12 @@ export default function ReviewPay() {
 
             } catch (error) {
                 console.error("Preview failed:", error);
-                setToast({ type: "error", message: extractErrorMessage(error) });
-                setTimeout(() => setToast(null), 3400);
+                if (isNetworkError(error) || !navigator.onLine) {
+                    setNetworkError(true);
+                } else {
+                    setToast({ type: "error", message: extractErrorMessage(error) });
+                    setTimeout(() => setToast(null), 3400);
+                }
             } finally {
                 setPreviewLoading(false);
             }
@@ -306,12 +338,12 @@ export default function ReviewPay() {
 
                     sessionStorage.clear();
 
-                    setShowSuccess(true);
 
-                    setTimeout(() => {
-                        setShowSecondSuccess(true);
-                        window.scrollTo(0, 0);
-                    }, 3000);
+                    setJustPaid(true);
+                    setShowSuccess(true);
+                    setShowSecondSuccess(true); // mount PaymentSuccess now, it fetches in the background
+                    window.scrollTo(0, 0);
+
                 },
 
                 modal: {
@@ -336,6 +368,15 @@ export default function ReviewPay() {
             setPayLoading(false);
         }
     };
+
+    useEffect(() => {
+        if (!showSuccess) {
+            setShowWaitMessage(false);
+            return;
+        }
+        const timer = setTimeout(() => setShowWaitMessage(true), 4000);
+        return () => clearTimeout(timer);
+    }, [showSuccess]);
 
     const handleClose = () => {
         localStorage.removeItem("paymentSuccess");
@@ -370,7 +411,25 @@ export default function ReviewPay() {
         }
     }, [slotType, gym]);
 
-    if (loading || previewLoading) { return <ReviewPaySkeleton />; }
+    if (loading || previewLoading) {
+        return (
+            <>
+                <ReviewPaySkeleton />
+                {(isOffline || networkError) && <NetworkErrorModal />}
+            </>
+        );
+    }
+
+    // NEW — after loading finishes, if it failed due to network issues,
+    // keep showing the skeleton + modal instead of falling through to a broken page
+    if (networkError || isOffline) {
+        return (
+            <>
+                <ReviewPaySkeleton />
+                <NetworkErrorModal />
+            </>
+        );
+    }
 
     return (
         <div className="pb-44 min-h-screen max-w-[1300px] mx-auto">
@@ -643,69 +702,83 @@ export default function ReviewPay() {
                         </div>
                     </div>
 
-                    <AnimatePresence>
-                        {showSuccess && (
-                            <motion.div
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                className="fixed inset-0 bg-blue-500 z-50 flex items-center justify-center"
-                            >
-                                <motion.div
-                                    initial={{ y: "-11vh", opacity: 0 }}
-                                    animate={{
-                                        y: ["-11vh", "0vh", "-1vh", "0vh"],
-                                        opacity: [0, 1, 1, 1, 1, 1],
-                                        scaleX: [1, 1.3, 0.9, 1.1, 0.95, 1],
-                                        scaleY: [1, 0.6, 1.1, 0.9, 1.05, 1],
-                                    }}
-                                    transition={{
-                                        duration: 1.2,
-                                        times: [0, 0.45, 0.65, 0.78, 0.9, 1],
-                                        ease: "easeIn"
-                                    }}
-                                >
-                                    <motion.div
-                                        animate={{
-                                            scaleX: [1, 1 / 1.3, 1 / 0.9, 1 / 1.1, 1 / 0.95, 1],
-                                            scaleY: [1, 1 / 0.6, 1 / 1.1, 1 / 0.9, 1 / 1.05, 1],
-                                        }}
-                                        transition={{
-                                            duration: 1.2,
-                                            times: [0, 0.45, 0.65, 0.78, 0.9, 1],
-                                            ease: "easeIn"
-                                        }}
-                                    >
-                                        <motion.div
-                                            animate={{
-                                                y: [0, -6, 5, -4, 3, -2, 1, 0],
-                                            }}
-                                            transition={{
-                                                delay: 0.54,
-                                                duration: 0.5,
-                                                ease: "easeOut"
-                                            }}
-                                            className="text-white p-8 w-80 text-center"
-                                        >
-                                            <FaCircleCheck className="text-green-500 bg-white rounded-full text-[85px] mx-auto mb-3" />
-                                            <h2 className="text-lg font-semibold mb-2">
-                                                Payment Successful
-                                            </h2>
-                                            <p className="text-sm font-normal text-[#EBEBEB]">
-                                                You will be redirected to the booking confirmation page.
-                                            </p>
-                                        </motion.div>
-                                    </motion.div>
-                                </motion.div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
                 </div>
             )}
 
             {showSecondSuccess && (
-                <PaymentSuccess onClose={handleClose} gym={gym} bookingReference={bookingReference ?? localStorage.getItem("bookingReference")} />
+                <PaymentSuccess
+                    onClose={handleClose}
+                    gym={gym}
+                    bookingReference={bookingReference ?? localStorage.getItem("bookingReference")}
+                    onReady={() => setShowSuccess(false)}
+                    hideSkeleton={justPaid}
+                />
             )}
+
+            <AnimatePresence>
+                {showSuccess && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-blue-500 z-50 flex items-center justify-center"
+                    >
+                        <motion.div
+                            initial={{ y: "-11vh", opacity: 0 }}
+                            animate={{
+                                y: ["-11vh", "0vh", "-1vh", "0vh"],
+                                opacity: [0, 1, 1, 1, 1, 1],
+                                scaleX: [1, 1.3, 0.9, 1.1, 0.95, 1],
+                                scaleY: [1, 0.6, 1.1, 0.9, 1.05, 1],
+                            }}
+                            transition={{
+                                duration: 1.2,
+                                times: [0, 0.45, 0.65, 0.78, 0.9, 1],
+                                ease: "easeIn"
+                            }}
+                        >
+                            <motion.div
+                                animate={{
+                                    scaleX: [1, 1 / 1.3, 1 / 0.9, 1 / 1.1, 1 / 0.95, 1],
+                                    scaleY: [1, 1 / 0.6, 1 / 1.1, 1 / 0.9, 1 / 1.05, 1],
+                                }}
+                                transition={{
+                                    duration: 1.2,
+                                    times: [0, 0.45, 0.65, 0.78, 0.9, 1],
+                                    ease: "easeIn"
+                                }}
+                            >
+                                <motion.div
+                                    animate={{
+                                        y: [0, -6, 5, -4, 3, -2, 1, 0],
+                                    }}
+                                    transition={{
+                                        delay: 0.54,
+                                        duration: 0.5,
+                                        ease: "easeOut"
+                                    }}
+                                    className="text-white p-8 w-80 text-center"
+                                >
+                                    <FaCircleCheck className="text-green-500 bg-white rounded-full text-[85px] mx-auto mb-3" />
+                                    <h2 className="text-lg font-semibold mb-2">
+                                        Payment Successful
+                                    </h2>
+                                    <p className="text-sm font-normal text-[#EBEBEB]">
+                                        You will be redirected to the booking confirmation page.
+                                    </p>
+
+                                    {showWaitMessage && (
+                                        <p className="text-xs font-normal text-[#EBEBEB] mt-3 flex items-center justify-center gap-1.5">
+                                            <LoadingDots />
+                                            Hang tight, your booking card is loading
+                                        </p>
+                                    )}
+                                </motion.div>
+                            </motion.div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* ===== Payment Failed Sheet ===== */}
             <BottomSheet
@@ -762,5 +835,15 @@ function Toast({ text, type, onClose }: { text: string; type: ToastType; onClose
             </span>
             <p className="text-sm font-medium">{text}</p>
         </div>
+    );
+}
+
+function LoadingDots() {
+    return (
+        <span className="inline-flex items-end gap-1">
+            <span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce [animation-delay:-0.3s]" />
+            <span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce [animation-delay:-0.15s]" />
+            <span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" />
+        </span>
     );
 }

@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from 'react';
 // import * as htmlToImage from "html-to-image";
 import jsPDF from "jspdf";
 import { snapdom } from '@zumer/snapdom';
+import NetworkErrorModal from '../components/NetworkErrorModal';
 
 const formatAmount = (n: number) => `${n > 0 ? "+" : "-"}₹${Math.abs(n)}`;
 
@@ -58,6 +59,7 @@ const TransactionDetails = ({ id, setSelectedTransactionId }: { id: number, setS
 
     const [transaction, setTransaction] = useState<WalletTransactionDetail | null>(null);
     const [fetching, setFetching] = useState<boolean>(true);
+    const [networkError, setNetworkError] = useState(false);
 
     const captureFullCanvas = async () => {
         if (!captureRef.current) return null;
@@ -166,10 +168,17 @@ const TransactionDetails = ({ id, setSelectedTransactionId }: { id: number, setS
         const fetchTransaction = async () => {
             try {
                 setFetching(true);
+                setNetworkError(false);
                 const data = await request(`/wallet/transactions/${id}/`) as { data: WalletTransactionDetail };
                 setTransaction(data?.data);
             } catch (err) {
                 console.error(err);
+                if (
+                    (err instanceof TypeError && /fetch/i.test(err.message)) ||
+                    !navigator.onLine
+                ) {
+                    setNetworkError(true);
+                }
             } finally {
                 setFetching(false);
             }
@@ -190,6 +199,7 @@ const TransactionDetails = ({ id, setSelectedTransactionId }: { id: number, setS
                         This might take a few seconds. Sit tight!
                     </p>
                 </div>
+                {networkError && <NetworkErrorModal />}
             </div>
         );
     }
@@ -199,14 +209,17 @@ const TransactionDetails = ({ id, setSelectedTransactionId }: { id: number, setS
     // If API failed AND you later want real behavior
     if (!transaction) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-[60vh] gap-2 text-center">
-                <p className="text-sm font-semibold text-gray-700">
-                    Transaction not found
-                </p>
-                <p className="text-xs text-gray-500">
-                    We couldn’t retrieve this transaction. Please try again.
-                </p>
-            </div>
+            <>
+                <div className="flex flex-col items-center justify-center min-h-[60vh] gap-2 text-center">
+                    <p className="text-sm font-semibold text-gray-700">
+                        Transaction not found
+                    </p>
+                    <p className="text-xs text-gray-500">
+                        We couldn't retrieve this transaction. Please try again.
+                    </p>
+                </div>
+                {networkError && <NetworkErrorModal />}
+            </>
         );
     }
 

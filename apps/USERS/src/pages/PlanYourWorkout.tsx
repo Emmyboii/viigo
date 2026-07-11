@@ -12,6 +12,7 @@ import { GrSun } from "react-icons/gr";
 import { getNowIST } from "../utils/ist";
 import { PlanWorkoutSkeleton } from "../components/Gymskeletons ";
 import leaf from '../assets/leaf.png'
+import NetworkErrorModal from "../components/NetworkErrorModal";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -35,6 +36,28 @@ const PlanYourWorkout = () => {
 
     const locations = useLocation()
 
+    const [isOffline, setIsOffline] = useState(!navigator.onLine);
+    const [networkError, setNetworkError] = useState(false);
+
+    useEffect(() => {
+        const handleOffline = () => setIsOffline(true);
+        const handleOnline = () => {
+            setIsOffline(false);
+            setNetworkError(false);
+        };
+
+        window.addEventListener("offline", handleOffline);
+        window.addEventListener("online", handleOnline);
+
+        return () => {
+            window.removeEventListener("offline", handleOffline);
+            window.removeEventListener("online", handleOnline);
+        };
+    }, []);
+
+    const isNetworkError = (err: unknown) =>
+        err instanceof TypeError && /fetch/i.test(err.message);
+
     const { gyms, userData, latitude, longitude } = useAppContext()
     const navigate = useNavigate()
 
@@ -57,12 +80,12 @@ const PlanYourWorkout = () => {
         const stored = localStorage.getItem("bookingData");
         if (stored) {
             try {
-                return JSON.parse(stored)?.slot_type ?? "NON_PEAK";
+                return JSON.parse(stored)?.slot_type ?? "MORNING_PEAK";
             } catch {
-                return "NON_PEAK";
+                return "MORNING_PEAK";
             }
         }
-        return "NON_PEAK";
+        return "MORNING_PEAK";
     });
 
     // --- Open modal function ---
@@ -179,6 +202,9 @@ const PlanYourWorkout = () => {
                 setGym(detailData?.data || null);
             } catch (err) {
                 console.error(err);
+                if (isNetworkError(err) || !navigator.onLine) {
+                    setNetworkError(true);
+                }
                 setGym(null);
             } finally {
                 setLoading(false);
@@ -221,7 +247,7 @@ const PlanYourWorkout = () => {
     // ── Generate next 7 dates ────────────────────────────────────────────────
     const dates = useMemo(() => {
         const today = getNowIST();
-        return Array.from({ length: 7 }).map((_, index) => {
+        return Array.from({ length: 6 }).map((_, index) => {
             const date = getNowIST();
             date.setDate(today.getDate() + index);
             return {
@@ -401,7 +427,7 @@ const PlanYourWorkout = () => {
 
         if (selectedSlot === 'MORNING_PEAK') {
             // Window restriction applies always (not just today)
-            return "Some durations are unavailable as they exceed the morning peak window (gym open – 8:00 AM).";
+            return `Some durations are unavailable as they exceed the morning peak window (${gym?.recommended_workout_timings?.peak_hours?.morning}).`;
         }
 
         // For Non-Peak and Evening Peak, only relevant today
@@ -499,6 +525,43 @@ const PlanYourWorkout = () => {
         window.scrollTo(0, 0);
     };
 
+    // ── Auto-switch to the next available slot once the current one closes ─────
+    useEffect(() => {
+        if (!isToday) return;
+
+        const isSlotClosed = (slot: SlotType) => {
+            if (slot === 'MORNING_PEAK') return isMorningPeakClosedToday;
+            if (slot === 'NON_PEAK') return isNonPeakClosedToday;
+            return isEveningPeakClosedToday;
+        };
+
+        const allSlotsClosed = isMorningPeakClosedToday && isNonPeakClosedToday && isEveningPeakClosedToday;
+
+        // If everything is closed for the day, park the selection on Morning Peak
+        if (allSlotsClosed) {
+            if (selectedSlot !== 'MORNING_PEAK') {
+                setSelectedSlot('MORNING_PEAK');
+            }
+            return;
+        }
+
+        if (!isSlotClosed(selectedSlot)) return; // current slot is still open, nothing to do
+
+        // Fallback order depends on which slot just closed
+        const fallbackOrder: SlotType[] =
+            selectedSlot === 'MORNING_PEAK'
+                ? ['NON_PEAK', 'EVENING_PEAK']
+                : selectedSlot === 'NON_PEAK'
+                    ? ['EVENING_PEAK']
+                    : [];
+
+        const nextAvailable = fallbackOrder.find((slot) => !isSlotClosed(slot));
+
+        if (nextAvailable) {
+            setSelectedSlot(nextAvailable);
+        }
+    }, [nowMinutes, isToday, selectedSlot, isMorningPeakClosedToday, isNonPeakClosedToday, isEveningPeakClosedToday]);
+
     const selectedSlotTiming = useMemo(() => {
         if (!gym) return "";
 
@@ -518,7 +581,24 @@ const PlanYourWorkout = () => {
         }
     }, [selectedSlot, gym]);
 
-    if (loading) { return <PlanWorkoutSkeleton />; }
+    if (loading) {
+        return (
+            <>
+                <PlanWorkoutSkeleton />
+                {(isOffline || networkError) && <NetworkErrorModal />}
+            </>
+        );
+    }
+
+    // NEW — covers the case where loading finished specifically because it failed
+    if (networkError || isOffline) {
+        return (
+            <>
+                <PlanWorkoutSkeleton />
+                <NetworkErrorModal />
+            </>
+        );
+    }
 
     // ── Helpers for slot card styling ────────────────────────────────────────
     const slotCardClass = (slot: SlotType, isClosed: boolean) => {

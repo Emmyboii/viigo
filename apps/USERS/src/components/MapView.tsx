@@ -511,6 +511,11 @@ export default function MapView({ selectedGymFromDetails }: any) {
         if (searchInputRef.current) searchInputRef.current.value = "";
     };
 
+    useEffect(() => {
+        const bad = gyms?.filter((g: any) => !getValidLatLng(g.latitude, g.longitude));
+        if (bad?.length) console.warn("Gyms with invalid coordinates:", bad.map((g: any) => g.name));
+    }, [gyms]);
+
     const displayedGyms = searchedAreaCenter ? filteredGyms : (gyms || []);
 
     if (!isLoaded) return <div className="h-full w-full" />;
@@ -541,27 +546,30 @@ export default function MapView({ selectedGymFromDetails }: any) {
                 )}
 
                 {/* Gym markers */}
-                {gyms?.map((gym: any) => {
-                    const isSelected = selectedGym?.id === gym.id;
-                    return (
-                        <OverlayView
-                            key={gym.id}
-                            position={{ lat: parseFloat(gym.latitude), lng: parseFloat(gym.longitude) }}
-                            mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-                        >
-                            <div
-                                onClick={() => panToGym(gym)}
-                                style={{ transform: "translate(-50%, -100%)" }}
-                                className="relative flex flex-col items-center cursor-pointer"
+                {gyms
+                    ?.filter((gym: any) => getValidLatLng(gym.latitude, gym.longitude) !== null)
+                    .map((gym: any) => {
+                        const isSelected = selectedGym?.id === gym.id;
+                        const coords = getValidLatLng(gym.latitude, gym.longitude)!;
+                        return (
+                            <OverlayView
+                                key={gym.id}
+                                position={coords}
+                                mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
                             >
-                                <HiLocationMarker size={34} className={isSelected ? "text-[#2563EB]" : "text-[#CBD5E1]"} />
-                                <div className={`mt-2 px-4 py-1 rounded-full text-sm font-semibold shadow-md transition-all duration-200 ${isSelected ? "bg-[#2563EB] text-white scale-105" : "bg-[#CBD5E1] text-[#0F172A]"}`}>
-                                    {Number(gym.hourly_rate)}/Hr
+                                <div
+                                    onClick={() => panToGym(gym)}
+                                    style={{ transform: "translate(-50%, -100%)" }}
+                                    className="relative flex flex-col items-center cursor-pointer"
+                                >
+                                    <HiLocationMarker size={34} className={isSelected ? "text-[#2563EB]" : "text-[#CBD5E1]"} />
+                                    <div className={`mt-2 px-4 py-1 rounded-full text-sm font-semibold shadow-md transition-all duration-200 ${isSelected ? "bg-[#2563EB] text-white scale-105" : "bg-[#CBD5E1] text-[#0F172A]"}`}>
+                                        {Number(gym.hourly_rate)}/Hr
+                                    </div>
                                 </div>
-                            </div>
-                        </OverlayView>
-                    );
-                })}
+                            </OverlayView>
+                        );
+                    })}
             </GoogleMap>
 
             {/* Search bar */}

@@ -164,6 +164,9 @@ type AppContextType = {
     userData: UserType | null;
     setUserData: (user: UserType | null) => void;
 
+    isOffline: boolean;
+    networkError: boolean;
+
     gyms: GymType[];
     setGyms: (gyms: GymType[]) => void;
 
@@ -250,6 +253,27 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [amenities, setAmenities] = useState<Amenity[]>([]);
     const [pendingRatings, setPendingRatings] = useState<PendingRating | null>(null);
     const [pendingRatingsCard, setPendingRatingsCard] = useState<PendingRatingCard | null>(null);
+    const [isOffline, setIsOffline] = useState(!navigator.onLine);
+    const [networkError, setNetworkError] = useState(false);
+
+    useEffect(() => {
+        const handleOffline = () => setIsOffline(true);
+        const handleOnline = () => {
+            setIsOffline(false);
+            setNetworkError(false);
+        };
+
+        window.addEventListener("offline", handleOffline);
+        window.addEventListener("online", handleOnline);
+
+        return () => {
+            window.removeEventListener("offline", handleOffline);
+            window.removeEventListener("online", handleOnline);
+        };
+    }, []);
+
+    const isNetworkError = (err: unknown) =>
+        err instanceof TypeError && /fetch/i.test(err.message);
 
     const hasUnread = notifications.some(n => !n.is_read);
 
@@ -397,6 +421,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             setRecommendedGyms(data?.data || []);
         } catch (err) {
             console.error("Failed to fetch recommended gyms", err);
+            if (isNetworkError(err) || !navigator.onLine) {
+                setNetworkError(true);
+            }
         }
     };
 
@@ -419,6 +446,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             setNearbyGyms(data?.data || []);
         } catch (err) {
             console.error("Failed to fetch nearby gyms", err);
+            if (isNetworkError(err) || !navigator.onLine) {
+                setNetworkError(true);
+            }
         } finally {
             setLoading2(false);
         }
@@ -744,6 +774,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                 fetchCurrentLocation,
                 fetchFilteredGyms,
                 fetchSortedGyms,
+                isOffline,
+                networkError
             }}
         >
             {children}

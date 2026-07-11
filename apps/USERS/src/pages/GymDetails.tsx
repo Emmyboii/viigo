@@ -21,6 +21,7 @@ import { FaRegClock, FaRestroom, FaLock } from "react-icons/fa";
 import { MdVerified } from "react-icons/md";
 import { RiWomenLine } from "react-icons/ri";
 import { GymDetailsSkeleton } from "../components/Gymskeletons ";
+import NetworkErrorModal from "../components/NetworkErrorModal";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -34,6 +35,27 @@ export default function GymDetails() {
 
     const [gym, setGym] = useState<GymCard | null>(null);
     const [loading, setLoading] = useState(true);
+    const [isOffline, setIsOffline] = useState(!navigator.onLine);
+    const [networkError, setNetworkError] = useState(false);
+
+    useEffect(() => {
+        const handleOffline = () => setIsOffline(true);
+        const handleOnline = () => {
+            setIsOffline(false);
+            setNetworkError(false);
+        };
+
+        window.addEventListener("offline", handleOffline);
+        window.addEventListener("online", handleOnline);
+
+        return () => {
+            window.removeEventListener("offline", handleOffline);
+            window.removeEventListener("online", handleOnline);
+        };
+    }, []);
+
+    const isNetworkError = (err: unknown) =>
+        err instanceof TypeError && /fetch/i.test(err.message);
 
     const [amenitiesOpen, setAmenitiesOpen] = useState(false);
     const [rulesOpen, setRulesOpen] = useState(false);
@@ -253,6 +275,9 @@ export default function GymDetails() {
                 setGym(detailData?.data || null);
             } catch (err) {
                 console.error(err);
+                if (isNetworkError(err) || !navigator.onLine) {
+                    setNetworkError(true);
+                }
                 setGym(null);
             } finally {
                 setLoading(false);
@@ -385,8 +410,25 @@ export default function GymDetails() {
     //     );
     // }
 
-    if (loading) { return <GymDetailsSkeleton />; }
+    if (loading) {
+        return (
+            <>
+                <GymDetailsSkeleton />
+                {(isOffline || networkError) && <NetworkErrorModal />}
+            </>
+        );
+    }
 
+    // NEW — covers the case where loading finished specifically because it failed
+    if (networkError || isOffline) {
+        return (
+            <>
+                <GymDetailsSkeleton />
+                <NetworkErrorModal />
+            </>
+        );
+    }
+    
     if (!gym) return (
         <div className="flex items-center justify-center min-h-screen px-4">
             <div className="flex flex-col items-center gap-6 p-8 bg-white animate-fadeIn max-w-sm text-center">

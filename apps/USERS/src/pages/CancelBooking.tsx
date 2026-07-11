@@ -116,6 +116,15 @@ export default function CancelBooking() {
     const selectedBookingId = localStorage.getItem("selectedBookingId");
 
     useEffect(() => {
+        if (!selectedBookingId) {
+            navigate(-1);
+        }
+    }, [selectedBookingId, navigate]);
+
+    useEffect(() => {
+
+        if (!selectedBookingId) return;
+
         const fetchBooking = async () => {
             setLoading(true)
             try {
@@ -233,11 +242,15 @@ export default function CancelBooking() {
 
                 const message =
                     errData?.data?.non_field_errors?.[0] ||
+                    errData?.data?.error?.[0] ||
+                    errData?.data?.error ||
+                    errData?.data?.errors ||
                     errData?.data?.detail ||
                     errData?.message ||
                     "Failed to cancel booking";
 
-                throw new Error(message);
+                // throw new Error(message);
+                setError(message);
             }
             openModal();
         } catch (err: any) {

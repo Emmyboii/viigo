@@ -161,6 +161,9 @@ export type AppContextType = {
     userData: UserType | null;
     setUserData: (user: UserType | null) => void;
 
+    isOffline: boolean;
+    networkError: boolean;
+
     selectedGym: GymType | null;
     setSelectedGym: React.Dispatch<React.SetStateAction<GymType | null>>;
 

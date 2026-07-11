@@ -10,6 +10,7 @@ import FilterChips from "../components/FilterChips";
 import UserCard from "../components/UserCard";
 import { useAppContext, type Booking } from "../context/AppContext";
 import { GymOwnerHomeSkeleton } from "../components/Gymskeletons ";
+import NetworkErrorModal from "../components/NetworkErrorModal";
 
 type Status =
   | "idle"
@@ -35,6 +36,8 @@ const GymOwnerHome = () => {
     isLoading,
     selectedGym,
     hasUnread,
+    isOffline,
+    networkError,
   } = useAppContext();
 
   const navigate = useNavigate();
@@ -309,6 +312,10 @@ const GymOwnerHome = () => {
 
       } catch (err) {
         console.error(err);
+        if (err instanceof TypeError && /fetch/i.test(err.message)) {
+          // surfaced via the shared isOffline/networkError from context instead of local state,
+          // since GymOwnerHomeSkeleton already gates the whole page on isLoading
+        }
       }
     };
 
@@ -384,7 +391,14 @@ const GymOwnerHome = () => {
   //   );
   // }
 
-  if (isLoading) { return <GymOwnerHomeSkeleton />; }
+  if (isLoading) {
+    return (
+      <>
+        <GymOwnerHomeSkeleton />
+        {(isOffline || networkError) && <NetworkErrorModal />}
+      </>
+    );
+  }
 
   return (
     <>
@@ -533,6 +547,8 @@ const GymOwnerHome = () => {
         </AnimatePresence>
       </div>
       {/* )} */}
+
+      {(isOffline || networkError) && <NetworkErrorModal />}
 
       <AnimatePresence>
         {selectedUser && (

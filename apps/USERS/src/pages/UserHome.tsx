@@ -14,11 +14,11 @@ import SortModal from "../components/SortModal";
 import { FaFilter } from "react-icons/fa";
 import { BiSortAlt2 } from "react-icons/bi";
 import { GymCardSkeleton, GymHorizontalCardSkeleton } from "../components/Gymskeletons ";
-
+import NetworkErrorModal from "../components/NetworkErrorModal";
 
 export default function UserHome() {
 
-    const { recommendedGyms, nearbyGyms, loading2 } = useAppContext()
+    const { recommendedGyms, nearbyGyms, loading2, isOffline, networkError } = useAppContext()
 
     const navigate = useNavigate();
     const [activeId, setActiveId] = useState("");
@@ -122,6 +122,8 @@ export default function UserHome() {
                     ))}
                 </div>
             )}
+
+            {(isOffline || networkError) && <NetworkErrorModal />}
 
             {showSortModal && (
                 <SortModal

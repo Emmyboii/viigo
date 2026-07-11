@@ -226,7 +226,7 @@ export default function GymDetails({ gym, setDisplay }: GymDetailsProps) {
         const today = getNowIST();
         const endDate = getNowIST();
         // endDate.setMonth(today.getMonth() + 1);
-        endDate.setDate(today.getDate() + 6)
+        endDate.setDate(today.getDate() + 5)
 
         const backendMap = new Map(
             gym?.calendar_availability?.map((item) => [

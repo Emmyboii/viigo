@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useAppContext } from "../context/AppContext";
 import { FiArrowLeft, FiSearch } from "react-icons/fi";
+import NetworkErrorModal from "../components/NetworkErrorModal";
 import { BiSort } from "react-icons/bi";
 import Header from "../components/Header";
 import { MdOutlineKeyboardArrowLeft, MdOutlineKeyboardArrowRight } from "react-icons/md";
@@ -12,7 +13,7 @@ type FilterType = "all" | "booking" | "refund";
 
 const Transactions = () => {
   const navigate = useNavigate();
-  const { walletTransactions } = useAppContext();
+  const { walletTransactions, isOffline, networkError } = useAppContext();
   const [typeFilter, setTypeFilter] = useState<FilterType>("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -271,7 +272,7 @@ const Transactions = () => {
               currentEntries.map((t) => (
                 <tr
                   key={t.id}
-                  className="border-b hover:bg-gray-50 cursor-pointer lg:font-semibold font-medium text-[#0F172A]"
+                  className={`border-b hover:bg-gray-50 lg:font-semibold font-medium text-[#0F172A] ${t.transaction_type === "WITHDRAWAL" ? "cursor-not-allowed opacity-80" : "cursor-pointer"}`}
                   onClick={() => {
                     if (t.transaction_type === "WITHDRAWAL") return
                     setSelectedTransactionId(t.id);
@@ -349,6 +350,8 @@ const Transactions = () => {
           </button>
         </div>
       </div>
+
+      {(isOffline || networkError) && <NetworkErrorModal />}
 
       <AnimatePresence>
         {selectedTransactionId && (

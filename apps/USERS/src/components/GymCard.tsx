@@ -25,7 +25,12 @@ export default function GymCard({ gym }: GymCardProps) {
         gym.amenities.slice(0, 2);
 
     return (
-        <div className="bg-white rounded-md shadow-md overflow-hidden h-[350px] flex flex-col">
+        <div
+            onClick={() => {
+                navigate(`/gyms/${gym?.slug}`)
+                window.scrollTo(0, 0);
+            }}
+            className="bg-white rounded-md shadow-md overflow-hidden h-[326px] cursor-pointer flex flex-col">
             <div className="h-40">
                 <ImageCarousel
                     images={gym.images.map(img => ({
@@ -39,12 +44,12 @@ export default function GymCard({ gym }: GymCardProps) {
             <div className="p-4 flex flex-col flex-1">
                 <h3 className="font-semibold text-[#0F172A]">{gym?.name}</h3>
 
-                <p className="text-[11px] text-[#475569] font-medium mt-1 flex items-center flex-wrap gap-1">
-                    <HiLocationMarker className="text-[#475569] text-sm" />
+                <p className="text-[10.5px] text-[#475569] font-medium mt-1 flex items-center flex-wrap gap-1">
+                    <HiLocationMarker className="text-[#475569] text-xs" />
                     {gym?.distance}, {gym?.area} <GoDotFill /> {gym?.open_status}
                 </p>
 
-                <div className="flex gap-2 mt-3 flex-wrap">
+                <div className="flex gap-1 mt-3 flex-wrap">
                     {visibleAmenities.map((amenity, index) => (
                         <FacilityTag key={index} amenity={amenity} />
                     ))}
@@ -61,10 +66,8 @@ export default function GymCard({ gym }: GymCardProps) {
 
                 <div className="flex justify-between items-center mt-auto pt-4">
                     <span className="font-semibold text-lg text-[#0F172A]">₹{gym?.hourly_rate}/Hr</span>
-                    <button onClick={() => {
-                        navigate(`/gyms/${gym?.slug}`)
-                        window.scrollTo(0, 0);
-                    }}
+                    <button
+
                         className="text-[#2563EB] text-sm font-semibold"
                     >
                         View Details
