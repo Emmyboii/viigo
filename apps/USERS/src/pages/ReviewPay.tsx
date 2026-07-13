@@ -696,7 +696,7 @@ export default function ReviewPay() {
                                 <button
                                     onClick={handlePayment}
                                     disabled={payLoading}
-                                    className="bg-[#2563EB] text-white px-4 py-4 min-w-[150px] h-[50px] w-ful text-xs rounded-md font-medium flex items-center justify-center gap-2 disabled:opacity-60"
+                                    className="bg-[#2563EB] text-white px-4 py-4 min-w-[160px] h-[50px] w-ful text-xs rounded-md font-medium flex items-center justify-center gap-2 disabled:opacity-60"
                                 >
                                     {payLoading ? (
                                         <>

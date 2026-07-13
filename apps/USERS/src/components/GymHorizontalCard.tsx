@@ -71,7 +71,7 @@ export default function GymHorizontalCard({ gym }: GymHorizontalCardProps) {
 
                 <div className="flex justify-between items-center mt-4">
                     <span className="font-semibold text-[#0F172A]">₹{Number(gym.hourly_rate)}/Hr</span>
-                    <button className="bg-[#2563EB] text-white text-sm font-semibold px-4 py-2.5 rounded-xl w-[121px]">
+                    <button className="bg-[#2563EB] text-white text-sm font-semibold px-4 py-2.5 rounded-lg w-[131px]">
                         Book Now
                     </button>
                 </div>

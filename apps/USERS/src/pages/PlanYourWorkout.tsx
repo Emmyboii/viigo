@@ -987,7 +987,7 @@ const PlanYourWorkout = () => {
                         <button
                             disabled={allHoursDisabled || isGymClosedForSelectedDate || isSelectedSlotClosedToday}
                             onClick={handleApply}
-                            className={`min-w-[140px] h-[50px] w-ful text-white px-6 py-3 rounded-md font-semibold cursor-pointer text-sm ${allHoursDisabled || isGymClosedForSelectedDate || isSelectedSlotClosedToday
+                            className={`min-w-[155px] h-[50px] w-ful text-white px-6 py-3 rounded-md font-semibold cursor-pointer text-sm ${allHoursDisabled || isGymClosedForSelectedDate || isSelectedSlotClosedToday
                                 ? "bg-[#a6a7a8] cursor-not-allowed"
                                 : "bg-blue-600 cursor-pointer"
                                 }`}

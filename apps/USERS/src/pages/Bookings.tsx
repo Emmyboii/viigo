@@ -327,7 +327,25 @@ const Bookings = () => {
                                         <div className="flex flex-col justify-between w-full p-3 pl-0">
 
                                             <div className="space-y-[7px]">
-                                                <h3 className="font-normal">{gym.gym_name}</h3>
+                                                <div className="flex items-center gap-4">
+                                                    <h3 className="font-normal">{gym.gym_name}</h3>
+
+                                                    <span
+                                                        className={`text-xs px-3 py-1.5 rounded-full font-medium ${gym.status === "ACTIVE"
+                                                            ? "bg-[#22C55E] text-white"
+                                                            : gym.status === "CONFIRMED"
+                                                                ? "bg-[#FACC15] text-white"
+                                                                : gym.status === "CANCELLED"
+                                                                    ? "bg-[#FDECEA] text-[#F43F5E]"
+                                                                    : gym.status === "COMPLETED"
+                                                                        ? "bg-[#CBD5E1] text-[#ffffff]"
+                                                                        : "bg-[#CBD5E1] text-[#FFFFFF]"
+                                                            }`}
+                                                    >
+                                                        {gym.status === "CONFIRMED" ? "Upcoming" : gym.status === "CANCELLED" ? "Cancelled" : gym.status === "COMPLETED" ? "Completed" : gym.status}
+                                                    </span>
+
+                                                </div>
                                                 <p className="text-xs text-[#475569] flex items-center gap-1">
                                                     <HiLocationMarker className="text-[#475569] text-base" />
                                                     {formatLocation(gym.gym_location)}

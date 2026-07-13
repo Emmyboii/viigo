@@ -641,7 +641,7 @@ export default function GymDetails() {
                             Gym timings : {formatTime12Hour(gym.open_time)} - {formatTime12Hour(gym.close_time)}
                         </p>
 
-                        <div className="flex items-center gap-2 leading-none">
+                        <div className="flex items-center text-nowrap gap-2 leading-none">
                             <p className="text-[22px] font-semibold flex items-center text-nowrap text-[#0F172A]">
                                 ₹{Number(gym.hourly_rate)}/Hr
                                 {/* ₹{Number(gym.hourly_rate) + Number(bookingConfig.platform_fee) + Math.round(Number(bookingConfig.gst_fee))}/Hr */}
@@ -663,7 +663,7 @@ export default function GymDetails() {
                             navigate(`/gyms/${gym.slug}/plan`);
                         }}
                         // disabled={isGymClosed}
-                        className={`px-6 py-4 text-sm rounded-md min-w-[153px] h-[50px] w-ful font-medium transition bg-blue-600 text-white`}
+                        className={`px-6 py-4 text-sm rounded-md min-w-[163px] h-[50px] w-ful font-medium transition bg-blue-600 text-white`}
                     >
                         Book Hour
                     </button>
