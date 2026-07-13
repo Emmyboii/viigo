@@ -20,6 +20,15 @@ const EditProfile = ({ setEdit }: { setEdit: (value: boolean) => void }) => {
 
     const [previewImage, setPreviewImage] = useState<string | null>(null);
 
+    useEffect(() => {
+        document.title = "Viigo – Edit Profile";
+
+        // Optional: restore the default title when leaving the page
+        return () => {
+            document.title = "Viigo – Find Gyms Near You";
+        };
+    }, []);
+
     const [initialData, setInitialData] = useState(formData);
     const [isLoading, setIsLoading] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -163,7 +172,7 @@ const EditProfile = ({ setEdit }: { setEdit: (value: boolean) => void }) => {
                     <IoArrowBack size={20} />
                 </button>
 
-                <span className="font-semibold text-lg text-[#0F172A]">Edit Gym Details</span>
+                <span className="font-semibold text-lg text-[#0F172A]">Edit Details</span>
             </div>
 
             <div className='pt-14'></div>

@@ -179,6 +179,7 @@ export type AppContextType = {
     setDisplayWallet: React.Dispatch<React.SetStateAction<DisplayType>>;
 
     loading: boolean;
+    isWalletDashboardLoading: boolean;
     setLoading: React.Dispatch<React.SetStateAction<boolean>>;
     isLoading: boolean;
     setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
@@ -202,7 +203,7 @@ export type AppContextType = {
     fetchNotifications: () => Promise<void>;
     fetchGyms: () => Promise<void>;
     fetchWallet: () => Promise<void>;
-    fetchWalletDashboard: () => Promise<void>;
+    fetchWalletDashboard: (period?: "week" | "month") => Promise<void>;
     fetchWalletTransactions: () => Promise<void>;
 };
 

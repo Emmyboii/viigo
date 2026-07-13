@@ -172,6 +172,15 @@ export default function Notifications({ Loading = false }: { Loading?: boolean }
         }
     }, [Loading, controls]);
 
+    useEffect(() => {
+        document.title = "Viigo – Notifications";
+
+        // Optional: restore the default title when leaving the page
+        return () => {
+            document.title = "Viigo – Find Gyms Near You";
+        };
+    }, []);
+
     // const deleteNotification = (id: number) => {
     //     setData((prev) => prev.filter((item) => item.id !== id));
     // };

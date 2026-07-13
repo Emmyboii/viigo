@@ -135,6 +135,14 @@ const EditProfile = () => {
         }
     };
 
+    useEffect(() => {
+        document.title = "Viigo – Edit Profile";
+
+        // Optional: restore the default title when leaving the page
+        return () => {
+            document.title = "Viigo – Find Gyms Near You";
+        };
+    }, []);
 
     const handleToastClose = useCallback(() => {
         setToast(null);
@@ -163,7 +171,7 @@ const EditProfile = () => {
                     <IoArrowBack size={20} />
                 </button>
 
-                <span className="font-semibold text-lg text-[#0F172A]">Edit Gym Details</span>
+                <span className="font-semibold text-lg text-[#0F172A]">Edit Details</span>
             </div>
 
             {isLoading ? <EditProfileSkeleton /> : (

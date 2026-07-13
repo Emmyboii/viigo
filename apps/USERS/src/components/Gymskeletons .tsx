@@ -1,6 +1,6 @@
 export function GymCardSkeleton() {
     return (
-        <div className="bg-white rounded-md shadow-md overflow-hidden h-[350px] flex flex-col">
+        <div className="bg-white rounded-xl shadow-md overflow-hidden h-[350px] flex flex-col">
             <div className="h-40 animate-shimmer" />
             <div className="p-4 flex flex-col flex-1">
                 <div className="h-4 animate-shimmer rounded w-3/4" />
@@ -24,7 +24,7 @@ export function GymCardSkeleton() {
 
 export function GymHorizontalCardSkeleton() {
     return (
-        <div className="bg-white rounded border border-[#E2E8F0] flex">
+        <div className="bg-white rounded-xl border border-[#E2E8F0] flex">
             <div className="w-[85px] min-h-[110px] animate-shimmer rounded-tl rounded-bl flex-shrink-0" />
             <div className="flex flex-col justify-between w-full p-3">
                 <div>
@@ -241,8 +241,8 @@ export function PlanWorkoutSkeleton() {
     return (
         <div className="pb-40 min-h-screen px-3.5 max-w-[1300px] mx-auto">
             <div className="pt-14" />
-            <div className="bg-white rounded border flex gap-1 h-[115px]">
-                <div className="w-[85px] animate-shimmer rounded-tl rounded-bl flex-shrink-0" />
+            <div className="bg-white rounded-xl border flex gap-1 h-[115px]">
+                <div className="w-[85px] animate-shimmer rounded-tl-xl rounded-bl-xl flex-shrink-0" />
                 <div className="p-3 space-y-2 flex-1">
                     <div className="h-4 animate-shimmer rounded w-2/3" />
                     <div className="h-3 animate-shimmer rounded w-1/2" />
@@ -275,8 +275,8 @@ export function ReviewPaySkeleton() {
         <div className="pb-36 min-h-screen max-w-[1300px] mx-auto">
             <div className="pt-14" />
             <div className="p-4 space-y-4">
-                <div className="rounded border flex gap-1 h-[100px]">
-                    <div className="w-[85px] animate-shimmer rounded-tl rounded-bl flex-shrink-0" />
+                <div className="rounded-xl border flex gap-1 h-[100px]">
+                    <div className="w-[85px] animate-shimmer rounded-tl-xl rounded-bl-xl flex-shrink-0" />
                     <div className="flex-1 p-2 space-y-2">
                         <div className="h-4 animate-shimmer rounded w-2/3" />
                         <div className="h-3 animate-shimmer rounded w-1/2" />

@@ -2,7 +2,7 @@ import { useAppContext } from '../context/AppContext';
 import Container from '../components/layout/Container';
 import GymHorizontalCard from '../components/GymHorizontalCard';
 import SearchBar2 from '../components/SearchBar2';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { IoArrowBack } from 'react-icons/io5';
 import { useNavigate } from 'react-router-dom';
 import Footer from '../components/Footer';
@@ -15,6 +15,15 @@ const Recommended = () => {
     const { recommendedGyms, loading2 } = useAppContext()
 
     const [query, setQuery] = useState("");
+
+    useEffect(() => {
+        document.title = "Viigo – Recommended Gyms";
+
+        // Optional: restore the default title when leaving the page
+        return () => {
+            document.title = "Viigo – Find Gyms Near You";
+        };
+    }, []);
 
     const filteredGyms = recommendedGyms.filter((gym) => {
         if (!query) return true;

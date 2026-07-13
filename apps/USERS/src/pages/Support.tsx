@@ -5,6 +5,7 @@ import { MdEmail, MdKeyboardArrowRight } from "react-icons/md";
 // import logoUrl from "../assets/icon2.png";
 // import * as htmlToImage from "html-to-image";
 import Footer from "../components/Footer";
+import { useEffect } from "react";
 // import { snapdom } from "@zumer/snapdom";
 
 const companyEmail = "Support@viigo.in";
@@ -12,6 +13,15 @@ const companyEmail = "Support@viigo.in";
 const Support = () => {
 
     const navigate = useNavigate();
+
+    useEffect(() => {
+        document.title = "Viigo – Support";
+
+        // Optional: restore the default title when leaving the page
+        return () => {
+            document.title = "Viigo – Find Gyms Near You";
+        };
+    }, []);
 
     const handleEmailClick = () => {
         window.location.href = `mailto:${companyEmail}`;

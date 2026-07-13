@@ -64,6 +64,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [notificationsLoading, setNotificationsLoading] = useState(true);
     const [isOffline, setIsOffline] = useState(!navigator.onLine);
     const [networkError, setNetworkError] = useState(false);
+    const [isWalletDashboardLoading, setIsWalletDashboardLoading] = useState(false);
 
     useEffect(() => {
         const handleOffline = () => setIsOffline(true);
@@ -216,15 +217,15 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [request]);
 
-    const fetchWalletDashboard = useCallback(async () => {
+    const fetchWalletDashboard = useCallback(async (period: "week" | "month" = "week") => {
 
         const token = localStorage.getItem("token");
 
         if (!token) return
 
-        setIsLoading(true);
+        setIsWalletDashboardLoading(true);
         try {
-            const data = await request("/wallet/dashboard/");
+            const data = await request(`/wallet/dashboard/?period=${period}`);
             const dashboard: WalletDashboard = data.data;
 
             setWalletDashboard(dashboard);
@@ -234,7 +235,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                 setNetworkError(true);
             }
         } finally {
-            setIsLoading(false);
+            setIsWalletDashboardLoading(false);
         }
     }, [request]);
 
@@ -312,7 +313,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         if (!isAuthenticated || isPublicRoute) return;
 
         fetchUser();
-        fetchWalletDashboard();
+        // fetchWalletDashboard();
         fetchWalletTransactions();
         fetchNotifications();
         fetchBookings();
@@ -320,7 +321,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         isAuthenticated,
         isPublicRoute,
         fetchUser,
-        fetchWalletDashboard,
+        // fetchWalletDashboard,
         fetchWalletTransactions,
         fetchNotifications,
         fetchBookings,
@@ -388,6 +389,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                 notificationsLoading,
                 walletDashboard,
                 walletTransactions,
+                isWalletDashboardLoading,
 
                 fetchWalletDashboard,
                 fetchWalletTransactions,

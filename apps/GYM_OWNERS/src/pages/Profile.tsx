@@ -118,6 +118,15 @@ const Profile = ({ user }: UserProps) => {
         }
     };
 
+    useEffect(() => {
+        document.title = "Viigo – Profile";
+
+        // Optional: restore the default title when leaving the page
+        return () => {
+            document.title = "Viigo – Find Gyms Near You";
+        };
+    }, []);
+
     return (
         <div>
             <div className='mk:block hidden'>

@@ -42,6 +42,15 @@ const Bookings = () => {
         { id: "all", label: "All", icon: '' },
     ];
 
+    useEffect(() => {
+        document.title = "Viigo – Bookings";
+
+        // Optional: restore the default title when leaving the page
+        return () => {
+            document.title = "Viigo – Find Gyms Near You";
+        };
+    }, []);
+
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
     // const { userData } = useAppContext()

@@ -370,6 +370,15 @@ export default function ReviewPay() {
     };
 
     useEffect(() => {
+        document.title = "Viigo – Review and Pay";
+
+        // Optional: restore the default title when leaving the page
+        return () => {
+            document.title = "Viigo – Find Gyms Near You";
+        };
+    }, []);
+
+    useEffect(() => {
         if (!showSuccess) {
             setShowWaitMessage(false);
             return;
@@ -448,18 +457,18 @@ export default function ReviewPay() {
                             {toast && <Toast type={toast.type} text={toast.message} onClose={handleToastClose} />}
 
                             {/* ===== Gym Summary Card ===== */}
-                            <div className="bg-white rounded border flex gap-1 max-h-[250px]">
+                            <div className="bg-white rounded-xl border flex gap-1 max-h-[250px]">
                                 <img
                                     crossOrigin="anonymous"
                                     src={`https://api.viigo.in/${normalizeImagePath(gym?.images[0]?.image)}`}
                                     alt={gym?.name}
-                                    className="w-[85px] min-h-full rounded-tl rounded-bl object-cover"
+                                    className="w-[85px] min-h-full rounded-tl-xl rounded-bl-xl object-cover"
                                 />
 
                                 <div className="flex-1 p-2">
                                     <h2 className="font-semibold">{gym?.name}</h2>
 
-                                    <div className="flex items-center text-nowrap text-xs text-[#475569] gap-1 mt-2 flex-wrap">
+                                    <div className="flex items-center text-nowrap text-[10.2px] text-[#475569] gap-1 mt-2 flex-wrap">
                                         <HiLocationMarker size={12} />
                                         <span>{gym?.distance}, {gym?.area}</span>
                                         <span>•</span>
@@ -687,7 +696,7 @@ export default function ReviewPay() {
                                 <button
                                     onClick={handlePayment}
                                     disabled={payLoading}
-                                    className="bg-[#2563EB] text-white px-4 py-4 min-w-[150px] h-[50px] w-full text-xs rounded-md font-medium flex items-center justify-center gap-2 disabled:opacity-60"
+                                    className="bg-[#2563EB] text-white px-4 py-4 min-w-[150px] h-[50px] w-ful text-xs rounded-md font-medium flex items-center justify-center gap-2 disabled:opacity-60"
                                 >
                                     {payLoading ? (
                                         <>

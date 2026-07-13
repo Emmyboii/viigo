@@ -180,7 +180,7 @@ export default function SearchModal({ onClose, onClose2, from, query, setQuery, 
             {!query && nearbyGyms?.length > 0 && (
                 <div>
                     <p className="text-sm text-[#94A3B8] font-medium mb-2">
-                        Popular near you
+                        Popular gyms near you
                     </p>
 
                     {nearbyGyms.slice(0, 5).map((gym) => (

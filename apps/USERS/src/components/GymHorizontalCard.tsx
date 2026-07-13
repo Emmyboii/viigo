@@ -22,7 +22,12 @@ export default function GymHorizontalCard({ gym }: GymHorizontalCardProps) {
         : gym.amenities.slice(0, 2);
 
     return (
-        <div onClick={() => navigate(`/gyms/${gym.slug}`)} className="bg-white rounded border border-[#E2E8F0] cursor-pointer flex">
+        <div
+            onClick={() => {
+                navigate(`/gyms/${gym?.slug}`)
+                window.scrollTo(0, 0);
+            }}
+            className="bg-white rounded-2xl border border-[#E2E8F0] cursor-pointer flex">
             {/* <div className="w-28 rounded-tl rounded-bl overflow-hidden">
                 <ImageCarousel
                     images={gym.images.map(img => ({
@@ -37,13 +42,13 @@ export default function GymHorizontalCard({ gym }: GymHorizontalCardProps) {
                 crossOrigin="anonymous"
                 src={`https://api.viigo.in/${normalizeImagePath(gym?.images[0]?.image)}`}
                 alt={gym?.name}
-                className="w-[97px] min-h-full rounded-tl rounded-bl object-cover"
+                className="w-[97px] min-h-full rounded-tl-2xl rounded-bl-2xl object-cover"
             />
 
             <div className="flex flex-col justify-between w-full p-3 pl-2 py-2">
                 <div>
                     <h3 className="font-semibold text-[#0F172A]">{gym.name}</h3>
-                    <p className="text-[11px] text-gray-500 mt-1.5 flex items-center gap-0.5 flex-wrap">
+                    <p className="text-[10px] text-gray-500 mt-1.5 flex items-center gap-0.5 flex-wrap">
                         <HiLocationMarker className="text-[#475569] text-[10px]" />
                         {gym.distance}, {gym?.area} <GoDotFill /> {gym.open_status}
                     </p>
@@ -66,7 +71,7 @@ export default function GymHorizontalCard({ gym }: GymHorizontalCardProps) {
 
                 <div className="flex justify-between items-center mt-4">
                     <span className="font-semibold text-[#0F172A]">₹{Number(gym.hourly_rate)}/Hr</span>
-                    <button className="bg-[#2563EB] text-white text-sm font-semibold px-4 py-2 rounded w-[121px]">
+                    <button className="bg-[#2563EB] text-white text-sm font-semibold px-4 py-2.5 rounded-xl w-[121px]">
                         Book Now
                     </button>
                 </div>

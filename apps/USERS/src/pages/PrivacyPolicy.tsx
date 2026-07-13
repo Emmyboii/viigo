@@ -1,4 +1,16 @@
+import { useEffect } from "react";
+
 const PrivacyPolicy = () => {
+
+    useEffect(() => {
+        document.title = "Viigo - Privacy Policy";
+
+        // Optional: restore the default title when leaving the page
+        return () => {
+            document.title = "Viigo - Find Gyms Near You";
+        };
+    }, []);
+
     return (
         <main className="min-h-screen bg-white px-6 py-8 text-black sm:px-12 lg:px-16">
             <section className="mx-auto max-w-[900px]">

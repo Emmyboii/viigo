@@ -107,6 +107,15 @@ export default function EditGym({ setDisplay, setGym }: EditGymProps) {
     const navigate = useNavigate();
     const [initialData, setInitialData] = useState<string>("");
 
+    useEffect(() => {
+        document.title = "Viigo – Edit Gym Details";
+
+        // Optional: restore the default title when leaving the page
+        return () => {
+            document.title = "Viigo – Find Gyms Near You";
+        };
+    }, []);
+
     const [isLoading, setIsLoading] = useState(false);
     const [toast, setToast] = useState<{ type: ToastType; message: string } | null>(null);
 
@@ -1431,7 +1440,7 @@ function Toast({ text, type, onClose }: { text: string; type: ToastType; onClose
 
     return (
         <div
-             className={`fixed bottom-20 z-50 left-4 right-4 mx-auto max-w-sm w-fit
+            className={`fixed bottom-20 z-50 left-4 right-4 mx-auto max-w-sm w-fit
             bg-white px-4 py-3 rounded-lg flex items-center gap-3
             shadow-[0_10px_40px_rgba(0,0,0,0.18)] animate-[fadeIn_0.2s_ease-out]`}
         >

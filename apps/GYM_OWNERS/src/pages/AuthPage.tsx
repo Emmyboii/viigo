@@ -334,10 +334,11 @@ const AuthPage = () => {
             </div>
           )}
           <div
-            onClick={() => {
-              loginWithGoogle()
-              setToast({ type: "validating", message: "Validating credentials..." });
-            }}
+            // onClick={() => {
+            //   loginWithGoogle()
+            //   setToast({ type: "validating", message: "Validating credentials..." });
+            // }}
+            onClick={() => loginWithGoogle()}
             className="rounded-full border border-[#E2E8F0] p-2.5 cursor-pointer hover:shadow-md transition"
           >
             <FcGoogle className="size-6" />
@@ -345,7 +346,7 @@ const AuthPage = () => {
         </div>
 
         <div className="text-center font-redhat">
-          <p className="text-[#0F172A] text-sm mb-2 font-normal">By continuing, you are agreeing to Viigo’s Terms of Service and Privacy Policy.</p>
+          <p className="text-[#0F172A] text-sm mb-2 font-normal">By continuing, you are agreeing to Viigo’s Terms of Service and <a href='/privacy-policy' target='_blank' className='cursor-pointer text-[#60A5FA]'>Privacy Policy.</a></p>
           <a href="/terms-and-conditions" target='_blank' className="text-[#60A5FA] text-sm font-normal cursor-pointer">View Terms and Conditions</a >
         </div>
       </div>

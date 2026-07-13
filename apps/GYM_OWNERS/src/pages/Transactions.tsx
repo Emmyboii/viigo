@@ -109,6 +109,15 @@ const Transactions = () => {
   };
 
   useEffect(() => {
+    document.title = "Viigo – Transactions";
+
+    // Optional: restore the default title when leaving the page
+    return () => {
+      document.title = "Viigo – Find Gyms Near You";
+    };
+  }, []);
+
+  useEffect(() => {
     const handlePopState = (e: PopStateEvent) => {
       if (e.state?.modal === "transaction") {
         setSelectedTransactionId(e.state.transactionId);

@@ -28,6 +28,15 @@ const DeleteAccount = () => {
     const navigate = useNavigate();
     const { userData } = useAppContext();
 
+    useEffect(() => {
+        document.title = "Viigo – Delete Account";
+
+        // Optional: restore the default title when leaving the page
+        return () => {
+            document.title = "Viigo – Find Gyms Near You";
+        };
+    }, []);
+
     const [selectedReason, setSelectedReason] = useState<string | null>(null);
     const [reasons, setReasons] = useState<DeletionReason[]>([]);
     const [understood, setUnderstood] = useState(false);

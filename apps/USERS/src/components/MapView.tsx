@@ -333,6 +333,74 @@ const getValidLatLng = (lat: any, lng: any) => {
 
 const LIBRARIES: ("places")[] = ["places"];
 
+// Groups gyms whose lat/lng are within `thresholdMeters` of each other,
+// and applies a small circular offset so overlapping markers spread apart visually.
+function spreadOverlappingGyms(gyms: any[], thresholdMeters = 15) {
+    const getCoords = (g: any) => getValidLatLng(g.latitude, g.longitude);
+
+    const groups: any[][] = [];
+    const used = new Set<number>();
+
+    gyms.forEach((gym, i) => {
+        if (used.has(i)) return;
+        const coords = getCoords(gym);
+        if (!coords) return;
+
+        const group = [gym];
+        used.add(i);
+
+        gyms.forEach((other, j) => {
+            if (i === j || used.has(j)) return;
+            const otherCoords = getCoords(other);
+            if (!otherCoords) return;
+
+            const distanceKm = haversineDistance(
+                coords.lat, coords.lng,
+                otherCoords.lat, otherCoords.lng
+            );
+
+            if (distanceKm * 1000 <= thresholdMeters) {
+                group.push(other);
+                used.add(j);
+            }
+        });
+
+        groups.push(group);
+    });
+
+    // For each group, spread members in a small circle around the true center
+    const OFFSET_METERS = 24; // how far apart siblings end up
+    const result: any[] = [];
+
+    groups.forEach((group) => {
+        if (group.length === 1) {
+            result.push(group[0]);
+            return;
+        }
+
+        const center = getCoords(group[0])!;
+        const angleStep = (2 * Math.PI) / group.length;
+
+        group.forEach((gym, idx) => {
+            const angle = angleStep * idx;
+
+            // Convert meters to approximate lat/lng degrees
+            const dLat = (OFFSET_METERS * Math.cos(angle)) / 111320;
+            const dLng =
+                (OFFSET_METERS * Math.sin(angle)) /
+                (111320 * Math.cos((center.lat * Math.PI) / 180));
+
+            result.push({
+                ...gym,
+                _displayLat: center.lat + dLat,
+                _displayLng: center.lng + dLng,
+            });
+        });
+    });
+
+    return result;
+}
+
 export default function MapView({ selectedGymFromDetails }: any) {
     const { gyms, latitude, longitude } = useAppContext();
     const navigate = useNavigate();
@@ -359,6 +427,16 @@ export default function MapView({ selectedGymFromDetails }: any) {
         googleMapsApiKey: import.meta.env.VITE_GOOGLE_API_KEY,
         libraries: LIBRARIES,
     });
+
+    const [spreadGyms, setSpreadGyms] = useState<any[]>([]);
+
+    useEffect(() => {
+        if (!gyms?.length) {
+            setSpreadGyms([]);
+            return;
+        }
+        setSpreadGyms(spreadOverlappingGyms(gyms));
+    }, [gyms]);
 
     // ── User location ──────────────────────────────────────────────────────────
     useEffect(() => {
@@ -461,7 +539,7 @@ export default function MapView({ selectedGymFromDetails }: any) {
             );
             if (coords) {
                 mapInstance.panTo(coords);
-                mapInstance.setZoom(13);
+                mapInstance.setZoom(20);
             }
             hasInitializedView.current = true;
         }
@@ -483,13 +561,40 @@ export default function MapView({ selectedGymFromDetails }: any) {
         }, 100);
     };
 
+    const SELECTED_GYM_ZOOM = 20;
+
+    // const getGymDisplayCoords = (gym: any) => {
+    //     const originalCoords = getValidLatLng(gym.latitude, gym.longitude);
+    //     if (!originalCoords) return null;
+
+    //     return {
+    //         lat: gym._displayLat ?? originalCoords.lat,
+    //         lng: gym._displayLng ?? originalCoords.lng,
+    //     };
+    // };
+
+    const getGymMarkerCoords = (gym: any) => {
+        const markerGym = spreadGyms.find((item: any) => item.id === gym.id) || gym;
+        const originalCoords = getValidLatLng(markerGym.latitude, markerGym.longitude);
+
+        if (!originalCoords) return null;
+
+        return {
+            lat: markerGym._displayLat ?? originalCoords.lat,
+            lng: markerGym._displayLng ?? originalCoords.lng,
+        };
+    };
+
     const panToGym = (gym: any) => {
         setSelectedGym(gym);
         if (!map) return;
-        const coords = getValidLatLng(gym.latitude, gym.longitude);
+
+        const coords = getGymMarkerCoords(gym);
         if (!coords) return;
+
+        map.setZoom(SELECTED_GYM_ZOOM);
         map.panTo(coords);
-        setTimeout(() => map.setZoom(15), 250);
+
         scrollCardIntoView(gym.id);
     };
 
@@ -533,6 +638,7 @@ export default function MapView({ selectedGymFromDetails }: any) {
                     clickableIcons: false,
                     styles: mapStyles,
                     minZoom: 3,
+                    maxZoom: 24,
                 }}
             >
                 {/* User location marker */}
@@ -546,11 +652,14 @@ export default function MapView({ selectedGymFromDetails }: any) {
                 )}
 
                 {/* Gym markers */}
-                {gyms
+                {spreadGyms
                     ?.filter((gym: any) => getValidLatLng(gym.latitude, gym.longitude) !== null)
                     .map((gym: any) => {
                         const isSelected = selectedGym?.id === gym.id;
-                        const coords = getValidLatLng(gym.latitude, gym.longitude)!;
+                        const coords = {
+                            lat: gym._displayLat ?? parseFloat(gym.latitude),
+                            lng: gym._displayLng ?? parseFloat(gym.longitude),
+                        };
                         return (
                             <OverlayView
                                 key={gym.id}
@@ -559,8 +668,12 @@ export default function MapView({ selectedGymFromDetails }: any) {
                             >
                                 <div
                                     onClick={() => panToGym(gym)}
-                                    style={{ transform: "translate(-50%, -100%)" }}
-                                    className="relative flex flex-col items-center cursor-pointer"
+                                    style={{
+                                        transform: "translate(-50%, -100%)",
+                                        zIndex: isSelected ? 999 : 1,
+                                        position: "relative",
+                                    }}
+                                    className="flex flex-col items-center cursor-pointer"
                                 >
                                     <HiLocationMarker size={34} className={isSelected ? "text-[#2563EB]" : "text-[#CBD5E1]"} />
                                     <div className={`mt-2 px-4 py-1 rounded-full text-sm font-semibold shadow-md transition-all duration-200 ${isSelected ? "bg-[#2563EB] text-white scale-105" : "bg-[#CBD5E1] text-[#0F172A]"}`}>
@@ -609,28 +722,31 @@ export default function MapView({ selectedGymFromDetails }: any) {
                             {filteredGyms.length} gym{filteredGyms.length !== 1 ? "s" : ""} near this area
                         </p>
                     )}
-                    <div ref={cardStripRef} className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
+                    <div ref={cardStripRef} className="flex gap-4 overflow-x-auto no-scrollbar px-1 pt-1 pb-2">
                         {displayedGyms.map((gym: any) => (
                             <div
                                 id={`gym-card-${gym.id}`}
                                 key={gym.id}
                                 onClick={(e) => { e.stopPropagation(); panToGym(gym); }}
-                                className={`min-w-[300px] bg-white rounded transition-all duration-200 cursor-pointer h-[94px] flex items-center gap-3 ${selectedGym?.id === gym.id ? "ring-2 ring-blue-600" : ""}`}
+                                className={`min-w-[300px] max-w-[300px] bg-white rounded-xl transition-all duration-200 cursor-pointer h-[94px] flex items-center gap-3 overflow-hidden ${selectedGym?.id === gym.id ? "ring-2 ring-blue-600" : ""}`}
                             >
-                                <div className="w-[71px] h-[94px] flex-shrink-0">
-                                    <img src={gym?.images[0]?.image} alt={gym.name} className="w-full h-full object-cover rounded-tl rounded-bl" />
+                                <div className="w-[91px] h-[94px] flex-shrink-0">
+                                    <img src={gym?.images[0]?.image} alt={gym.name} className="w-full h-full object-cover rounded-tl-xl rounded-bl-xl" />
                                 </div>
-                                <div className="p-2 pl-0">
-                                    <h3 className="font-semibold text-[#0F172A] text-base">{gym.name}</h3>
-                                    <p className="text-[11.3px] text-[#475569] flex items-center gap-1 mt-1">
-                                        <HiLocationMarker size={16} />
-                                        {gym.distance} • {gym.area} • {gym.open_status}
+                                <div className="p-2 pl-0 min-w-0 flex-1">
+                                    <h3 className="font-semibold text-[#0F172A] text-base truncate">{gym.name}</h3>
+
+                                    <p className="text-[11.3px] text-[#475569] truncate flex items-center gap-1 mt-1">
+                                        <HiLocationMarker size={16} className="flex-shrink-0" />
+                                        <span className="truncate">{gym.distance} • {gym.area} • {gym.open_status}</span>
                                     </p>
-                                    <div className="flex items-center justify-between gap-2 mt-1">
-                                        <p className="text-lg font-semibold">Rs. {Number(gym.hourly_rate)}/Hr</p>
+                                    <div className="flex items-center justify-between gap-2 mt-1 min-w-0">
+                                        <p className="text-lg font-semibold truncate min-w-0">
+                                            Rs. {Number(gym.hourly_rate)}/Hr
+                                        </p>
                                         <p
                                             onClick={(e) => { e.stopPropagation(); navigate(`/gyms/${gym?.slug}`); }}
-                                            className="text-sm font-semibold text-[#2563EB]"
+                                            className="text-sm font-semibold text-[#2563EB] flex-shrink-0"
                                         >
                                             Details
                                         </p>

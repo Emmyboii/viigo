@@ -3,12 +3,22 @@ import CreateWallet from "../components/CreateWallet";
 import { useAppContext } from "../context/AppContext";
 import { UnverifiedWalletSkeleton, VerifiedWalletSkeleton, WalletSkeleton } from "../components/Gymskeletons ";
 import NetworkErrorModal from "../components/NetworkErrorModal";
+import { useEffect } from "react";
 
 export default function Wallet() {
 
     const { displayWallet, wallet, setDisplayWallet, isLoading, isOffline, networkError } = useAppContext()
 
     const status = wallet?.verification_status;
+
+    useEffect(() => {
+        document.title = "Viigo – Wallet";
+
+        // Optional: restore the default title when leaving the page
+        return () => {
+            document.title = "Viigo – Find Gyms Near You";
+        };
+    }, []);
 
     if (isLoading && (displayWallet === "create" || displayWallet === "edit")) {
         return (

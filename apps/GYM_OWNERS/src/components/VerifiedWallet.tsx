@@ -49,8 +49,9 @@ export default function VerifiedWallet() {
     const {
         walletDashboard,
         bookings,
-        request
-
+        request,
+        fetchWalletDashboard,
+        isWalletDashboardLoading
     } = useAppContext();
 
     const [showWithdrawalModal, setShowWithdrawalModal] = useState(false);
@@ -78,7 +79,9 @@ export default function VerifiedWallet() {
     const isWithdrawDisabled = balance <= 0;
 
     const navigate = useNavigate();
-    const [range, setRange] = useState<"week" | "month">("week");
+    const [range, setRange] = useState<"week" | "month">(() => {
+        return (localStorage.getItem("walletRange") as "week" | "month") || "week";
+    });
     const chartData = walletDashboard?.chart_data ?? [];
 
     const hasTransactions = (walletDashboard?.recent_activity?.length ?? 0) > 0;
@@ -166,6 +169,29 @@ export default function VerifiedWallet() {
 
     }, []);
 
+    useEffect(() => {
+        fetchWalletDashboard(range);
+    }, [range, fetchWalletDashboard]);
+
+    const handleRangeChange = (value: "week" | "month") => {
+        if (value === range || isWalletDashboardLoading) return;
+
+        setRange(value);
+        localStorage.setItem("walletRange", value);
+    };
+
+    useEffect(() => {
+        const handleBeforeUnload = () => {
+            localStorage.removeItem("walletRange");
+        };
+
+        window.addEventListener("beforeunload", handleBeforeUnload);
+
+        return () => {
+            window.removeEventListener("beforeunload", handleBeforeUnload);
+        };
+    }, []);
+
     return (
         <div className="mk:bg-[#DBEAFE] min-h-[91.6vh]">
             <div className="space-y-4 mk:space-y-0 pb-14 mb-14 mk:mb-0 pt-4 px-5 mk:grid grid-cols-2 gap-10 mk:p-14 max-w-[1900px] mx-auto">
@@ -181,8 +207,8 @@ export default function VerifiedWallet() {
                                 <h3 className="text-lg font-semibold">₹ {walletDashboard?.todays_earnings ?? "0"}</h3>
                                 <p
                                     className={`text-sm ${Number(earningsPercentage) >= 0
-                                            ? "text-[#00FF5E]"
-                                            : "text-red-500"
+                                        ? "text-[#00FF5E]"
+                                        : "text-red-500"
                                         }`}
                                 >
                                     {Number(earningsPercentage) >= 0 ? "+" : ""}
@@ -219,64 +245,69 @@ export default function VerifiedWallet() {
                         <div className="mk:bg-white mk:rounded-lg mk:p-6 flex flex-col mk:flex-col-reverse">
                             <div className="mt-4">
                                 <div className="h-[200px]">
-                                    <ResponsiveContainer>
-                                        <LineChart data={chartData} margin={{ top: 20, right: 10, left: -30, bottom: 0 }}>
+                                    {isWalletDashboardLoading ? (
+                                        <div className="h-full rounded-lg bg-slate-100 animate-pulse" />
+                                    ) : (
+                                        <ResponsiveContainer>
+                                            <LineChart data={chartData} margin={{ top: 20, right: 10, left: -30, bottom: 0 }}>
 
-                                            {/* GRID (dotted like design) */}
-                                            <CartesianGrid
-                                                strokeDasharray="4 4"
-                                                vertical={false}
-                                                stroke="#E5E7EB"
-                                            />
+                                                {/* GRID (dotted like design) */}
+                                                <CartesianGrid
+                                                    strokeDasharray="4 4"
+                                                    vertical={false}
+                                                    stroke="#E5E7EB"
+                                                />
 
-                                            {/* X AXIS */}
-                                            <XAxis
-                                                dataKey="day"
-                                                axisLine={false}
-                                                tickLine={false}
-                                                tick={{ fontSize: 10, fill: "#6B7280", fontWeight: 600 }}
-                                            />
+                                                {/* X AXIS */}
+                                                <XAxis
+                                                    dataKey="day"
+                                                    axisLine={false}
+                                                    tickLine={false}
+                                                    tick={{ fontSize: 10, fill: "#6B7280", fontWeight: 600 }}
+                                                />
 
-                                            {/* Y AXIS */}
-                                            <YAxis
-                                                axisLine={false}
-                                                tickLine={false}
-                                                tick={{ fontSize: 10, fill: "#9CA3AF" }}
-                                                tickFormatter={(v) => (v === 0 ? "0" : `${v / 1000}k`)}
-                                                domain={[0, 4000]}
-                                            />
+                                                {/* Y AXIS */}
+                                                <YAxis
+                                                    axisLine={false}
+                                                    tickLine={false}
+                                                    tick={{ fontSize: 10, fill: "#9CA3AF" }}
+                                                    tickFormatter={(v) => (v === 0 ? "0" : `${v / 1000}k`)}
+                                                    domain={[0, 4000]}
+                                                />
 
-                                            {/* TOOLTIP */}
-                                            <Tooltip
-                                                content={<CustomTooltip />}
-                                                cursor={{
-                                                    stroke: "#3B82F6",
-                                                    strokeDasharray: "4 4",
-                                                }}
-                                            />
+                                                {/* TOOLTIP */}
+                                                <Tooltip
+                                                    content={<CustomTooltip />}
+                                                    cursor={{
+                                                        stroke: "#3B82F6",
+                                                        strokeDasharray: "4 4",
+                                                    }}
+                                                />
 
-                                            {/* LINE */}
-                                            <Line
-                                                type="monotone"
-                                                dataKey="amount"
-                                                stroke="#3B82F6"
-                                                strokeWidth={2.5}
-                                                dot={false}
-                                                activeDot={{
-                                                    r: 6,
-                                                    stroke: "#3B82F6",
-                                                    strokeWidth: 3,
-                                                    fill: "#fff",
-                                                }}
-                                            />
-                                        </LineChart>
-                                    </ResponsiveContainer>
+                                                {/* LINE */}
+                                                <Line
+                                                    type="monotone"
+                                                    dataKey="amount"
+                                                    stroke="#3B82F6"
+                                                    strokeWidth={2.5}
+                                                    dot={false}
+                                                    activeDot={{
+                                                        r: 6,
+                                                        stroke: "#3B82F6",
+                                                        strokeWidth: 3,
+                                                        fill: "#fff",
+                                                    }}
+                                                />
+                                            </LineChart>
+                                        </ResponsiveContainer>
+                                    )}
                                 </div>
                             </div>
 
                             <div className="flex gap-2 mt-6 mk:mt-0">
                                 <button
-                                    onClick={() => setRange("week")}
+                                    disabled={isWalletDashboardLoading}
+                                    onClick={() => handleRangeChange("week")}
                                     className={`px-4 py-1.5 rounded-lg border font-medium text-sm ${range === "week"
                                         ? "bg-[#DBEAFE] text-[#2563EB] border-[#2563EB]"
                                         : "bg-white text-[#0F172A] border-[#CBD5E1]"
@@ -286,7 +317,8 @@ export default function VerifiedWallet() {
                                 </button>
 
                                 <button
-                                    onClick={() => setRange("month")}
+                                    disabled={isWalletDashboardLoading}
+                                    onClick={() => handleRangeChange("month")}
                                     className={`px-4 py-1.5 rounded-lg border font-medium text-sm ${range === "month"
                                         ? "bg-[#DBEAFE] text-[#2563EB] border-[#2563EB]"
                                         : "bg-white text-[#0F172A] border-[#CBD5E1]"

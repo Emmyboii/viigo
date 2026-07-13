@@ -1,7 +1,7 @@
 import { useAppContext } from '../context/AppContext';
 import Container from '../components/layout/Container';
 import GymHorizontalCard from '../components/GymHorizontalCard';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import SearchBar2 from '../components/SearchBar2';
 import { IoArrowBack } from 'react-icons/io5';
 import { useNavigate } from 'react-router-dom';
@@ -14,6 +14,15 @@ const NearBy = () => {
     const { nearbyGyms, loading2 } = useAppContext()
 
     const [query, setQuery] = useState("");
+
+    useEffect(() => {
+        document.title = "Viigo – Nearby Gyms";
+
+        // Optional: restore the default title when leaving the page
+        return () => {
+            document.title = "Viigo – Find Gyms Near You";
+        };
+    }, []);
 
     const filteredGyms = nearbyGyms.filter((gym) => {
         if (!query) return true;

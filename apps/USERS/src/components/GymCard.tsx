@@ -30,7 +30,7 @@ export default function GymCard({ gym }: GymCardProps) {
                 navigate(`/gyms/${gym?.slug}`)
                 window.scrollTo(0, 0);
             }}
-            className="bg-white rounded-md shadow-md overflow-hidden h-[326px] cursor-pointer flex flex-col">
+            className="bg-white rounded-2xl shadow-md overflow-hidden h-[300px] cursor-pointer flex flex-col">
             <div className="h-40">
                 <ImageCarousel
                     images={gym.images.map(img => ({
@@ -41,7 +41,7 @@ export default function GymCard({ gym }: GymCardProps) {
                 />
             </div>
 
-            <div className="p-4 flex flex-col flex-1">
+            <div className="p-4 pt-2 flex flex-col flex-1">
                 <h3 className="font-semibold text-[#0F172A]">{gym?.name}</h3>
 
                 <p className="text-[10.5px] text-[#475569] font-medium mt-1 flex items-center flex-wrap gap-1">

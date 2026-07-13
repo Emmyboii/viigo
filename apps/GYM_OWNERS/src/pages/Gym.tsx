@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import EditGym from "../components/EditGym";
 import GymDetails from "../components/GymDetails";
 import { GymOwnerDetailsSkeleton } from "../components/Gymskeletons ";
@@ -56,6 +57,15 @@ interface GymProps {
 export default function Gym({ gym, loading, display, setDisplay, setGym }: GymProps) {
 
     const { isOffline, networkError } = useAppContext();
+
+    useEffect(() => {
+        document.title = "Viigo – Gym Details";
+
+        // Optional: restore the default title when leaving the page
+        return () => {
+            document.title = "Viigo – Find Gyms Near You";
+        };
+    }, []);
 
     if (loading) {
         return (

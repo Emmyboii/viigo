@@ -2,7 +2,7 @@ import { FaClock, FaUser } from 'react-icons/fa6'
 import icon from '../assets/profileIcon.png'
 import Footer from '../components/Footer'
 import { useNavigate } from 'react-router'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { FaUserCircle } from 'react-icons/fa'
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -24,6 +24,15 @@ const Profile = ({ user }: UserProps) => {
     const navigate = useNavigate()
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+    useEffect(() => {
+        document.title = "Viigo – Profile";
+
+        // Optional: restore the default title when leaving the page
+        return () => {
+            document.title = "Viigo – Find Gyms Near You";
+        };
+    }, []);
 
     const handleLogout = async () => {
         setIsLoggingOut(true);

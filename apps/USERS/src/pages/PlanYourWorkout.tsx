@@ -525,6 +525,15 @@ const PlanYourWorkout = () => {
         window.scrollTo(0, 0);
     };
 
+    useEffect(() => {
+        document.title = "Viigo – Plan Your Workout";
+
+        // Optional: restore the default title when leaving the page
+        return () => {
+            document.title = "Viigo – Find Gyms Near You";
+        };
+    }, []);
+
     // ── Auto-switch to the next available slot once the current one closes ─────
     useEffect(() => {
         if (!isToday) return;
@@ -643,11 +652,11 @@ const PlanYourWorkout = () => {
 
             <div className="space-y-4 relative">
                 {/* ===== Gym Summary Card ===== */}
-                <div className="bg-white rounded border flex gap-1 max-h-[115px]">
-                    <img src={gym?.images[0]?.image} alt={gym?.name} className="w-[85px] object-cover rounded-tl rounded-bl" />
+                <div className="bg-white rounded-xl border flex gap-1 max-h-[115px]">
+                    <img src={gym?.images[0]?.image} alt={gym?.name} className="w-[85px] object-cover rounded-tl-xl rounded-bl-xl" />
                     <div className="p-3">
                         <h2 className="font-semibold">{gym?.name}</h2>
-                        <div className="flex items-center text-xs text-[#475569] gap-1 mt-1 flex-wrap">
+                        <div className="flex items-center text-[10.2px] text-[#475569] gap-1 mt-1 flex-wrap">
                             <HiLocationMarker size={12} />
                             <span>{gym?.distance}, {gym?.area}</span>
                             <span>•</span>
@@ -978,7 +987,7 @@ const PlanYourWorkout = () => {
                         <button
                             disabled={allHoursDisabled || isGymClosedForSelectedDate || isSelectedSlotClosedToday}
                             onClick={handleApply}
-                            className={`min-w-[140px] h-[50px] w-full text-white px-6 py-3 rounded-md font-semibold cursor-pointer text-sm ${allHoursDisabled || isGymClosedForSelectedDate || isSelectedSlotClosedToday
+                            className={`min-w-[140px] h-[50px] w-ful text-white px-6 py-3 rounded-md font-semibold cursor-pointer text-sm ${allHoursDisabled || isGymClosedForSelectedDate || isSelectedSlotClosedToday
                                 ? "bg-[#a6a7a8] cursor-not-allowed"
                                 : "bg-blue-600 cursor-pointer"
                                 }`}

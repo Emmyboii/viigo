@@ -92,6 +92,15 @@ export default function EditWallet() {
         return "Something went wrong";
     };
 
+    useEffect(() => {
+        document.title = "Viigo – Edit Bank Details & G.S.T Details";
+
+        // Optional: restore the default title when leaving the page
+        return () => {
+            document.title = "Viigo – Find Gyms Near You";
+        };
+    }, []);
+
     const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
         e.preventDefault()
 

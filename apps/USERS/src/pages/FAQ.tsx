@@ -64,6 +64,15 @@ export default function FAQ() {
         fetchFaqs();
     }, []);
 
+    useEffect(() => {
+        document.title = "Viigo – Frequently Asked Questions";
+
+        // Optional: restore the default title when leaving the page
+        return () => {
+            document.title = "Viigo – Find Gyms Near You";
+        };
+    }, []);
+
     const filteredFaqs = faqs?.filter(
         (faq) => faq.category === activeCategory.toUpperCase()
     );

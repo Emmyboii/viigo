@@ -322,6 +322,14 @@ export default function GymDetails() {
     };
 
     useEffect(() => {
+        document.title = `Viigo – ${gym?.name || "Gym Details"}`;
+
+        return () => {
+            document.title = "Viigo – Find Gyms Near You";
+        };
+    }, [gym?.name]);
+
+    useEffect(() => {
         const handlePopState = () => {
             if (amenitiesOpen) setAmenitiesOpen(false);
             else if (rulesOpen) setRulesOpen(false);
@@ -428,7 +436,7 @@ export default function GymDetails() {
             </>
         );
     }
-    
+
     if (!gym) return (
         <div className="flex items-center justify-center min-h-screen px-4">
             <div className="flex flex-col items-center gap-6 p-8 bg-white animate-fadeIn max-w-sm text-center">
@@ -655,7 +663,7 @@ export default function GymDetails() {
                             navigate(`/gyms/${gym.slug}/plan`);
                         }}
                         // disabled={isGymClosed}
-                        className={`px-6 py-4 text-sm rounded-md min-w-[153px] h-[50px] w-full font-medium transition bg-blue-600 text-white`}
+                        className={`px-6 py-4 text-sm rounded-md min-w-[153px] h-[50px] w-ful font-medium transition bg-blue-600 text-white`}
                     >
                         Book Hour
                     </button>

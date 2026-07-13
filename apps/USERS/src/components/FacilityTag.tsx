@@ -29,7 +29,7 @@ export default function FacilityTag({
     return (
         <div
             onClick={onClick}
-            className="flex items-center gap-1 bg-[#F1F5F9] px-1.5 py-1 rounded-full text-[10px] font-medium text-[#0F172A]"
+            className="flex items-center gap-0.5 bg-[#F1F5F9] px-1 py-1 rounded-full text-[9px] font-medium text-[#0F172A]"
         >
             {amenity?.icon && (
                 <img

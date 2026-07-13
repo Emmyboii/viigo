@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+
 const terms = [
   {
     title: "1. About Viigo",
@@ -74,6 +76,16 @@ const terms = [
 ];
 
 const TermsAndCondtions = () => {
+
+  useEffect(() => {
+    document.title = "Viigo – Terms and Conditions";
+
+    // Optional: restore the default title when leaving the page
+    return () => {
+      document.title = "Viigo – Find Gyms Near You";
+    };
+  }, []);
+
   return (
     <main className="min-h-screen bg-white px-6 py-8 text-black sm:px-12 lg:px-16">
       <section className="mx-auto max-w-[900px]">

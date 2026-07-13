@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
-import { injectDistances } from "../utils/distance";
+import { formatDistance, haversineDistance, injectDistances } from "../utils/distance";
 
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -437,13 +437,31 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const fetchNearbyGyms = async (lat: number, long: number) => {
-        ;
         try {
             const data = await request(
                 `/client/gyms/nearby/?lat=${lat}&long=${long}`
             );
 
-            setNearbyGyms(data?.data || []);
+            const gymsWithDistance = (data?.data || []).map((gym: any) => {
+                // Only calculate a fallback if backend didn't provide one
+                if (gym.distance) return gym;
+
+                const gymLat = parseFloat(gym.latitude);
+                const gymLng = parseFloat(gym.longitude);
+
+                if (!isFinite(gymLat) || !isFinite(gymLng)) {
+                    return { ...gym, distance: "N/A" };
+                }
+
+                const km = haversineDistance(lat, long, gymLat, gymLng);
+
+                return {
+                    ...gym,
+                    distance: formatDistance(km),
+                };
+            });
+
+            setNearbyGyms(gymsWithDistance);
         } catch (err) {
             console.error("Failed to fetch nearby gyms", err);
             if (isNetworkError(err) || !navigator.onLine) {
@@ -540,16 +558,17 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const fetchFilteredGyms = async (filters: any) => {
         try {
             setSearchLoading(true);
-            setSortLabel("")
+            setSortLabel("");
 
             const params = new URLSearchParams();
 
-            params.append("lat", latitude);
-            params.append("long", longitude);
+            // Only append lat/long if actually available — matches documented fallback
+            if (latitude) params.append("lat", latitude);
+            if (longitude) params.append("long", longitude);
 
-            if (filters.radius) params.append("radius", filters.radius);
-            if (filters.min_price) params.append("min_price", filters.min_price);
-            if (filters.max_price) params.append("max_price", filters.max_price);
+            if (filters.radius) params.append("radius", String(filters.radius));
+            if (filters.min_price) params.append("min_price", String(filters.min_price));
+            if (filters.max_price) params.append("max_price", String(filters.max_price));
             if (filters.sort) params.append("sort", filters.sort);
 
             if (filters.amenities && filters.amenities.length > 0) {
@@ -574,17 +593,14 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
             const params = new URLSearchParams();
 
-            params.append("lat", latitude);
-            params.append("long", longitude);
-            params.append("sort", sort);
+            if (latitude) params.append("lat", latitude);
+            if (longitude) params.append("long", longitude);
+            if (sort) params.append("sort", sort);
 
-            const res = await request(
-                `/client/gyms/sort/?${params.toString()}`
-            );
+            const res = await request(`/gyms/filter/?${params.toString()}`);
 
             setSearchResults(res.data || []);
             setSortLabel(label);
-
         } catch (err) {
             console.error(err);
         } finally {

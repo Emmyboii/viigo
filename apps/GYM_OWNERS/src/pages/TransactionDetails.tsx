@@ -122,6 +122,15 @@ const TransactionDetails = ({ id, setSelectedTransactionId }: { id: number, setS
         pdf.save(`transaction-${transaction.id}.pdf`);
     };
 
+    useEffect(() => {
+        document.title = "Viigo – Transaction Details";
+
+        // Optional: restore the default title when leaving the page
+        return () => {
+            document.title = "Viigo – Find Gyms Near You";
+        };
+    }, []);
+
     const sharePage = async () => {
         if (!captureRef.current) return;
 

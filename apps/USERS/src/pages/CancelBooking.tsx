@@ -107,10 +107,21 @@ export default function CancelBooking() {
     }, [showSuccess]);
 
     const handleClose = () => {
-        closeModal("cancelSuccess");
-        navigate("/");
+        setShowSuccess(false);
+        localStorage.removeItem("cancelSuccess");
+        localStorage.removeItem("selectedBookingId");
+        navigate("/", { replace: true });
         window.scrollTo(0, 0);
     };
+
+    useEffect(() => {
+        document.title = "Viigo – Cancel Booking";
+
+        // Optional: restore the default title when leaving the page
+        return () => {
+            document.title = "Viigo – Find Gyms Near You";
+        };
+    }, []);
 
     const token = localStorage.getItem("token");
     const selectedBookingId = localStorage.getItem("selectedBookingId");
