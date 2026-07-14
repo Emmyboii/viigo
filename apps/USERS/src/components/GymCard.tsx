@@ -30,7 +30,7 @@ export default function GymCard({ gym }: GymCardProps) {
                 navigate(`/gyms/${gym?.slug}`)
                 window.scrollTo(0, 0);
             }}
-            className="bg-white rounded-2xl shadow-md overflow-hidden h-[300px] cursor-pointer flex flex-col">
+            className="w-full min-w-0 bg-white rounded-2xl shadow-md overflow-hidden h-[300px] cursor-pointer flex flex-col">
             <div className="h-40">
                 <ImageCarousel
                     images={gym.images.map(img => ({
@@ -41,15 +41,17 @@ export default function GymCard({ gym }: GymCardProps) {
                 />
             </div>
 
-            <div className="p-4 pt-2 flex flex-col flex-1">
-                <h3 className="font-semibold text-[#0F172A]">{gym?.name}</h3>
+            <div className="p-4 pt-2 flex flex-col flex-1 min-w-0">
+                <h3 className="font-semibold text-[#0F172A] truncate min-w-0">{gym?.name}</h3>
 
-                <p className="text-[10.5px] text-[#475569] font-medium mt-1 flex items-center flex-wrap gap-1">
-                    <HiLocationMarker className="text-[#475569] text-xs" />
-                    {gym?.distance}, {gym?.area} <GoDotFill /> {gym?.open_status}
+                <p className="flex items-center gap-1 mt-1 min-w-0 text-[11px]">
+                    <HiLocationMarker className="flex-shrink-0 text-xs" />
+                    <span className="truncate flex-1">
+                        {gym?.distance}, {gym?.area} <GoDotFill className="inline" /> {gym?.open_status}
+                    </span>
                 </p>
 
-                <div className="flex gap-1 mt-3 flex-wrap">
+                <div className="flex gap-1 mt-3 flex-wra truncate">
                     {visibleAmenities.map((amenity, index) => (
                         <FacilityTag key={index} amenity={amenity} />
                     ))}
@@ -74,6 +76,6 @@ export default function GymCard({ gym }: GymCardProps) {
                     </button>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }

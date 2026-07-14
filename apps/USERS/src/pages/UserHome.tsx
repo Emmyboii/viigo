@@ -80,7 +80,7 @@ export default function UserHome() {
                 <div className="overflow-hidden py-2">
                     <div className="flex gap-4">
                         {[1, 2].map((i) => (
-                            <div key={i} className="flex-[0_0_85%]">
+                            <div key={i} className="flex-[0_0_73%]">
                                 <GymCardSkeleton />
                             </div>
                         ))}
@@ -92,9 +92,15 @@ export default function UserHome() {
                 </p>
             ) : (
                 <div className="overflow-hidden py-2" ref={emblaRef}>
-                    <div className="flex gap-4 embla__container">
+                    <div className="flex gap-3.5 embla__container">
                         {recommendedGyms.map((gym, index) => (
-                            <div key={index} className={`embla__slide ${recommendedGyms.length === 1 ? "" : "flex-[0_0_81%]"}`}>
+                            <div
+                                key={index}
+                                className={`embla__slide min-w-0 ${recommendedGyms.length === 1
+                                        ? "w-full"
+                                        : "basis-[73%] shrink-0 grow-0"
+                                    }`}
+                            >
                                 <GymCard gym={gym} />
                             </div>
                         ))}

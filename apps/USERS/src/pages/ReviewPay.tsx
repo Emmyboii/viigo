@@ -559,7 +559,7 @@ export default function ReviewPay() {
                                                 )}
                                             </div>
 
-                                            <div className="flex items-center gap-1 text-[11px] text-[#475569] mt-2">
+                                            <div className="flex items-center gap-1 text-[11px] text-[#000000] font-medium mt-2">
                                                 <PiWarningCircle className="rotate-180 flex-shrink-0" size={14} />
                                                 {slotType === "NON_PEAK" ? (
                                                     <span>Slot starts at 8:00 AM. You can check in anytime before {previewData?.last_entry_time}.</span>
@@ -660,7 +660,7 @@ export default function ReviewPay() {
                         {/* ===== Sticky Bottom Pay Bar ===== */}
                         <div id="share-bottom-bar" className="fixed max-w-[1300px] mx-auto bottom-0 left-0 right-0 bg-white">
                             <div className="bg-[#DBEAFE] text-[#2563EB] text-sm px-4 py-3 font-medium text-center">
-                                Last entry for selected duration: {previewData?.last_entry_time}
+                                Check in before {previewData?.last_entry_time}
                             </div>
 
                             <div className="flex justify-between items-center gap-3 px-4 py-5">

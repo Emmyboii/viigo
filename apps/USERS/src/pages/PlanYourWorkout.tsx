@@ -748,15 +748,15 @@ const PlanYourWorkout = () => {
                 </div>
 
                 {durationDisabledMessage && (
-                    <p className="text-amber-600 text-xs mt-2">{durationDisabledMessage}</p>
+                    <p className="text-amber-600 text-[13px] mt-2">{durationDisabledMessage}</p>
                 )}
 
                 {error.type === 'hours' && (
-                    <p className="text-red-500 text-sm mt-2">{error.message}</p>
+                    <p className="text-red-500 text-[13px] mt-2">{error.message}</p>
                 )}
 
                 {error.type === 'duration_reset' && (
-                    <p className="text-amber-600 text-sm mt-2">{error.message}</p>
+                    <p className="text-amber-600 text-[13px] mt-2">{error.message}</p>
                 )}
             </div>
 
@@ -948,7 +948,7 @@ const PlanYourWorkout = () => {
             {/* ===== Sticky Bottom Pay Bar ===== */}
             <div className="fixed max-w-[1300px] mx-auto bottom-0 left-0 right-0 bg-white">
                 <div className="bg-blue-50 text-blue-700 text-sm px-4 py-3 font-medium text-center">
-                    Last entry for selected duration: {lastEntryTime}
+                    Check in before {lastEntryTime}
                 </div>
 
                 <div className="px-3 py-3">

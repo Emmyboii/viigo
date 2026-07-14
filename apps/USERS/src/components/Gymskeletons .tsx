@@ -1,6 +1,6 @@
 export function GymCardSkeleton() {
     return (
-        <div className="bg-white rounded-xl shadow-md overflow-hidden h-[350px] flex flex-col">
+        <div className="bg-white rounded-xl shadow-md overflow-hidden h-[300px] flex flex-col">
             <div className="h-40 animate-shimmer" />
             <div className="p-4 flex flex-col flex-1">
                 <div className="h-4 animate-shimmer rounded w-3/4" />

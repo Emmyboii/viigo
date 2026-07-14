@@ -27,7 +27,7 @@ export default function GymHorizontalCard({ gym }: GymHorizontalCardProps) {
                 navigate(`/gyms/${gym?.slug}`)
                 window.scrollTo(0, 0);
             }}
-            className="bg-white rounded-2xl border border-[#E2E8F0] cursor-pointer flex">
+            className="bg-white rounded-2xl border border-[#E2E8F0] cursor-pointer flex h-[155px]">
             {/* <div className="w-28 rounded-tl rounded-bl overflow-hidden">
                 <ImageCarousel
                     images={gym.images.map(img => ({
@@ -42,10 +42,10 @@ export default function GymHorizontalCard({ gym }: GymHorizontalCardProps) {
                 crossOrigin="anonymous"
                 src={`https://api.viigo.in/${normalizeImagePath(gym?.images[0]?.image)}`}
                 alt={gym?.name}
-                className="w-[97px] min-h-full rounded-tl-2xl rounded-bl-2xl object-cover"
+                className="w-[97px] h-full object-cover rounded-l-2xl flex-shrink-0"
             />
 
-            <div className="flex flex-col justify-between w-full p-3 pl-2 py-2">
+            <div className="flex flex-col justify-between w-full p-3 pl-2 py-3">
                 <div>
                     <h3 className="font-semibold text-[#0F172A]">{gym.name}</h3>
                     <p className="text-[10px] text-gray-500 mt-1.5 flex items-center gap-0.5 flex-wrap">
@@ -71,11 +71,11 @@ export default function GymHorizontalCard({ gym }: GymHorizontalCardProps) {
 
                 <div className="flex justify-between items-center mt-4">
                     <span className="font-semibold text-[#0F172A]">₹{Number(gym.hourly_rate)}/Hr</span>
-                    <button className="bg-[#2563EB] text-white text-sm font-semibold px-4 py-2.5 rounded-lg w-[131px]">
+                    <button className="bg-[#2563EB] text-white text-sm font-semibold px-4 py-2.5 rounded-md max-w-[141px] w-full">
                         Book Now
                     </button>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }

@@ -11,7 +11,7 @@ export default function SectionHeader({ title, url }: SectionHeaderProps) {
     const navigate = useNavigate()
     return (
         <div className="flex justify-between items-center mt-6 mb-3">
-            <h2 className="font-semibold text-base">{title}</h2>
+            <h2 className="font-semibold text-lg">{title}</h2>
             <button
                 onClick={() => {
                     navigate(`${url}`)
