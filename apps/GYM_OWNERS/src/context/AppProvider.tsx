@@ -9,10 +9,39 @@ import {
     type Booking,
     type NotificationType,
     type WalletDashboard,
-    type WalletTransaction
+    type WalletTransaction,
+    ApiRequestError,
+    type ApiErrorPayload,
 } from "./AppContext";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
+// interface ApiErrorPayload {
+//     message?: string;
+//     data?: {
+//         error?: string;
+//         errors?: string;
+//         [key: string]: unknown;
+//     };
+//     [key: string]: unknown;
+// }
+
+interface ApiResponse<T = unknown> {
+    status?: string;
+    message?: string;
+    data?: T;
+    [key: string]: unknown;
+}
+
+// class ApiRequestError extends Error {
+//     data?: ApiErrorPayload | null;
+
+//     constructor(message: string, data?: ApiErrorPayload | null) {
+//         super(message);
+//         this.name = "ApiRequestError";
+//         this.data = data;
+//     }
+// }
 
 // provider
 export const AppProvider = ({ children }: { children: ReactNode }) => {
@@ -107,7 +136,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         }
     }, []);
 
-    const request = useCallback(async (url: string, options?: RequestInit) => {
+    const request = useCallback(async function request<T = ApiResponse>(
+        url: string,
+        options?: RequestInit
+    ): Promise<T> {
         const token = localStorage.getItem("token");
 
         if (!token) {
@@ -130,17 +162,24 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             throw new Error("Unauthorized");
         }
 
-        if (!res.ok) {
-            throw new Error("Request failed");
+        let body: ApiErrorPayload | null = null;
+        try {
+            body = (await res.json()) as ApiErrorPayload;
+        } catch {
+            // response wasn't valid JSON — leave body as null
         }
 
-        return res.json();
+        if (!res.ok) {
+            throw new ApiRequestError(body?.message || "Request failed", body);
+        }
+
+        return body as T;
     }, [navigate]);
 
     const fetchUser = useCallback(async () => {
         try {
-            const data = await request("/api/user/profile/");
-            setUserData(data?.data);
+            const data = await request<ApiResponse<UserType>>("/api/user/profile/");
+            setUserData(data?.data ?? null);
         } catch (err) {
             console.error(err);
         }
@@ -149,7 +188,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const fetchGyms = useCallback(async () => {
         setIsLoading(true);
         try {
-            const data = await request("/gymowner/gyms/");
+            const data = await request<ApiResponse<GymType[]>>("/gymowner/gyms/");
             const gyms: GymType[] = data.data || [];
 
             // No gyms created
@@ -188,7 +227,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const fetchWallet = useCallback(async () => {
         setIsLoading(true);
         try {
-            const data = await request("/wallet/");
+            const data = await request<ApiResponse<WalletType>>("/wallet/");
             const wallet: WalletType | null = data.data || null;
 
             if (!wallet) {
@@ -225,10 +264,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
         setIsWalletDashboardLoading(true);
         try {
-            const data = await request(`/wallet/dashboard/?period=${period}`);
-            const dashboard: WalletDashboard = data.data;
-
-            setWalletDashboard(dashboard);
+            const data = await request<ApiResponse<WalletDashboard>>(`/wallet/dashboard/?period=${period}`);
+            setWalletDashboard(data.data ?? null);
         } catch (err) {
             console.error(err);
             if (isNetworkError(err) || !navigator.onLine) {
@@ -241,7 +278,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     const fetchWalletTransactions = useCallback(async () => {
         try {
-            const data = await request("/transactions/history/");
+            const data = await request<ApiResponse<WalletTransaction[]>>("/transactions/history/");
             setWalletTransactions(data.data || []);
         } catch (err) {
             console.error("Error fetching wallet transactions:", err);
@@ -256,7 +293,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setNotificationsLoading(true);
 
         try {
-            const data = await request("/notification/notifications/");
+            const data = await request<ApiResponse<NotificationType[]>>("/notification/notifications/");
             setNotifications(data.data || []);
         } catch (err) {
             console.error(err);
@@ -279,7 +316,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setIsLoading(true);
 
         try {
-            const data = await request("/gymowner/owner/bookings/");
+            const data = await request<ApiResponse<Booking[]>>("/gymowner/owner/bookings/");
             setBookings(data?.data || []);
         } catch (err) {
             console.error(err);

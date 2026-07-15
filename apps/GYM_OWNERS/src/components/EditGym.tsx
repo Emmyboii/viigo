@@ -14,7 +14,7 @@ import { useRef } from "react";
 import SelectionModal from "../components/SelectionModal";
 import { MdError } from "react-icons/md";
 import { RiArrowRightSLine } from "react-icons/ri";
-import { useAppContext } from "../context/AppContext";
+import { ApiRequestError, useAppContext } from "../context/AppContext";
 
 // interface PeakHour {
 //     id: string;
@@ -548,7 +548,20 @@ export default function EditGym({ setDisplay, setGym }: EditGymProps) {
             window.scrollTo(0, 0)
         } catch (err) {
             console.error(err);
-            setToast({ type: "error", message: "Something went wrong, please try again!" });
+
+            let message = "Something went wrong. Try again later.";
+
+            if (err instanceof ApiRequestError) {
+                message =
+                    err.data?.data?.error ||
+                    err.data?.data?.errors ||
+                    err.data?.message ||
+                    message;
+            } else if (err instanceof Error) {
+                message = err.message;
+            }
+
+            setToast({ type: "error", message });
         } finally {
             setIsLoading(false);
         }
@@ -1440,7 +1453,7 @@ function Toast({ text, type, onClose }: { text: string; type: ToastType; onClose
 
     return (
         <div
-            className={`fixed bottom-20 z-50 left-4 right-4 mx-auto max-w-sm w-fit
+            className={`fixed bottom-20 z-50 left-4 right-4 mx-auto max-w-[440px] w-fit
             bg-white px-4 py-3 rounded-lg flex items-center gap-3
             shadow-[0_10px_40px_rgba(0,0,0,0.18)] animate-[fadeIn_0.2s_ease-out]`}
         >

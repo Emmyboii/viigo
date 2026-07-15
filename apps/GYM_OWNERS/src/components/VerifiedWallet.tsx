@@ -9,20 +9,26 @@ import {
     ResponsiveContainer,
     CartesianGrid,
 } from "recharts";
-import { useAppContext } from "../context/AppContext";
+import { useAppContext, ApiRequestError } from "../context/AppContext";
 import WithdrawalModal from "../components/WithdrawalModal";
 import { motion, AnimatePresence } from "framer-motion";
 import TransactionDetails from "../pages/TransactionDetails";
 import { FaCircleCheck } from "react-icons/fa6";
 import { MdError } from "react-icons/md";
 
+
 interface WithdrawalResponse {
     status: "success" | "error";
     code: number;
     message: string;
     data?: {
-        withdrawn_amount: number;
-        remaining_balance: number;
+        // success shape
+        withdrawn_amount?: number;
+        remaining_balance?: number;
+        // error shape
+        error?: string;
+        errors?: string;
+        withdrawable_balance?: number;
     };
 }
 
@@ -137,8 +143,10 @@ export default function VerifiedWallet() {
             });
 
             // If API indicates failure
+            console.log("RAW WITHDRAWAL RESPONSE:", JSON.stringify(data, null, 2));
+
             if (data.status !== "success") {
-                const message = data?.message || "Failed to withdraw";
+                const message = data.data?.error || data.data?.errors || data.message || "Failed to withdraw";
                 setToast({ type: "error", message });
                 return;
             }
@@ -158,8 +166,18 @@ export default function VerifiedWallet() {
         } catch (err) {
             console.error(err);
 
-            const message =
-                err instanceof Error ? err.message : "Something went wrong. Try again later.";
+            let message = "Something went wrong. Try again later.";
+
+            if (err instanceof ApiRequestError) {
+                message =
+                    err.data?.data?.error ||
+                    err.data?.data?.errors ||
+                    err.data?.message ||
+                    message;
+            } else if (err instanceof Error) {
+                message = err.message;
+            }
+
             setToast({ type: "error", message });
         }
     };
@@ -450,7 +468,7 @@ function Toast({ text, type, onClose }: { text: string; type: ToastType; onClose
 
     return (
         <div
-            className={`mk:absolute fixed w-fit bottom-20 z-50 left-4 right-4 mx-auto max-w-sm
+            className={`mk:absolute fixed w-fit bottom-20 z-50 left-4 right-4 mx-auto max-w-[440px]
       bg-white px-4 py-3 rounded-lg flex items-center gap-3
       shadow-[0_10px_40px_rgba(0,0,0,0.18)] animate-[fadeIn_0.2s_ease-out]`}
         >

@@ -319,6 +319,7 @@ const Bookings = () => {
 
                                             openBookingModal(gym);
                                             localStorage.setItem("selectedBookingId", String(gym.id));
+                                            window.scrollTo({ top: 0, behavior: "smooth" });
                                         }}
                                         className={`bg-white rounded border border-[#E2E8F0] min-h-[140px] h-full flex gap-3 ${gym.status === "CANCELLED" || gym.status === "COMPLETED" ? "cursor-not-allowed opacity-70" : "cursor-pointer"} `}
                                     >

@@ -289,7 +289,7 @@ function Toast({ text, type, onClose }: { text: string; type: ToastType; onClose
 
     return (
         <div
-            className={`fixed bottom-20 z-50 left-4 right-4 mx-auto max-w-sm w-fit
+            className={`fixed bottom-20 z-50 left-4 right-4 mx-auto max-w-[440px] w-fit
             bg-white px-4 py-3 rounded-lg flex items-center gap-3
             shadow-[0_10px_40px_rgba(0,0,0,0.18)] animate-[fadeIn_0.2s_ease-out]`}
         >

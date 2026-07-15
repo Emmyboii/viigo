@@ -183,7 +183,7 @@ export default function OTPVerification() {
                 setStatus("idle");
 
                 // Auto-hide toast after 3 seconds
-                setTimeout(() => setToast(null), 2000);
+                setTimeout(() => setToast(null), 3300);
                 return;
             }
 
@@ -234,7 +234,7 @@ export default function OTPVerification() {
                 setStatus("idle");
 
                 // Auto-hide toast after 3 seconds
-                setTimeout(() => setToast(null), 2000);
+                setTimeout(() => setToast(null), 3300);
                 return;
             }
 
@@ -369,7 +369,7 @@ function Toast({ text, type, onClose }: { text: string; type: ToastType; onClose
 
     return (
         <div
-            className={`fixed w-fit bottom-20 z-50 left-4 right-4 mx-auto max-w-sm
+            className={`fixed w-fit bottom-20 z-50 left-4 right-4 mx-auto max-w-[440px]
       bg-white px-4 py-3 rounded-lg flex items-center gap-3
       shadow-[0_10px_40px_rgba(0,0,0,0.18)] animate-[fadeIn_0.2s_ease-out]`}
         >

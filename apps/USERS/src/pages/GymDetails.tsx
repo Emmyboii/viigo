@@ -439,7 +439,7 @@ export default function GymDetails() {
 
     if (!gym) return (
         <div className="flex items-center justify-center min-h-screen px-4">
-            <div className="flex flex-col items-center gap-6 p-8 bg-white animate-fadeIn max-w-sm text-center">
+            <div className="flex flex-col items-center gap-6 p-8 bg-white animate-fadeIn max-w-[440px] text-center">
                 <IoWarningOutline className="text-4xl text-yellow-500" />
                 <p className="text-gray-800 text-xl font-semibold">
                     Gym Not Found
@@ -661,6 +661,7 @@ export default function GymDetails() {
                         onClick={() => {
                             // if (isGymClosed) return;
                             navigate(`/gyms/${gym.slug}/plan`);
+                            window.scrollTo({ top: 0, behavior: "smooth" });
                         }}
                         // disabled={isGymClosed}
                         className={`px-6 py-4 text-sm rounded-md min-w-[163px] h-[50px] w-ful font-medium transition bg-blue-600 text-white`}

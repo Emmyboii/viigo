@@ -362,7 +362,7 @@ function Toast({ text, type, onClose }: { text: string; type: ToastType; onClose
 
     const timer = setTimeout(() => {
       onClose();
-    }, 2000);
+    }, 3300);
     return () => clearTimeout(timer);
   }, [onClose, type]);
 
@@ -388,7 +388,7 @@ function Toast({ text, type, onClose }: { text: string; type: ToastType; onClose
   return (
     <div
       role="alert"
-      className={`mk:absolute fixed w-fit bottom-10 z-50 left-4 right-4 mx-auto max-w-sm
+      className={`mk:absolute fixed w-fit bottom-10 z-50 left-4 right-4 mx-auto max-w-[440px]
       bg-white px-4 py-3 rounded-lg flex items-center gap-3
       shadow-[0_10px_40px_rgba(0,0,0,0.18)] animate-[fadeIn_0.2s_ease-out]`}
     >

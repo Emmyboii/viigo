@@ -292,7 +292,7 @@ export default function Notifications({ Loading = false }: { Loading?: boolean }
                         exit={{ opacity: 0, scale: 0.9, y: 20 }}
                         transition={{ duration: 0.25 }}
                     >
-                        <div className="fixed text-nowrap top-1/2 left-[50%] -translate-x-1/2 -translate-y-1/2 
+                        <div className="fixed top-1/2 mx-auto left-4 right-4 max-w-[440px] w-fit -translate-y-1/2 
                         bg-gray-300 text-black px-6 py-3 rounded-xl shadow-xl z-50 text-sm font-medium">
                             {toast.message}
                         </div>

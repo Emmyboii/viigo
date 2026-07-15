@@ -111,7 +111,7 @@ const DeleteAccount = () => {
                     data?.message ||
                     "Failed to delete account";
                 setToast({ type: "error", message });
-                setTimeout(() => setToast(null), 2000);
+                setTimeout(() => setToast(null), 3300);
                 return;
             }
 
@@ -119,7 +119,7 @@ const DeleteAccount = () => {
             setDeleted(true);
         } catch {
             setToast({ type: "error", message: "Something went wrong. Please try again." });
-            setTimeout(() => setToast(null), 2000);
+            setTimeout(() => setToast(null), 3300);
         } finally {
             setLoading(false);
         }
@@ -290,7 +290,7 @@ const DeleteAccount = () => {
                 </button>
 
                 {toast && (
-                    <div className="fixed bottom-20 z-50 left-4 right-4 mx-auto max-w-sm w-fit
+                    <div className="fixed bottom-20 z-50 left-4 right-4 mx-auto max-w-[440px] w-fit
                             bg-white px-4 py-3 rounded-lg flex items-center gap-3
                             shadow-[0_10px_40px_rgba(0,0,0,0.18)] animate-[fadeIn_0.2s_ease-out]">
                         <span className={`text-xl flex-shrink-0 ${toast.type === "success" ? "text-green-500" : "text-red-500"}`}>

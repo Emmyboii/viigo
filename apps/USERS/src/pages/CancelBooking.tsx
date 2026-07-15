@@ -254,10 +254,18 @@ export default function CancelBooking() {
                 const message =
                     errData?.data?.non_field_errors?.[0] ||
                     errData?.data?.error?.[0] ||
+                    errData?.non_field_errors?.[0] ||
+                    errData?.error?.[0] ||
                     errData?.data?.error ||
                     errData?.data?.errors ||
                     errData?.data?.detail ||
+                    errData?.detail ||
+                    errData?.data?.details ||
+                    errData?.details ||
                     errData?.message ||
+                    errData?.errors ||
+                    errData?.error ||
+                    errData?.data?.message ||
                     "Failed to cancel booking";
 
                 // throw new Error(message);
@@ -266,7 +274,7 @@ export default function CancelBooking() {
             openModal();
         } catch (err: any) {
             console.error(err);
-            setError(err.message || "Something went wrong");
+            setError(err.message || "Something went wrong, please try again!");
         } finally {
             setIsCancelling(false);
         }

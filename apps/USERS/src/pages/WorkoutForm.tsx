@@ -100,7 +100,7 @@ export default function WorkoutForm() {
                 setToast({ type: "error", message });
 
                 // Auto-hide toast after 3 seconds
-                setTimeout(() => setToast(null), 2000);
+                setTimeout(() => setToast(null), 3300);
                 return;
             }
 
@@ -113,7 +113,7 @@ export default function WorkoutForm() {
                 const from = (location.state as { from?: string })?.from || '/'; // 👈
                 window.location.href = from;
 
-            }, 2000);
+            }, 3300);
         } catch (err: any) {
             console.error(err);
             setToast({ type: 'error', message: err.message || 'Something went wrong. Please try again.' });
@@ -165,7 +165,7 @@ export default function WorkoutForm() {
                 type: 'error',
                 message: err.message || 'Something went wrong',
             });
-            setTimeout(() => setToast(null), 2000);
+            setTimeout(() => setToast(null), 3300);
         } finally {
             setIsLoading(false);
         }
@@ -289,7 +289,7 @@ function Toast({ text, type }: { text: string; type: ToastType; }) {
     const isSuccess = type === 'success';
     return (
         <div
-            className={`fixed w-fit bottom-10 z-50 left-4 right-4 mx-auto max-w-sm
+            className={`fixed w-fit bottom-10 z-50 left-4 right-4 mx-auto max-w-[440px]
       bg-white px-4 py-3 rounded-lg flex items-center gap-3
       shadow-[0_10px_40px_rgba(0,0,0,0.18)] animate-[fadeIn_0.2s_ease-out]`}
         >

@@ -50,6 +50,8 @@ function extractErrorMessage(error: unknown): string {
         const err = error as {
             data?: Record<string, string | string[]>;
             message?: string;
+            errors?: string;
+            error?: string;
             non_field_errors?: string[];
         };
 
@@ -63,6 +65,8 @@ function extractErrorMessage(error: unknown): string {
 
         if (err.non_field_errors?.length) return err.non_field_errors[0];
         if (err.message) return err.message;
+        if (err.errors) return err.errors;
+        if (err.error) return err.error;
     }
 
     return "Something went wrong. Please try again.";
@@ -696,7 +700,7 @@ export default function ReviewPay() {
                                 <button
                                     onClick={handlePayment}
                                     disabled={payLoading}
-                                    className="bg-[#2563EB] text-white px-4 py-4 min-w-[160px] h-[50px] w-ful text-xs rounded-md font-medium flex items-center justify-center gap-2 disabled:opacity-60"
+                                    className="bg-[#2563EB] text-white px-4 py-4 min-w-[150px] h-[50px] w-ful text-xs rounded-md font-medium flex items-center justify-center gap-2 disabled:opacity-60"
                                 >
                                     {payLoading ? (
                                         <>
@@ -824,7 +828,7 @@ function Toast({ text, type, onClose }: { text: string; type: ToastType; onClose
     useEffect(() => {
         const timer = setTimeout(() => {
             onClose();
-        }, 2000);
+        }, 3300);
         return () => clearTimeout(timer);
     }, [onClose]);
 
@@ -835,7 +839,7 @@ function Toast({ text, type, onClose }: { text: string; type: ToastType; onClose
     return (
         <div
             role="alert"
-            className={`fixed bottom-20 z-50 left-4 right-4 mx-auto max-w-sm w-fit
+            className={`fixed bottom-20 z-50 left-4 right-4 mx-auto max-w-[440px] w-fit
             bg-white px-4 py-3 rounded-lg flex items-center gap-3
             shadow-[0_10px_40px_rgba(0,0,0,0.18)] animate-[fadeIn_0.2s_ease-out]`}
         >

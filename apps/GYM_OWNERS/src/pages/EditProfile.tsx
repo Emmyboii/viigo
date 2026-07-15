@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { FaCircleCheck } from 'react-icons/fa6'
 import { MdError } from 'react-icons/md'
 import { FaUserCircle } from 'react-icons/fa'
+import { ApiRequestError } from '../context/AppContext'
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 type ToastType = "success" | "error" | null;
@@ -138,7 +139,20 @@ const EditProfile = ({ setEdit }: { setEdit: (value: boolean) => void }) => {
 
         } catch (err) {
             console.error(err);
-            setToast({ type: "error", message: "Something went wrong, please try again!" });
+
+            let message = "Something went wrong. Try again later.";
+
+            if (err instanceof ApiRequestError) {
+                message =
+                    err.data?.data?.error ||
+                    err.data?.data?.errors ||
+                    err.data?.message ||
+                    message;
+            } else if (err instanceof Error) {
+                message = err.message;
+            }
+
+            setToast({ type: "error", message });
         } finally {
             setSaving(false);
         }
@@ -299,7 +313,7 @@ function Toast({ text, type, onClose }: { text: string; type: ToastType; onClose
 
     return (
         <div
-            className={`fixed mk:absolute w-fit bottom-20 z-50 left-4 right-4 mx-auto max-w-sm
+            className={`fixed mk:absolute w-fit bottom-20 z-50 left-4 right-4 mx-auto max-w-[440px]
       bg-white px-4 py-3 rounded-lg flex items-center gap-3
       shadow-[0_10px_40px_rgba(0,0,0,0.18)] animate-[fadeIn_0.2s_ease-out]`}
         >

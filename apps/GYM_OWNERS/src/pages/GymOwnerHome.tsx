@@ -8,7 +8,7 @@ import { HiLocationMarker, HiOutlineBell } from "react-icons/hi"
 import { useNavigate } from "react-router";
 import FilterChips from "../components/FilterChips";
 import UserCard from "../components/UserCard";
-import { useAppContext, type Booking } from "../context/AppContext";
+import { ApiRequestError, useAppContext, type Booking } from "../context/AppContext";
 import { GymOwnerHomeSkeleton } from "../components/Gymskeletons ";
 import NetworkErrorModal from "../components/NetworkErrorModal";
 
@@ -172,7 +172,7 @@ const GymOwnerHome = () => {
         setStatus("idle");
 
         // Auto-hide toast after 3 seconds
-        setTimeout(() => setToast(null), 2000);
+        setTimeout(() => setToast(null), 3300);
         return;
       }
 
@@ -205,21 +205,24 @@ const GymOwnerHome = () => {
         setTimeout(() => { isAutoTransitioning.current = false; }, 100);
       }, 2400);
 
-    } catch (err: unknown) {
+    } catch (err) {
       console.error(err);
 
       setStatus("error");
 
       let message = "OTP verification failed";
 
-      if (err instanceof Error) {
+      if (err instanceof ApiRequestError) {
+        message =
+          err.data?.data?.error ||
+          err.data?.data?.errors ||
+          err.data?.message ||
+          message;
+      } else if (err instanceof Error) {
         message = err.message;
       }
 
-      setToast({
-        type: "error",
-        message,
-      });
+      setToast({ type: "error", message });
     }
   };
 
@@ -596,7 +599,7 @@ function Toast({
 
   return (
     <div
-      className={`fixed bottom-20 z-50 left-4 right-4 mx-auto max-w-sm w-fit
+      className={`fixed bottom-20 z-50 left-4 right-4 mx-auto max-w-[440px] w-fit
             bg-white px-4 py-3 rounded-lg flex items-center gap-3
             shadow-[0_10px_40px_rgba(0,0,0,0.18)] animate-[fadeIn_0.2s_ease-out]`}
     >

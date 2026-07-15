@@ -118,7 +118,29 @@ const EditProfile = () => {
                 body: fd,
             });
 
-            if (!res.ok) throw new Error("Failed to update");
+            if (!res.ok) {
+                const errData = await res.json();
+
+                const message =
+                    errData?.data?.non_field_errors?.[0] ||
+                    errData?.data?.error?.[0] ||
+                    errData?.non_field_errors?.[0] ||
+                    errData?.error?.[0] ||
+                    errData?.data?.error ||
+                    errData?.data?.errors ||
+                    errData?.data?.detail ||
+                    errData?.detail ||
+                    errData?.data?.details ||
+                    errData?.details ||
+                    errData?.message ||
+                    errData?.errors ||
+                    errData?.error ||
+                    errData?.data?.message ||
+                    "Failed to update profile";
+
+                // throw new Error(message);
+                setToast({ type: "error", message: message });
+            }
 
             setToast({ type: "success", message: "Changes saved successfully!" });
 

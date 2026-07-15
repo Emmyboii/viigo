@@ -41,7 +41,7 @@ export default function WithdrawalModal({ open, balance, onClose, onSubmit }: Pr
             onClick={onClose} 
         >
             <div
-                className="bg-white w-full max-w-sm rounded-2xl p-6 space-y-5"
+                className="bg-white w-full max-w-[440px] rounded-2xl p-6 space-y-5"
                 onClick={(e) => e.stopPropagation()}
             >
 

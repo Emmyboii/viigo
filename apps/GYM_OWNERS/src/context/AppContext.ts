@@ -15,6 +15,26 @@ export interface Amenity {
     icon: string;
 }
 
+export interface ApiErrorPayload {
+    message?: string;
+    data?: {
+        error?: string;
+        errors?: string;
+        [key: string]: unknown;
+    };
+    [key: string]: unknown;
+}
+
+export class ApiRequestError extends Error {
+    data?: ApiErrorPayload | null;
+
+    constructor(message: string, data?: ApiErrorPayload | null) {
+        super(message);
+        this.name = "ApiRequestError";
+        this.data = data;
+    }
+}
+
 export interface Rule {
     id: number;
     description: string;

@@ -242,8 +242,8 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
 
                 <div className="relative bg-gradient-to-b from-blue-600 to-blue-500 text-white rounded-3xl p-4 shadow-xl">
 
-                    <img src={halfCircle} alt="Half Circle" className={`absolute ${pass.slot_type === "NON_PEAK" ? "bottom-[120px]" : pass.slot_type === "MORNING_PEAK" ? "bottom-[120px]" : "bottom-[100px]"} left-[-13px] w-[48px] h-[55px]`} />
-                    <img src={halfCircle} alt="Half Circle" className={`absolute ${pass.slot_type === "NON_PEAK" ? "bottom-[120px]" : pass.slot_type === "MORNING_PEAK" ? "bottom-[120px]" : "bottom-[100px]"} right-[-13px] rotate-180 w-[48px] h-[55px]`} />
+                    {/* <img src={halfCircle} alt="Half Circle" className={`absolute ${pass.slot_type === "NON_PEAK" ? "bottom-[120px]" : pass.slot_type === "MORNING_PEAK" ? "bottom-[120px]" : "bottom-[100px]"} left-[-13px] w-[48px] h-[55px]`} />
+                    <img src={halfCircle} alt="Half Circle" className={`absolute ${pass.slot_type === "NON_PEAK" ? "bottom-[120px]" : pass.slot_type === "MORNING_PEAK" ? "bottom-[120px]" : "bottom-[100px]"} right-[-13px] rotate-180 w-[48px] h-[55px]`} /> */}
 
                     {/* Gym Header */}
                     <div className="flex gap-3">
@@ -320,7 +320,19 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
                     </div>
 
                     {/* Divider */}
-                    <div className="border-t border-dashed border-white/40 my-3" />
+                    <div className="relative my-3">
+                        <div className="border-t border-dashed border-white/40" />
+                        <img
+                            src={halfCircle}
+                            alt=""
+                            className="absolute top-1/2 -translate-y-1/2 left-[-27px] w-[48px] h-[55px]"
+                        />
+                        <img
+                            src={halfCircle}
+                            alt=""
+                            className="absolute top-1/2 -translate-y-1/2 right-[-27px] rotate-180 w-[48px] h-[55px]"
+                        />
+                    </div>
 
                     {/* {pass.slot_type && (
                         <p className={`text-sm font-normal ${pass.slot_type === 'NON_PEAK' ? 'text-[#0F7D37]' : 'text-[#DC2626]'
@@ -441,7 +453,10 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
                 <div className="rounded-lg bg-[#F1F5F9] p-2 mx-4">
                     <div className="flex gap-3 items-center">
                         <h3 className="font-semibold text-sm">Change of Plans</h3>
-                        <button onClick={() => navigate(`/cancelbooking/${pass?.booking_reference}`)} className="text-[#F43F5E] font-medium text-sm border border-[#F43F5E] px-3 py-1 rounded-md">
+                        <button onClick={() => {
+                            navigate(`/cancelbooking/${pass?.booking_reference}`)
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }} className="text-[#F43F5E] font-medium text-sm border border-[#F43F5E] px-3 py-1 rounded-md">
                             Cancel Booking
                         </button>
                     </div>
@@ -522,6 +537,7 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
                     // onClose();
                     navigate('/')
                     localStorage.removeItem("selectedBookingId");
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
                     className="text-blue-600 text-center w-full"
                 >
@@ -532,6 +548,7 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
                     onClose();
                     navigate('/bookings')
                     localStorage.removeItem("selectedBookingId");
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
                     className="bg-blue-600 text-white py-3 rounded-md min-w-[200px]"
                 >
