@@ -636,25 +636,28 @@ export default function ReviewPay() {
                                 </h3>
 
                                 <div className="space-y-2">
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex items-start gap-2">
                                         <div className="w-2 h-2 rounded-full bg-[#22C55E] mt-1.5 flex-shrink-0" />
                                         <p className="text-[10.5px] text-[#0F172A] leading-relaxed">
-                                            Cancel at least 1 hour before your last entry time for a full refund.
+                                            Get a <span className="font-semibold">100% refund</span> when you cancel at least{" "}
+                                            <span className="font-semibold">1 hour before your "Check-in Before" time.</span>
                                         </p>
                                     </div>
 
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex items-start gap-2">
                                         <div className="w-2 h-2 rounded-full bg-[#EAB308] mt-1.5 flex-shrink-0" />
                                         <p className="text-[10.5px] text-[#0F172A] leading-relaxed">
-                                            Cancel within 1 hour of your last entry time and receive a 50% refund.
+                                            Get a <span className="font-semibold">50% refund</span> when you cancel within{" "}
+                                            <span className="font-semibold">1 hour of your "Check-in Before" time.</span>
                                         </p>
                                     </div>
 
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex items-start gap-2">
                                         <div className="w-2 h-2 rounded-full bg-[#F43F5E] mt-1.5 flex-shrink-0" />
                                         <p className="text-[10.5px] text-[#0F172A] leading-relaxed">
-                                            If you don't check in before your last entry time, no refund will be
-                                            issued and your booking will be marked as a No-Show.
+                                            After your <span className="font-semibold">"Check-in Before" time</span>, your booking
+                                            will be cancelled automatically and <span className="font-semibold">no refund</span>{" "}
+                                            will be issued.
                                         </p>
                                     </div>
                                 </div>

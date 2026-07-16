@@ -22,6 +22,8 @@ export type Booking = {
     display_date: string;
     display_time: string;
     last_entry_time: string;
+    gym_lat: number;
+    gym_long: number;
     payment_breakdown: {
         base_price: string;
         booking_hours: number;
@@ -36,10 +38,10 @@ export type Booking = {
 const Bookings = () => {
 
     const chipData = [
+        { id: "all", label: "All", icon: '' },
+        { id: "active", label: "Active", icon: '' },
         { id: "upcoming", label: "Upcoming", icon: '' },
         { id: "past", label: "Past", icon: '' },
-        { id: "cancelled", label: "Cancelled", icon: '' },
-        { id: "all", label: "All", icon: '' },
     ];
 
     useEffect(() => {
@@ -249,8 +251,8 @@ const Bookings = () => {
                 return b.status === "CONFIRMED";
             case "past":
                 return b.status === "COMPLETED";
-            case "cancelled":
-                return b.status === "CANCELLED";
+            case "active":
+                return b.status === "ACTIVE";
             case "all":
             default:
                 return true;
@@ -343,7 +345,7 @@ const Bookings = () => {
                                                                         : "bg-[#CBD5E1] text-[#FFFFFF]"
                                                             }`}
                                                     >
-                                                        {gym.status === "CONFIRMED" ? "Upcoming" : gym.status === "CANCELLED" ? "Cancelled" : gym.status === "COMPLETED" ? "Completed" : gym.status}
+                                                        {gym.status === "CONFIRMED" ? "Upcoming" : gym.status === "CANCELLED" ? "Cancelled" : gym.status === "COMPLETED" ? "Completed" : gym.status=== "ACTIVE" ? "Active" : gym.status}
                                                     </span>
 
                                                 </div>

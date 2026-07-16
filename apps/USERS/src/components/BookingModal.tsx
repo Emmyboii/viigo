@@ -18,10 +18,35 @@ import type { RecommendedWorkoutTimings } from "./types/gym";
 import fire from '../assets/fire.png'
 import { BookingModalSkeleton } from "./Gymskeletons ";
 import leaf from '../assets/leaf.png'
+import { useAppContext } from "../context/AppContext";
 
 type PaymentSuccessProps = {
     onClose: () => void;
     booking?: Booking;
+};
+
+const calculateDistance = (
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number
+) => {
+    const toRad = (value: number) => (value * Math.PI) / 180;
+
+    const R = 6371; // Earth's radius in km
+
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+
+    const a =
+        Math.sin(dLat / 2) ** 2 +
+        Math.cos(toRad(lat1)) *
+        Math.cos(toRad(lat2)) *
+        Math.sin(dLon / 2) ** 2;
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return R * c;
 };
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -55,19 +80,36 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
 
     const [pass, setPass] = useState<BookingPass | null>(null);
 
+    const { latitude, longitude } = useAppContext();
+
+    const distance =
+        latitude != null &&
+            longitude != null &&
+            pass?.latitude &&
+            pass?.longitude
+            ? calculateDistance(
+                Number(latitude),
+                Number(longitude),
+                Number(pass.latitude),
+                Number(pass.longitude)
+            )
+            : null;
+
     const navigate = useNavigate();
 
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
 
     useEffect(() => {
         const fetchPass = async () => {
             if (!booking?.id) return;
 
             setLoading(true);
+            setError(false);
 
             try {
                 const res = await fetch(
-                    `${backendUrl}/client/booking/${booking.id}/pass/`,
+                    `${backendUrl}/client/booking/${booking.id}/pass/?lat=${booking.gym_lat}&lng=${booking.gym_long}`,
                     {
                         headers: {
                             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -75,11 +117,17 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
                     }
                 );
 
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status}`);
+                }
+
                 const data = await res.json();
                 setPass(data.data);
+
             } catch (err) {
-                console.error("Error fetching booking pass", err);
+                console.error(err);
                 setPass(null);
+                setError(true);
             } finally {
                 setLoading(false);
             }
@@ -220,7 +268,24 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
     //     );
     // }
 
-    if (loading || !pass) { return <BookingModalSkeleton />; }
+    if (loading) { return <BookingModalSkeleton />; }
+
+    if (error || !pass) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center px-4 text-center gap-3">
+                <p className="text-red-500 font-medium">
+                    We couldn't load your booking pass.
+                </p>
+
+                <button
+                    onClick={() => window.location.href = "/bookings"}
+                    className="text-blue-600 underline text-sm"
+                >
+                    View Bookings
+                </button>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen pb-28 overflow-x-hidden max-w-[400px] mx-auto">
@@ -246,7 +311,7 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
                     <img src={halfCircle} alt="Half Circle" className={`absolute ${pass.slot_type === "NON_PEAK" ? "bottom-[120px]" : pass.slot_type === "MORNING_PEAK" ? "bottom-[120px]" : "bottom-[100px]"} right-[-13px] rotate-180 w-[48px] h-[55px]`} /> */}
 
                     {/* Gym Header */}
-                    <div className="flex gap-3">
+                    <div className="flex gap-2">
                         <img
                             src={`https://api.viigo.in/${pass?.gym_image}`}
                             alt={pass?.gym_name || "Gym"}
@@ -254,18 +319,18 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
                         />
 
                         <div className="flex-1">
-                            <div className="flex justify-between items-center gap-2">
-                                <h2 className="font-semibold text-nowrap text-lg">
+                            <div className="flex sr:flex-row flex-col justify-between sr:items-center gap-1">
+                                <h2 className="font-semibold text-nowrap text-base">
                                     {pass?.gym_name}
                                 </h2>
 
-                                <div className="flex gap-3">
+                                <div className="flex gap-2">
                                     {/* Phone */}
                                     <div
                                         onClick={handlePhoneClick}
                                         className="bg-[#BFDBFE] text-[#2563EB] p-1 rounded-lg cursor-pointer hover:bg-gray-200 transition"
                                     >
-                                        <MdPhone size={16} />
+                                        <MdPhone size={14} />
                                     </div>
 
                                     {/* Location */}
@@ -273,7 +338,7 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
                                         onClick={handleLocationClick}
                                         className="bg-[#BFDBFE] text-[#2563EB] p-1 rounded-lg cursor-pointer hover:bg-gray-200 transition"
                                     >
-                                        <TiLocation size={16} />
+                                        <TiLocation size={14} />
                                     </div>
                                 </div>
                             </div>
@@ -282,9 +347,13 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
                                 {pass.gym_location}
                             </div>
 
-                            <div className="flex items-center gap-1 text-sm opacity-90">
-                                <FiMapPin className="w-4 h-4" />
-                                <span className="pl-2 text-nowrap">{`${pass.gym_open_till}`}</span>
+                            <div className="flex items-center gap-1 text-[12.5px] opacity-90">
+                                <FiMapPin className="w-3 h-3 flex-shrink-0" />
+                                <span className="sr:text-nowrap">
+                                    {distance !== null
+                                        ? `${distance.toFixed(1)} km • ${pass.gym_open_till}`
+                                        : pass.gym_open_till}
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -293,7 +362,7 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
                     <div className="grid grid-cols-3 gap-1 justify-between mt-2 text-sm border-b border-white/30 py-4">
                         <div>
                             <p className="text-[#DBEAFE]">Guest Name</p>
-                            <p className="break-all"> {pass.guest_name?.split(" ")[0]}</p>
+                            <p className="break-all"> {pass.guest_name}</p>
                         </div>
                         <div className="border-l border-[#FFFFFF33] pl-2">
                             <p className="text-[#DBEAFE]">Hours</p>
@@ -462,25 +531,28 @@ export default function BookingModal({ onClose, booking }: PaymentSuccessProps) 
                     </div>
 
                     <div className="space-y-2 mt-2">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-start gap-2">
                             <div className="w-2 h-2 rounded-full bg-[#22C55E] mt-1.5 flex-shrink-0" />
                             <p className="text-[10.5px] text-[#0F172A] leading-relaxed">
-                                Cancel at least 1 hour before your last entry time for a full refund.
+                                Get a <span className="font-semibold">100% refund</span> when you cancel at least{" "}
+                                <span className="font-semibold">1 hour before your "Check-in Before" time.</span>
                             </p>
                         </div>
 
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-start gap-2">
                             <div className="w-2 h-2 rounded-full bg-[#EAB308] mt-1.5 flex-shrink-0" />
                             <p className="text-[10.5px] text-[#0F172A] leading-relaxed">
-                                Cancel within 1 hour of your last entry time and receive a 50% refund.
+                                Get a <span className="font-semibold">50% refund</span> when you cancel within{" "}
+                                <span className="font-semibold">1 hour of your "Check-in Before" time.</span>
                             </p>
                         </div>
 
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-start gap-2">
                             <div className="w-2 h-2 rounded-full bg-[#F43F5E] mt-1.5 flex-shrink-0" />
                             <p className="text-[10.5px] text-[#0F172A] leading-relaxed">
-                                If you don't check in before your last entry time, no refund will be
-                                issued and your booking will be marked as a No-Show.
+                                After your <span className="font-semibold">"Check-in Before" time</span>, your booking
+                                will be cancelled automatically and <span className="font-semibold">no refund</span>{" "}
+                                will be issued.
                             </p>
                         </div>
                     </div>

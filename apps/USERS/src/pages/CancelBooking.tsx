@@ -227,6 +227,64 @@ export default function CancelBooking() {
         };
     }, []);
 
+    const getErrorMessage = (error: any): string => {
+        if (!error) return "Something went wrong.";
+
+        // 👇 Check nested `data` FIRST
+        if (error?.data) {
+            const message = getErrorMessage(error.data);
+
+            if (message !== "Something went wrong.") {
+                return message;
+            }
+        }
+
+        // String
+        if (typeof error === "string") {
+            return error;
+        }
+
+        // Array
+        if (Array.isArray(error)) {
+            for (const item of error) {
+                const message = getErrorMessage(item);
+                if (message !== "Something went wrong.") {
+                    return message;
+                }
+            }
+        }
+
+        // Object
+        if (typeof error === "object") {
+            const priorityKeys = [
+                "error",
+                "errors",
+                "detail",
+                "details",
+                "non_field_errors",
+                "message",
+            ];
+
+            for (const key of priorityKeys) {
+                if (key in error) {
+                    const message = getErrorMessage(error[key]);
+                    if (message !== "Something went wrong.") {
+                        return message;
+                    }
+                }
+            }
+
+            for (const value of Object.values(error)) {
+                const message = getErrorMessage(value);
+                if (message !== "Something went wrong.") {
+                    return message;
+                }
+            }
+        }
+
+        return "Something went wrong.";
+    };
+
     const handleCancel = async () => {
         if (!selectedReason) {
             setError("Please select a reason for cancellation.");
@@ -248,29 +306,14 @@ export default function CancelBooking() {
                 },
                 body: JSON.stringify({ reason: selectedReason }),
             });
+
             if (!res.ok) {
                 const errData = await res.json();
 
-                const message =
-                    errData?.data?.non_field_errors?.[0] ||
-                    errData?.data?.error?.[0] ||
-                    errData?.non_field_errors?.[0] ||
-                    errData?.error?.[0] ||
-                    errData?.data?.error ||
-                    errData?.data?.errors ||
-                    errData?.data?.detail ||
-                    errData?.detail ||
-                    errData?.data?.details ||
-                    errData?.details ||
-                    errData?.message ||
-                    errData?.errors ||
-                    errData?.error ||
-                    errData?.data?.message ||
-                    "Failed to cancel booking";
-
-                // throw new Error(message);
-                setError(message);
+                setError(getErrorMessage(errData));
+                return;
             }
+
             openModal();
         } catch (err: any) {
             console.error(err);
