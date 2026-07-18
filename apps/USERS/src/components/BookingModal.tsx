@@ -13,7 +13,7 @@ import type { Booking } from "../pages/Bookings";
 import { MdPending, MdPhone } from "react-icons/md";
 // import { toPng } from "html-to-image";
 import { snapdom } from "@zumer/snapdom";
-import { PiWarningCircle } from "react-icons/pi";
+// import { PiWarningCircle } from "react-icons/pi";
 import type { RecommendedWorkoutTimings } from "./types/gym";
 import fire from '../assets/fire.png'
 import { BookingModalSkeleton } from "./Gymskeletons ";

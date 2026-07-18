@@ -162,7 +162,7 @@ export default function GymDetails() {
                 { type: "image/png" }
             );
 
-            const shareText = `${gym?.name}\n\nMore info: https://viigousers.vercel.app/gyms/${gym?.slug}`;
+            const shareText = `${gym?.name}\n\nMore info: https://viigo.in/gyms/${gym?.slug}`;
 
             if (navigator.share && navigator.canShare({ files: [file] })) {
                 await navigator.share({ files: [file], text: shareText });

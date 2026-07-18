@@ -12,7 +12,7 @@ import { useAppContext, type GymCard, type RecommendedWorkoutTimings } from "../
 import { MdPhone } from "react-icons/md";
 import { TiLocation } from "react-icons/ti";
 import { snapdom } from "@zumer/snapdom";
-import { PiWarningCircle } from "react-icons/pi";
+// import { PiWarningCircle } from "react-icons/pi";
 import fire from '../assets/fire.png'
 import leaf from '../assets/leaf.png'
 import { PaymentSuccessSkeleton } from "../components/Gymskeletons ";
