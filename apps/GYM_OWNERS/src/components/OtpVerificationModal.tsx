@@ -248,7 +248,7 @@ export default function OtpVerificationModal({ user, onClose }: OtpVerificationM
                                 {user?.status === 'CANCELLED' ? (
                                     <div className="flex items-center gap-2 text-nowrap">
                                         <HiMiniCurrencyRupee size={17} />
-                                        <p className="text-[#0F172A] font-normal text-sm">Amount Refunded : <span className='font-semibold'>₹{user?.total_amount}</span></p>
+                                        <p className="text-[#0F172A] font-normal text-sm">Amount Refunded : <span className='font-semibold'>₹{user?.payment_breakdown.refund_amount}</span></p>
                                     </div>
                                 ) : (
                                     <div className="flex items-center gap-2 text-nowrap">

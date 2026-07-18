@@ -154,6 +154,11 @@ export default function OTPVerification() {
         }
     };
 
+    useEffect(() => {
+        const t = setTimeout(() => inputsRef.current[0]?.focus(), 300);
+        return () => clearTimeout(t);
+    }, []);
+
     /* ---------------- Verify OTP ---------------- */
     const verifyOtp = async (code: string) => {
 
@@ -280,7 +285,7 @@ export default function OTPVerification() {
             {/* ❌ Bottom Toast */}
             {toast && <Toast type={toast.type} text={toast.message} onClose={handleToastClose} />}
 
-            <div className="min-h-screen py-10 bg-white flex justify-center">
+            <div className="min-h-dvh py-10 bg-white flex justify-center">
                 <div className="w-full max-w-s px-6">
                     <img src={lockImage} title="img" className="mx-auto size-[120px]" />
 
@@ -314,7 +319,7 @@ export default function OTPVerification() {
                                 inputMode="numeric"
                                 autoComplete="one-time-code"
                                 pattern="\d*"
-                                autoFocus={index === 0}
+                                // autoFocus={index === 0}
                                 enterKeyHint={index === 5 ? "done" : "next"}
                                 ref={(el) => {
                                     inputsRef.current[index] = el;

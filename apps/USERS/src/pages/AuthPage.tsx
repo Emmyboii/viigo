@@ -244,7 +244,7 @@ const AuthPage = () => {
 
   return (
     <div className="bg-[#2563EB] overflow-x-hidden">
-      <div className="relative h-[50vh] bg-white mx-auto text-white overflow-hidden">
+      <div className="relative h-[45dvh] bg-white mx-auto text-white overflow-hidden">
         {/* Slides */}
         <div ref={emblaRef} className="h-full">
           <div className="flex h-full">
@@ -294,8 +294,7 @@ const AuthPage = () => {
                 value={phoneNumber}
                 onChange={handleChange}
                 title="number"
-                className="border border-[#475569] text-[#0F172A] text-sm w-full rounded-lg py-2 px-4 outline-none pt-7"
-              />
+                className="border border-[#475569] text-[#0F172A] text-base sm:text-sm w-full rounded-lg py-2 px-4 outline-none pt-7" />
               <p className="text-[#475569] absolute top-2 left-4 text-xs font-normal">10 Digit Phone Number</p>
             </div>
 
@@ -320,8 +319,7 @@ const AuthPage = () => {
                 value={emailAddress}
                 onChange={(e) => setEmailAddress(e.target.value)}
                 title="email"
-                className="border border-[#475569] text-[#0F172A] text-sm w-full rounded-lg py-2 px-4 outline-none pt-7"
-              />
+                className="border border-[#475569] text-[#0F172A] text-base sm:text-sm w-full rounded-lg py-2 px-4 outline-none pt-7" />
               <p className="text-[#475569] absolute top-2 left-4 text-xs font-normal">Enter Email ID</p>
             </div>
 
@@ -339,9 +337,9 @@ const AuthPage = () => {
         )}
 
         <div className="flex items-center justify-center gap-4 text-[#CBD5E1] text-sm font-normal">
-          <div className="w-[260px] border border-[#CBD5E1]"></div>
+          <div className="flex-1 border border-[#CBD5E1]"></div>
           <p>or</p>
-          <div className="w-[260px] border border-[#CBD5E1]"></div>
+          <div className="flex-1 border border-[#CBD5E1]"></div>
         </div>
 
         <div className="flex items-center justify-center gap-6">

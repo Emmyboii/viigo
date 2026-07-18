@@ -329,7 +329,25 @@ export default function PaymentSuccess({ onClose, bookingReference, onReady, hid
                     <div className="text-center mt-1">
                         <p className="text-[48px] font-semibold">OTP : {pass.otp}</p>
                         <p className="text-xs mt-2 max-w-[261px] mx-auto">Use OTP during check in to start your session.</p>
-                        <p className="text-xs mt-2 max-w-[261px] mx-auto">This pass will be valid till the end of selected booking slot</p>
+                        {/* <p className="text-xs mt-2 max-w-[261px] mx-auto">This pass will be valid till the end of selected booking slot</p> */}
+                        {pass.slot_type === 'MORNING_PEAK' && (
+                            <div className="flex gap-1 text-[11px] text-[#ffffff] text-center justify-center mt-2">
+                                {/* <PiWarningCircle className="rotate-180 mt-[3px]" size={14} /> */}
+                                <span>Slot starts at {pass.gym_timings.split(" - ")[0]}. You can check in anytime <br /> before {pass?.last_entry_time}.</span>
+                            </div>
+                        )}
+                        {pass.slot_type === 'EVENING_PEAK' && (
+                            <div className="flex gap-1 text-[11px] text-[#ffffff] text-center justify-center mt-2">
+                                {/* <PiWarningCircle className="rotate-180 mt-[3px]" size={14} /> */}
+                                <span>Slot starts at 5:00 PM. You can check in anytime <br /> before {pass?.last_entry_time}.</span>
+                            </div>
+                        )}
+                        {pass.slot_type === 'NON_PEAK' && (
+                            <div className="flex gap-1 text-[11px] text-[#ffffff] text-center justify-center mt-2">
+                                {/* <PiWarningCircle className="rotate-180 mt-[3px]" size={14} /> */}
+                                <span>Slot starts at 8:00 AM. You can check in anytime <br /> before {pass?.last_entry_time}.</span>
+                            </div>
+                        )}
                     </div>
 
                     <div className="relative my-3">
@@ -385,24 +403,7 @@ export default function PaymentSuccess({ onClose, bookingReference, onReady, hid
                             </div>
                         )}
 
-                        {pass.slot_type === 'MORNING_PEAK' && (
-                            <div className="flex gap-1 text-[11px] text-[#ffffff] text-center justify-center mt-2">
-                                <PiWarningCircle className="rotate-180 mt-[3px]" size={14} />
-                                <span>Slot starts at {pass.gym_timings.split(" - ")[0]}. You can check in anytime before {pass?.last_entry_time}.</span>
-                            </div>
-                        )}
-                        {pass.slot_type === 'EVENING_PEAK' && (
-                            <div className="flex gap-1 text-[11px] text-[#ffffff] text-center justify-center mt-2">
-                                <PiWarningCircle className="rotate-180 mt-[3px]" size={14} />
-                                <span>Slot starts at 5:00 PM. You can check in anytime before {pass?.last_entry_time}.</span>
-                            </div>
-                        )}
-                        {pass.slot_type === 'NON_PEAK' && (
-                            <div className="flex gap-1 text-[11px] text-[#ffffff] text-center justify-center mt-2">
-                                <PiWarningCircle className="rotate-180 mt-[3px]" size={14} />
-                                <span>Slot starts at 8:00 AM. You can check in anytime before {pass?.last_entry_time}.</span>
-                            </div>
-                        )}
+
                     </div>
                 </motion.div>
             </div>

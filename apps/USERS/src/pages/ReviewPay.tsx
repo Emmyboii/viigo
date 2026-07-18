@@ -498,11 +498,11 @@ export default function ReviewPay() {
                             {/* ===== Selected Pass ===== */}
                             <div className="bg-white rounded-xl border p-4 space-y-4">
                                 <div>
-                                    <div className="flex justify-between gap-2 items-center mb-4">
+                                    <div className="flex justify-between gap-10 items-center mb-4">
                                         <div className="space-y-2">
                                             <h3 className="font-semibold">Selected Pass</h3>
 
-                                            <div className="flex items-center gap-1 text-nowrap text-sm mt-2">
+                                            <div className="flex items-center gap-1 break-all text-sm mt-2">
                                                 <img src={three2} alt="Three" className="mt- w-4" />
                                                 <p className="break-al text-[#0F172A]">{userData?.full_name.split(" ")[0] || userData?.email}
                                                     {peopleCount > 0 && ` +${peopleCount} ${peopleCount > 1 ? "Friends" : "Friend"}`}</p>

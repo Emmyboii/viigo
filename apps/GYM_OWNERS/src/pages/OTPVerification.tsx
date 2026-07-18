@@ -35,7 +35,7 @@ export default function OTPVerification() {
 
     // Fetch identifier from localStorage
     useEffect(() => {
-        const tempIdentifierStr =JSON.parse(
+        const tempIdentifierStr = JSON.parse(
             localStorage.getItem("tempIdentifier") || "{}"
         );
         if (!tempIdentifierStr) {
@@ -213,6 +213,11 @@ export default function OTPVerification() {
         }
     };
 
+    useEffect(() => {
+        const t = setTimeout(() => inputsRef.current[0]?.focus(), 300);
+        return () => clearTimeout(t);
+    }, []);
+
     /* ---------------- Resend OTP ---------------- */
     const handleResend = async () => {
         setStatus("resending");
@@ -279,7 +284,7 @@ export default function OTPVerification() {
 
             {/* ❌ Bottom Toast */}
 
-            <div className="h-screen relative py-10 bg-white flex justify-center max-w-[400px] mx-auto lg:w-1/2 w-full">
+            <div className="h-dvh relative py-10 bg-white flex justify-center max-w-[400px] mx-auto lg:w-1/2 w-full">
                 {(status === "verifying" || status === "resending") && (
                     <CenterModal
                         text={status === "verifying" ? "Validating credentials" : "Resending OTP"}
@@ -318,7 +323,7 @@ export default function OTPVerification() {
                                 inputMode="numeric"
                                 autoComplete="one-time-code"
                                 pattern="\d*"
-                                autoFocus={index === 0}
+                                // autoFocus={index === 0}
                                 enterKeyHint={index === 5 ? "done" : "next"}
                                 ref={(el) => {
                                     inputsRef.current[index] = el;
