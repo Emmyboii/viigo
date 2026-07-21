@@ -116,7 +116,7 @@ export function CancelBookingSkeleton() {
 
 export function EditProfileSkeleton() {
     return (
-        <div className="p-5 max-w-[1300px] mx-auto">
+        <div className="max-w-[1300px] mx-auto">
             <div className="pt-14" />
             <div className="border border-gray-100 py-6 px-4 rounded-md space-y-4">
                 <div className="flex items-center justify-between">

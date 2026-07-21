@@ -6,6 +6,8 @@ import { FaCircleCheck } from 'react-icons/fa6';
 import { MdError } from 'react-icons/md';
 import { FaUserCircle } from 'react-icons/fa';
 import { EditProfileSkeleton } from '../components/Gymskeletons ';
+import { IoClose } from "react-icons/io5";
+import { FiCamera } from 'react-icons/fi';
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 type ToastType = "success" | "error" | null;
@@ -20,8 +22,10 @@ const EditProfile = () => {
         phone_number: '',
         profile_image: null as File | null,
         profile_image_url: '' as string,
-        total_fitness_hours: ''
+        total_fitness_hours: '',
+        total_fitness_duration: 0
     });
+
 
     const [previewImage, setPreviewImage] = useState<string | null>(null);
 
@@ -29,6 +33,16 @@ const EditProfile = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [toast, setToast] = useState<{ type: ToastType; message: string } | null>(null);
+    const [showLeaveModal, setShowLeaveModal] = useState(false);
+    const [allowUnload, setAllowUnload] = useState(false);
+
+    const hasInitialImage = !!initialData.profile_image_url;
+    const hasCurrentImage =
+        !!previewImage || !!formData.profile_image_url;
+
+    const imageChanged =
+        hasInitialImage !== hasCurrentImage ||
+        formData.profile_image !== null;
 
     useEffect(() => {
         setIsLoading(true)
@@ -51,6 +65,7 @@ const EditProfile = () => {
                         profile_image: null,
                         profile_image_url: data.data.profile_image || '',
                         total_fitness_hours: data.data.total_fitness_hours || '',
+                        total_fitness_duration: Number(data.data.total_fitness_duration) || 0,
                     });
                     setInitialData({
                         full_name: data.data.full_name || '',
@@ -59,6 +74,7 @@ const EditProfile = () => {
                         profile_image: null,
                         profile_image_url: data.data.profile_image || '',
                         total_fitness_hours: data.data.total_fitness_hours || '',
+                        total_fitness_duration: Number(data.data.total_fitness_duration) || 0,
                     });
                 }
             } catch (err) {
@@ -84,12 +100,69 @@ const EditProfile = () => {
         formData.full_name !== initialData.full_name ||
         formData.email !== initialData.email ||
         formData.phone_number !== initialData.phone_number ||
-        formData.profile_image !== null ||
-        formData.total_fitness_hours !== initialData.total_fitness_hours;
+        imageChanged
+
+    const handleBack = () => {
+        if (isDirty) {
+            setShowLeaveModal(true);
+            return;
+        }
+
+        navigate(-1);
+    };
+
+    useEffect(() => {
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            if (!isDirty || allowUnload) return;
+
+            e.preventDefault();
+            e.returnValue = "";
+        };
+
+        window.addEventListener("beforeunload", handleBeforeUnload);
+
+        return () => {
+            window.removeEventListener("beforeunload", handleBeforeUnload);
+        };
+    }, [isDirty, allowUnload]);
+
+    useEffect(() => {
+        window.history.pushState(null, "", window.location.href);
+
+        const handlePopState = () => {
+            if (isDirty) {
+                setShowLeaveModal(true);
+
+                // Push the state back so the browser stays on this page
+                window.history.pushState(null, "", window.location.href);
+            } else {
+                navigate(-1);
+            }
+        };
+
+        window.addEventListener("popstate", handlePopState);
+
+        return () => {
+            window.removeEventListener("popstate", handlePopState);
+        };
+    }, [isDirty, navigate]);
+
+    const shouldRemoveImage =
+        !!initialData.profile_image_url &&
+        !previewImage &&
+        !formData.profile_image;
 
     // const isValid =
     //     formData.email.trim() !== '' &&
     //     formData.phone_number.trim() !== '';
+
+    useEffect(() => {
+        return () => {
+            if (previewImage) {
+                URL.revokeObjectURL(previewImage);
+            }
+        };
+    }, [previewImage]);
 
     const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -108,6 +181,10 @@ const EditProfile = () => {
 
             if (formData.profile_image) {
                 fd.append("profile_image", formData.profile_image);
+            }
+
+            if (shouldRemoveImage) {
+                fd.append("remove_profile_image", "true");
             }
 
             const res = await fetch(`${backendUrl}/api/user/profile/`, {
@@ -140,10 +217,13 @@ const EditProfile = () => {
 
                 // throw new Error(message);
                 setToast({ type: "error", message: message });
+                return
             }
 
             setToast({ type: "success", message: "Changes saved successfully!" });
 
+            setShowLeaveModal(false);
+            setAllowUnload(true);
             setTimeout(() => {
                 navigate("/profile");
                 window.location.reload();
@@ -186,7 +266,7 @@ const EditProfile = () => {
             <div className="fixed max-w-[1300px] mx-auto top-0 left-0 right-0 z-40 bg-white flex items-center px-4 py-3" >
 
                 <button
-                    onClick={() => navigate(-1)}
+                    onClick={handleBack}
                     aria-label="Go back"
                     className="p-1"
                 >
@@ -209,35 +289,68 @@ const EditProfile = () => {
                             <div className="flex items-center justify-between">
                                 <div className="space-y-2">
                                     <p className="text-[#0F172A] font-semibold text-base">{formData?.full_name || "User"}</p>
-                                    <p className="text-[#0F172A] font-normal text-sm">Total Fitness Hours : {formData.total_fitness_hours || 0}</p>
+                                    <p className="text-[#0F172A] font-normal text-sm">Total Fitness Hours : {formData.total_fitness_duration || 0} {formData.total_fitness_duration === 1 ? 'Hr' : 'Hrs'}</p>
                                 </div>
 
-                                <label className="cursor-pointer">
-                                    <div className="w-[69px] h-[69px] rounded-full overflow-hidden flex items-center justify-center bg-gray-100">
-                                        {previewImage ? (
-                                            <img
-                                                src={previewImage}
-                                                className="w-full h-full object-cover"
-                                                alt="Profile"
+                                <div className="relative w-[69px] h-[69px]">
+                                    <label htmlFor="profile-image" className="cursor-pointer group">
+                                        <div className="w-full h-full rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
+                                            {previewImage ? (
+                                                <img
+                                                    src={previewImage}
+                                                    className="w-full h-full object-cover transition duration-200 group-hover:brightness-90"
+                                                    alt="Profile"
+                                                />
+                                            ) : formData.profile_image_url ? (
+                                                <img
+                                                    src={formData.profile_image_url}
+                                                    className="w-full h-full object-cover transition duration-200 group-hover:brightness-90"
+                                                    alt="Profile"
+                                                />
+                                            ) : (
+                                                <FaUserCircle size={70} className="text-gray-400" />
+                                            )}
+                                        </div>
+
+                                        <div
+                                            className="absolute bottom-0 left-0 w-5 h-5 rounded-full bg-[#2563EB] border-2 border-white flex items-center justify-center shadow-md transition duration-200 group-hover:scale-110">
+                                            <FiCamera
+                                                size={10}
+                                                className="text-white"
                                             />
-                                        ) : formData.profile_image_url ? (
-                                            <img
-                                                src={formData.profile_image_url}
-                                                className="w-full h-full object-cover"
-                                                alt="Profile"
-                                            />
-                                        ) : (
-                                            <FaUserCircle size={60} className="text-gray-400" />
-                                        )}
-                                    </div>
+                                        </div>
+                                    </label>
+
+
+                                    {(previewImage || formData.profile_image_url) && (
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                // e.preventDefault();
+                                                // e.stopPropagation();
+
+                                                setPreviewImage(null);
+
+                                                setFormData(prev => ({
+                                                    ...prev,
+                                                    profile_image: null,
+                                                    profile_image_url: "",
+                                                }));
+                                            }}
+                                            className="absolute z-50 top-0 right-0 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center shadow-md hover:bg-red-600 transition">
+                                            <IoClose size={13} />
+                                        </button>
+                                    )}
 
                                     <input
                                         type="file"
+                                        id="profile-image"
                                         accept="image/*"
                                         className="hidden"
                                         onChange={(e) => {
                                             const file = e.target.files?.[0];
                                             if (!file) return;
+
 
                                             setFormData((prev) => ({
                                                 ...prev,
@@ -247,7 +360,7 @@ const EditProfile = () => {
                                             setPreviewImage(URL.createObjectURL(file));
                                         }}
                                     />
-                                </label>
+                                </div>
                             </div>
 
                             <div className="border border-[#F2F2F2] border-dotted"></div>
@@ -304,6 +417,55 @@ const EditProfile = () => {
                             {saving ? 'Saving...' : 'Save Changes'}
                         </button>
                     </form>
+
+                    {showLeaveModal && (
+                        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm px-5">
+                            <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl animate-[fadeIn_0.2s_ease-out]">
+
+                                <div className="flex justify-center">
+                                    <div className="flex h-14 w-14 items-center justify-center rounded-full bg-red-100">
+                                        <MdError className="text-3xl text-red-500" />
+                                    </div>
+                                </div>
+
+                                <div className="mt-5 text-center">
+                                    <h2 className="text-lg font-semibold text-[#0F172A]">
+                                        Discard changes?
+                                    </h2>
+
+                                    <p className="mt-2 text-sm leading-6 text-[#64748B]">
+                                        You have unsaved changes. If you leave now, all your edits
+                                        will be lost.
+                                    </p>
+                                </div>
+
+                                <div className="mt-6 flex gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowLeaveModal(false)}
+                                        className="flex-1 h-11 rounded-lg border border-gray-300 bg-white font-medium text-[#0F172A] transition hover:bg-gray-50"
+                                    >
+                                        Continue Editing
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setShowLeaveModal(false);
+
+                                            window.removeEventListener("popstate", () => { });
+
+                                            navigate("/profile");
+                                        }}
+                                        className="flex-1 h-11 rounded-lg bg-red-500 font-medium text-white transition hover:bg-red-600"
+                                    >
+                                        Discard
+                                    </button>
+                                </div>
+
+                            </div>
+                        </div>
+                    )}
                     <Footer />
                 </>
             )}
