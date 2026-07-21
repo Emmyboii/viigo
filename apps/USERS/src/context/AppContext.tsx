@@ -13,6 +13,7 @@ type UserType = {
     phone_number: string | null;
     user_type: string;
     total_fitness_hours: number;
+    total_fitness_duration: number;
 };
 
 interface Amenity {
