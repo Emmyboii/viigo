@@ -78,11 +78,11 @@ const terms = [
 const TermsAndCondtions = () => {
 
   useEffect(() => {
-    document.title = "Viigo – Terms and Conditions";
+    document.title = "Viigo Partners – Terms and Conditions";
 
     // Optional: restore the default title when leaving the page
     return () => {
-      document.title = "Viigo – Find Gyms Near You";
+      document.title = "Viigo Partners – Grow Your Gym";
     };
   }, []);
 

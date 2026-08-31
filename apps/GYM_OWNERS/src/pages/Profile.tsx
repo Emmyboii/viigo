@@ -119,11 +119,11 @@ const Profile = ({ user }: UserProps) => {
     };
 
     useEffect(() => {
-        document.title = "Viigo – Profile";
+        document.title = "Viigo Partners – Profile";
 
         // Optional: restore the default title when leaving the page
         return () => {
-            document.title = "Viigo – Find Gyms Near You";
+            document.title = "Viigo Partners – Grow Your Gym";
         };
     }, []);
 

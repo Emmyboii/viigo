@@ -22,11 +22,11 @@ const EditProfile = ({ setEdit }: { setEdit: (value: boolean) => void }) => {
     const [previewImage, setPreviewImage] = useState<string | null>(null);
 
     useEffect(() => {
-        document.title = "Viigo – Edit Profile";
+        document.title = "Viigo Partners – Edit Profile";
 
         // Optional: restore the default title when leaving the page
         return () => {
-            document.title = "Viigo – Find Gyms Near You";
+            document.title = "Viigo Partners – Grow Your Gym";
         };
     }, []);
 

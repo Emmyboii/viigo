@@ -109,11 +109,11 @@ const Transactions = () => {
   };
 
   useEffect(() => {
-    document.title = "Viigo – Transactions";
+    document.title = "Viigo Partners – Transactions";
 
     // Optional: restore the default title when leaving the page
     return () => {
-      document.title = "Viigo – Find Gyms Near You";
+      document.title = "Viigo Partners – Grow Your Gym";
     };
   }, []);
 

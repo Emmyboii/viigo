@@ -108,11 +108,11 @@ export default function EditGym({ setDisplay, setGym }: EditGymProps) {
     const [initialData, setInitialData] = useState<string>("");
 
     useEffect(() => {
-        document.title = "Viigo – Edit Gym Details";
+        document.title = "Viigo Partners – Edit Gym Details";
 
         // Optional: restore the default title when leaving the page
         return () => {
-            document.title = "Viigo – Find Gyms Near You";
+            document.title = "Viigo Partners – Grow Your Gym";
         };
     }, []);
 

@@ -59,11 +59,11 @@ export default function Gym({ gym, loading, display, setDisplay, setGym }: GymPr
     const { isOffline, networkError } = useAppContext();
 
     useEffect(() => {
-        document.title = "Viigo – Gym Details";
+        document.title = "Viigo Partners – Gym Details";
 
         // Optional: restore the default title when leaving the page
         return () => {
-            document.title = "Viigo – Find Gyms Near You";
+            document.title = "Viigo Partners – Grow Your Gym";
         };
     }, []);
 

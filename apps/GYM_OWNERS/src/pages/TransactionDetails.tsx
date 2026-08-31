@@ -123,11 +123,11 @@ const TransactionDetails = ({ id, setSelectedTransactionId }: { id: number, setS
     };
 
     useEffect(() => {
-        document.title = "Viigo – Transaction Details";
+        document.title = "Viigo Partners – Transaction Details";
 
         // Optional: restore the default title when leaving the page
         return () => {
-            document.title = "Viigo – Find Gyms Near You";
+            document.title = "Viigo Partners – Grow Your Gym";
         };
     }, []);
 

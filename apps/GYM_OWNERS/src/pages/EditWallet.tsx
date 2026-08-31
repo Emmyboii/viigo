@@ -93,11 +93,11 @@ export default function EditWallet() {
     };
 
     useEffect(() => {
-        document.title = "Viigo – Edit Bank Details & G.S.T Details";
+        document.title = "Viigo Partners – Edit Bank Details & G.S.T Details";
 
         // Optional: restore the default title when leaving the page
         return () => {
-            document.title = "Viigo – Find Gyms Near You";
+            document.title = "Viigo Partners – Grow Your Gym";
         };
     }, []);
 

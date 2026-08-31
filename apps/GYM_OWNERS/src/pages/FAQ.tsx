@@ -191,11 +191,11 @@ export default function FAQ({ setFaq }: { setFaq: (value: boolean) => void }) {
     };
 
     useEffect(() => {
-        document.title = "Viigo – Frequently Asked Questions";
+        document.title = "Viigo Partners – Frequently Asked Questions";
 
         // Optional: restore the default title when leaving the page
         return () => {
-            document.title = "Viigo – Find Gyms Near You";
+            document.title = "Viigo Partners – Grow Your Gym";
         };
     }, []);
 

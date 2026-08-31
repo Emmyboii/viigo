@@ -58,11 +58,11 @@ const privacySections = [
 const PrivacyPolicy = () => {
 
     useEffect(() => {
-        document.title = "Viigo – Privacy Policy";
+        document.title = "Viigo Partners – Privacy Policy";
 
         // Optional: restore the default title when leaving the page
         return () => {
-            document.title = "Viigo – Find Gyms Near You";
+            document.title = "Viigo Partners – Grow Your Gym";
         };
     }, []);
     

@@ -173,11 +173,11 @@ export default function Notifications({ Loading = false }: { Loading?: boolean }
     }, [Loading, controls]);
 
     useEffect(() => {
-        document.title = "Viigo – Notifications";
+        document.title = "Viigo Partners – Notifications";
 
         // Optional: restore the default title when leaving the page
         return () => {
-            document.title = "Viigo – Find Gyms Near You";
+            document.title = "Viigo Partners – Grow Your Gym";
         };
     }, []);
 

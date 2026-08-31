@@ -1,6 +1,6 @@
-import { Route, Routes } from "react-router-dom"
-import AuthPage from "./pages/AuthPage"
-import Loader from './components/Loader';
+import { Route, Routes } from "react-router-dom";
+import AuthPage from "./pages/AuthPage";
+import Loader from "./components/Loader";
 import OTPVerification from "./pages/OTPVerification";
 import WorkoutForm from "./pages/WorkoutForm";
 import GymOwnerHome from "./pages/GymOwnerHome";
@@ -23,17 +23,26 @@ import WalletGuard from "./components/WalletGuard";
 import TermsAndCondtions from "./pages/TermsAndCondtions";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import DeleteAccount from "./pages/DeleteAccount";
+import HowToDelete from "./pages/HowToDelete";
 
 function App() {
-
-  const { loading, userData, selectedGym, setSelectedGym, display, setDisplay, isLoading } = useAppContext();
+  const {
+    loading,
+    userData,
+    selectedGym,
+    setSelectedGym,
+    display,
+    setDisplay,
+    isLoading,
+  } = useAppContext();
 
   return (
     <div className="font-manrope relative">
       {/* Loader */}
       <div
-        className={`fixed inset-0 z-50 transition-opacity duration-500 ${loading ? "opacity-100" : "opacity-0 pointer-events-none"
-          }`}
+        className={`fixed inset-0 z-50 transition-opacity duration-500 ${
+          loading ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
       >
         <Loader />
       </div>
@@ -49,19 +58,11 @@ function App() {
             }
           />
 
-          <Route
-            path="/terms-and-conditions"
-            element={
-              <TermsAndCondtions />
-            }
-          />
+          <Route path="/terms-and-conditions" element={<TermsAndCondtions />} />
 
-          <Route
-            path="/privacy-policy"
-            element={
-              <PrivacyPolicy />
-            }
-          />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+
+          <Route path="/how-to-delete-your-account" element={<HowToDelete />} />
 
           <Route
             path="/signup"
@@ -108,7 +109,15 @@ function App() {
               <ProtectedRoute>
                 <OnboardingGuard>
                   <AppLayout>
-                    {userData && <Gym setGym={setSelectedGym} display={display} setDisplay={setDisplay} gym={selectedGym} loading={isLoading} />}
+                    {userData && (
+                      <Gym
+                        setGym={setSelectedGym}
+                        display={display}
+                        setDisplay={setDisplay}
+                        gym={selectedGym}
+                        loading={isLoading}
+                      />
+                    )}
                   </AppLayout>
                 </OnboardingGuard>
               </ProtectedRoute>
@@ -166,7 +175,6 @@ function App() {
               </ProtectedRoute>
             }
           /> */}
-
 
           <Route
             path="/profile"
@@ -248,7 +256,7 @@ function App() {
         </Routes>
       </div>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;

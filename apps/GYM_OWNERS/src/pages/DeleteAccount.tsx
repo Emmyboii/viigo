@@ -29,11 +29,11 @@ const DeleteAccount = () => {
     const { userData } = useAppContext();
 
     useEffect(() => {
-        document.title = "Viigo – Delete Account";
+        document.title = "Viigo Partners – Delete Account";
 
         // Optional: restore the default title when leaving the page
         return () => {
-            document.title = "Viigo – Find Gyms Near You";
+            document.title = "Viigo Partners – Grow Your Gym";
         };
     }, []);
 

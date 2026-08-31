@@ -12,11 +12,11 @@ export default function Wallet() {
     const status = wallet?.verification_status;
 
     useEffect(() => {
-        document.title = "Viigo – Wallet";
+        document.title = "Viigo Partners – Wallet";
 
         // Optional: restore the default title when leaving the page
         return () => {
-            document.title = "Viigo – Find Gyms Near You";
+            document.title = "Viigo Partners – Grow Your Gym";
         };
     }, []);
 

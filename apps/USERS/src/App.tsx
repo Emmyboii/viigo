@@ -1,6 +1,6 @@
-import { Route, Routes, useLocation } from "react-router-dom"
-import AuthPage from "./pages/AuthPage"
-import Loader from './components/Loader';
+import { Route, Routes, useLocation } from "react-router-dom";
+import AuthPage from "./pages/AuthPage";
+import Loader from "./components/Loader";
 import UserHome from "./pages/UserHome";
 import OTPVerification from "./pages/OTPVerification";
 import WorkoutForm from "./pages/WorkoutForm";
@@ -27,9 +27,9 @@ import WorkoutRatingModal from "./components/Workoutratingmodal";
 import TermsAndCondtions from "./pages/TermsAndCondtions";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import DeleteAccount from "./pages/DeleteAccount";
+import HowToDelete from "./pages/HowToDelete";
 
 function App() {
-
   const { loading, userData } = useAppContext();
   const location = useLocation();
 
@@ -43,9 +43,7 @@ function App() {
   }, [location.pathname]);
 
   useEffect(() => {
-    if (
-      !location.pathname.startsWith("/reviewpayment")
-    ) {
+    if (!location.pathname.startsWith("/reviewpayment")) {
       localStorage.removeItem("paid");
       localStorage.removeItem("paymentSuccess");
     }
@@ -66,7 +64,7 @@ function App() {
     "/profile",
     "/profile/edit",
     "/support",
-    "/faq"
+    "/faq",
   ];
 
   const isKnownRoute =
@@ -78,8 +76,9 @@ function App() {
     <div className="font-manrope relative">
       {/* Loader */}
       <div
-        className={`fixed inset-0 z-50 transition-opacity duration-500 ${loading ? "opacity-100" : "opacity-0 pointer-events-none"
-          }`}
+        className={`fixed inset-0 z-50 transition-opacity duration-500 ${
+          loading ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
       >
         <Loader />
       </div>
@@ -95,19 +94,10 @@ function App() {
             }
           />
 
-          <Route
-            path="/terms-and-conditions"
-            element={
-              <TermsAndCondtions />
-            }
-          />
+          <Route path="/terms-and-conditions" element={<TermsAndCondtions />} />
 
-          <Route
-            path="/privacy-policy"
-            element={
-              <PrivacyPolicy />
-            }
-          />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/how-to-delete-your-account" element={<HowToDelete />} />
 
           <Route
             path="/signup"
@@ -280,14 +270,12 @@ function App() {
           />
 
           <Route path="*" element={<NotFound Loading={loading} />} />
-
         </Routes>
 
         {isKnownRoute && <WorkoutRatingModal />}
-
       </div>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
