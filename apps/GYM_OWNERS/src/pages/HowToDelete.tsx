@@ -25,7 +25,7 @@ const DeleteAccount = () => {
         <div className="mt-8 space-y-7">
           <section>
             <h2 className="text-[14px] font-bold leading-6">
-              How to Delete Your Account in the Viigo App
+              How to Delete Your Account in the Viigo Partners App
             </h2>
 
             <p className="text-[14px] leading-[1.7]">
@@ -35,7 +35,7 @@ const DeleteAccount = () => {
 
             <ol className="mt-2 list-decimal space-y-1 pl-5 text-[14px] leading-[1.7]">
               <li>
-                Open the Viigo app and go to your <strong>Profile</strong>.
+                Open the Viigo Partners App and go to your <strong>Profile</strong>.
               </li>
 
               <li>
@@ -91,7 +91,7 @@ const DeleteAccount = () => {
 
             <div className="space-y-0.5 text-[14px] leading-[1.6]">
               <p>
-                If you are unable to delete your account through the Viigo app,
+                If you are unable to delete your account through the Viigo Partners App,
                 please contact us for assistance.
               </p>
 
